@@ -9,6 +9,7 @@ import (
 	"./sdl"
 	"github.com/go-gl/gl"
 	// "github.com/veandco/go-sdl2/sdl"
+	"math"
 )
 
 const LETTER_WIDTH = 2.1
@@ -19,20 +20,20 @@ const COLOR_NUM = 4
 
 var COLOR_RGB = [][]float32{[]float32{1, 1, 1}, []float32{0.9, 0.7, 0.5}}
 
-const LETTER_NUM int = 44
-const DISPLAY_LIST_NUM int = LETTER_NUM * COLOR_NUM
+const LETTER_NUM = 44
+const DISPLAY_LIST_NUM = LETTER_NUM * COLOR_NUM
 
 type Letter struct {
-	DisplayList sdl.DisplayList
+	DisplayList *sdl.DisplayList
 }
 
 func (l *Letter) Init() {
-	l.DisplayList = NewDisplayList(DISPLAY_LIST_NUM)
+	l.DisplayList = sdl.NewDisplayList(DISPLAY_LIST_NUM)
 	l.DisplayList.ResetList()
 	for j := 0; j < COLOR_NUM; j++ {
 		for i := 0; i < LETTER_NUM; i++ {
 			l.DisplayList.NewList()
-			l.SetLetter(i, j)
+			setLetter(i, j)
 			l.DisplayList.EndList()
 		}
 	}
@@ -43,7 +44,7 @@ func (l *Letter) close() {
 }
 
 func getWidth(n int, s float32) float32 {
-	return n * s * LETTER_WIDTH
+	return float32(n) * s * LETTER_WIDTH
 }
 
 func getHeight(s float32) float32 {
@@ -51,24 +52,24 @@ func getHeight(s float32) float32 {
 }
 
 func (l *Letter) drawLetter(n int, c int) {
-	l.DisplayList.Call(n + c*LETTER_NUM)
+	l.DisplayList.Call(uint(n + c*LETTER_NUM))
 }
 
-func (l *Letter) drawLetterOption(n int, x float32, y float32, s float32, d float32, c int) {
+func (l *Letter) drawLetterOption(n int, x float32, y float32, s float32, d Direction, c int) {
 	gl.PushMatrix()
 	gl.Translatef(x, y, 0)
 	gl.Scalef(s, s, s)
 	gl.Rotatef(d, 0, 0, 1)
-	l.DisplayList.Call(n + c*LETTER_NUM)
+	l.DisplayList.Call(uint(n + c*LETTER_NUM))
 	gl.PopMatrix()
 }
 
-func (l *Letter) drawLetterRev(n int, x float32, y float32, s float32, d float32, c int) {
+func (l *Letter) drawLetterRev(n int, x float32, y float32, s float32, d Direction, c int) {
 	gl.PushMatrix()
 	gl.Translatef(x, y, 0)
 	gl.Scalef(s, -s, s)
 	gl.Rotatef(d, 0, 0, 1)
-	l.DisplayList.Call(n + c*LETTER_NUM)
+	l.DisplayList.Call(uint(n + c*LETTER_NUM))
 	gl.PopMatrix()
 }
 
@@ -81,7 +82,7 @@ const ( // Direction
 	TO_UP
 )
 
-func ConvertCharToInt(c char) int {
+func convertCharToInt(c rune) int {
 	var idx int
 	if c >= '0' && c <= '9' {
 		idx = c - '0'
@@ -105,11 +106,11 @@ func ConvertCharToInt(c char) int {
 	return idx
 }
 
-func DrawString(str []char, lx float32, y float32, s float32) {
-	DrawStringOption(str, lx, y, s, TO_RIGHT, 0, false, 0)
+func (l *Letter) DrawString(str string, lx float32, y float32, s float32) {
+	l.DrawStringOption(str, lx, y, s, TO_RIGHT, 0, false, 0)
 }
 
-func DrawStringOption(str []char, lx float32, y float32, s float32,
+func (l *Letter) DrawStringOption(str string, lx float32, y float32, s float32,
 	d Direction,
 	cl int,
 	rev bool,
@@ -117,8 +118,8 @@ func DrawStringOption(str []char, lx float32, y float32, s float32,
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
 	x := lx
-	var int idx
-	var float32 ld
+	var idx int
+	var ld float32
 	switch d {
 	case TO_RIGHT:
 		ld = 0
@@ -134,13 +135,13 @@ func DrawStringOption(str []char, lx float32, y float32, s float32,
 		break
 	}
 	ld += od
-	for char = range c {
+	for c := range str {
 		if c != ' ' {
 			idx = convertCharToInt(c)
 			if rev {
-				DrawLetterRev(idx, x, y, s, ld, cl)
+				l.drawLetterRev(idx, x, y, s, ld, cl)
 			} else {
-				DrawLetter(idx, x, y, s, ld, cl)
+				l.drawLetterOption(idx, x, y, s, ld, cl)
 			}
 		}
 		if od == 0 {
@@ -159,32 +160,32 @@ func DrawStringOption(str []char, lx float32, y float32, s float32,
 				break
 			}
 		} else {
-			x += cos(ld*PI/180) * s * LETTER_WIDTH
-			y += sin(ld*PI/180) * s * LETTER_WIDTH
+			x += math.Cos(ld*math.Pi/180) * s * LETTER_WIDTH
+			y += math.Sin(ld*math.Pi/180) * s * LETTER_WIDTH
 		}
 	}
 }
 
-func DrawNum(num int, lx float32, y float32, s float32) {
-	DrawNumOption(num, lx, y, s, 0, 0, -1, -1)
+func (l *Letter) DrawNum(num int, lx float32, y float32, s float32) {
+	l.DrawNumOption(num, lx, y, s, 0, 0, -1, -1)
 }
 
-func DrawNumOption(num int, lx float32, y float32, s float32,
+func (l *Letter) DrawNumOption(num int, lx float32, y float32, s float32,
 	cl int, dg int,
-	headChar int, float32Digit int) {
+	headChar int, floatDigit int) {
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
 	n := num
 	x := lx
-	var ld flaot = 0
+	var ld float32 = 0
 	digit := dg
-	var fd int = float32Digit
+	var fd int = floatDigit
 	for {
 		if fd <= 0 {
-			DrawLetterOption(n%10, x, y, s, ld, cl)
+			l.drawLetterOption(n%10, x, y, s, ld, cl)
 			x -= s * LETTER_WIDTH
 		} else {
-			DrawLetterOption(n%10, x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
+			l.drawLetterOption(n%10, x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
 			x -= s * LETTER_WIDTH * 0.5
 		}
 		n /= 10
@@ -194,30 +195,30 @@ func DrawNumOption(num int, lx float32, y float32, s float32,
 			break
 		}
 		if fd == 0 {
-			DrawLetter(36, x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
+			l.drawLetterOption(36, x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
 			x -= s * LETTER_WIDTH * 0.5
 		}
 	}
 	if headChar >= 0 {
-		drawLetter(headChar, x+s*LETTER_WIDTH*0.2, y+s*LETTER_WIDTH*0.2, s*0.6, ld, cl)
+		l.drawLetterOption(headChar, x+s*LETTER_WIDTH*0.2, y+s*LETTER_WIDTH*0.2, s*0.6, ld, cl)
 	}
 }
 
-func DrawNumSign(num int, lx float32, ly float32, s float32) {
-	DrawNumSignOption(num, lx, ly, s, 0, -1, -1)
+func (l *Letter) DrawNumSign(num int, lx float32, ly float32, s float32) {
+	l.DrawNumSignOption(num, lx, ly, s, 0, -1, -1)
 }
 
-func DrawNumSignOption(num int, lx float32, ly float32, s float32, int cl, int headChar, int float32Digit) {
+func (l *Letter) DrawNumSignOption(num int, lx float32, ly float32, s float32, cl int, headChar int, floatDigit int) {
 	x := lx
 	y := ly
 	n := num
-	fd := float32Digit
+	fd := floatDigit
 	for {
 		if fd <= 0 {
-			drawLetterRev(n%10, x, y, s, 0, cl)
+			l.drawLetterRev(n%10, x, y, s, 0, cl)
 			x -= s * LETTER_WIDTH
 		} else {
-			drawLetterRev(n%10, x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
+			l.drawLetterRev(n%10, x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
 			x -= s * LETTER_WIDTH * 0.5
 		}
 		n /= 10
@@ -226,16 +227,16 @@ func DrawNumSignOption(num int, lx float32, ly float32, s float32, int cl, int h
 		}
 		fd--
 		if fd == 0 {
-			drawLetterRev(36, x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
+			l.drawLetterRev(36, x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
 			x -= s * LETTER_WIDTH * 0.5
 		}
 	}
 	if headChar >= 0 {
-		drawLetterRev(headChar, x+s*LETTER_WIDTH*0.2, y-s*LETTER_WIDTH*0.2, s*0.6, 0, cl)
+		l.drawLetterRev(headChar, x+s*LETTER_WIDTH*0.2, y-s*LETTER_WIDTH*0.2, s*0.6, 0, cl)
 	}
 }
 
-func drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */) {
+func (l *Letter) drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */) {
 	n := time
 	if n < 0 {
 		n = 0
@@ -243,19 +244,19 @@ func drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */
 	var x float32 = lx
 	for i := 0; i < 7; i++ {
 		if i != 4 {
-			drawLetter(n%10, x, y, s, Direction.TO_RIGHT, cl)
+			l.drawLetterOption(n%10, x, y, s, TO_RIGHT, cl)
 			n /= 10
 		} else {
-			drawLetter(n%6, x, y, s, Direction.TO_RIGHT, cl)
+			l.drawLetterOption(n%6, x, y, s, TO_RIGHT, cl)
 			n /= 6
 		}
 		if (i&1) == 1 || i == 0 {
 			switch i {
 			case 3:
-				drawLetter(41, x+s*1.16, y, s, Direction.TO_RIGHT, cl)
+				l.drawLetterOption(41, x+s*1.16, y, s, TO_RIGHT, cl)
 				break
 			case 5:
-				drawLetter(40, x+s*1.16, y, s, Direction.TO_RIGHT, cl)
+				l.drawLetterOption(40, x+s*1.16, y, s, TO_RIGHT, cl)
 				break
 			default:
 				break
@@ -313,7 +314,7 @@ func setBox(x float32, y float32, width float32, height float32, deg float32, r 
 	gl.PopMatrix()
 }
 
-func setBoxLine(x float32, y float32, width flaot, height float32, deg float32) {
+func setBoxLine(x float32, y float32, width float32, height float32, deg float32) {
 	gl.PushMatrix()
 	gl.Translatef(x-width/2, y-height/2, 0)
 	gl.Rotatef(deg, 0, 0, 1)
@@ -342,7 +343,7 @@ func setBoxPart(width float32, height float32) {
 	gl.Vertex3f(-width/3*1, height/2, 0)
 }
 
-const spData = [][][]float32{
+var spData = [][][]float32{
 	[][]float32{
 		[]float32{0, 1.15, 0.65, 0.3, 0},
 		[]float32{-0.6, 0.55, 0.65, 0.3, 90}, []float32{0.6, 0.55, 0.65, 0.3, 90},
