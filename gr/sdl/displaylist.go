@@ -7,7 +7,6 @@ package sdl
 
 import (
 	"errors"
-	"fmt"
 	"github.com/go-gl/gl"
 )
 
@@ -60,7 +59,6 @@ func (dp *DisplayList) EndList() {
 }
 
 func (dp *DisplayList) Call(i uint) { // default value should be 0
-	fmt.Println("displaying list")
 	gl.CallList(dp.idx + i)
 }
 

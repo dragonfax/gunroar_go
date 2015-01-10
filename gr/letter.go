@@ -6,9 +6,9 @@
 package gr
 
 import (
-	"./sdl"
+	"github.com/dragonfax/gunroar_go/gr/sdl"
 	"github.com/go-gl/gl"
-	// "github.com/veandco/go-sdl2/sdl"
+	// "github.com/veandco/go-sdl3/sdl"
 	"math"
 )
 
@@ -39,7 +39,7 @@ func (l *Letter) Init() {
 	}
 }
 
-func (l *Letter) close() {
+func (l *Letter) Close() {
 	l.DisplayList.Close()
 }
 
