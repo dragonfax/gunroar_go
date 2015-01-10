@@ -6,21 +6,22 @@
 package sdl
 
 import (
-	"github.com/jackyb/go-gl/gl"
-	"github.com/veandco/go-sdl2/sdl"
+	"errors"
+	"github.com/go-gl/gl"
+	// "github.com/veandco/go-sdl2/sdl"
 )
 
 type DisplayList struct {
 	registered bool
-	num        int
-	idx        int
-	enumIdx    int
+	num        uint
+	idx        uint
+	enumIdx    uint
 }
 
-func NewDisplayList(int num) *DisplayList {
+func NewDisplayList(num uint) *DisplayList {
 	dl := &DisplayList{}
 	dl.num = num
-	dl.idx = glGenLists(num)
+	dl.idx = gl.GenLists(int(num))
 	return dl
 }
 
@@ -30,17 +31,17 @@ func (dp *DisplayList) BeginNewList() {
 }
 
 func (dp *DisplayList) NextNewList() error {
-	glEndList()
+	gl.EndList()
 	dp.enumIdx++
 	if dp.enumIdx >= dp.idx+dp.num || dp.enumIdx < dp.idx {
-		return errors.error("Can't create new list. Index out of bound.")
+		return errors.New("Can't create new list. Index out of bound.")
 	}
-	glNewList(dp.enumIdx, GL_COMPILE)
+	gl.NewList(dp.enumIdx, gl.COMPILE)
 	return nil
 }
 
 func (dp *DisplayList) EndNewList() {
-	glEndList()
+	gl.EndList()
 	dp.registered = true
 }
 
@@ -49,22 +50,22 @@ func (dp *DisplayList) ResetList() {
 }
 
 func (dp *DisplayList) NewList() {
-	glNewList(dp.enumIdx, GL_COMPILE)
+	gl.NewList(dp.enumIdx, gl.COMPILE)
 }
 
 func (dp *DisplayList) EndList() {
-	glEndList()
+	gl.EndList()
 	dp.enumIdx++
 	dp.registered = true
 }
 
-func (dp *DisplayList) Call(int i) { // default value should be 0
-	glCallList(dp.idx + i)
+func (dp *DisplayList) Call(i uint) { // default value should be 0
+	gl.CallList(dp.idx + i)
 }
 
 func (dp *DisplayList) Close() {
 	if !dp.registered {
 		return
 	}
-	glDeleteLists(dp.idx, dp.num)
+	gl.DeleteLists(dp.idx, int(dp.num))
 }

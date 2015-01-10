@@ -6,9 +6,9 @@
 package gr
 
 import (
-	"sdl"
-	"github.com/jackyb/go-gl/gl"
-	"github.com/veandco/go-sdl2/sdl"
+	"./sdl"
+	"github.com/go-gl/gl"
+	// "github.com/veandco/go-sdl2/sdl"
 )
 
 const LETTER_WIDTH = 2.1
@@ -17,12 +17,13 @@ const LINE_COLOR = 2
 const POLY_COLOR = 3
 const COLOR_NUM = 4
 
-var COLOR_RGB = [][]float{ []float{1, 1, 1}, []float{0.9, 0.7, 0.5} }
+var COLOR_RGB = [][]float32{[]float32{1, 1, 1}, []float32{0.9, 0.7, 0.5}}
+
 const LETTER_NUM int = 44
 const DISPLAY_LIST_NUM int = LETTER_NUM * COLOR_NUM
 
 type Letter struct {
-  DisplayList sdl.DisplayList
+	DisplayList sdl.DisplayList
 }
 
 func (l *Letter) Init() {
@@ -41,80 +42,84 @@ func (l *Letter) close() {
 	l.DisplayList.Close()
 }
 
-func getWidth(n int,s float) float {
+func getWidth(n int, s float32) float32 {
 	return n * s * LETTER_WIDTH
 }
 
-func getHeight(s float) float {
+func getHeight(s float32) float32 {
 	return s * LETTER_HEIGHT
 }
 
 func (l *Letter) drawLetter(n int, c int) {
-	l.DisplayList.Call(n + c * LETTER_NUM)
+	l.DisplayList.Call(n + c*LETTER_NUM)
 }
 
-func (l *Letter) drawLetter(n int, x float, y float, s float, d float, c int) {
-	glPushMatrix()
-	glTranslatef(x, y, 0)
-	glScalef(s, s, s)
-	glRotatef(d, 0, 0, 1)
-	l.DisplayList.Call(n + c * LETTER_NUM)
-	glPopMatrix()
+func (l *Letter) drawLetterOption(n int, x float32, y float32, s float32, d float32, c int) {
+	gl.PushMatrix()
+	gl.Translatef(x, y, 0)
+	gl.Scalef(s, s, s)
+	gl.Rotatef(d, 0, 0, 1)
+	l.DisplayList.Call(n + c*LETTER_NUM)
+	gl.PopMatrix()
 }
 
-func (l *Letter) drawLetterRev(n int, x float, y float, s float, d float, c int) {
-	glPushMatrix()
-	glTranslatef(x, y, 0)
-	glScalef(s, -s, s)
-	glRotatef(d, 0, 0, 1)
-	l.DisplayList.Call(n + c * LETTER_NUM)
-	glPopMatrix()
+func (l *Letter) drawLetterRev(n int, x float32, y float32, s float32, d float32, c int) {
+	gl.PushMatrix()
+	gl.Translatef(x, y, 0)
+	gl.Scalef(s, -s, s)
+	gl.Rotatef(d, 0, 0, 1)
+	l.DisplayList.Call(n + c*LETTER_NUM)
+	gl.PopMatrix()
 }
 
 type Direction int
 
 const ( // Direction
 	TO_RIGHT Direction = iota
-	TO_DOWN 
+	TO_DOWN
 	TO_LEFT
 	TO_UP
 )
 
 func ConvertCharToInt(c char) int {
 	var idx int
-	if (c >= '0' && c <='9') {
+	if c >= '0' && c <= '9' {
 		idx = c - '0'
-	} else if (c >= 'A' && c <= 'Z') {
+	} else if c >= 'A' && c <= 'Z' {
 		idx = c - 'A' + 10
-	} else if (c >= 'a' && c <= 'z') {
+	} else if c >= 'a' && c <= 'z' {
 		idx = c - 'a' + 10
-	} else if (c == '.') {
+	} else if c == '.' {
 		idx = 36
-	} else if (c == '-') {
+	} else if c == '-' {
 		idx = 38
-	} else if (c == '+') {
+	} else if c == '+' {
 		idx = 39
-	} else if (c == '_') {
+	} else if c == '_' {
 		idx = 37
-	} else if (c == '!') {
+	} else if c == '!' {
 		idx = 42
-	} else if (c == '/') {
+	} else if c == '/' {
 		idx = 43
 	}
 	return idx
 }
 
-func DrawString(str []char, lx float, y float, s float,
-															d Direction,  // default should be to the right
-															cl int, // default should be 0
-															rev bool,  // default false
-															od float ) { // default 0
+func DrawString(str []char, lx float32, y float32, s float32) {
+	DrawStringOption(str, lx, y, s, TO_RIGHT, 0, false, 0)
+}
+
+func DrawStringOption(str []char, lx float32, y float32, s float32,
+	d Direction,
+	cl int,
+	rev bool,
+	od float32) {
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
 	x := lx
 	var int idx
-	var float ld
-	switch (d) {
+	var float32 ld
+	switch d {
 	case TO_RIGHT:
 		ld = 0
 		break
@@ -130,16 +135,16 @@ func DrawString(str []char, lx float, y float, s float,
 	}
 	ld += od
 	for char = range c {
-		if (c != ' ') {
+		if c != ' ' {
 			idx = convertCharToInt(c)
-			if (rev) {
+			if rev {
 				DrawLetterRev(idx, x, y, s, ld, cl)
 			} else {
 				DrawLetter(idx, x, y, s, ld, cl)
 			}
 		}
-		if (od == 0) {
-			switch(d) {
+		if od == 0 {
+			switch d {
 			case TO_RIGHT:
 				x += s * LETTER_WIDTH
 				break
@@ -154,112 +159,124 @@ func DrawString(str []char, lx float, y float, s float,
 				break
 			}
 		} else {
-			x += cos(ld * PI / 180) * s * LETTER_WIDTH
-			y += sin(ld * PI / 180) * s * LETTER_WIDTH
+			x += cos(ld*PI/180) * s * LETTER_WIDTH
+			y += sin(ld*PI/180) * s * LETTER_WIDTH
 		}
 	}
 }
 
-DrawNum(num int, lx float, y float, s float,
-													 int cl = 0, int dg = 0,
-													 int headChar = -1, int floatDigit = -1) {
+func DrawNum(num int, lx float32, y float32, s float32) {
+	DrawNumOption(num, lx, y, s, 0, 0, -1, -1)
+}
+
+func DrawNumOption(num int, lx float32, y float32, s float32,
+	cl int, dg int,
+	headChar int, float32Digit int) {
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
-	int n = num
-	float x = lx
-	float ld = 0
-	int digit = dg
-	int fd = floatDigit
-	for () {
-		if (fd <= 0) {
-			drawLetter(n % 10, x, y, s, ld, cl)
+	n := num
+	x := lx
+	var ld flaot = 0
+	digit := dg
+	var fd int = float32Digit
+	for {
+		if fd <= 0 {
+			DrawLetterOption(n%10, x, y, s, ld, cl)
 			x -= s * LETTER_WIDTH
 		} else {
-			drawLetter(n % 10, x, y + s * LETTER_WIDTH * 0.25f, s * 0.5f, ld, cl)
-			x -= s * LETTER_WIDTH * 0.5f
+			DrawLetterOption(n%10, x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
+			x -= s * LETTER_WIDTH * 0.5
 		}
 		n /= 10
 		digit--
 		fd--
-		if (n <= 0 && digit <= 0 && fd < 0)
+		if n <= 0 && digit <= 0 && fd < 0 {
 			break
-		if (fd == 0) {
-			drawLetter(36, x, y + s * LETTER_WIDTH * 0.25f, s * 0.5f, ld, cl)
-			x -= s * LETTER_WIDTH * 0.5f
+		}
+		if fd == 0 {
+			DrawLetter(36, x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
+			x -= s * LETTER_WIDTH * 0.5
 		}
 	}
-	if (headChar >= 0)
-		drawLetter(headChar, x + s * LETTER_WIDTH * 0.2f, y + s * LETTER_WIDTH * 0.2f,
-							 s * 0.6f, ld, cl)
+	if headChar >= 0 {
+		drawLetter(headChar, x+s*LETTER_WIDTH*0.2, y+s*LETTER_WIDTH*0.2, s*0.6, ld, cl)
+	}
 }
 
-public static void drawNumSign(int num, float lx, float ly, float s, int cl = 0,
-															 int headChar = -1, int floatDigit = -1) {
-	float x = lx
-	float y = ly
-	int n = num
-	int fd = floatDigit
-	for () {
-		if (fd <= 0) {
-			drawLetterRev(n % 10, x, y, s, 0, cl)
+func DrawNumSign(num int, lx float32, ly float32, s float32) {
+	DrawNumSignOption(num, lx, ly, s, 0, -1, -1)
+}
+
+func DrawNumSignOption(num int, lx float32, ly float32, s float32, int cl, int headChar, int float32Digit) {
+	x := lx
+	y := ly
+	n := num
+	fd := float32Digit
+	for {
+		if fd <= 0 {
+			drawLetterRev(n%10, x, y, s, 0, cl)
 			x -= s * LETTER_WIDTH
 		} else {
-			drawLetterRev(n % 10, x, y - s * LETTER_WIDTH * 0.25f, s * 0.5f, 0, cl)
-			x -= s * LETTER_WIDTH * 0.5f
+			drawLetterRev(n%10, x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
+			x -= s * LETTER_WIDTH * 0.5
 		}
 		n /= 10
-		if (n <= 0)
+		if n <= 0 {
 			break
+		}
 		fd--
-		if (fd == 0) {
-			drawLetterRev(36, x, y - s * LETTER_WIDTH * 0.25f, s * 0.5f, 0, cl)
-			x -= s * LETTER_WIDTH * 0.5f
+		if fd == 0 {
+			drawLetterRev(36, x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
+			x -= s * LETTER_WIDTH * 0.5
 		}
 	}
-	if (headChar >= 0)
-		drawLetterRev(headChar, x + s * LETTER_WIDTH * 0.2f, y - s * LETTER_WIDTH * 0.2f,
-									s * 0.6f, 0, cl)
+	if headChar >= 0 {
+		drawLetterRev(headChar, x+s*LETTER_WIDTH*0.2, y-s*LETTER_WIDTH*0.2, s*0.6, 0, cl)
+	}
 }
 
-public static void drawTime(int time, float lx, float y, float s, int cl = 0) {
-	int n = time
-	if (n < 0)
+func drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */) {
+	n := time
+	if n < 0 {
 		n = 0
-	float x = lx
-	for (int i = 0 i < 7 i++) {
-		if (i != 4) {
-			drawLetter(n % 10, x, y, s, Direction.TO_RIGHT, cl)
+	}
+	var x float32 = lx
+	for i := 0; i < 7; i++ {
+		if i != 4 {
+			drawLetter(n%10, x, y, s, Direction.TO_RIGHT, cl)
 			n /= 10
 		} else {
-			drawLetter(n % 6, x, y, s, Direction.TO_RIGHT, cl)
+			drawLetter(n%6, x, y, s, Direction.TO_RIGHT, cl)
 			n /= 6
 		}
-		if ((i & 1) == 1 || i == 0) {
-			switch (i) {
+		if (i&1) == 1 || i == 0 {
+			switch i {
 			case 3:
-				drawLetter(41, x + s * 1.16f, y, s, Direction.TO_RIGHT, cl)
+				drawLetter(41, x+s*1.16, y, s, Direction.TO_RIGHT, cl)
 				break
 			case 5:
-				drawLetter(40, x + s * 1.16f, y, s, Direction.TO_RIGHT, cl)
+				drawLetter(40, x+s*1.16, y, s, Direction.TO_RIGHT, cl)
 				break
 			default:
 				break
 			}
 			x -= s * LETTER_WIDTH
 		} else {
-			x -= s * LETTER_WIDTH * 1.3f
+			x -= s * LETTER_WIDTH * 1.3
 		}
-		if (n <= 0)
+		if n <= 0 {
 			break
+		}
 	}
 }
 
-private static void setLetter(int idx, int c) {
-	float x, y, length, size, t
-	float deg
-	for (int i = 0 i++) {
-		deg = cast(int) spData[idx][i][4]
-		if (deg > 99990) break
+func setLetter(idx int, c int) {
+	var x, y, length, size, t, deg float32
+	for i := 0; ; i++ {
+		deg = int(spData[idx][i][4])
+		if deg > 99990 {
+			break
+		}
 		x = -spData[idx][i][0]
 		y = -spData[idx][i][1]
 		size = spData[idx][i][2]
@@ -270,303 +287,302 @@ private static void setLetter(int idx, int c) {
 		x = -x
 		y = y
 		deg %= 180
-		if (c == LINE_COLOR)
+		if c == LINE_COLOR {
 			setBoxLine(x, y, size, length, deg)
-		else if (c == POLY_COLOR)
+		} else if c == POLY_COLOR {
 			setBoxPoly(x, y, size, length, deg)
-		else
+		} else {
 			setBox(x, y, size, length, deg,
-							COLOR_RGB[c][0], COLOR_RGB[c][1], COLOR_RGB[c][2])
+				COLOR_RGB[c][0], COLOR_RGB[c][1], COLOR_RGB[c][2])
+		}
 	}
 }
 
-private static void setBox(float x, float y, float width, float height, float deg,
-													 float r, float g, float b) {
-	glPushMatrix()
-	glTranslatef(x - width / 2, y - height / 2, 0)
-	glRotatef(deg, 0, 0, 1)
+func setBox(x float32, y float32, width float32, height float32, deg float32, r float32, g float32, b float32) {
+	gl.PushMatrix()
+	gl.Translatef(x-width/2, y-height/2, 0)
+	gl.Rotatef(deg, 0, 0, 1)
 	Screen.setColor(r, g, b, 0.5)
-	glBegin(GL_TRIANGLE_FAN)
+	gl.Begin(gl_TRIANGLE_FAN)
 	setBoxPart(width, height)
-	glEnd()
+	gl.End()
 	Screen.setColor(r, g, b)
-	glBegin(GL_LINE_LOOP)
+	gl.Begin(gl.LINE_LOOP)
 	setBoxPart(width, height)
-	glEnd()
-	glPopMatrix()
+	gl.End()
+	gl.PopMatrix()
 }
 
-private static void setBoxLine(float x, float y, float width, float height, float deg) {
-	glPushMatrix()
-	glTranslatef(x - width / 2, y - height / 2, 0)
-	glRotatef(deg, 0, 0, 1)
-	glBegin(GL_LINE_LOOP)
+func setBoxLine(x float32, y float32, width flaot, height float32, deg float32) {
+	gl.PushMatrix()
+	gl.Translatef(x-width/2, y-height/2, 0)
+	gl.Rotatef(deg, 0, 0, 1)
+	gl.Begin(gl.LINE_LOOP)
 	setBoxPart(width, height)
-	glEnd()
-	glPopMatrix()
+	gl.End()
+	gl.PopMatrix()
 }
 
-private static void setBoxPoly(float x, float y, float width, float height, float deg) {
-	glPushMatrix()
-	glTranslatef(x - width / 2, y - height / 2, 0)
-	glRotatef(deg, 0, 0, 1)
-	glBegin(GL_TRIANGLE_FAN)
+func setBoxPoly(x float32, y float32, width float32, height float32, deg float32) {
+	gl.PushMatrix()
+	gl.Translatef(x-width/2, y-height/2, 0)
+	gl.Rotatef(deg, 0, 0, 1)
+	gl.Begin(gl.TRIANGLE_FAN)
 	setBoxPart(width, height)
-	glEnd()
-	glPopMatrix()
+	gl.End()
+	gl.PopMatrix()
 }
 
-private static void setBoxPart(float width, float height) {
-	glVertex3f(-width / 2, 0, 0)
-	glVertex3f(-width / 3 * 1, -height / 2, 0)
-	glVertex3f( width / 3 * 1, -height / 2, 0)
-	glVertex3f( width / 2, 0, 0)
-	glVertex3f( width / 3 * 1,  height / 2, 0)
-	glVertex3f(-width / 3 * 1,  height / 2, 0)
+func setBoxPart(width float32, height float32) {
+	gl.Vertex3f(-width/2, 0, 0)
+	gl.Vertex3f(-width/3*1, -height/2, 0)
+	gl.Vertex3f(width/3*1, -height/2, 0)
+	gl.Vertex3f(width/2, 0, 0)
+	gl.Vertex3f(width/3*1, height/2, 0)
+	gl.Vertex3f(-width/3*1, height/2, 0)
 }
 
-const spData = float[][][]{
-	[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.6f, 0.55f, 0.65f, 0.3f, 90], [0.6f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.6f, -0.55f, 0.65f, 0.3f, 90], [0.6f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0.5f, 0.55f, 0.65f, 0.3f, 90],
-	 [0.5f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[//A
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [-0.18f, 1.15f, 0.45f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.45f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.18f, 0, 0.45f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [-0.15f, 1.15f, 0.45f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.45f, 0.45f, 0.65f, 0.3f, 90],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[//F
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0.05f, 0, 0.3f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 0.55f, 0.65f, 0.3f, 90],
-	 [0, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0.65f, -0.55f, 0.65f, 0.3f, 90], [-0.7f, -0.7f, 0.3f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[//K
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.4f, 0.55f, 0.65f, 0.3f, 100],
-	 [-0.25f, 0, 0.45f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.6f, -0.55f, 0.65f, 0.3f, 80],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [-0.5f, 1.15f, 0.3f, 0.3f, 0], [0.1f, 1.15f, 0.3f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0.55f, 0.65f, 0.3f, 90],
-	 [0, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[//P
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0.05f, -0.55f, 0.45f, 0.3f, 60],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.2f, 0, 0.45f, 0.3f, 0],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.45f, -0.55f, 0.65f, 0.3f, 80],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0.65f, 0.3f, 0],
-	 [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [-0.5f, 1.15f, 0.55f, 0.3f, 0], [0.5f, 1.15f, 0.55f, 0.3f, 0],
-	 [0.1f, 0.55f, 0.65f, 0.3f, 90],
-	 [0.1f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[//U
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.5f, -0.55f, 0.65f, 0.3f, 90], [0.5f, -0.55f, 0.65f, 0.3f, 90],
-	 [-0.1f, -1.15f, 0.45f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [-0.65f, 0.55f, 0.65f, 0.3f, 90], [0.65f, 0.55f, 0.65f, 0.3f, 90],
-	 [-0.65f, -0.55f, 0.65f, 0.3f, 90], [0.65f, -0.55f, 0.65f, 0.3f, 90],
-	 [-0.5f, -1.15f, 0.3f, 0.3f, 0], [0.1f, -1.15f, 0.3f, 0.3f, 0],
-	 [0, 0.55f, 0.65f, 0.3f, 90],
-	 [0, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [-0.4f, 0.6f, 0.85f, 0.3f, 360-120],
-	 [0.4f, 0.6f, 0.85f, 0.3f, 360-60],
-	 [-0.4f, -0.6f, 0.85f, 0.3f, 360-240],
-	 [0.4f, -0.6f, 0.85f, 0.3f, 360-300],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [-0.4f, 0.6f, 0.85f, 0.3f, 360-120],
-	 [0.4f, 0.6f, 0.85f, 0.3f, 360-60],
-	 [-0.1f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[
-	 [0, 1.15f, 0.65f, 0.3f, 0],
-	 [0.3f, 0.4f, 0.65f, 0.3f, 120],
-	 [-0.3f, -0.4f, 0.65f, 0.3f, 120],
-	 [0, -1.15f, 0.65f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[//.
-	 [0, -1.15f, 0.3f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[//_
-	 [0, -1.15f, 0.8f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[//-
-	 [0, 0, 0.9f, 0.3f, 0],
-	 [0, 0, 0, 0, 99999],
-	],[//+
-	 [-0.5f, 0, 0.45f, 0.3f, 0], [0.45f, 0, 0.45f, 0.3f, 0],
-	 [0.1f, 0.55f, 0.65f, 0.3f, 90],
-	 [0.1f, -0.55f, 0.65f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[//'
-	 [0, 1.0f, 0.4f, 0.2f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[//''
-	 [-0.19f, 1.0f, 0.4f, 0.2f, 90],
-	 [0.2f, 1.0f, 0.4f, 0.2f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[//!
-	 [0.56f, 0.25f, 1.1f, 0.3f, 90],
-	 [0, -1.0f, 0.3f, 0.3f, 90],
-	 [0, 0, 0, 0, 99999],
-	],[// /
-	 [0.8f, 0, 1.75f, 0.3f, 120],
-	 [0, 0, 0, 0, 99999],
-	]
-}
+const spData = [][][]float32{
+	[][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.6, 0.55, 0.65, 0.3, 90}, []float32{0.6, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.6, -0.55, 0.65, 0.3, 90}, []float32{0.6, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0.5, 0.55, 0.65, 0.3, 90},
+		[]float32{0.5, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //A
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{-0.18, 1.15, 0.45, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.45, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.18, 0, 0.45, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{-0.15, 1.15, 0.45, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.45, 0.45, 0.65, 0.3, 90},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //F
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0.05, 0, 0.3, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 0.55, 0.65, 0.3, 90},
+		[]float32{0, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0.65, -0.55, 0.65, 0.3, 90}, []float32{-0.7, -0.7, 0.3, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //K
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.4, 0.55, 0.65, 0.3, 100},
+		[]float32{-0.25, 0, 0.45, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.6, -0.55, 0.65, 0.3, 80},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{-0.5, 1.15, 0.3, 0.3, 0}, []float32{0.1, 1.15, 0.3, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0.55, 0.65, 0.3, 90},
+		[]float32{0, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //P
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0.05, -0.55, 0.45, 0.3, 60},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.2, 0, 0.45, 0.3, 0},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.45, -0.55, 0.65, 0.3, 80},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0.65, 0.3, 0},
+		[]float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{-0.5, 1.15, 0.55, 0.3, 0}, []float32{0.5, 1.15, 0.55, 0.3, 0},
+		[]float32{0.1, 0.55, 0.65, 0.3, 90},
+		[]float32{0.1, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //U
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.5, -0.55, 0.65, 0.3, 90}, []float32{0.5, -0.55, 0.65, 0.3, 90},
+		[]float32{-0.1, -1.15, 0.45, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{-0.65, 0.55, 0.65, 0.3, 90}, []float32{0.65, 0.55, 0.65, 0.3, 90},
+		[]float32{-0.65, -0.55, 0.65, 0.3, 90}, []float32{0.65, -0.55, 0.65, 0.3, 90},
+		[]float32{-0.5, -1.15, 0.3, 0.3, 0}, []float32{0.1, -1.15, 0.3, 0.3, 0},
+		[]float32{0, 0.55, 0.65, 0.3, 90},
+		[]float32{0, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{-0.4, 0.6, 0.85, 0.3, 360 - 120},
+		[]float32{0.4, 0.6, 0.85, 0.3, 360 - 60},
+		[]float32{-0.4, -0.6, 0.85, 0.3, 360 - 240},
+		[]float32{0.4, -0.6, 0.85, 0.3, 360 - 300},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{-0.4, 0.6, 0.85, 0.3, 360 - 120},
+		[]float32{0.4, 0.6, 0.85, 0.3, 360 - 60},
+		[]float32{-0.1, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{
+		[]float32{0, 1.15, 0.65, 0.3, 0},
+		[]float32{0.3, 0.4, 0.65, 0.3, 120},
+		[]float32{-0.3, -0.4, 0.65, 0.3, 120},
+		[]float32{0, -1.15, 0.65, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //.
+		[]float32{0, -1.15, 0.3, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //_
+		[]float32{0, -1.15, 0.8, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //-
+		[]float32{0, 0, 0.9, 0.3, 0},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //+
+		[]float32{-0.5, 0, 0.45, 0.3, 0}, []float32{0.45, 0, 0.45, 0.3, 0},
+		[]float32{0.1, 0.55, 0.65, 0.3, 90},
+		[]float32{0.1, -0.55, 0.65, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //'
+		[]float32{0, 1.0, 0.4, 0.2, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //''
+		[]float32{-0.19, 1.0, 0.4, 0.2, 90},
+		[]float32{0.2, 1.0, 0.4, 0.2, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ //!
+		[]float32{0.56, 0.25, 1.1, 0.3, 90},
+		[]float32{0, -1.0, 0.3, 0.3, 90},
+		[]float32{0, 0, 0, 0, 99999},
+	}, [][]float32{ // /
+		[]float32{0.8, 0, 1.75, 0.3, 120},
+		[]float32{0, 0, 0, 0, 99999},
+	}}
