@@ -8,24 +8,31 @@ package gr
 /**
  * Actor in the game that has the interface to move and draw.
  */
-type Actor struct {
-  Exists bool
+type Actor interface {
+	Exists() bool
+	SetExists(b bool)
 }
 
 var actors = make(map[Actor]bool)
 
-func NewActor() *Actor {
-  a = new(Actor)
-  a.Init()
+type ActorImpl struct {
+	exists bool
 }
 
-func (a *Actor) Init() {
-  a.Exists = true
-  actors[a] = false
+func (a *ActorImpl) Exists() bool {
+	return a.exists
 }
 
-func (a *Actor) Done() {
-  a.Exists = false
-  delete(actors,a)
+func (a *ActorImpl) SetExists(b bool) {
+	a.exists = b
 }
 
+func (a *ActorImpl) Init() {
+	a.Exists = true
+	actors[a] = false
+}
+
+func (a *ActorImpl) Done() {
+	a.Exists = false
+	delete(actors, a)
+}

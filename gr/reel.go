@@ -89,84 +89,92 @@ func (nr *NumReel) clear() {
 	nr.Init()
 }
 
-  public void move() {
-    float vd = _targetDeg - deg;
-    vd *= 0.05f * velRatio;
-    if (vd < VEL_MIN * velRatio)
-      vd = VEL_MIN * velRatio;
-    deg += vd;
-    if (deg > _targetDeg)
-      deg = _targetDeg;
-  }
+func (nr *NumReel)  move() {
+	vd := nr.targetDeg - nr.deg
+	vd *= 0.05 * nr.velRatio
+	if (vd < VEL_MIN * nr.velRatio) {
+		vd = VEL_MIN * nr.velRatio
+	}
+	nr.deg += vd
+	if (nr.deg > nr.targetDeg) {
+		nr.deg = nr.targetDeg
+	}
+}
 
-  public void draw(float x, float y, float s) {
-    int n = cast(int) ((deg * 10 / 360 + 0.99f) + 1) % 10;
-    float d = deg % 360;
-    float od = d - n * 360 / 10;
-    od -= 15;
-    Math.normalizeDeg360(od);
-    od *= 1.5f;
-    for (int i = 0; i < 3; i++) {
-      glPushMatrix();
-      if (ofs > 0.005f)
-        glTranslatef(x + rand.nextSignedFloat(1) * ofs, y + rand.nextSignedFloat(1) * ofs, 0);
-      else
-        glTranslatef(x, y, 0);
-      glRotatef(od, 1, 0, 0);
-      glTranslatef(0, 0, s * 2.4f);
-      glScalef(s, -s, s);
-      float a = 1 - fabs((od + 15) / (360 / 10 * 1.5f)) / 2;
-      if (a < 0)
-        a = 0;
-      Screen.setColor(a, a, a);
-      Letter.drawLetter(n, 2);
-      Screen.setColor(a / 2, a / 2, a / 2);
-      Letter.drawLetter(n, 3);
-      glPopMatrix();
-      n--;
-      if (n < 0)
-        n = 9;
-      od += 360 / 10 * 1.5f;
-      Math.normalizeDeg360(od);
-    }
-    ofs *= 0.95f;
-  }
+func (nr *NumReel) draw(x float, y float, s float) {
+	n := int((deg * 10 / 360 + 0.99f) + 1) % 10;
+	d := deg % 360
+	od := d - n * 360 / 10
+	od -= 15;
+	normalizeDeg360(od)
+	od *= 1.5
+	for i := 0; i < 3; i++ {
+		gl.PushMatrix()
+		if (nr.ofs > 0.005) {
+			gl.Translatef(x + rand.Float32() * nr.ofs, y + rand.Float32() * nr.ofs, 0)
+		} else {
+			gl.Translatef(x, y, 0)
+		}
+		gl.Rotatef(od, 1, 0, 0)
+		gl.Translatef(0, 0, s * 2.4)
+		gl.Scalef(s, -s, s)
+		a := float32(1 - fabs((od + 15) / (360 / 10 * 1.5)) / 2)
+		if (a < 0) {
+			a = 0
+		}
+		Screen.setColor(a, a, a)
+		Letter.drawLetter(n, 2)
+		Screen.setColor(a / 2, a / 2, a / 2)
+		Letter.drawLetter(n, 3)
+		gl.PopMatrix()
+		n--
+		if (n < 0) {
+			n = 9
+		}
+		od += 360 / 10 * 1.5
+		Math.normalizeDeg360(od)
+	}
+	ofs *= 0.95f;
+}
 
-  public void targetDeg(float td) {
-    if ((td - _targetDeg) > 1)
-      ofs += 0.1f;
-    return _targetDeg = td;
-  }
+fund (nr *NumReel) targetDeg(td float) {
+	if ((td - nr.targetDeg) > 1) {
+		nr.ofs += 0.1
+	}
+	nr.targetDeg = td
+	return nr.targetDeg
+}
 
-  public void accelerate() {
-    velRatio = 4;
-  }
+func (nr *NumReel) accelerate() {
+	nr.velRatio = 4
 }
 
 /**
  * Flying indicator that shows the score and the multiplier.
  */
-public class NumIndicator: Actor {
- private:
-  static enum IndicatorType {
-    SCORE, MULTIPLIER,
-  };
-  static enum FlyingToType {
-    RIGHT, BOTTOM,
-  };
-  static Rand rand;
-  static const float TARGET_Y_MIN = -7;
-  static const float TARGET_Y_MAX = 7;
-  static const float TARGET_Y_INTERVAL = 1;
-  static float targetY;
-  struct Target {
-    Vector pos;
-    int flyingTo;
-    float initialVelRatio;
-    float size;
-    int n;
-    int cnt;
-  };
+
+static enum IndicatorType {
+	SCORE, MULTIPLIER,
+};
+static enum FlyingToType {
+	RIGHT, BOTTOM,
+};
+static const float TARGET_Y_MIN = -7;
+static const float TARGET_Y_MAX = 7;
+static const float TARGET_Y_INTERVAL = 1;
+static float targetY;
+struct Target {
+	Vector pos;
+	int flyingTo;
+	float initialVelRatio;
+	float size;
+	int n;
+	int cnt;
+};
+
+type NumIndicator struct {
+	ActorImpl
+
   ScoreReel scoreReel;
   Vector pos, vel;
   int n, type;
@@ -354,8 +362,3 @@ public class NumIndicator: Actor {
   }
 }
 
-public class NumIndicatorPool: ActorPool!(NumIndicator) {
-  public this(int n, Object[] args) {
-    super(n, args);
-  }
-}
