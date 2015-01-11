@@ -3,121 +3,91 @@
  *
  * Copyright 2005 Kenta Cho. Some rights reserved.
  */
-module abagames.gr.reel;
-
-private import std.math;
-private import opengl;
-private import abagames.util.math;
-private import abagames.util.vector;
-private import abagames.util.actor;
-private import abagames.util.rand;
-private import abagames.gr.letter;
-private import abagames.gr.screen;
-private import abagames.gr.soundmanager;
+package gr
 
 /**
  * Rolling reel that displays the score.
  */
-public class ScoreReel {
- public:
-  static const int MAX_DIGIT = 16;
- private:
-  int score, targetScore;
-  int _actualScore;
-  int digit;
-  NumReel[MAX_DIGIT] numReel;
 
-  invariant {
-    assert(digit > 0 && digit <= MAX_DIGIT);
-  }
+static const int MAX_DIGIT = 16;
 
-  public this() {
-    foreach (inout NumReel nr; numReel)
-      nr = new NumReel;
-    digit = 1;
-  }
-
-  public void clear(int digit = 9) {
-    score = targetScore = _actualScore = 0;
-    this.digit = digit;
-    for (int i = 0; i < digit; i++)
-      numReel[i].clear();
-  }
-
-  public void move() {
-    for (int i = 0; i < digit; i++)
-      numReel[i].move();
-  }
-
-  public void draw(float x, float y, float s) {
-    float lx = x, ly = y;
-    for (int i = 0; i < digit; i++) {
-      numReel[i].draw(lx, ly, s);
-      lx -= s * 2;
-    }
-  }
-
-  public void addReelScore(int as) {
-    targetScore += as;
-    int ts = targetScore;
-    for (int i = 0; i < digit; i++) {
-      numReel[i].targetDeg = cast(float) ts * 360 / 10;
-      ts /= 10;
-      if (ts < 0)
-        break;
-    }
-  }
-
-  public void accelerate() {
-    for (int i = 0; i < digit; i++)
-      numReel[i].accelerate();
-  }
-
-  public void addActualScore(int as) {
-    _actualScore += as;
-  }
-
-  public int actualScore() {
-    return _actualScore;
-  }
+type ScoreReel struct {
+  score, targetScore int
+  actualScore int
+  digit int
+  numReel [MAX_DIGIT]NumReel
 }
 
-public class NumReel {
- private:
-  static const float VEL_MIN = 5;
-  static Rand rand;
-  float deg;
-  float _targetDeg;
-  float ofs;
-  float velRatio;
+func (sr *ScoreReel) Init() {
+	for i,_ := range sr.numReel {
+		sr.numReel[i].Init()
+	}
+	sr.digit = 1
+}
 
-  invariant {
-    assert(deg >= 0);
-    assert(_targetDeg >= 0);
-    assert(ofs >= 0);
-  }
+func (sr *ScoreReel) clear(digit int /*= 9 */) {
+	sr.score = sr.targetScore = sr.actualScore = 0
+	sr.digit = digit
+	for i := 0; i < digit; i++ {
+		sr.numReel[i].clear()
+	}
+}
 
-  public static this() {
-    rand = new Rand;
-  }
+func (sr *ScoreReel)  move() {
+	for i := 0; i < digit; i++ {
+		sr.numReel[i].move()
+	}
+}
 
-  public static void setRandSeed(long seed) {
-    rand.setSeed(seed);
-  }
+func (sr *ScoreReel)  draw(x float32, y float32, s float32) {
+	lx = x, ly = y float32
+	for i := 0; i < digit; i++ {
+		sr.numReel[i].draw(lx, ly, s);
+		lx -= s * 2
+	}
+}
 
-  public this() {
-    init();
-  }
+func (sr *ScoreReel) addReelScore(as int) {
+	sr.targetScore += as
+	ts := sr.targetScore
+	for i := 0; i < digit; i++ {
+		sr.numReel[i].targetDeg = float32(ts * 360 / 10)
+		ts /= 10
+		if (ts < 0) {
+			break
+		}
+	}
+}
 
-  private void init() {
-    deg = _targetDeg = 0;
-    ofs = 0;
-    velRatio = 1;
-  }
+func (sr *ScoreReel)  accelerate() {
+	for i := 0; i < digit; i++ {
+		sr.numReel[i].accelerate()
+	}
+}
 
-  public void clear() {
-    init();
-  }
+func (sr *ScoreReel)  addActualScore(as int) {
+	sr.actualScore += as
+}
+
+
+const VEL_MIN float32 = 5
+
+type NumReel struct {
+  deg float32
+  _targetDeg float32
+  ofs float32
+  velRatio float32
+}
+
+func (nr *NumReel) Init() {
+  nr.deg = 0
+	nr.ofs = 0
+	nr.velRatio = 1;
+}
+
+func (nr *NumReel) clear() {
+	nr.Init()
+}
 
   public void move() {
     float vd = _targetDeg - deg;
