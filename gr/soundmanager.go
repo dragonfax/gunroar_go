@@ -6,7 +6,7 @@
 package gr
 
 import (
-	"github.com/veandco/go-sdl2/mix"
+	"github.com/veandco/go-sdl2/sdl_mixer"
 )
 
 var noSound bool

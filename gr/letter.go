@@ -6,7 +6,6 @@
 package gr
 
 import (
-	"github.com/dragonfax/gunroar_go/gr/sdl"
 	"github.com/go-gl/gl"
 	// "github.com/veandco/go-sdl3/sdl"
 	"math"

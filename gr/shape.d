@@ -584,7 +584,7 @@ func (c *CollidableImpl) CheckCollision(ax float32, ay float32, shape *Collidabl
 /**
  * Drawable that has a single displaylist.
  */
-type DrawableShape struct {
+type DrawableShape interface {
 	displayList DisplayList
 }
 

@@ -3,51 +3,48 @@
  *
  * Copyright 2005 Kenta Cho. Some rights reserved.
  */
-package sdl
+package gr
 
 const MOUSE_SCREEN_MAPPING_RATIO_X = 26.0
 const MOUSE_SCREEN_MAPPING_RATIO_Y = 19.5
 
 func (m *Mouse) adjustPos(ms *MouseState) {
-  ms.x =  (ms.x - screen.width  / 2) * MOUSE_SCREEN_MAPPING_RATIO_X / screen.width;
-  ms.y = -(ms.y - screen.height / 2) * MOUSE_SCREEN_MAPPING_RATIO_Y / screen.height;
+	ms.x = (ms.x - screen.width/2) * MOUSE_SCREEN_MAPPING_RATIO_X / screen.width
+	ms.y = -(ms.y - screen.height/2) * MOUSE_SCREEN_MAPPING_RATIO_Y / screen.height
 }
-
-
 
 /**
  * Mouse input.
  */
 type Mouse struct {
-  screen SizableScreen
-  state MouseState
+	screen SizableScreen
+	state  MouseState
 }
 
 func (m *Mouse) getState() MouseState {
 	mx, my, btn := sdl.GetMouseState()
 	m.state.X = mx
 	m.state.Y = my
-	m.state.Button = NONE
-	if btn & sdl.Button(LEFT) {
-		state.Button |= LEFT
+	m.state.Button = MouseButtonNONE
+	if btn & sdl.Button(MouseButtonLEFT) {
+		state.Button |= MouseButtonLEFT
 	}
-	if btn & sdl.Button(RIGHT) {
-		state.Button |= RIGHT
+	if btn & sdl.Button(MouseButtonRIGHT) {
+		state.Button |= MouseButtonRIGHT
 	}
 	adjustPos(state)
 	return state
 }
 
-type Button int 
+type MouseButton int
 
 const (
-	NONE Button = 0,
-	LEFT Button = 1,
-	RIGHT Button = 2
+	MouseButtonNONE  MouseButton = 0
+	MouseButtonLEFT              = 1
+	MouseButtonRIGHT             = 2
 )
 
-
 type MouseState struct {
-  X, Y float32
-  Button Button
+	X, Y   float32
+	Button MouseButton
 }
