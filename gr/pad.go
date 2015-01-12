@@ -39,83 +39,85 @@ func (pad *Pad) handleEvent(event *sdl.Event) {
 }
 
 func (pad *Pad) getState() PadState {
-	var x, y int
+	var x, y int16
 	pad.state.dir = 0
 	if pad.stick != nil {
-		x = sdl.JoystickGetAxis(pad.stick, 0)
-		y = sdl.JoystickGetAxis(pad.stick, 1)
+		x = pad.stick.GetAxis(0)
+		y = pad.stick.GetAxis(1)
 	}
-	if pad.keys[sdl.K_RIGHT] == sdl.PRESSED || pad.keys[sdl.K_KP6] == sdl.PRESSED ||
+	if pad.keys[sdl.K_RIGHT] == sdl.PRESSED || pad.keys[sdl.K_KP_6] == sdl.PRESSED ||
 		pad.keys[sdl.K_d] == sdl.PRESSED || pad.keys[sdl.K_l] == sdl.PRESSED ||
 		x > JOYSTICK_AXIS {
-		pad.state.dir |= RIGHT
+		pad.state.dir |= PadDirRIGHT
 	}
-	if pad.keys[sdl.K_LEFT] == sdl.PRESSED || pad.keys[sdl.K_KP4] == sdl.PRESSED ||
+	if pad.keys[sdl.K_LEFT] == sdl.PRESSED || pad.keys[sdl.K_KP_4] == sdl.PRESSED ||
 		pad.keys[sdl.K_a] == sdl.PRESSED || pad.keys[sdl.K_j] == sdl.PRESSED ||
 		x < -JOYSTICK_AXIS {
-		pad.state.dir |= LEFT
+		pad.state.dir |= PadDirLEFT
 	}
-	if pad.keys[sdl.K_DOWN] == sdl.PRESSED || pad.keys[sdl.K_KP2] == sdl.PRESSED ||
+	if pad.keys[sdl.K_DOWN] == sdl.PRESSED || pad.keys[sdl.K_KP_2] == sdl.PRESSED ||
 		pad.keys[sdl.K_s] == sdl.PRESSED || pad.keys[sdl.K_k] == sdl.PRESSED ||
 		y > JOYSTICK_AXIS {
-		pad.state.dir |= DOWN
+		pad.state.dir |= PadDirDOWN
 	}
-	if pad.keys[sdl.K_UP] == sdl.PRESSED || pad.keys[sdl.K_KP8] == sdl.PRESSED ||
+	if pad.keys[sdl.K_UP] == sdl.PRESSED || pad.keys[sdl.K_KP_8] == sdl.PRESSED ||
 		pad.keys[sdl.K_w] == sdl.PRESSED || pad.keys[sdl.K_i] == sdl.PRESSED ||
 		y < -JOYSTICK_AXIS {
-		pad.state.dir |= UP
+		pad.state.dir |= PadDirUP
 	}
 	pad.state.button = 0
-	var btn1, btn2 int
-	var leftTrigger, rightTrigger float = 0
-	if pad.stick {
-		btn1 = sdl.JoystickGetButton(pad.stick, 0) + sdl.JoystickGetButton(pad.stick, 3) +
-			sdl.JoystickGetButton(pad.stick, 4) + sdl.JoystickGetButton(pad.stick, 7) +
-			sdl.JoystickGetButton(pad.stick, 8) + sdl.JoystickGetButton(pad.stick, 11)
-		btn2 = sdl.JoystickGetButton(pad.stick, 1) + sdl.JoystickGetButton(pad.stick, 2) +
-			sdl.JoystickGetButton(pad.stick, 5) + sdl.JoystickGetButton(pad.stick, 6) +
-			sdl.JoystickGetButton(pad.stick, 9) + sdl.JoystickGetButton(pad.stick, 10)
+	var btn1, btn2 byte
+	var leftTrigger float32 = 0
+	var rightTrigger float32 = 0
+	if pad.stick != nil {
+		btn1 = pad.stick.GetButton(0) + pad.stick.GetButton(3) +
+			pad.stick.GetButton(4) + pad.stick.GetButton(7) +
+			pad.stick.GetButton(8) + pad.stick.GetButton(11)
+		btn2 = pad.stick.GetButton(1) + pad.stick.GetButton(2) +
+			pad.stick.GetButton(5) + pad.stick.GetButton(6) +
+			pad.stick.GetButton(9) + pad.stick.GetButton(10)
 	}
 	if pad.keys[sdl.K_z] == sdl.PRESSED || pad.keys[sdl.K_PERIOD] == sdl.PRESSED ||
 		pad.keys[sdl.K_LCTRL] == sdl.PRESSED || pad.keys[sdl.K_RCTRL] == sdl.PRESSED ||
-		btn1 {
+		btn1 != 0 {
 		if !pad.buttonReversed {
-			pad.state.button |= PadState.Button.A
+			pad.state.button |= PadButtonA
 		} else {
-			pad.state.button |= PadState.Button.B
+			pad.state.button |= PadButtonB
 		}
 	}
 	if pad.keys[sdl.K_x] == sdl.PRESSED || pad.keys[sdl.K_SLASH] == sdl.PRESSED ||
 		pad.keys[sdl.K_LALT] == sdl.PRESSED || pad.keys[sdl.K_RALT] == sdl.PRESSED ||
 		pad.keys[sdl.K_LSHIFT] == sdl.PRESSED || pad.keys[sdl.K_RSHIFT] == sdl.PRESSED ||
 		pad.keys[sdl.K_RETURN] == sdl.PRESSED ||
-		btn2 {
-		if !buttonReversed {
-			pad.state.button |= B
+		btn2 != 0 {
+		if !pad.buttonReversed {
+			pad.state.button |= PadButtonB
 		} else {
-			pad.state.button |= A
+			pad.state.button |= PadButtonA
 		}
 	}
 	return pad.state
 }
 
-type Dir int
+type PadDir int
 
 const (
-	UP    Dir = 1
-	DOWN      = 2
-	LEFT      = 4
-	RIGHT     = 8
+	PadDirUP    PadDir = 1
+	PadDirDOWN         = 2
+	PadDirLEFT         = 4
+	PadDirRIGHT        = 8
 )
 
-type Button int
+type PadButton int
 
 const (
-	A   Button = 16
-	B   Button = 32
-	ANY Button = 48
+	PadButtonA   PadButton = 16
+	PadButtonB   PadButton = 32
+	PadButtonANY PadButton = 48
 )
 
 type PadState struct {
-	dir, button int
+	dir    PadDir
+	button PadButton
 }

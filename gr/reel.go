@@ -9,6 +9,11 @@ package gr
  * Rolling reel that displays the score.
  */
 
+import (
+	"github.com/go-gl/gl"
+	"math/rand"
+)
+
 const MAX_DIGIT = 16
 
 type ScoreReel struct {
@@ -36,7 +41,7 @@ func (sr *ScoreReel) clear(digit int /*= 9 */) {
 }
 
 func (sr *ScoreReel) move() {
-	for i := 0; i < digit; i++ {
+	for i := 0; i < sr.digit; i++ {
 		sr.numReel[i].move()
 	}
 }
@@ -44,7 +49,7 @@ func (sr *ScoreReel) move() {
 func (sr *ScoreReel) draw(x float32, y float32, s float32) {
 	lx := x
 	ly := y
-	for i := 0; i < digit; i++ {
+	for i := 0; i < sr.digit; i++ {
 		sr.numReel[i].draw(lx, ly, s)
 		lx -= s * 2
 	}
@@ -53,7 +58,7 @@ func (sr *ScoreReel) draw(x float32, y float32, s float32) {
 func (sr *ScoreReel) addReelScore(as int) {
 	sr.targetScore += as
 	ts := sr.targetScore
-	for i := 0; i < digit; i++ {
+	for i := 0; i < sr.digit; i++ {
 		sr.numReel[i].targetDeg = float32(ts * 360 / 10)
 		ts /= 10
 		if ts < 0 {
@@ -63,7 +68,7 @@ func (sr *ScoreReel) addReelScore(as int) {
 }
 
 func (sr *ScoreReel) accelerate() {
-	for i := 0; i < digit; i++ {
+	for i := 0; i < sr.digit; i++ {
 		sr.numReel[i].accelerate()
 	}
 }
@@ -75,10 +80,10 @@ func (sr *ScoreReel) addActualScore(as int) {
 const VEL_MIN float32 = 5
 
 type NumReel struct {
-	deg        float32
-	_targetDeg float32
-	ofs        float32
-	velRatio   float32
+	deg       float32
+	targetDeg float32
+	ofs       float32
+	velRatio  float32
 }
 
 func (nr *NumReel) Init() {
@@ -103,12 +108,12 @@ func (nr *NumReel) move() {
 	}
 }
 
-func (nr *NumReel) draw(x float, y float, s float) {
-	n := int((deg*10/360+0.99)+1) % 10
-	d := deg % 360
+func (nr *NumReel) draw(x float32, y float32, s float32) {
+	n := Mod32(((nr.deg*10/360 + 0.99) + 1), 10)
+	d := Mod32(nr.deg, 360)
 	od := d - n*360/10
 	od -= 15
-	normalizeDeg360(od)
+	od = normalizeDeg360(od)
 	od *= 1.5
 	for i := 0; i < 3; i++ {
 		gl.PushMatrix()
@@ -125,18 +130,18 @@ func (nr *NumReel) draw(x float, y float, s float) {
 			a = 0
 		}
 		Screen.setColor(a, a, a)
-		Letter.drawLetter(n, 2)
+		drawLetter(n, 2)
 		Screen.setColor(a/2, a/2, a/2)
-		Letter.drawLetter(n, 3)
+		drawLetter(n, 3)
 		gl.PopMatrix()
 		n--
 		if n < 0 {
 			n = 9
 		}
 		od += 360 / 10 * 1.5
-		Math.normalizeDeg360(od)
+		od = normalizeDeg360(od)
 	}
-	ofs *= 0.95
+	nr.ofs *= 0.95
 }
 
 func (nr *NumReel) targetDeg(td float32) {
@@ -158,8 +163,8 @@ func (nr *NumReel) accelerate() {
 type IndicatorType int
 
 const (
-	IndicatorTypeSCORE      IndicatorTypee = 1
-	IndicatorTypeMULTIPLIER                = 2
+	IndicatorTypeSCORE      IndicatorType = 1
+	IndicatorTypeMULTIPLIER               = 2
 )
 
 type FlyingToType int
@@ -254,7 +259,7 @@ func (ni *NumIndicator) set(n int, t IndicatorType, size float32, x float32, y f
 }
 
 func (ni *NumIndicator) addTarget(x float32, y float32, flyingTo FlyingToType, initialVelRatio float32,
-	size float32, n int, cnt in) {
+	size float32, n int, cnt int) {
 	ni.target[ni.targetNum].pos.x = x
 	ni.target[ni.targetNum].pos.y = y
 	ni.target[ni.targetNum].flyingTo = flyingTo

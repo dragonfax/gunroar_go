@@ -9,16 +9,20 @@ import (
 	"math"
 )
 
-func NormalizeDeg(d *float32) {
-	if d < -math.Pi {
-		d = math.Pi*2 - (-d % (math.Pi * 2))
+const Pi32 = float32(math.Pi)
+
+func normalizeDeg(d float32) float32 {
+	if d < -Pi32 {
+		d = Pi32*2 - (Mod32(-d, (Pi32 * 2)))
 	}
-	d = (d+math.Pi)%(math.Pi*2) - math.Pi
+	d = Mod32((d+Pi32), (Pi32*2)) - Pi32
+	return d
 }
 
-func NormalizeDeg360(d *float32) {
+func normalizeDeg360(d float32) float32 {
 	if d < -180 {
-		d = 360 - (-d % 360)
+		d = 360 - Mod32(-d, 360)
 	}
-	d = (d+180)%360 - 180
+	d = Mod32((d+180), 360) - 180
+	return d
 }

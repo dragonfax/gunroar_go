@@ -50,7 +50,7 @@ func (this Vector) checkSide(pos1 Vector, pos2 Vector) float32 {
 	}
 }
 
-func (this Vector) checkSide(pos1 Vector, pos2 Vector, afs Vector) float32 {
+func (this Vector) checkSide3(pos1 Vector, pos2 Vector, afs Vector) float32 {
 	xo := pos2.X() - pos1.X()
 	yo := pos2.Y() - pos1.Y()
 	mx := this.X() + ofs.X()
@@ -179,7 +179,7 @@ func (this Vector) distFloat(px float32 /* = 0 */, py float32 /* = 0 */) float32
 	}
 }
 
-func (this Vector) contains(p Vector, r float32 /*= 1*/) bool {
+func (this Vector) containsVector(p Vector, r float32 /*= 1*/) bool {
 	return containsFloat(p.X(), p.Y(), r)
 }
 

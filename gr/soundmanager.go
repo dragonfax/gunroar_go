@@ -59,7 +59,7 @@ func loadChunks() {
 	}
 }
 
-func playBgm(name string) {
+func playBgmByName(name string) {
 	currentBgm = name
 	if bgmDisabled {
 		return

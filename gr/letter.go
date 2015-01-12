@@ -7,7 +7,6 @@ package gr
 
 import (
 	"github.com/go-gl/gl"
-	// "github.com/veandco/go-sdl3/sdl"
 	"math"
 )
 
@@ -22,53 +21,51 @@ var COLOR_RGB = [][]float32{[]float32{1, 1, 1}, []float32{0.9, 0.7, 0.5}}
 const LETTER_NUM = 44
 const DISPLAY_LIST_NUM = LETTER_NUM * COLOR_NUM
 
-type Letter struct {
-	DisplayList *sdl.DisplayList
-}
+var displayList *DisplayList
 
-func (l *Letter) Init() {
-	l.DisplayList = sdl.NewDisplayList(DISPLAY_LIST_NUM)
-	l.DisplayList.ResetList()
+func InitLetter() {
+	displayList = NewDisplayList(DISPLAY_LIST_NUM)
+	displayList.ResetList()
 	for j := 0; j < COLOR_NUM; j++ {
 		for i := 0; i < LETTER_NUM; i++ {
-			l.DisplayList.NewList()
+			displayList.NewList()
 			setLetter(i, j)
-			l.DisplayList.EndList()
+			displayList.EndList()
 		}
 	}
 }
 
-func (l *Letter) Close() {
-	l.DisplayList.Close()
+func Close() {
+	displayList.Close()
 }
 
-func getWidth(n int, s float32) float32 {
+func getLetterWidth(n int, s float32) float32 {
 	return float32(n) * s * LETTER_WIDTH
 }
 
-func getHeight(s float32) float32 {
+func getLetterHeight(s float32) float32 {
 	return s * LETTER_HEIGHT
 }
 
-func (l *Letter) drawLetter(n int, c int) {
-	l.DisplayList.Call(uint(n + c*LETTER_NUM))
+func drawLetter(n int, c int) {
+	displayList.Call(uint(n + c*LETTER_NUM))
 }
 
-func (l *Letter) drawLetterOption(n int, x float32, y float32, s float32, d float32, c int) {
+func drawLetterOption(n int, x float32, y float32, s float32, d float32, c int) {
 	gl.PushMatrix()
 	gl.Translatef(x, y, 0)
 	gl.Scalef(s, s, s)
 	gl.Rotatef(float32(d), 0, 0, 1)
-	l.DisplayList.Call(uint(n + c*LETTER_NUM))
+	displayList.Call(uint(n + c*LETTER_NUM))
 	gl.PopMatrix()
 }
 
-func (l *Letter) drawLetterRev(n int, x float32, y float32, s float32, d float32, c int) {
+func drawLetterRev(n int, x float32, y float32, s float32, d float32, c int) {
 	gl.PushMatrix()
 	gl.Translatef(x, y, 0)
 	gl.Scalef(s, -s, s)
 	gl.Rotatef(float32(d), 0, 0, 1)
-	l.DisplayList.Call(uint(n + c*LETTER_NUM))
+	displayList.Call(uint(n + c*LETTER_NUM))
 	gl.PopMatrix()
 }
 
@@ -105,11 +102,11 @@ func convertCharToInt(c rune) int {
 	return idx
 }
 
-func (l *Letter) DrawString(str string, lx float32, y float32, s float32) {
-	l.DrawStringOption(str, lx, y, s, TO_RIGHT, 0, false, 0)
+func DrawString(str string, lx float32, y float32, s float32) {
+	DrawStringOption(str, lx, y, s, TO_RIGHT, 0, false, 0)
 }
 
-func (l *Letter) DrawStringOption(str string, lx float32, y float32, s float32, d Direction, cl int, rev bool, od float32) {
+func DrawStringOption(str string, lx float32, y float32, s float32, d Direction, cl int, rev bool, od float32) {
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
 	x := lx
@@ -134,9 +131,9 @@ func (l *Letter) DrawStringOption(str string, lx float32, y float32, s float32, 
 		if c != ' ' {
 			idx = convertCharToInt(c)
 			if rev {
-				l.drawLetterRev(idx, x, y, s, ld, cl)
+				drawLetterRev(idx, x, y, s, ld, cl)
 			} else {
-				l.drawLetterOption(idx, x, y, s, ld, cl)
+				drawLetterOption(idx, x, y, s, ld, cl)
 			}
 		}
 		if od == 0 {
@@ -169,11 +166,11 @@ func Sin32(d float32) float32 {
 	return float32(math.Sin(float64(d)))
 }
 
-func (l *Letter) DrawNum(num int, lx float32, y float32, s float32) {
-	l.DrawNumOption(num, lx, y, s, 0, 0, -1, -1)
+func DrawNum(num int, lx float32, y float32, s float32) {
+	DrawNumOption(num, lx, y, s, 0, 0, -1, -1)
 }
 
-func (l *Letter) DrawNumOption(num int, lx float32, y float32, s float32, cl int, dg int, headChar int, floatDigit int) {
+func DrawNumOption(num int, lx float32, y float32, s float32, cl int, dg int, headChar int, floatDigit int) {
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
 	n := num
@@ -183,10 +180,10 @@ func (l *Letter) DrawNumOption(num int, lx float32, y float32, s float32, cl int
 	var fd int = floatDigit
 	for {
 		if fd <= 0 {
-			l.drawLetterOption(n%10, x, y, s, ld, cl)
+			drawLetterOption(n%10, x, y, s, ld, cl)
 			x -= s * LETTER_WIDTH
 		} else {
-			l.drawLetterOption(n%10, x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
+			drawLetterOption(n%10, x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
 			x -= s * LETTER_WIDTH * 0.5
 		}
 		n /= 10
@@ -196,30 +193,30 @@ func (l *Letter) DrawNumOption(num int, lx float32, y float32, s float32, cl int
 			break
 		}
 		if fd == 0 {
-			l.drawLetterOption(36, x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
+			drawLetterOption(36, x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
 			x -= s * LETTER_WIDTH * 0.5
 		}
 	}
 	if headChar >= 0 {
-		l.drawLetterOption(headChar, x+s*LETTER_WIDTH*0.2, y+s*LETTER_WIDTH*0.2, s*0.6, ld, cl)
+		drawLetterOption(headChar, x+s*LETTER_WIDTH*0.2, y+s*LETTER_WIDTH*0.2, s*0.6, ld, cl)
 	}
 }
 
-func (l *Letter) DrawNumSign(num int, lx float32, ly float32, s float32) {
-	l.DrawNumSignOption(num, lx, ly, s, 0, -1, -1)
+func DrawNumSign(num int, lx float32, ly float32, s float32) {
+	DrawNumSignOption(num, lx, ly, s, 0, -1, -1)
 }
 
-func (l *Letter) DrawNumSignOption(num int, lx float32, ly float32, s float32, cl int, headChar int, floatDigit int) {
+func DrawNumSignOption(num int, lx float32, ly float32, s float32, cl int, headChar int, floatDigit int) {
 	x := lx
 	y := ly
 	n := num
 	fd := floatDigit
 	for {
 		if fd <= 0 {
-			l.drawLetterRev(n%10, x, y, s, 0, cl)
+			drawLetterRev(n%10, x, y, s, 0, cl)
 			x -= s * LETTER_WIDTH
 		} else {
-			l.drawLetterRev(n%10, x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
+			drawLetterRev(n%10, x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
 			x -= s * LETTER_WIDTH * 0.5
 		}
 		n /= 10
@@ -228,16 +225,16 @@ func (l *Letter) DrawNumSignOption(num int, lx float32, ly float32, s float32, c
 		}
 		fd--
 		if fd == 0 {
-			l.drawLetterRev(36, x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
+			drawLetterRev(36, x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
 			x -= s * LETTER_WIDTH * 0.5
 		}
 	}
 	if headChar >= 0 {
-		l.drawLetterRev(headChar, x+s*LETTER_WIDTH*0.2, y-s*LETTER_WIDTH*0.2, s*0.6, 0, cl)
+		drawLetterRev(headChar, x+s*LETTER_WIDTH*0.2, y-s*LETTER_WIDTH*0.2, s*0.6, 0, cl)
 	}
 }
 
-func (l *Letter) drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */) {
+func drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */) {
 	n := time
 	if n < 0 {
 		n = 0
@@ -245,19 +242,19 @@ func (l *Letter) drawTime(time int, lx float32, y float32, s float32, cl int /* 
 	var x float32 = lx
 	for i := 0; i < 7; i++ {
 		if i != 4 {
-			l.drawLetterOption(n%10, x, y, s, 0, cl)
+			drawLetterOption(n%10, x, y, s, 0, cl)
 			n /= 10
 		} else {
-			l.drawLetterOption(n%6, x, y, s, 0, cl)
+			drawLetterOption(n%6, x, y, s, 0, cl)
 			n /= 6
 		}
 		if (i&1) == 1 || i == 0 {
 			switch i {
 			case 3:
-				l.drawLetterOption(41, x+s*1.16, y, s, 0, cl)
+				drawLetterOption(41, x+s*1.16, y, s, 0, cl)
 				break
 			case 5:
-				l.drawLetterOption(40, x+s*1.16, y, s, 0, cl)
+				drawLetterOption(40, x+s*1.16, y, s, 0, cl)
 				break
 			default:
 				break
@@ -308,22 +305,22 @@ func setBox(x float32, y float32, width float32, height float32, deg float32, r 
 	gl.PushMatrix()
 	gl.Translatef(x-width/2, y-height/2, 0)
 	gl.Rotatef(deg, 0, 0, 1)
-	setColorAlpha(r, g, b, 0.5)
+	setLetterColorAlpha(r, g, b, 0.5)
 	gl.Begin(gl.TRIANGLE_FAN)
 	setBoxPart(width, height)
 	gl.End()
-	setColor(r, g, b)
+	setLetterColor(r, g, b)
 	gl.Begin(gl.LINE_LOOP)
 	setBoxPart(width, height)
 	gl.End()
 	gl.PopMatrix()
 }
 
-func setColor(red float32, green float32, blue float32) {
+func setLetterColor(red float32, green float32, blue float32) {
 	gl.Color3f(red, green, blue)
 }
 
-func setColorAlpha(red float32, green float32, blue float32, alpha float32) {
+func setLetterColorAlpha(red float32, green float32, blue float32, alpha float32) {
 	gl.Color4f(red, green, blue, alpha)
 }
 

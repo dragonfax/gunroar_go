@@ -5,35 +5,39 @@
  */
 package gr
 
+import (
+	"github.com/veandco/go-sdl2/sdl"
+)
+
 const MOUSE_SCREEN_MAPPING_RATIO_X = 26.0
 const MOUSE_SCREEN_MAPPING_RATIO_Y = 19.5
 
 func (m *Mouse) adjustPos(ms *MouseState) {
-	ms.x = (ms.x - screen.width/2) * MOUSE_SCREEN_MAPPING_RATIO_X / screen.width
-	ms.y = -(ms.y - screen.height/2) * MOUSE_SCREEN_MAPPING_RATIO_Y / screen.height
+	ms.x = (ms.x - float32(m.screen.width)/2) * MOUSE_SCREEN_MAPPING_RATIO_X / float32(m.screen.width)
+	ms.y = -(ms.y - float32(m.screen.height)/2) * MOUSE_SCREEN_MAPPING_RATIO_Y / float32(m.screen.height)
 }
 
 /**
  * Mouse input.
  */
 type Mouse struct {
-	screen SizableScreen
+	screen Screen
 	state  MouseState
 }
 
 func (m *Mouse) getState() MouseState {
 	mx, my, btn := sdl.GetMouseState()
-	m.state.X = mx
-	m.state.Y = my
+	m.state.x = float32(mx)
+	m.state.y = float32(my)
 	m.state.Button = MouseButtonNONE
-	if btn & sdl.Button(MouseButtonLEFT) {
-		state.Button |= MouseButtonLEFT
+	if btn&sdl.Button(MouseButtonLEFT) != 0 {
+		m.state.Button |= MouseButtonLEFT
 	}
-	if btn & sdl.Button(MouseButtonRIGHT) {
-		state.Button |= MouseButtonRIGHT
+	if btn&sdl.Button(MouseButtonRIGHT) != 0 {
+		m.state.Button |= MouseButtonRIGHT
 	}
-	adjustPos(state)
-	return state
+	m.adjustPos(&m.state)
+	return m.state
 }
 
 type MouseButton int
@@ -45,6 +49,6 @@ const (
 )
 
 type MouseState struct {
-	X, Y   float32
+	x, y   float32
 	Button MouseButton
 }

@@ -164,12 +164,7 @@ func (s *Screen) move() {
 	}
 }
 
-func (s *Screen) luminosity(v float32) float32 {
-	s.luminosity = v
-	return s.luminosity
-}
-
-func setColorForced(r float, g float, b float, a float /* = 1 */) {
+func setScreenColorForced(r float32, g float32, b float32, a float32 /* = 1 */) {
 	gl.Color4f(r, g, b, a)
 }
 
@@ -238,7 +233,7 @@ func glTranslate3(v Vector3) {
 	gl.Translatef(v.X(), v.Y(), v.Z())
 }
 
-func setColor(r float32, g float32, b float32, a float32 /* = 1 */) {
+func setScreenColor(r float32, g float32, b float32, a float32 /* = 1 */) {
 	gl.Color4f(r*brightness, g*brightness, b*brightness, a)
 }
 
