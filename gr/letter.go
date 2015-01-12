@@ -35,7 +35,7 @@ func InitLetter() {
 	}
 }
 
-func Close() {
+func CloseLetter() {
 	displayList.Close()
 }
 

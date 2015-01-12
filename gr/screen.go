@@ -34,13 +34,10 @@ type Screen struct {
 	height             int
 	windowMode         bool
 	window             *sdl.Window
+	context            sdl.GLContext
 }
 
 func (s *Screen) Init() {
-	s.farPlane = 1000
-	s.nearPlane = 0.1
-	s.width = 640
-	s.height = 480
 	s.setCaption(CAPTION)
 	gl.LineWidth(1)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE)
@@ -173,7 +170,11 @@ func setScreenColorForced(r float32, g float32, b float32, a float32 /* = 1 */) 
 	gl.Color4f(r, g, b, a)
 }
 
-func (s *Screen) initSDL() {
+func (s *Screen) InitSDL() {
+	s.farPlane = 1000
+	s.nearPlane = 0.1
+	s.width = 640
+	s.height = 480
 	// Initialize SDL.
 	if sdl.Init(sdl.INIT_VIDEO) < 0 {
 		panic(fmt.Sprintf(" SDLInitFailedException( Unable to initialize SDL: %v", sdl.GetError()))
@@ -182,14 +183,15 @@ func (s *Screen) initSDL() {
 	var videoFlags uint32
 	if s.windowMode {
 		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_RESIZABLE
-	} else {
+	} /*else {
 		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_FULLSCREEN
-	}
+	}*/
 	window, err := sdl.CreateWindow("Title", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, s.width, s.height, videoFlags)
 	if err != nil {
 		panic(fmt.Sprintf("SDLInitFailedException (Unable to create SDL screen: %v", sdl.GetError()))
 	}
 	s.window = window
+	s.context = sdl.GL_CreateContext(window)
 	gl.Viewport(0, 0, s.width, s.height)
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
 	s.resized(s.width, s.height)
@@ -202,8 +204,8 @@ func (s *Screen) closeSDL() {
 	sdl.ShowCursor(sdl.ENABLE)
 }
 
-func (s *Screen) flip() {
-	s.handleError()
+func (s *Screen) Flip() {
+	// s.handleError()
 	sdl.GL_SwapWindow(s.window)
 }
 

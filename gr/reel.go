@@ -46,7 +46,7 @@ func (sr *ScoreReel) move() {
 	}
 }
 
-func (sr *ScoreReel) draw(x float32, y float32, s float32) {
+func (sr *ScoreReel) Draw(x float32, y float32, s float32) {
 	lx := x
 	ly := y
 	for i := 0; i < sr.digit; i++ {
@@ -73,7 +73,7 @@ func (sr *ScoreReel) accelerate() {
 	}
 }
 
-func (sr *ScoreReel) addActualScore(as int) {
+func (sr *ScoreReel) AddActualScore(as int) {
 	sr.actualScore += as
 }
 
@@ -209,7 +209,7 @@ func InitNumIndicator() {
 	targetY = TARGET_Y_MIN
 }
 
-func initTargetY() {
+func InitTargetY() {
 	targetY = TARGET_Y_MIN
 }
 

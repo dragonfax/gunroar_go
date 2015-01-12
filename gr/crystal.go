@@ -1,5 +1,3 @@
-// +build ignore
-
 /*
  * $Id: crystal.d,v 1.2 2005/07/17 11:02:45 kenta Exp $
  *
