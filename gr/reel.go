@@ -144,7 +144,8 @@ func (nr *NumReel) draw(x float32, y float32, s float32) {
 	nr.ofs *= 0.95
 }
 
-func (nr *NumReel) targetDeg(td float32) float32 {
+/* TODO this may be mis-used in place of a call to targetDeg */
+func (nr *NumReel) targetDegUpdate(td float32) float32 {
 	if (td - nr.targetDeg) > 1 {
 		nr.ofs += 0.1
 	}

@@ -67,8 +67,8 @@ func (pad *Pad) getState() PadState {
 	}
 	pad.state.button = 0
 	var btn1, btn2 byte
-	var leftTrigger float32 = 0
-	var rightTrigger float32 = 0
+	// var leftTrigger float32 = 0
+	// var rightTrigger float32 = 0
 	if pad.stick != nil {
 		btn1 = pad.stick.GetButton(0) + pad.stick.GetButton(3) +
 			pad.stick.GetButton(4) + pad.stick.GetButton(7) +

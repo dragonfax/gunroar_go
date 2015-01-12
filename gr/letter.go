@@ -158,14 +158,6 @@ func DrawStringOption(str string, lx float32, y float32, s float32, d Direction,
 	}
 }
 
-func Cos32(d float32) float32 {
-	return float32(math.Cos(float64(d)))
-}
-
-func Sin32(d float32) float32 {
-	return float32(math.Sin(float64(d)))
-}
-
 func DrawNum(num int, lx float32, y float32, s float32) {
 	DrawNumOption(num, lx, y, s, 0, 0, -1, -1)
 }

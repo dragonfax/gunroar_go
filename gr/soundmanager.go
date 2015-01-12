@@ -6,7 +6,13 @@
 package gr
 
 import (
+	"errors"
+	"fmt"
+	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_mixer"
+	"io/ioutil"
+	"math/rand"
+	"path/filepath"
 )
 
 var noSound bool
@@ -18,8 +24,8 @@ var seFileName = []string{"shot.wav", "lance.wav", "hit.wav",
 	"ship_destroyed.wav", "ship_shield_lost.wav", "score_up.wav"}
 
 var seChannel = []int{0, 1, 2, 3, 4, 5, 6, 7, 7, 6}
-var bgm map[string]Music
-var se map[string]Chunk
+var bgm map[string]*Music
+var se map[string]*Chunk
 var seMark map[string]bool
 var bgmDisabled bool
 var seDisabled bool
@@ -34,17 +40,21 @@ func loadSounds() {
 }
 
 func loadMusics() {
-	musics := make(map[string]Music)
-	files := listdir(Music.dir)
-	for _, fileName := range files {
-		ext = getExt(fileName)
+	// musics := make(map[string]Music)
+	files, err := ioutil.ReadDir(musicDir)
+	if err != nil {
+		panic(err.Error())
+	}
+	for _, fileInfo := range files {
+		fileName := fileInfo.Name()
+		ext := filepath.Ext(fileName)
 		if ext != "ogg" && ext != "wav" {
 			continue
 		}
 		music := &Music{}
 		music.Load(fileName)
 		bgm[fileName] = music
-		bgmFileName += fileName
+		bgmFileName = append(bgmFileName, fileName)
 		fmt.Println("Load bgm: " + fileName)
 	}
 }
@@ -52,7 +62,7 @@ func loadMusics() {
 func loadChunks() {
 	for i, fileName := range seFileName {
 		chunk := &Chunk{}
-		chunk.Load(fileName, seChannel[i])
+		chunk.LoadToChannel(fileName, seChannel[i])
 		se[fileName] = chunk
 		seMark[fileName] = false
 		fmt.Println("Load SE: " + fileName)
@@ -64,38 +74,38 @@ func playBgmByName(name string) {
 	if bgmDisabled {
 		return
 	}
-	Music.haltMusic()
+	haltMusic()
 	bgm[name].Play()
 }
 
 func playBgm() {
-	bgmIdx := rand.nextInt(bgm.length-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
-	nextIdxMv = rand.nextInt(2)*2 - 1
+	bgmIdx := rand.Intn(len(bgm)-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
+	nextIdxMv = rand.Intn(2)*2 - 1
 	prevBgmIdx = bgmIdx
-	playBgm(bgmFileName[bgmIdx])
+	playBgmByName(bgmFileName[bgmIdx])
 }
 
 func nextBgm() {
 	bgmIdx := prevBgmIdx + nextIdxMv
 	if bgmIdx < RANDOM_BGM_START_INDEX {
-		bgmIdx = bgm.length - 1
-	} else if bgmIdx >= bgm.length {
+		bgmIdx = len(bgm) - 1
+	} else if bgmIdx >= len(bgm) {
 		bgmIdx = RANDOM_BGM_START_INDEX
 	}
 	prevBgmIdx = bgmIdx
-	playBgm(bgmFileName[bgmIdx])
+	playBgmByName(bgmFileName[bgmIdx])
 }
 
 func playCurrentBgm() {
-	playBgm(currentBgm)
+	playBgmByName(currentBgm)
 }
 
 func fadeBgm() {
-	Music.fadeMusic()
+	fadeMusic()
 }
 
 func haltBgm() {
-	Music.haltMusic()
+	haltMusic()
 }
 
 func playSe(name string) {
@@ -106,8 +116,7 @@ func playSe(name string) {
 }
 
 func playMarkedSe() {
-	keys := seMark.keys
-	for key, _ := range keys {
+	for key, _ := range seMark {
 		if seMark[key] {
 			se[key].Play()
 			seMark[key] = false
@@ -140,7 +149,7 @@ func InitSoundManager() {
 		panic(errors.New(fmt.Sprintf("SDLInitFailedException Unable to initialize SDL_AUDIO: %v", sdl.GetError())))
 	}
 	audio_rate := 44100
-	audio_format := AUDIO_S16
+	var audio_format uint16 = sdl.AUDIO_S16
 	audio_channels := 1
 	audio_buffers := 4096
 	if !mix.OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) {
@@ -182,20 +191,20 @@ func (m *Music) Load(name string) {
 	}
 	fileName := musicDir + "/" + name
 	m.music = mix.LoadMUS(fileName)
-	if music == nil {
+	if m.music == nil {
 		noSound = true
-		panic("Couldn't load: " + fileName + " (" + Mix_GetError() + ")")
+		panic("Couldn't load: " + fileName)
 	}
 }
 
 func (m *Music) LoadToChannel(name string, ch int) {
-	m.load(name)
+	m.Load(name)
 }
 
 func (m *Music) Free() {
 	if m.music != nil {
 		m.Halt()
-		mix.FreeMusic(m.music)
+		m.music.Free()
 	}
 }
 
@@ -203,14 +212,14 @@ func (m *Music) Play() {
 	if noSound {
 		return
 	}
-	mix.PlayMusic(m.music, -1)
+	m.music.Play(-1)
 }
 
 func (m *Music) PlayOnce() {
 	if noSound {
 		return
 	}
-	mix.PlayMusic(m.music, 1)
+	m.music.Play(1)
 }
 
 func (m *Music) Fade() {
@@ -232,7 +241,7 @@ func haltMusic() {
 	if noSound {
 		return
 	}
-	if mix.PlayingMusic() {
+	if mix.MusicPlaying() {
 		mix.HaltMusic()
 	}
 }
@@ -254,9 +263,9 @@ func (c *Chunk) LoadToChannel(name string, ch int) {
 	}
 	fileName := soundDir + "/" + name
 	c.chunk = mix.LoadWAV(fileName)
-	if chunk == nil {
+	if c.chunk == nil {
 		noSound = true
-		panic("SDLException Couldn't load: " + fileName + " (" + mix.GetError() + ")")
+		panic("SDLException Couldn't load: " + fileName)
 	}
 	c.chunkChannel = ch
 }

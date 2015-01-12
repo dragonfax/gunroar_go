@@ -33,6 +33,7 @@ type Screen struct {
 	width              int
 	height             int
 	windowMode         bool
+	window             *sdl.Window
 }
 
 func (s *Screen) Init() {
@@ -184,9 +185,11 @@ func (s *Screen) initSDL() {
 	} else {
 		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_FULLSCREEN
 	}
-	if sdl.SetVideoMode(s.width, s.height, 0, videoFlags) == nil {
+	window, err := sdl.CreateWindow("Title", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, s.width, s.height, videoFlags)
+	if err != nil {
 		panic(fmt.Sprintf("SDLInitFailedException (Unable to create SDL screen: %v", sdl.GetError()))
 	}
+	s.window = window
 	gl.Viewport(0, 0, s.width, s.height)
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
 	s.resized(s.width, s.height)
@@ -201,7 +204,7 @@ func (s *Screen) closeSDL() {
 
 func (s *Screen) flip() {
 	s.handleError()
-	gl.SwapBuffers()
+	sdl.GL_SwapWindow(s.window)
 }
 
 func (s *Screen) clear() {
@@ -218,7 +221,7 @@ func (s *Screen) handleError() {
 }
 
 func (s *Screen) setCaption(name string) {
-	sdl.WM_SetCaption(name, nil)
+	s.window.SetTitle(name)
 }
 
 func glVertex(v Vector) {
