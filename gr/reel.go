@@ -153,212 +153,199 @@ func (nr *NumReel) accelerate() {
  * Flying indicator that shows the score and the multiplier.
  */
 
-static enum IndicatorType {
-	SCORE, MULTIPLIER,
-};
-static enum FlyingToType {
-	RIGHT, BOTTOM,
-};
-static const float TARGET_Y_MIN = -7;
-static const float TARGET_Y_MAX = 7;
-static const float TARGET_Y_INTERVAL = 1;
-static float targetY;
-struct Target {
-	Vector pos;
-	int flyingTo;
-	float initialVelRatio;
-	float size;
-	int n;
-	int cnt;
+type IndicatorType int 
+const (
+	IndicatorTypeSCORE IndicatorTypee = 1
+	IndicatorTypeMULTIPLIER = 2
+)
+
+type FlyingToType int
+const (
+	FlyingToTypeRIGHT FlyingToType = 1
+	FlyingToTypeBOTTOM = 2
+)
+
+const TARGET_Y_MIN = -7
+const TARGET_Y_MAX = 7
+const TARGET_Y_INTERVAL = 1
+var targetY float32
+
+type Target struct {
+	pos Vector
+	flyingTo int
+	initialVelRatio float32
+	size float32
+	n int
+	cnt int
 };
 
 type NumIndicator struct {
 	ActorImpl
 
-  ScoreReel scoreReel;
-  Vector pos, vel;
-  int n, type;
-  float size;
-  int cnt;
-  float alpha;
-  Target[4] target;
-  int targetIdx;
-  int targetNum;
+  scoreReel *ScoreReel
+  pos, vel Vector
+  n, t int
+  size float32
+  cnt int
+  alpha float32
+  target [4]Target
+  targetIdx int
+  targetNum int
+}
 
-  invariant {
-    assert(targetY <= TARGET_Y_MAX && targetY >= TARGET_Y_MIN);
-    assert(pos.x < 15 && pos.x > -15);
-    assert(pos.y < 20 && pos.y > -20);
-    assert(vel.x < 10 && vel.x > -10);
-    assert(vel.y < 10 && vel.y > -10);
-    assert(alpha >= 0 && alpha <= 1);
-    foreach (Target t; target) {
-      assert(t.pos.x < 15 && t.pos.x > -15);
-      assert(t.pos.y < 20 && t.pos.y > -20);
-      assert(t.initialVelRatio >= 0);
-      assert(t.size >= 0);
-    }
-    assert(targetIdx >= -1 && targetIdx <= 4);
-    assert(targetNum >= 0 && targetNum <= 4);
-  }
+func InitNumIndicator() {
+	targetY = TARGET_Y_MIN
+}
 
-  public static this() {
-    rand = new Rand;
-    targetY = TARGET_Y_MIN;
-  }
+func initTargetY() {
+	targetY = TARGET_Y_MIN
+}
 
-  public static void setRandSeed(long seed) {
-    rand.setSeed(seed);
-  }
+func getTargetY() float32 {
+	ty := targetY
+	targetY += TARGET_Y_INTERVAL
+	if (targetY > TARGET_Y_MAX) {
+		targetY = TARGET_Y_MIN
+	}
+	return ty
+}
 
-  public static void initTargetY() {
-    targetY = TARGET_Y_MIN;
-  }
+func decTargetY() {
+	targetY -= TARGET_Y_INTERVAL
+	if (targetY < TARGET_Y_MIN) {
+		targetY = TARGET_Y_MAX
+	}
+}
 
-  public static float getTargetY() {
-    float ty = targetY;
-    targetY += TARGET_Y_INTERVAL;
-    if (targetY > TARGET_Y_MAX)
-      targetY = TARGET_Y_MIN;
-    return ty;
-  }
+func (ni *NumIndicator) Init() {
+	ni.pos = Vector{}
+	ni.vel = Vector{}
+	for t := range ni.target) {
+		t.pos = Vector{}
+		t.initialVelRatio = 0
+		t.size = 0
+	}
+	ni.targetIdx = 0
+	ni.targetNum = 0
+	ni.alpha = 1
+}
 
-  public static void decTargetY() {
-    targetY -= TARGET_Y_INTERVAL;
-    if (targetY < TARGET_Y_MIN)
-      targetY = TARGET_Y_MAX;
-  }
+func (ni *NumIndicator)  set(n int, t IndicatorType, size float32, x float32, y float32) {
+	if (ni.Exists() && ni.t == IndicatorTypeSCORE) {
+		if (ni.target[ni.targetIdx].flyingTo == FlyingToTypeRIGHT) {
+			decTargetY()
+		}
+		ni.scoreReel.addReelScore(ni.target[ni.targetNum - 1].n);
+	}
+	ni.n = n
+	ni.t = t
+	ni.size = size
+	ni.pos.x = x
+	ni.pos.y = y
+	ni.targetIdx = -1
+	ni.targetNum = 0
+	ni.alpha = 0.1
+	ni.SetExists(true)
+}
 
-  public this() {
-    pos = new Vector;
-    vel = new Vector;
-    foreach (inout Target t; target) {
-      t.pos = new Vector;
-      t.initialVelRatio = 0;
-      t.size = 0;
-    }
-    targetIdx = targetNum = 0;
-    alpha = 1;
-  }
+func (ni *NumIndicator)  addTarget(x float32, y float32, flyingTo FlyingToType, initialVelRatio float32,
+											size float32, n int, cnt in) {
+	ni.target[ni.targetNum].pos.x = x
+	ni.target[ni.targetNum].pos.y = y
+	ni.target[ni.targetNum].flyingTo = flyingTo
+	ni.target[ni.targetNum].initialVelRatio = initialVelRatio
+	ni.target[ni.targetNum].size = size
+	ni.target[ni.targetNum].n = n
+	ni.target[ni.targetNum].cnt = cnt
+	ni.targetNum++
+}
 
-  public void init(Object[] args) {
-    scoreReel = cast(ScoreReel) args[0];
-  }
+func (ni *NumIndicator)  gotoNextTarget() {
+	ni.targetIdx++
+	if (ni.targetIdx > 0) {
+		SoundManager.playSe("score_up.wav")
+	}
+	if (ni.targetIdx >= ni.targetNum) {
+		if (ni.target[ni.targetIdx - 1].flyingTo == FlyingToType.BOTTOM) {
+			ni.scoreReel.addReelScore(ni.target[ni.targetIdx - 1].n)
+		}
+		ni.SetExists(false)
+		return
+	}
+	switch (ni.target[ni.targetIdx].flyingTo) {
+	case FlyingToTypeRIGHT
+		ni.vel.x = -0.3 + rand.Float32() * 0.05
+		ni.vel.y = rand.Float32() * 0.1
+		break
+	case FlyingToTypeBOTTOM:
+		ni.vel.x = rand.Float32() * 0.1
+		ni.vel.y = 0.3 + rand.Float32 * 0.05
+		decTargetY()
+		break
+	}
+	ni.vel *= ni.target[ni.targetIdx].initialVelRatio
+	ni.cnt = ni.target[ni.targetIdx].cnt
+}
 
-  public void set(int n, IndicatorType type, float size, Vector p) {
-    set(n, type, size, p.x, p.y);
-  }
+func (ni *NumIndicator) move() {
+	if (ni.targetIdx < 0) {
+		return
+	}
+	Vector tp = ni.target[ni.targetIdx].pos
+	switch (ni.target[ni.targetIdx].flyingTo) {
+	case FlyingToTypeRIGHT:
+		ni.vel.x += (tp.x - ni.pos.x) * 0.0036
+		ni.pos.y += (tp.y - ni.pos.y) * 0.1
+		if (fabs(ni.pos.y - tp.y) < 0.5) {
+			ni.pos.y += (tp.y - ni.pos.y) * 0.33
+		}
+		ni.alpha += (1 - ni.alpha) * 0.03
+		break
+	case FlyingToTypeBOTTOM:
+		ni.pos.x += (tp.x - ni.pos.x) * 0.1
+		ni.vel.y += (tp.y - ni.pos.y) * 0.0036
+		ni.alpha *= 0.97
+		break
+	}
+	ni.vel *= 0.98
+	ni.size += (ni.target[ni.targetIdx].size - ni.size) * 0.025
+	ni.pos += ni.vel
+	vn := int((ni.target[ni.targetIdx].n - ni.n) * 0.2)
+	if (vn < 10 && vn > -10) {
+		ni.n = ni.target[ni.targetIdx].n
+	} else {
+		ni.n += vn
+	}
+	switch (ni.target[ni.targetIdx].flyingTo) {
+	case FlyingToTypeRIGHT:
+		if (ni.pos.x > tp.x) {
+			ni.pos.x = tp.x
+			ni.vel.x *= -0.05
+		}
+		break
+	case FlyingToTypeBOTTOM:
+		if (ni.pos.y < tp.y) {
+			ni.pos.y = tp.y
+			ni.vel.y *= -0.05
+		}
+		break
+	}
+	ni.cnt--
+	if (ni.cnt < 0) {
+		ni.gotoNextTarget()
+	}
+}
 
-  public void set(int n, IndicatorType type, float size, float x, float y) {
-    if (exists && this.type == IndicatorType.SCORE) {
-      if (this.target[targetIdx].flyingTo == FlyingToType.RIGHT)
-        decTargetY();
-      scoreReel.addReelScore(target[targetNum - 1].n);
-    }
-    this.n = n;
-    this.type = type;
-    this.size = size;
-    pos.x = x;
-    pos.y = y;
-    targetIdx = -1;
-    targetNum = 0;
-    alpha = 0.1f;
-    exists = true;
-  }
-
-  public void addTarget(float x, float y, FlyingToType flyingTo, float initialVelRatio,
-                        float size, int n, int cnt) {
-    target[targetNum].pos.x = x;
-    target[targetNum].pos.y = y;
-    target[targetNum].flyingTo = flyingTo;
-    target[targetNum].initialVelRatio = initialVelRatio;
-    target[targetNum].size = size;
-    target[targetNum].n = n;
-    target[targetNum].cnt = cnt;
-    targetNum++;
-  }
-
-  public void gotoNextTarget() {
-    targetIdx++;
-    if (targetIdx > 0)
-      SoundManager.playSe("score_up.wav");
-    if (targetIdx >= targetNum) {
-      if (target[targetIdx - 1].flyingTo == FlyingToType.BOTTOM)
-        scoreReel.addReelScore(target[targetIdx - 1].n);
-      exists = false;
-      return;
-    }
-    switch (target[targetIdx].flyingTo) {
-    case FlyingToType.RIGHT:
-      vel.x = -0.3f + rand.nextSignedFloat(0.05f);
-      vel.y = rand.nextSignedFloat(0.1f);
-      break;
-    case FlyingToType.BOTTOM:
-      vel.x = rand.nextSignedFloat(0.1f);
-      vel.y = 0.3f + rand.nextSignedFloat(0.05f);
-      decTargetY();
-      break;
-    }
-    vel *= target[targetIdx].initialVelRatio;
-    cnt = target[targetIdx].cnt;
-  }
-
-  public void move() {
-    if (targetIdx < 0)
-      return;
-    Vector tp = target[targetIdx].pos;
-    switch (target[targetIdx].flyingTo) {
-    case FlyingToType.RIGHT:
-      vel.x += (tp.x - pos.x) * 0.0036f;
-      pos.y += (tp.y - pos.y) * 0.1f;
-      if (fabs(pos.y - tp.y) < 0.5f)
-        pos.y += (tp.y - pos.y) * 0.33f;
-      alpha += (1 - alpha) * 0.03f;
-      break;
-    case FlyingToType.BOTTOM:
-      pos.x += (tp.x - pos.x) * 0.1f;
-      vel.y += (tp.y - pos.y) * 0.0036f;
-      alpha *= 0.97f;
-      break;
-    }
-    vel *= 0.98f;
-    size += (target[targetIdx].size - size) * 0.025f;
-    pos += vel;
-    int vn = cast(int) ((target[targetIdx].n - n) * 0.2f);
-    if (vn < 10 && vn > -10)
-      n = target[targetIdx].n;
-    else
-      n += vn;
-    switch (target[targetIdx].flyingTo) {
-    case FlyingToType.RIGHT:
-      if (pos.x > tp.x) {
-        pos.x = tp.x;
-        vel.x *= -0.05f;
-      }
-      break;
-    case FlyingToType.BOTTOM:
-      if (pos.y < tp.y) {
-        pos.y = tp.y;
-        vel.y *= -0.05f;
-      }
-      break;
-    }
-    cnt--;
-    if (cnt < 0)
-      gotoNextTarget();
-  }
-
-  public void draw() {
-    Screen.setColor(alpha, alpha, alpha);
-    switch (type) {
-    case IndicatorType.SCORE:
-      Letter.drawNumSign(n, pos.x, pos.y, size, Letter.LINE_COLOR);
-      break;
-    case IndicatorType.MULTIPLIER:
-      Screen.setColor(alpha, alpha, alpha);
-      Letter.drawNumSign(n, pos.x, pos.y, size, Letter.LINE_COLOR, 33, 3);
-      break;
-    }
-  }
+func (ni *NumIndicator) draw() {
+	Screen.setColor(ni.alpha, ni.alpha, ni.alpha)
+	switch (ni.t) {
+	case IndicatorTypeSCORE:
+		Letter.drawNumSign(ni.n, ni.pos.x, ni.pos.y, ni.size, Letter.LINE_COLOR)
+		break
+	case IndicatorTypeMULTIPLIER:
+		Screen.setColor(ni.alpha, ni.alpha, ni.alpha)
+		Letter.drawNumSign(ni.n, ni.pos.x, ni.pos.y, ni.size, Letter.LINE_COLOR, 33, 3)
+		break
+	}
 }
 
