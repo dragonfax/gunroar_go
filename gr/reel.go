@@ -129,10 +129,10 @@ func (nr *NumReel) draw(x float32, y float32, s float32) {
 		if a < 0 {
 			a = 0
 		}
-		Screen.setColor(a, a, a)
-		drawLetter(n, 2)
-		Screen.setColor(a/2, a/2, a/2)
-		drawLetter(n, 3)
+		setScreenColor(a, a, a, 1)
+		drawLetter(int(n), 2)
+		setScreenColor(a/2, a/2, a/2, 1)
+		drawLetter(int(n), 3)
 		gl.PopMatrix()
 		n--
 		if n < 0 {
@@ -144,7 +144,7 @@ func (nr *NumReel) draw(x float32, y float32, s float32) {
 	nr.ofs *= 0.95
 }
 
-func (nr *NumReel) targetDeg(td float32) {
+func (nr *NumReel) targetDeg(td float32) float32 {
 	if (td - nr.targetDeg) > 1 {
 		nr.ofs += 0.1
 	}
@@ -182,7 +182,7 @@ var targetY float32
 
 type Target struct {
 	pos             Vector
-	flyingTo        int
+	flyingTo        FlyingToType
 	initialVelRatio float32
 	size            float32
 	n               int
@@ -194,7 +194,8 @@ type NumIndicator struct {
 
 	scoreReel *ScoreReel
 	pos, vel  Vector
-	n, t      int
+	n         int
+	t         IndicatorType
 	size      float32
 	cnt       int
 	alpha     float32
@@ -230,7 +231,7 @@ func decTargetY() {
 func (ni *NumIndicator) Init() {
 	ni.pos = Vector{}
 	ni.vel = Vector{}
-	for t := range ni.target {
+	for _, t := range ni.target {
 		t.pos = Vector{}
 		t.initialVelRatio = 0
 		t.size = 0
@@ -250,8 +251,7 @@ func (ni *NumIndicator) set(n int, t IndicatorType, size float32, x float32, y f
 	ni.n = n
 	ni.t = t
 	ni.size = size
-	ni.pos.x = x
-	ni.pos.y = y
+	ni.pos = Vector{x, y}
 	ni.targetIdx = -1
 	ni.targetNum = 0
 	ni.alpha = 0.1
@@ -260,8 +260,7 @@ func (ni *NumIndicator) set(n int, t IndicatorType, size float32, x float32, y f
 
 func (ni *NumIndicator) addTarget(x float32, y float32, flyingTo FlyingToType, initialVelRatio float32,
 	size float32, n int, cnt int) {
-	ni.target[ni.targetNum].pos.x = x
-	ni.target[ni.targetNum].pos.y = y
+	ni.target[ni.targetNum].pos = Vector{x, y}
 	ni.target[ni.targetNum].flyingTo = flyingTo
 	ni.target[ni.targetNum].initialVelRatio = initialVelRatio
 	ni.target[ni.targetNum].size = size
@@ -273,10 +272,10 @@ func (ni *NumIndicator) addTarget(x float32, y float32, flyingTo FlyingToType, i
 func (ni *NumIndicator) gotoNextTarget() {
 	ni.targetIdx++
 	if ni.targetIdx > 0 {
-		SoundManager.playSe("score_up.wav")
+		playSe("score_up.wav")
 	}
 	if ni.targetIdx >= ni.targetNum {
-		if ni.target[ni.targetIdx-1].flyingTo == FlyingToType.BOTTOM {
+		if ni.target[ni.targetIdx-1].flyingTo == FlyingToTypeBOTTOM {
 			ni.scoreReel.addReelScore(ni.target[ni.targetIdx-1].n)
 		}
 		ni.SetExists(false)
@@ -284,16 +283,18 @@ func (ni *NumIndicator) gotoNextTarget() {
 	}
 	switch ni.target[ni.targetIdx].flyingTo {
 	case FlyingToTypeRIGHT:
-		ni.vel.x = -0.3 + rand.Float32()*0.05
-		ni.vel.y = rand.Float32() * 0.1
+		x := -0.3 + rand.Float32()*0.05
+		y := rand.Float32() * 0.1
+		ni.vel = Vector{x, y}
 		break
 	case FlyingToTypeBOTTOM:
-		ni.vel.x = rand.Float32() * 0.1
-		ni.vel.y = 0.3 + rand.Float32*0.05
+		x := rand.Float32() * 0.1
+		y := 0.3 + rand.Float32()*0.05
+		ni.vel = Vector{x, y}
 		decTargetY()
 		break
 	}
-	ni.vel *= ni.target[ni.targetIdx].initialVelRatio
+	ni.vel = ni.vel.Mul(ni.target[ni.targetIdx].initialVelRatio)
 	ni.cnt = ni.target[ni.targetIdx].cnt
 }
 
@@ -304,16 +305,20 @@ func (ni *NumIndicator) move() {
 	tp := ni.target[ni.targetIdx].pos
 	switch ni.target[ni.targetIdx].flyingTo {
 	case FlyingToTypeRIGHT:
-		ni.vel.x += (tp.x - ni.pos.x) * 0.0036
-		ni.pos.y += (tp.y - ni.pos.y) * 0.1
-		if fabs(ni.pos.y-tp.y) < 0.5 {
-			ni.pos.y += (tp.y - ni.pos.y) * 0.33
+		x := (tp.X() - ni.pos.X()) * 0.0036
+		ni.vel = Vector{ni.vel.x + x, ni.vel.y}
+		y := (tp.Y() - ni.pos.Y()) * 0.1
+		ni.pos = Vector{ni.pos.x, ni.pos.y + y}
+		if fabs(ni.pos.Y()-tp.Y()) < 0.5 {
+			y := (tp.Y() - ni.pos.Y()) * 0.33
+			ni.pos = Vector{ni.pos.x, ni.pos.y + y}
 		}
 		ni.alpha += (1 - ni.alpha) * 0.03
 		break
 	case FlyingToTypeBOTTOM:
-		ni.pos.x += (tp.x - ni.pos.x) * 0.1
-		ni.vel.y += (tp.y - ni.pos.y) * 0.0036
+		/* I was here with the conversions */
+		ni.pos.x += (tp.X() - ni.pos.X()) * 0.1
+		ni.vel.y += (tp.Y() - ni.pos.Y()) * 0.0036
 		ni.alpha *= 0.97
 		break
 	}
@@ -347,13 +352,13 @@ func (ni *NumIndicator) move() {
 }
 
 func (ni *NumIndicator) draw() {
-	Screen.setColor(ni.alpha, ni.alpha, ni.alpha)
+	setScrenColor(ni.alpha, ni.alpha, ni.alpha, 1)
 	switch ni.t {
 	case IndicatorTypeSCORE:
 		Letter.drawNumSign(ni.n, ni.pos.x, ni.pos.y, ni.size, Letter.LINE_COLOR)
 		break
 	case IndicatorTypeMULTIPLIER:
-		Screen.setColor(ni.alpha, ni.alpha, ni.alpha)
+		setScreenColor(ni.alpha, ni.alpha, ni.alpha, 1)
 		Letter.drawNumSign(ni.n, ni.pos.x, ni.pos.y, ni.size, Letter.LINE_COLOR, 33, 3)
 		break
 	}

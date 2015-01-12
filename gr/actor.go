@@ -28,11 +28,11 @@ func (a *ActorImpl) SetExists(b bool) {
 }
 
 func (a *ActorImpl) Init() {
-	a.Exists = true
+	a.exists = true
 	actors[a] = false
 }
 
 func (a *ActorImpl) Done() {
-	a.Exists = false
+	a.exists = false
 	delete(actors, a)
 }
