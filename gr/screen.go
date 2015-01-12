@@ -6,6 +6,10 @@
 package gr
 
 import (
+	"fmt"
+	"github.com/go-gl/gl"
+	"github.com/go-gl/glu"
+	"github.com/veandco/go-sdl2/sdl"
 	"math/rand"
 )
 
@@ -20,7 +24,7 @@ var lineWidthBase float32
 var brightness float32 = 1
 
 type Screen struct {
-	luminousScreen     LuminousScreen
+	luminousScreen     *LuminousScreen
 	luminosity         float32
 	screenShakeCnt     int
 	screenShakeIntense float32
@@ -38,7 +42,7 @@ func (s *Screen) Init() {
 	s.height = 480
 	s.setCaption(CAPTION)
 	gl.LineWidth(1)
-	gl.BlendFunc(gl.SRC_ALPHA, GL_ONE)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE)
 	gl.Enable(gl.BLEND)
 	gl.Enable(gl.LINE_SMOOTH)
 	gl.Disable(gl.TEXTURE_2D)
@@ -46,9 +50,9 @@ func (s *Screen) Init() {
 	gl.Disable(gl.CULL_FACE)
 	gl.Disable(gl.DEPTH_TEST)
 	gl.Disable(gl.LIGHTING)
-	s.setClearColor(0, 0, 0, 1)
+	setClearColor(0, 0, 0, 1)
 	if s.luminosity > 0 {
-		s.luminousScreen = NewLuminousScreen()
+		s.luminousScreen = &LuminousScreen{}
 		s.luminousScreen.Init(s.luminosity, s.width, s.height)
 	} else {
 		s.luminousScreen = nil
@@ -58,7 +62,7 @@ func (s *Screen) Init() {
 
 func (s *Screen) Close() {
 	if s.luminousScreen != nil {
-		s.luminousScreen.Close()
+		s.luminousScreen.close()
 	}
 }
 
@@ -89,21 +93,21 @@ func (s *Screen) resized(width int, height int) {
 
 	s.width = width
 	s.height = height
-	screenResized()
+	s.screenResized()
 }
 
 func (s *Screen) screenResized() {
 	gl.Viewport(0, 0, s.width, s.height)
 	gl.MatrixMode(gl.PROJECTION)
 	gl.LoadIdentity()
-	gl.Frustum(-s.nearPlane,
-		s.nearPlane,
-		-s.nearPlane*float32(s.height)/float32(s.width),
-		s.nearPlane*float32(s.height)/float32(s.width),
-		0.1, s.farPlane)
+	gl.Frustum(-float64(s.nearPlane),
+		float64(s.nearPlane),
+		-float64(s.nearPlane*float32(s.height)/float32(s.width)),
+		float64(s.nearPlane*float32(s.height)/float32(s.width)),
+		0.1, float64(s.farPlane))
 	gl.MatrixMode(gl.MODELVIEW)
 
-	lw := (float32(width)/640 + float32(height)/480) / 2
+	lw := (float32(s.width)/640 + float32(s.height)/480) / 2
 	if lw < 1 {
 		lw = 1
 	} else if lw > 4 {
@@ -114,7 +118,7 @@ func (s *Screen) screenResized() {
 }
 
 func lineWidth(w int) {
-	gl.LineWidth(int(lineWidthBase * w))
+	gl.LineWidth(lineWidthBase * float32(w))
 }
 
 func (s *Screen) Clear() {
@@ -143,14 +147,14 @@ func (s *Screen) setEyepos() {
 	var lx, ly, lz float32
 	ez = 13.0
 	if s.screenShakeCnt > 0 {
-		mx = rand.Float32 * (s.screenShakeIntense * (s.screenShakeCnt + 4))
-		my = rand.Float32 * (s.screenShakeIntense * (s.screenShakeCnt + 4))
+		mx := rand.Float32() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
+		my := rand.Float32() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
 		ex += mx
 		ey += my
 		lx += mx
 		ly += my
 	}
-	glu.LookAt(ex, ey, ez, lx, ly, lz, 0, 1, 0)
+	glu.LookAt(float64(ex), float64(ey), float64(ez), float64(lx), float64(ly), float64(lz), 0, 1, 0)
 }
 
 func (s *Screen) setScreenShake(cnt int, its float32) {
@@ -171,17 +175,17 @@ func setScreenColorForced(r float32, g float32, b float32, a float32 /* = 1 */) 
 func (s *Screen) initSDL() {
 	// Initialize SDL.
 	if sdl.Init(sdl.INIT_VIDEO) < 0 {
-		panic(" SDLInitFailedException( Unable to initialize SDL: " + sdl.GetError())
+		panic(fmt.Sprintf(" SDLInitFailedException( Unable to initialize SDL: %v", sdl.GetError()))
 	}
 	// Create an OpenGL screen.
 	var videoFlags uint32
 	if s.windowMode {
-		videoFlags = sdl.OPENGL | sdl.RESIZABLE
+		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_RESIZABLE
 	} else {
-		videoFlags = sdl.OPENGL | sdl.FULLSCREEN
+		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_FULLSCREEN
 	}
 	if sdl.SetVideoMode(s.width, s.height, 0, videoFlags) == nil {
-		panic("SDLInitFailedException (Unable to create SDL screen: " + sdl.GetError())
+		panic(fmt.Sprintf("SDLInitFailedException (Unable to create SDL screen: %v", sdl.GetError()))
 	}
 	gl.Viewport(0, 0, s.width, s.height)
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
@@ -191,7 +195,7 @@ func (s *Screen) initSDL() {
 }
 
 func (s *Screen) closeSDL() {
-	s.close()
+	s.Close()
 	sdl.ShowCursor(sdl.ENABLE)
 }
 
@@ -205,12 +209,12 @@ func (s *Screen) clear() {
 }
 
 func (s *Screen) handleError() {
-	error := glGetError()
+	error := gl.GetError()
 	if error == gl.NO_ERROR {
 		return
 	}
 	s.closeSDL()
-	panic("OpenGL error(" + error + ")")
+	panic(fmt.Sprintf("OpenGL error( %v )", error))
 }
 
 func (s *Screen) setCaption(name string) {
@@ -238,5 +242,5 @@ func setScreenColor(r float32, g float32, b float32, a float32 /* = 1 */) {
 }
 
 func setClearColor(r float32, g float32, b float32, a float32 /*= 1*/) {
-	gl.ClearColor(r*brightness, g*brightness, b*brightness, a)
+	gl.ClearColor(gl.GLclampf(r*brightness), gl.GLclampf(g*brightness), gl.GLclampf(b*brightness), gl.GLclampf(a))
 }

@@ -9,7 +9,13 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-type Vector mgl32.Vec2
+type Vector struct {
+	*mgl32.Vec2
+}
+
+func NewVector(x float32, y float32) Vector {
+	return Vector{&mgl32.Vec2{x, y}}
+}
 
 func (this Vector) getElement(v Vector) Vector {
 	var Vector rsl
@@ -191,7 +197,25 @@ func (this Vector) toString() string {
 	return fmt.Sprintf("(%v, %v)", this.X(), this.Y())
 }
 
-type Vector3 mgl32.Vec3
+type Vector3 struct {
+	*mgl32.Vec3
+}
+
+func (this Vector) MulV(f float32) Vector {
+	return NewVector{this.Mul(f)}
+}
+
+func (this Vector) AddV(v2 Vector) Vector {
+	return NewVector{this.Add(v2)}
+}
+
+func (this Vector) SetX(x float32) Vector {
+	return NewVector(x, this.Y())
+}
+
+func (this Vector) SetY(y float32) Vector {
+	return NewVector(this.X(), y)
+}
 
 func (this Vector3) rollX(d float32) Vector3 {
 	ty := this.Y()*cos(d) - this.Z()*sin(d)

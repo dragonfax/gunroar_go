@@ -12,7 +12,7 @@ import (
 
 const LETTER_WIDTH = 2.1
 const LETTER_HEIGHT = 3.0
-const LINE_COLOR = 2
+const LETTER_LINE_COLOR = 2
 const POLY_COLOR = 3
 const COLOR_NUM = 4
 
@@ -202,11 +202,11 @@ func DrawNumOption(num int, lx float32, y float32, s float32, cl int, dg int, he
 	}
 }
 
-func DrawNumSign(num int, lx float32, ly float32, s float32) {
-	DrawNumSignOption(num, lx, ly, s, 0, -1, -1)
+func drawNumSign(num int, lx float32, ly float32, s float32) {
+	drawNumSignOption(num, lx, ly, s, 0, -1, -1)
 }
 
-func DrawNumSignOption(num int, lx float32, ly float32, s float32, cl int, headChar int, floatDigit int) {
+func drawNumSignOption(num int, lx float32, ly float32, s float32, cl int, headChar int, floatDigit int) {
 	x := lx
 	y := ly
 	n := num
@@ -286,7 +286,7 @@ func setLetter(idx int, c int) {
 		x = -x
 		y = y
 		deg = Mod32(deg, 180)
-		if c == LINE_COLOR {
+		if c == LETTER_LINE_COLOR {
 			setBoxLine(x, y, size, length, deg)
 		} else if c == POLY_COLOR {
 			setBoxPoly(x, y, size, length, deg)

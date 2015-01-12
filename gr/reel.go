@@ -251,7 +251,7 @@ func (ni *NumIndicator) set(n int, t IndicatorType, size float32, x float32, y f
 	ni.n = n
 	ni.t = t
 	ni.size = size
-	ni.pos = Vector{x, y}
+	ni.pos = NewVector(x, y)
 	ni.targetIdx = -1
 	ni.targetNum = 0
 	ni.alpha = 0.1
@@ -260,7 +260,7 @@ func (ni *NumIndicator) set(n int, t IndicatorType, size float32, x float32, y f
 
 func (ni *NumIndicator) addTarget(x float32, y float32, flyingTo FlyingToType, initialVelRatio float32,
 	size float32, n int, cnt int) {
-	ni.target[ni.targetNum].pos = Vector{x, y}
+	ni.target[ni.targetNum].pos = NewVector(x, y)
 	ni.target[ni.targetNum].flyingTo = flyingTo
 	ni.target[ni.targetNum].initialVelRatio = initialVelRatio
 	ni.target[ni.targetNum].size = size
@@ -285,16 +285,16 @@ func (ni *NumIndicator) gotoNextTarget() {
 	case FlyingToTypeRIGHT:
 		x := -0.3 + rand.Float32()*0.05
 		y := rand.Float32() * 0.1
-		ni.vel = Vector{x, y}
+		ni.vel = NewVector(x, y)
 		break
 	case FlyingToTypeBOTTOM:
 		x := rand.Float32() * 0.1
 		y := 0.3 + rand.Float32()*0.05
-		ni.vel = Vector{x, y}
+		ni.vel = NewVector(x, y)
 		decTargetY()
 		break
 	}
-	ni.vel = ni.vel.Mul(ni.target[ni.targetIdx].initialVelRatio)
+	ni.vel = ni.vel.MulV(ni.target[ni.targetIdx].initialVelRatio)
 	ni.cnt = ni.target[ni.targetIdx].cnt
 }
 
@@ -306,26 +306,26 @@ func (ni *NumIndicator) move() {
 	switch ni.target[ni.targetIdx].flyingTo {
 	case FlyingToTypeRIGHT:
 		x := (tp.X() - ni.pos.X()) * 0.0036
-		ni.vel = Vector{ni.vel.x + x, ni.vel.y}
+		ni.vel = NewVector(ni.vel.X()+x, ni.vel.Y())
 		y := (tp.Y() - ni.pos.Y()) * 0.1
-		ni.pos = Vector{ni.pos.x, ni.pos.y + y}
+		ni.pos = NewVector(ni.pos.X(), ni.pos.Y()+y)
 		if fabs(ni.pos.Y()-tp.Y()) < 0.5 {
 			y := (tp.Y() - ni.pos.Y()) * 0.33
-			ni.pos = Vector{ni.pos.x, ni.pos.y + y}
+			ni.pos = NewVector(ni.pos.X(), ni.pos.Y()+y)
 		}
 		ni.alpha += (1 - ni.alpha) * 0.03
 		break
 	case FlyingToTypeBOTTOM:
 		/* I was here with the conversions */
-		ni.pos.x += (tp.X() - ni.pos.X()) * 0.1
-		ni.vel.y += (tp.Y() - ni.pos.Y()) * 0.0036
+		ni.pos = NewVector(ni.pos.X()+(tp.X()-ni.pos.X())*0.1, ni.pos.Y())
+		ni.vel = NewVector(ni.vel.X(), ni.vel.Y()+(tp.Y()-ni.pos.Y())*0.0036)
 		ni.alpha *= 0.97
 		break
 	}
-	ni.vel *= 0.98
+	ni.vel = ni.vel.MulV(0.98)
 	ni.size += (ni.target[ni.targetIdx].size - ni.size) * 0.025
-	ni.pos += ni.vel
-	vn := int((ni.target[ni.targetIdx].n - ni.n) * 0.2)
+	ni.pos = ni.pos.AddV(ni.vel)
+	vn := int(float32(ni.target[ni.targetIdx].n-ni.n) * 0.2)
 	if vn < 10 && vn > -10 {
 		ni.n = ni.target[ni.targetIdx].n
 	} else {
@@ -333,15 +333,15 @@ func (ni *NumIndicator) move() {
 	}
 	switch ni.target[ni.targetIdx].flyingTo {
 	case FlyingToTypeRIGHT:
-		if ni.pos.x > tp.x {
-			ni.pos.x = tp.x
-			ni.vel.x *= -0.05
+		if ni.pos.X() > tp.X() {
+			ni.pos = ni.pos.SetX(tp.X())
+			ni.vel = ni.vel.SetX(ni.vel.X() * -0.05)
 		}
 		break
 	case FlyingToTypeBOTTOM:
-		if ni.pos.y < tp.y {
-			ni.pos.y = tp.y
-			ni.vel.y *= -0.05
+		if ni.pos.Y() < tp.Y() {
+			ni.pos = ni.pos.SetY(tp.Y())
+			ni.vel = ni.vel.SetY(ni.vel.Y() * -0.05)
 		}
 		break
 	}
@@ -352,14 +352,14 @@ func (ni *NumIndicator) move() {
 }
 
 func (ni *NumIndicator) draw() {
-	setScrenColor(ni.alpha, ni.alpha, ni.alpha, 1)
+	setScreenColor(ni.alpha, ni.alpha, ni.alpha, 1)
 	switch ni.t {
 	case IndicatorTypeSCORE:
-		Letter.drawNumSign(ni.n, ni.pos.x, ni.pos.y, ni.size, Letter.LINE_COLOR)
+		drawNumSignOption(ni.n, ni.pos.X(), ni.pos.Y(), ni.size, LETTER_LINE_COLOR, -1, -1)
 		break
 	case IndicatorTypeMULTIPLIER:
 		setScreenColor(ni.alpha, ni.alpha, ni.alpha, 1)
-		Letter.drawNumSign(ni.n, ni.pos.x, ni.pos.y, ni.size, Letter.LINE_COLOR, 33, 3)
+		drawNumSignOption(ni.n, ni.pos.X(), ni.pos.Y(), ni.size, LETTER_LINE_COLOR, 33, 3)
 		break
 	}
 }
