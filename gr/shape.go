@@ -185,18 +185,18 @@ func (this *ComplexShape) createLoop(s float32, z float32, backToFirst bool /*= 
 	}
 }
 
-private void createSquareLoop(float32 s, float32 z, bool backToFirst = false, float32 yRatio = 1) {
-	float32 d
-	int pn
-	if (backToFirst) {
+func (this *ComplexShape) createSquareLoop(s float32, z float32, backToFirst bool /*= false*/, yRatio float32 /*= 1*/) {
+	var d float32
+	var pn int
+	if backToFirst {
 		pn = 4
 	} else {
 		pn = 3
 	}
 	for i := 0; i <= pn; i++ {
-		d = PI * 2 * i / 4 + PI / 4
-		float32 px = sin(d) * size * s
-		float32 py = cos(d) * size * s
+		d := Pi32 * 2 * i / 4 + Pi32 / 4
+		px := Sin32(d) * this.size * s
+		py := Cos32(d) * this.size * s
 		if (py > 0) {
 			py *= yRatio
 		}
@@ -204,76 +204,73 @@ private void createSquareLoop(float32 s, float32 z, bool backToFirst = false, fl
 	}
 }
 
-private void createPillar(Vector p, float32 s, float32 z) {
-	float32 d
+func (this *ComplexShape) createPillar(p Vector, s float32, z float32) {
+	var d float32
 	for i := 0; i < PILLAR_POINT_NUM; i++ {
-		d = PI * 2 * i / PILLAR_POINT_NUM
-		gl.Vertex3(sin(d) * s + p.x, cos(d) * s + p.y, z)
+		d := Pi32 * 2 * i / PILLAR_POINT_NUM
+		gl.Vertex3(Sin32(d) * s + p.x, Cos32(d) * s + p.y, z)
 	}
 }
 
-public void addWake(WakePool wakes, Vector pos, float32 deg, float32 spd, float32 sr = 1) {
-	float32 sp = spd
+func (this *ComplexShape)  addWake(wakes WakePool, pos Vector, deg float32, spd float32, sr float32 /*= 1*/) {
+	sp := spd
 	if (sp > 0.1) {
 		sp = 0.1
 	}
-	float32 sz = size
+	sz := size
 	if (sz > 10) {
 		sz = 10
 	}
-	wakePos.x = pos.x + sin(deg + PI / 2 + 0.7) * size * 0.5 * sr
-	wakePos.y = pos.y + cos(deg + PI / 2 + 0.7) * size * 0.5 * sr
+	this.wakePos.x = pos.x + Sin32(deg + Pi32/ 2 + 0.7) * size * 0.5 * sr
+	this.wakePos.y = pos.y + Cos32(deg + Pi32/ 2 + 0.7) * size * 0.5 * sr
 	Wake w = wakes.getInstanceForced()
-	w.set(wakePos, deg + PI - 0.2 + rand.nextSignedfloat32(0.1), sp, 40, sz * 32 * sr)
-	wakePos.x = pos.x + sin(deg - PI / 2 - 0.7) * size * 0.5 * sr
-	wakePos.y = pos.y + cos(deg - PI / 2 - 0.7) * size * 0.5 * sr
+	w.set(wakePos, deg + Pi32- 0.2 + rand.nextSignedfloat32(0.1), sp, 40, sz * 32 * sr)
+	this.wakePos.x = pos.x + Sin32(deg - Pi32/ 2 - 0.7) * size * 0.5 * sr
+	this.wakePos.y = pos.y + Cos32(deg - Pi32/ 2 - 0.7) * size * 0.5 * sr
 	w = wakes.getInstanceForced()
-	w.set(wakePos, deg + PI + 0.2 + rand.nextSignedfloat32(0.1), sp, 40, sz * 32 * sr)
+	w.set(wakePos, deg + Pi32+ 0.2 + rand.nextSignedfloat32(0.1), sp, 40, sz * 32 * sr)
 }
 
-public Vector[] pointPos() {
-	return _pointPos
-}
-
-public float32[] pointDeg() {
-	return _pointDeg
-}
-
-public bool checkShipCollision(float32 x, float32 y, float32 deg, float32 sr = 1) {
-	float32 cs = size * (1 - distRatio) * 1.1 * sr
-	if (dist(x, y, 0, 0) < cs) {
+func (this *ComplexShape) checkShipCollision(x float32, y float32, deg float32, sr float32 /*= 1*/) bool {
+	cs := this.size * (1 - this.distRatio) * 1.1 * sr
+	if (this.dist(x, y, 0, 0) < cs) {
 		return true
 	}
-	float32 ofs = 0
+	var ofs float32 = 0
 	for {
 		ofs += cs
-		cs *= distRatio
+		cs *= this.distRatio
 		if (cs < 0.2) {
 			return false
 		}
-		if (dist(x, y, sin(deg) * ofs, cos(deg) * ofs) < cs ||
-				dist(x, y, -sin(deg) * ofs, -cos(deg) * ofs) < cs) {
+		if (this.dist(x, y, Sin32(deg) * ofs, Cos32(deg) * ofs) < cs ||
+				this.dist(x, y, -Sin32(deg) * ofs, -Cos32(deg) * ofs) < cs) {
 			return true
 		}
 	}
 }
 
-private float32 dist(float32 x, float32 y, float32 px, float32 py) {
-	float32 ax = fabs(x - px)
-	float32 ay = fabs(y - py)
+func (this *ComplexShape) dist(float32 x, float32 y, float32 px, float32 py) float32 {
+	ax := fabs32(x - px)
+	ay := fabs32(y - py)
 	if (ax > ay) {
 		return ax + ay / 2
 	} else {
 		return ay + ax / 2
 	}
 }
-}
 
-public class TurretShape: ResizableShape {
- public:
-  static enum TurretShapeType {
-    NORMAL, DAMAGED, DESTROYED,
-  }
+type TurretShapeType int
+
+const (
+	TurretShapeTypeNORMAL TurretShapeType = iota
+	TurretShapeTypeDAMAGED 
+	TurretShapeTypeDESTROYED
+)
+
+type TurretShape struct {
+	*ResizableShape
+
  private:
   static ComplexShape[] shapes
 
@@ -503,8 +500,8 @@ public class ShieldShape: SimpleShape {
     gl.Begin(gl.LINE_LOOP)
     float32 d = 0
 		for i := 0; i < 8; i++ {
-      gl.Vertex3(sin(d), cos(d), 0)
-      d += PI / 4
+      gl.Vertex3(Sin32(d), Cos32(d), 0)
+      d += Pi32/ 4
     }
     gl.End()
     gl.Begin(gl.TRIANGLE_FAN)
@@ -513,8 +510,8 @@ public class ShieldShape: SimpleShape {
     d = 0
     setScreenColor(0.3, 0.3, 0.5)
 		for i := 0; i < 9; i++ {
-      gl.Vertex3(sin(d), cos(d), 0)
-      d += PI / 4
+      gl.Vertex3(Sin32(d), Cos32(d), 0)
+      d += Pi32/ 4
     }
     gl.End()
   }
