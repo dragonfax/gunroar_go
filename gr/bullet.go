@@ -6,8 +6,6 @@
 package gr
 
 type Bullet struct {
-	*ActorImpl
-
 	gameManager      *GameManager
 	field            *Field
 	ship             *Ship
