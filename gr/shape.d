@@ -8,14 +8,26 @@ package gr
 /**
  * Shape of a ship/platform/turret/bridge.
  */
-public class BaseShape: DrawableShape {
+
+type ShapeType int
+
+const (
+  SHIP ShapeType = iota
+  SHIP_ROUNDTAIL
+  SHIP_SHADOW
+  PLATFORM
+  TURRET
+  BRIDGE
+  SHIP_DAMAGED
+  SHIP_DESTROYED
+  PLATFORM_DAMAGED
+  PLATFORM_DESTROYED
+  TURRET_DAMAGED
+  TURRET_DESTROYED
+)
+
+public class ComplexShape: SimpleShape {
  public:
-  static enum ShapeType {
-    SHIP, SHIP_ROUNDTAIL, SHIP_SHADOW, PLATFORM, TURRET, BRIDGE,
-    SHIP_DAMAGED, SHIP_DESTROYED,
-    PLATFORM_DAMAGED, PLATFORM_DESTROYED,
-    TURRET_DAMAGED, TURRET_DESTROYED,
-  };
  private:
   static const int POINT_NUM = 16;
   static Rand rand;
@@ -28,28 +40,6 @@ public class BaseShape: DrawableShape {
   Vector[] _pointPos;
   float[] _pointDeg;
 
-  invariant {
-    assert(wakePos.x < 15 && wakePos.x > -15);
-    assert(wakePos.y < 60 && wakePos.y > -40);
-    assert(size > 0 && size < 20);
-    assert(distRatio >= 0 && distRatio <= 1);
-    assert(spinyRatio >= 0 && spinyRatio <= 1);
-    assert(type >= 0);
-    assert(r >= 0 && r <= 1);
-    assert(g >= 0 && g <= 1);
-    assert(b >= 0 && b <= 1);
-    foreach (Vector p; pillarPos) {
-      assert(p.x < 20 && p.x > -20);
-      assert(p.y < 20 && p.x > -20);
-    }
-    foreach (Vector p; _pointPos) {
-      assert(p.x < 20 && p.x > -20);
-      assert(p.y < 20 && p.x > -20);
-    }
-    foreach (float d; _pointDeg)
-      assert(d <>= 0);
-  }
-
   public static this() {
     rand = new Rand;
     wakePos = new Vector;
@@ -60,7 +50,7 @@ public class BaseShape: DrawableShape {
   }
 
   public this(float size, float distRatio, float spinyRatio,
-              int type, float r, float g, float b) {
+              int type, float r, float g, float b, bool collidable = false) {
     this.size = size;
     this.distRatio = distRatio;
     this.spinyRatio = spinyRatio;
@@ -68,6 +58,12 @@ public class BaseShape: DrawableShape {
     this.r = r;
     this.g = g;
     this.b = b;
+    if (collidable ) {
+      collision = new Vector(size / 2, size / 2);
+    }
+    else{
+      collision = nil
+    }
     super();
   }
 
@@ -270,39 +266,22 @@ public class BaseShape: DrawableShape {
   }
 }
 
-public class CollidableBaseShape: BaseShape, Collidable {
-  mixin CollidableImpl;
- private:
-  Vector _collision;
-
-  public this(float size, float distRatio, float spinyRatio,
-              int type,
-              float r, float g, float b) {
-    super(size, distRatio, spinyRatio, type, r, g, b);
-    _collision = new Vector(size / 2, size / 2);
-  }
-
-  public Vector collision() {
-    return _collision;
-  }
-}
-
-public class TurretShape: ResizableDrawable {
+public class TurretShape: ResizableShape {
  public:
   static enum TurretShapeType {
     NORMAL, DAMAGED, DESTROYED,
   };
  private:
-  static BaseShape[] shapes;
+  static ComplexShape[] shapes;
 
   public static void init() {
-    shapes ~= new CollidableBaseShape(1, 0, 0, BaseShape.ShapeType.TURRET, 1, 0.8f, 0.8f);
-    shapes ~= new BaseShape(1, 0, 0, BaseShape.ShapeType.TURRET_DAMAGED, 0.9f, 0.9f, 1);
-    shapes ~= new BaseShape(1, 0, 0, BaseShape.ShapeType.TURRET_DESTROYED, 0.8f, 0.33f, 0.66f);
+    shapes ~= new CollidableComplexShape(1, 0, 0, ComplexShape.ShapeType.TURRET, 1, 0.8f, 0.8f);
+    shapes ~= new ComplexShape(1, 0, 0, ComplexShape.ShapeType.TURRET_DAMAGED, 0.9f, 0.9f, 1);
+    shapes ~= new ComplexShape(1, 0, 0, ComplexShape.ShapeType.TURRET_DESTROYED, 0.8f, 0.33f, 0.66f);
   }
 
   public static void close() {
-    foreach (BaseShape s; shapes)
+    foreach (ComplexShape s; shapes)
       s.close();
   }
 
@@ -311,7 +290,7 @@ public class TurretShape: ResizableDrawable {
   }
 }
 
-public class EnemyShape: ResizableDrawable {
+public class EnemyShape: ResizableShape {
  public:
   static enum EnemyShapeType {
     SMALL, SMALL_DAMAGED, SMALL_BRIDGE,
@@ -320,35 +299,35 @@ public class EnemyShape: ResizableDrawable {
   };
   static const float MIDDLE_COLOR_R = 1, MIDDLE_COLOR_G = 0.6f, MIDDLE_COLOR_B = 0.5f;
  private:
-  static BaseShape[] shapes;
+  static ComplexShape[] shapes;
 
   public static void init() {
-    shapes ~= new BaseShape
-      (1, 0.5f, 0.1f, BaseShape.ShapeType.SHIP, 0.9f, 0.7f, 0.5f);
-    shapes ~= new BaseShape
-      (1, 0.5f, 0.1f, BaseShape.ShapeType.SHIP_DAMAGED, 0.5f, 0.5f, 0.9f);
-    shapes ~= new CollidableBaseShape
-      (0.66f, 0, 0, BaseShape.ShapeType.BRIDGE, 1, 0.2f, 0.3f);
-    shapes ~= new BaseShape
-      (1, 0.7f, 0.33f, BaseShape.ShapeType.SHIP, MIDDLE_COLOR_R, MIDDLE_COLOR_G, MIDDLE_COLOR_B);
-    shapes ~= new BaseShape
-      (1, 0.7f, 0.33f, BaseShape.ShapeType.SHIP_DAMAGED, 0.5f, 0.5f, 0.9f);
-    shapes ~= new BaseShape
-      (1, 0.7f, 0.33f, BaseShape.ShapeType.SHIP_DESTROYED, 0, 0, 0);
-    shapes ~= new CollidableBaseShape
-      (0.66f, 0, 0, BaseShape.ShapeType.BRIDGE, 1, 0.2f, 0.3f);
-    shapes ~= new BaseShape
-      (1, 0, 0, BaseShape.ShapeType.PLATFORM, 1, 0.6f, 0.7f);
-    shapes ~= new BaseShape
-      (1, 0, 0, BaseShape.ShapeType.PLATFORM_DAMAGED, 0.5f, 0.5f, 0.9f);
-    shapes ~= new BaseShape
-      (1, 0, 0, BaseShape.ShapeType.PLATFORM_DESTROYED, 1, 0.6f, 0.7f);
-    shapes ~= new CollidableBaseShape
-      (0.5f, 0, 0, BaseShape.ShapeType.BRIDGE, 1, 0.2f, 0.3f);
+    shapes ~= new ComplexShape
+      (1, 0.5f, 0.1f, ComplexShape.ShapeType.SHIP, 0.9f, 0.7f, 0.5f);
+    shapes ~= new ComplexShape
+      (1, 0.5f, 0.1f, ComplexShape.ShapeType.SHIP_DAMAGED, 0.5f, 0.5f, 0.9f);
+    shapes ~= new CollidableComplexShape
+      (0.66f, 0, 0, ComplexShape.ShapeType.BRIDGE, 1, 0.2f, 0.3f);
+    shapes ~= new ComplexShape
+      (1, 0.7f, 0.33f, ComplexShape.ShapeType.SHIP, MIDDLE_COLOR_R, MIDDLE_COLOR_G, MIDDLE_COLOR_B);
+    shapes ~= new ComplexShape
+      (1, 0.7f, 0.33f, ComplexShape.ShapeType.SHIP_DAMAGED, 0.5f, 0.5f, 0.9f);
+    shapes ~= new ComplexShape
+      (1, 0.7f, 0.33f, ComplexShape.ShapeType.SHIP_DESTROYED, 0, 0, 0);
+    shapes ~= new CollidableComplexShape
+      (0.66f, 0, 0, ComplexShape.ShapeType.BRIDGE, 1, 0.2f, 0.3f);
+    shapes ~= new ComplexShape
+      (1, 0, 0, ComplexShape.ShapeType.PLATFORM, 1, 0.6f, 0.7f);
+    shapes ~= new ComplexShape
+      (1, 0, 0, ComplexShape.ShapeType.PLATFORM_DAMAGED, 0.5f, 0.5f, 0.9f);
+    shapes ~= new ComplexShape
+      (1, 0, 0, ComplexShape.ShapeType.PLATFORM_DESTROYED, 1, 0.6f, 0.7f);
+    shapes ~= new CollidableComplexShape
+      (0.5f, 0, 0, ComplexShape.ShapeType.BRIDGE, 1, 0.2f, 0.3f);
   }
 
   public static void close() {
-    foreach (BaseShape s; shapes)
+    foreach (ComplexShape s; shapes)
       s.close();
   }
 
@@ -357,21 +336,21 @@ public class EnemyShape: ResizableDrawable {
   }
 
   public void addWake(WakePool wakes, Vector pos, float deg, float sp) {
-    (cast(BaseShape) shape).addWake(wakes, pos, deg, sp, size);
+    (cast(ComplexShape) shape).addWake(wakes, pos, deg, sp, size);
   }
 
   public bool checkShipCollision(float x, float y, float deg) {
-    return (cast(BaseShape) shape).checkShipCollision(x, y, deg, size);
+    return (cast(ComplexShape) shape).checkShipCollision(x, y, deg, size);
   }
 }
 
-public class BulletShape: ResizableDrawable {
+public class BulletShape: ResizableShape {
  public:
   static enum BulletShapeType {
     NORMAL, SMALL, MOVING_TURRET, DESTRUCTIVE,
   };
  private:
-  static DrawableShape[] shapes;
+  static SimpleShape[] shapes;
 
   public static void init() {
     shapes ~= new NormalBulletShape;
@@ -381,7 +360,7 @@ public class BulletShape: ResizableDrawable {
   }
 
   public static void close() {
-    foreach (DrawableShape s; shapes)
+    foreach (SimpleShape s; shapes)
       s.close();
   }
 
@@ -390,7 +369,7 @@ public class BulletShape: ResizableDrawable {
   }
 }
 
-public class NormalBulletShape: DrawableShape {
+public class NormalBulletShape: SimpleShape {
   public override void createDisplayList() {
     glDisable(GL_BLEND);
     Screen.setColor(1, 1, 0.3f);
@@ -417,7 +396,7 @@ public class NormalBulletShape: DrawableShape {
   }
 }
 
-public class SmallBulletShape: DrawableShape {
+public class SmallBulletShape: SimpleShape {
   public override void createDisplayList() {
     glDisable(GL_BLEND);
     Screen.setColor(0.6f, 0.9f, 0.3f);
@@ -444,7 +423,7 @@ public class SmallBulletShape: DrawableShape {
   }
 }
 
-public class MovingTurretBulletShape: DrawableShape {
+public class MovingTurretBulletShape: SimpleShape {
   public override void createDisplayList() {
     glDisable(GL_BLEND);
     Screen.setColor(0.7f, 0.5f, 0.9f);
@@ -471,8 +450,7 @@ public class MovingTurretBulletShape: DrawableShape {
   }
 }
 
-public class DestructiveBulletShape: DrawableShape, Collidable {
-  mixin CollidableImpl;
+public class DestructiveBulletShape: SimpleShape {
  private:
   Vector _collision;
 
@@ -501,7 +479,7 @@ public class DestructiveBulletShape: DrawableShape, Collidable {
   }
 }
 
-public class CrystalShape: DrawableShape {
+public class CrystalShape: SimpleShape {
   public override void createDisplayList() {
     Screen.setColor(0.6f, 1, 0.7f);
     glBegin(GL_LINE_LOOP);
@@ -513,7 +491,7 @@ public class CrystalShape: DrawableShape {
   }
 }
 
-public class ShieldShape: DrawableShape {
+public class ShieldShape: SimpleShape {
   public override void createDisplayList() {
     Screen.setColor(0.5f, 0.5f, 0.7f);
     glBegin(GL_LINE_LOOP);
@@ -537,35 +515,22 @@ public class ShieldShape: DrawableShape {
 }
 
 
-
-/*
- * $Id: shape.d,v 1.1.1.1 2005/06/18 00:46:00 kenta Exp $
- *
- * Copyright 2005 Kenta Cho. Some rights reserved.
- */
-module abagames.util.sdl.shape;
-
-private import opengl;
-private import abagames.util.vector;
-private import abagames.util.sdl.displaylist;
-
 /**
  * Interface for drawing a shape.
  */
-public interface Drawable {
+public interface Shape {
   public void draw();
-}
-
-/**
- * Interface and implmentation for a shape that has a collision.
- */
-public interface Collidable {
   public Vector collision();
-  public bool checkCollision(float ax, float ay, Collidable shape = null);
+  public bool checkCollision(float ax, float ay, Shape shape = null);
 }
 
-public template CollidableImpl() {
-  public bool checkCollision(float ax, float ay, Collidable shape = null) {
+/* just a displaylist
+   and a simple static collision, if collidable */
+public template SimpleShape() {
+  protected DisplayList displayList;
+  collision Vector
+
+  public bool checkCollision(float ax, float ay, Shape shape = null) {
     float cx, cy;
     if (shape) {
       cx = collision.x + shape.collision.x;
@@ -579,14 +544,6 @@ public template CollidableImpl() {
     else
       return false;
   }
-}
-
-/**
- * Drawable that has a single displaylist.
- */
-public abstract class DrawableShape: Drawable {
-  protected DisplayList displayList;
- private:
 
   public this() {
     displayList = new DisplayList(1);
@@ -597,6 +554,10 @@ public abstract class DrawableShape: Drawable {
 
   protected abstract void createDisplayList();
 
+  public Vector collision() {
+    return collision;
+  }
+
   public void close() {
     displayList.close();
   }
@@ -606,66 +567,39 @@ public abstract class DrawableShape: Drawable {
   }
 }
 
-/**
- * DrawableShape that has a collision.
+/*
+ * a Shape that can change a size.
+ *
+ * proxies a Simple or Complex shape
  */
-public abstract class CollidableDrawable: DrawableShape, Collidable {
-  mixin CollidableImpl;
-  protected Vector _collision;
- private:
-
-  public this() {
-    super();
-    setCollision();
-  }
-
-  protected abstract void setCollision();
-
-  public Vector collision() {
-    return _collision;
-  }
+type ResizableShape struct {
+  shape Shape
+  size float32
+  resizedCollision Vector
 }
 
-/**
- * Drawable that can change a size.
- */
-public class ResizableDrawable: Drawable, Collidable {
-  mixin CollidableImpl;
- private:
-  Drawable _shape;
-  float _size;
-  Vector _collision;
-
-  public void draw() {
-    glScalef(_size, _size, _size);
-    _shape.draw();
-  }
-
-  public Drawable shape(Drawable v) {
-    _collision = new Vector;
-    return _shape = v;
-  }
-
-  public Drawable shape() {
-    return _shape;
-  }
-
-  public float size(float v) {
-    return _size = v;
-  }
-
-  public float size() {
-    return _size;
-  }
-
-  public Vector collision() {
-    Collidable cd = cast(Collidable) _shape;
-    if (cd) {
-      _collision.x = cd.collision.x * _size;
-      _collision.y = cd.collision.y * _size;
-      return _collision;
-    } else {
-      return null;
-    }
-  }
+func (rd *ResizableShape) draw() {
+  gl.Scalef(rs.size, rs.size, rs.size)
+  rs.shape.Draw()
 }
+
+func (rd *ResizableShape) collision() *Vector {
+  rs.resizedCollision = NewVector(cd.collision().X() * rs.size, cd.collision().Y() * rs.size)
+  return rs.collision
+}
+
+public bool checkCollision(float ax, float ay, Shape shape = null) {
+  float cx, cy;
+  if (shape) {
+    cx = collision.x + shape.collision.x;
+    cy = collision.y + shape.collision.y;
+  } else {
+    cx = collision.x;
+    cy = collision.y;
+  }
+  if (ax <= cx && ay <= cy)
+    return true;
+  else
+    return false;
+}
+
