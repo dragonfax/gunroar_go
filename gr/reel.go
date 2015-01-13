@@ -20,14 +20,17 @@ type ScoreReel struct {
 	score, targetScore int
 	actualScore        int
 	digit              int
-	numReel            [MAX_DIGIT]NumReel
+	numReel            [MAX_DIGIT]*NumReel
 }
 
-func (sr *ScoreReel) Init() {
+func NewScoreReel() *ScoreReel {
+	sr := new(ScoreReel)
 	for i, _ := range sr.numReel {
 		sr.numReel[i].Init()
 	}
 	sr.digit = 1
+	actors[sr] = true
+	return sr
 }
 
 func (sr *ScoreReel) clear(digit int /*= 9 */) {
@@ -77,6 +80,10 @@ func (sr *ScoreReel) AddActualScore(as int) {
 	sr.actualScore += as
 }
 
+func (sr *ScoreReel) remove() {
+	delete(actors, sr)
+}
+
 const VEL_MIN float32 = 5
 
 type NumReel struct {
@@ -86,14 +93,11 @@ type NumReel struct {
 	velRatio  float32
 }
 
-func (nr *NumReel) Init() {
-	nr.deg = 0
-	nr.ofs = 0
+func NewNumReel() *NumReel {
+	nr = new(NumReel)
 	nr.velRatio = 1
-}
-
-func (nr *NumReel) clear() {
-	nr.Init()
+	actors[nr] = true
+	return nr
 }
 
 func (nr *NumReel) move() {
@@ -157,6 +161,10 @@ func (nr *NumReel) accelerate() {
 	nr.velRatio = 4
 }
 
+func (nr *NumReel) remove() {
+	delete(actors, nr)
+}
+
 /**
  * Flying indicator that shows the score and the multiplier.
  */
@@ -191,8 +199,6 @@ type Target struct {
 }
 
 type NumIndicator struct {
-	ActorImpl
-
 	scoreReel *ScoreReel
 	pos, vel  Vector
 	n         int
@@ -205,7 +211,7 @@ type NumIndicator struct {
 	targetNum int
 }
 
-func InitNumIndicator() {
+func InitNumIndicators() {
 	targetY = TARGET_Y_MIN
 }
 
@@ -229,21 +235,11 @@ func decTargetY() {
 	}
 }
 
-func (ni *NumIndicator) Init() {
-	ni.pos = Vector{}
-	ni.vel = Vector{}
-	for _, t := range ni.target {
-		t.pos = Vector{}
-		t.initialVelRatio = 0
-		t.size = 0
-	}
-	ni.targetIdx = 0
-	ni.targetNum = 0
+func NewNumIndicator(n int, t IndicatorType, size float32, x float32, y float32) *NumIndicator {
+	ni = new(NumIndicator)
 	ni.alpha = 1
-}
 
-func (ni *NumIndicator) set(n int, t IndicatorType, size float32, x float32, y float32) {
-	if ni.Exists() && ni.t == IndicatorTypeSCORE {
+	if ni.t == IndicatorTypeSCORE {
 		if ni.target[ni.targetIdx].flyingTo == FlyingToTypeRIGHT {
 			decTargetY()
 		}
@@ -252,11 +248,10 @@ func (ni *NumIndicator) set(n int, t IndicatorType, size float32, x float32, y f
 	ni.n = n
 	ni.t = t
 	ni.size = size
-	ni.pos = NewVector(x, y)
+	ni.pos = Vector{x, y}
 	ni.targetIdx = -1
-	ni.targetNum = 0
 	ni.alpha = 0.1
-	ni.SetExists(true)
+	actors[ni] = true
 }
 
 func (ni *NumIndicator) addTarget(x float32, y float32, flyingTo FlyingToType, initialVelRatio float32,
@@ -363,4 +358,8 @@ func (ni *NumIndicator) draw() {
 		drawNumSignOption(ni.n, ni.pos.X(), ni.pos.Y(), ni.size, LETTER_LINE_COLOR, 33, 3)
 		break
 	}
+}
+
+func (ni *NumIndicator) remove() {
+	delete(actors, ni)
 }

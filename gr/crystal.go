@@ -29,14 +29,15 @@ func NewCrystal(p Vector, ship *Ship) *Crystal {
 	c.cnt = COUNT
 	c.vel = Vector{0, 0.1}
 	c.ship = ship
-	Actor(c).Init()
+	actors[c] = true
+	return c
 }
 
 func (c *Crystal) Close() {
 	c.shape.Close()
 }
 
-func (c *Crystal) Move() {
+func (c *Crystal) move() {
 	c.cnt--
 	dist := c.pos.dist(c.ship.midstPos)
 	if dist < 0.1 {
@@ -54,7 +55,7 @@ func (c *Crystal) Move() {
 	c.pos += vel
 }
 
-func (c *Crystal) Draw() {
+func (c *Crystal) draw() {
 	r := 0.25
 	d := cnt * 0.1
 	if c.cnt > PULLIN_COUNT {
@@ -67,4 +68,8 @@ func (c *Crystal) Draw() {
 		gl.PopMatrix()
 		d += math.Pi / 2
 	}
+}
+
+func (c *Crystal) remove() {
+	delete(actors, c)
 }
