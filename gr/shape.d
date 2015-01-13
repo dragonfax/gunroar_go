@@ -3,15 +3,7 @@
  *
  * Copyright 2005 Kenta Cho. Some rights reserved.
  */
-module abagames.gr.shape;
-
-private import std.math;
-private import opengl;
-private import abagames.util.vector;
-private import abagames.util.rand;
-private import abagames.util.sdl.shape;
-private import abagames.gr.screen;
-private import abagames.gr.particle;
+package gr
 
 /**
  * Shape of a ship/platform/turret/bridge.
@@ -551,106 +543,129 @@ public class ShieldShape: DrawableShape {
  *
  * Copyright 2005 Kenta Cho. Some rights reserved.
  */
-package sdl
+module abagames.util.sdl.shape;
 
-type Drawable interface {
-	Draw()
+private import opengl;
+private import abagames.util.vector;
+private import abagames.util.sdl.displaylist;
+
+/**
+ * Interface for drawing a shape.
+ */
+public interface Drawable {
+  public void draw();
 }
 
-type Collidable interface {
-	Collision() *Vector
-	CheckCollision(ax float32, ay float32, shape *Collidable /* = null */) bool
+/**
+ * Interface and implmentation for a shape that has a collision.
+ */
+public interface Collidable {
+  public Vector collision();
+  public bool checkCollision(float ax, float ay, Collidable shape = null);
 }
 
-type CollidableImpl struct {
-}
-
-func (c *CollidableImpl) CheckCollision(ax float32, ay float32, shape *Collidable /* = nil */) bool {
-	var cx, cy float32
-	if shape != nil {
-		cx = collision.x + shape.collision.x
-		cy = collision.y + shape.collision.y
-	} else {
-		cx = collision.x
-		cy = collision.y
-	}
-	if ax <= cx && ay <= cy {
-		return true
-	} else {
-		return false
-	}
+public template CollidableImpl() {
+  public bool checkCollision(float ax, float ay, Collidable shape = null) {
+    float cx, cy;
+    if (shape) {
+      cx = collision.x + shape.collision.x;
+      cy = collision.y + shape.collision.y;
+    } else {
+      cx = collision.x;
+      cy = collision.y;
+    }
+    if (ax <= cx && ay <= cy)
+      return true;
+    else
+      return false;
+  }
 }
 
 /**
  * Drawable that has a single displaylist.
  */
-type DrawableShape interface {
-	displayList DisplayList
-}
+public abstract class DrawableShape: Drawable {
+  protected DisplayList displayList;
+ private:
 
-func NewDrawableShape() *DrawableShape {
-	this := New(DrawableShape)
-	this.displayList = NewDisplayList(1)
-	this.displayList.beginNewList()
-	this.createDisplayList()
-	this.displayList.endNewList()
-	return this
-}
+  public this() {
+    displayList = new DisplayList(1);
+    displayList.beginNewList();
+    createDisplayList();
+    displayList.endNewList();
+  }
 
-func (ds *DrawableShape) Close() {
-	ds.displayList.Close()
-}
+  protected abstract void createDisplayList();
 
-func (ds *DrawableShape) Draw() {
-	ds.displayList.Call(0)
+  public void close() {
+    displayList.close();
+  }
+
+  public void draw() {
+    displayList.call(0);
+  }
 }
 
 /**
  * DrawableShape that has a collision.
  */
-type CollidableDrawable struct {
-	DrawableShape
-	CollidableImpl
+public abstract class CollidableDrawable: DrawableShape, Collidable {
+  mixin CollidableImpl;
+  protected Vector _collision;
+ private:
 
-	collision Vector
-}
+  public this() {
+    super();
+    setCollision();
+  }
 
-func NewCollidableDrawable() CollidableDrawable {
-	this := new(CollidableDrawable)
-	this.setCollision()
+  protected abstract void setCollision();
+
+  public Vector collision() {
+    return _collision;
+  }
 }
 
 /**
  * Drawable that can change a size.
  */
-type ResizableDrawable struct {
-	CollidableImpl
+public class ResizableDrawable: Drawable, Collidable {
+  mixin CollidableImpl;
+ private:
+  Drawable _shape;
+  float _size;
+  Vector _collision;
 
-	Shape     *Drawable
-	Size      float32
-	collision *Vector
+  public void draw() {
+    glScalef(_size, _size, _size);
+    _shape.draw();
+  }
+
+  public Drawable shape(Drawable v) {
+    _collision = new Vector;
+    return _shape = v;
+  }
+
+  public Drawable shape() {
+    return _shape;
+  }
+
+  public float size(float v) {
+    return _size = v;
+  }
+
+  public float size() {
+    return _size;
+  }
+
+  public Vector collision() {
+    Collidable cd = cast(Collidable) _shape;
+    if (cd) {
+      _collision.x = cd.collision.x * _size;
+      _collision.y = cd.collision.y * _size;
+      return _collision;
+    } else {
+      return null;
+    }
+  }
 }
-
-func (rd *ResizableDrawable) Draw() {
-	gl.Scalef(rd.size, rd.size, rd.size)
-	shape.Draw()
-}
-
-func (rd *ResizableDrawable) SetShape(v Drawable) *Drawable {
-	rd.collision = new(Vector)
-	rd.shape = v
-	return rd.shape
-}
-
-func (rd *ResizableDrawable) Collision() *Vector {
-	cd := Collidable(rd.shape)
-	if cd != nil {
-		rd.collision.x = cd.collision.x * rd.Size
-		rd.collision.y = cd.collision.y * rd.Size
-		return rd.collision
-	} else {
-		return nil
-	}
-}
-
-
