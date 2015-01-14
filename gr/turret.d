@@ -3,24 +3,7 @@
  *
  * Copyright 2005 Kenta Cho. Some rights reserved.
  */
-module abagames.gr.turret;
-
-private import std.math;
-private import opengl;
-private import abagames.util.vector;
-private import abagames.util.actor;
-private import abagames.util.rand;
-private import abagames.util.math;
-private import abagames.util.sdl.shape;
-private import abagames.gr.field;
-private import abagames.gr.bullet;
-private import abagames.gr.ship;
-private import abagames.gr.screen;
-private import abagames.gr.particle;
-private import abagames.gr.shot;
-private import abagames.gr.shape;
-private import abagames.gr.enemy;
-private import abagames.gr.soundmanager;
+package gr
 
 /**
  * Turret mounted on a deck of an enemy ship.

@@ -3,30 +3,7 @@
  *
  * Copyright 2005 Kenta Cho. Some rights reserved.
  */
-module abagames.gr.ship;
-
-private import std.math;
-private import opengl;
-private import abagames.util.vector;
-private import abagames.util.rand;
-private import abagames.util.math;
-private import abagames.util.sdl.pad;
-private import abagames.util.sdl.twinstick;
-private import abagames.util.sdl.mouse;
-private import abagames.util.sdl.recordableinput;
-private import abagames.util.sdl.shape;
-private import abagames.gr.field;
-private import abagames.gr.gamemanager;
-private import abagames.gr.screen;
-private import abagames.gr.particle;
-private import abagames.gr.letter;
-private import abagames.gr.shot;
-private import abagames.gr.enemy;
-private import abagames.gr.stagemanager;
-private import abagames.gr.soundmanager;
-private import abagames.gr.prefmanager;
-private import abagames.gr.shape;
-private import abagames.gr.mouseandpad;
+package gr
 
 /**
  * Player's ship.
@@ -51,14 +28,13 @@ public class Ship {
     assert(_scrollSpeedBase > 0);
   }
 
-  public this(Pad pad, TwinStick twinStick, Mouse mouse, RecordableMouseAndPad mouseAndPad,
-              Field field, Screen screen,
-              SparkPool sparks, SmokePool smokes, FragmentPool fragments, WakePool wakes) {
+  public this(Pad pad, /*TwinStick twinStick, */Mouse mouse, MouseAndPad mouseAndPad,
+              Field field, Screen screen ){
     this.field = field;
     Boat.init();
     int i = 0;
     foreach (inout Boat b; boat) {
-      b = new Boat(i, this, pad, twinStick, mouse, mouseAndPad,
+      b = new Boat(i, this, pad, /*twinStick, */mouse, mouseAndPad,
                    field, screen, sparks, smokes, fragments, wakes);
       i++;
     }
@@ -72,23 +48,9 @@ public class Ship {
     bridgeShape = new BaseShape(0.3f, 0.2f, 0.1f, BaseShape.ShapeType.BRIDGE, 0.3f, 0.7f, 0.7f);
   }
 
-  public void setRandSeed(long seed) {
-    Boat.setRandSeed(seed);
-  }
-
   public void close() {
     foreach (Boat b; boat)
       b.close();
-  }
-
-  public void setShots(ShotPool shots) {
-    foreach (Boat b; boat)
-      b.setShots(shots);
-  }
-
-  public void setEnemies(EnemyPool enemies) {
-    foreach (Boat b; boat)
-      b.setEnemies(enemies);
   }
 
   public void setStageManager(StageManager stageManager) {
@@ -192,20 +154,6 @@ public class Ship {
     return _scrollSpeedBase;
   }
 
-  public void setReplayMode(float turnSpeed, bool reverseFire) {
-    foreach (Boat b; boat)
-      b.setReplayMode(turnSpeed, reverseFire);
-  }
-
-  public void unsetReplayMode() {
-    foreach (Boat b; boat)
-      b.unsetReplayMode();
-  }
-
-  public bool replayMode() {
-    return boat[0].replayMode();
-  }
-
   public Vector midstPos() {
     _midstPos.x = _midstPos.y = 0;
     for (int i = 0; i < boatNum; i++) {
@@ -288,20 +236,14 @@ public class Boat {
   static const float TURN_CHANGE_RATIO = 0.5f;
   static Rand rand;
   static PadState padInput;
-  static TwinStickState stickInput;
+  // static TwinStickState stickInput;
   static MouseState mouseInput;
-  RecordablePad pad;
-  RecordableTwinStick twinStick;
-  RecordableMouse mouse;
-  RecordableMouseAndPad mouseAndPad;
+  Pad pad;
+  // TwinStick twinStick;
+  Mouse mouse;
+  MouseAndPad mouseAndPad;
   Field field;
   Screen screen;
-  ShotPool shots;
-  SparkPool sparks;
-  SmokePool smokes;
-  FragmentPool fragments;
-  WakePool wakes;
-  EnemyPool enemies;
   StageManager stageManager;
   InGameState gameState;
   Vector _pos;
@@ -324,7 +266,6 @@ public class Boat {
   Vector refVel;
   int shieldCnt;
   ShieldShape shieldShape;
-  bool _replayMode;
   float turnSpeed;
   bool reverseFire;
   int gameMode;
@@ -355,19 +296,14 @@ public class Boat {
     rand = new Rand;
   }
 
-  public static void setRandSeed(long seed) {
-    rand.setSeed(seed);
-  }
-
   public this(int idx, Ship ship,
-              Pad pad, TwinStick twinStick, Mouse mouse, RecordableMouseAndPad mouseAndPad,
-              Field field, Screen screen,
-              SparkPool sparks, SmokePool smokes, FragmentPool fragments, WakePool wakes) {
+              Pad pad, /*TwinStick twinStick, */Mouse mouse, MouseAndPad mouseAndPad,
+              Field field, Screen screen ) {
     this.idx = idx;
     this.ship = ship;
-    this.pad = cast(RecordablePad) pad;
-    this.twinStick = cast(RecordableTwinStick) twinStick;
-    this.mouse = cast(RecordableMouse) mouse;
+    this.pad = cast(Pad) pad;
+    //this.twinStick = cast(TwinStick) twinStick;
+    this.mouse = cast(Mouse) mouse;
     this.mouseAndPad = mouseAndPad;
     this.field = field;
     this.screen = screen;
@@ -406,14 +342,6 @@ public class Boat {
     shieldShape.close();
   }
 
-  public void setShots(ShotPool shots) {
-    this.shots = shots;
-  }
-
-  public void setEnemies(EnemyPool enemies) {
-    this.enemies = enemies;
-  }
-
   public void setStageManager(StageManager stageManager) {
     this.stageManager = stageManager;
   }
@@ -445,7 +373,7 @@ public class Boat {
     cnt = -INVINCIBLE_CNT;
     aPressed = bPressed = true;
     padInput = pad.getNullState();
-    stickInput = twinStick.getNullState();
+    //stickInput = twinStick.getNullState();
     mouseInput = mouse.getNullState();
   }
 
@@ -455,8 +383,10 @@ public class Boat {
       fireCnt = 99999;
       fireInterval = 99999;
       break;
+      /*
     case InGameState.GameMode.TWIN_STICK:
     case InGameState.GameMode.DOUBLE_PLAY:
+    */
     case InGameState.GameMode.MOUSE:
       fireCnt = 0;
       fireInterval = FIRE_INTERVAL;
@@ -481,12 +411,14 @@ public class Boat {
     case InGameState.GameMode.NORMAL:
       moveNormal();
       break;
+      /*
     case InGameState.GameMode.TWIN_STICK:
       moveTwinStick();
       break;
     case InGameState.GameMode.DOUBLE_PLAY:
       moveDoublePlay();
       break;
+      */
     case InGameState.GameMode.MOUSE:
       moveMouse();
       break;
@@ -541,12 +473,14 @@ public class Boat {
     case InGameState.GameMode.NORMAL:
       fireNormal();
       break;
+      /*
     case InGameState.GameMode.TWIN_STICK:
       fireTwinStick();
       break;
     case InGameState.GameMode.DOUBLE_PLAY:
       fireDobulePlay();
       break;
+      */
     case InGameState.GameMode.MOUSE:
       fireMouse();
       break;
@@ -583,16 +517,7 @@ public class Boat {
   }
 
   private void moveNormal() {
-    if (!_replayMode) {
-      padInput = pad.getState();
-    } else {
-      try {
-        padInput = pad.replay();
-      } catch (NoRecordDataException e) {
-        gameState.isGameOver = true;
-        padInput = pad.getNullState();
-      }
-    }
+    padInput = pad.getState();
     if (gameState.isGameOver || cnt < -INVINCIBLE_CNT)
       padInput.clear();
     if (padInput.dir & PadState.Dir.UP)
@@ -618,17 +543,9 @@ public class Boat {
     }
   }
 
+  /*
   private void moveTwinStick() {
-    if (!_replayMode) {
       stickInput = twinStick.getState();
-    } else {
-      try {
-        stickInput = twinStick.replay();
-      } catch (NoRecordDataException e) {
-        gameState.isGameOver = true;
-        stickInput = twinStick.getNullState();
-      }
-    }
     if (gameState.isGameOver || cnt < -INVINCIBLE_CNT)
       stickInput.clear();
     vx = stickInput.left.x;
@@ -647,16 +564,7 @@ public class Boat {
   private void moveDoublePlay() {
     switch (idx) {
     case 0:
-      if (!_replayMode) {
         stickInput = twinStick.getState();
-      } else {
-        try {
-          stickInput = twinStick.replay();
-        } catch (NoRecordDataException e) {
-          gameState.isGameOver = true;
-          stickInput = twinStick.getNullState();
-        }
-      }
       if (gameState.isGameOver || cnt < -INVINCIBLE_CNT)
         stickInput.clear();
       vx = stickInput.left.x;
@@ -677,23 +585,12 @@ public class Boat {
       Math.normalizeDeg(deg);
     }
   }
+  */
 
   private void moveMouse() {
-    if (!_replayMode) {
       MouseAndPadState mps = mouseAndPad.getState();
       padInput = mps.padState;
       mouseInput = mps.mouseState;
-    } else {
-      try {
-        MouseAndPadState mps = mouseAndPad.replay();
-        padInput = mps.padState;
-        mouseInput = mps.mouseState;
-      } catch (NoRecordDataException e) {
-        gameState.isGameOver = true;
-        padInput = pad.getNullState();
-        mouseInput = mouse.getNullState();
-      }
-    }
     if (gameState.isGameOver || cnt < -INVINCIBLE_CNT) {
       padInput.clear();
       mouseInput.clear();
@@ -793,6 +690,7 @@ public class Boat {
     fireLanceCnt--;
   }
 
+  /*
   private void fireTwinStick() {
     if (fabs(stickInput.right.x) + fabs(stickInput.right.y) > 0.01f) {
       fireDeg = atan2(stickInput.right.x, stickInput.right.y);
@@ -888,6 +786,7 @@ public class Boat {
     }
     fireCnt--;
   }
+  */
 
   private void fireMouse() {
     float fox = mouseInput.x - _pos.x;
@@ -1095,19 +994,4 @@ public class Boat {
     return _vel;
   }
 
-  public void setReplayMode(float turnSpeed, bool reverseFire) {
-    _replayMode = true;
-    this.turnSpeed = turnSpeed;
-    this.reverseFire = reverseFire;
-  }
-
-  public void unsetReplayMode() {
-    _replayMode = false;
-    turnSpeed = GameManager.shipTurnSpeed;
-    reverseFire = GameManager.shipReverseFire;
-  }
-
-  public bool replayMode() {
-    return _replayMode;
-  }
 }
