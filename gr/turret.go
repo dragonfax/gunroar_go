@@ -134,124 +134,123 @@ func (this *Turret) draw() {
 	if this.spec.invisible {
 		return
 	}
-	glPushMatrix()
+	gl.PushMatrix()
 	if this.destroyedCnt < 0 && this.damagedCnt > 0 {
-		/* stopping doing the "this" work here */
-		this.damagedPos.x = pos.x + rand.nextSignedfloat32(damagedCnt*0.015)
-		damagedPos.y = pos.y + rand.nextSignedfloat32(damagedCnt*0.015)
-		Screen.glTranslate(damagedPos)
+		this.damagedPos.x = this.pos.x + rand.nextSignedfloat32(this.damagedCnt*0.015)
+		this.damagedPos.y = this.pos.y + rand.nextSignedfloat32(this.damagedCnt*0.015)
+		gl.Translate(this.damagedPos)
 	} else {
-		Screen.glTranslate(pos)
+		gl.Translate(this.pos)
 	}
-	glRotatef(-(baseDeg+deg)*180/Pi32, 0, 0, 1)
-	if destroyedCnt >= 0 {
-		spec.destroyedShape.draw()
-	} else if !damaged {
-		spec.shape.draw()
+	gl.Rotatef(-(this.baseDeg+this.deg)*180/Pi32, 0, 0, 1)
+	if this.destroyedCnt >= 0 {
+		this.spec.destroyedShape.draw()
+	} else if !this.damaged {
+		this.spec.shape.draw()
 	} else {
-		spec.damagedShape.draw()
+		this.spec.damagedShape.draw()
 	}
-	glPopMatrix()
-	if destroyedCnt >= 0 {
+	gl.PopMatrix()
+	if this.destroyedCnt >= 0 {
 		return
 	}
-	if appCnt > 120 {
+	if this.appCnt > 120 {
 		return
 	}
-	a := 1 - float32(appCnt)/120
-	if startCnt < 12 {
-		a = float32(startCnt) / 12
+	a := 1 - float32(this.appCnt)/120
+	if this.startCnt < 12 {
+		a = float32(this.startCnt) / 12
 	}
-	td := baseDeg + deg
-	if spec.nway <= 1 {
-		glBegin(GL_LINE_STRIP)
-		Screen.setColor(0.9, 0.1, 0.1, a)
-		glVertex2(pos.x+Sin32(td)*spec.minRange, pos.y+Cos32(td)*spec.minRange)
-		Screen.setColor(0.9, 0.1, 0.1, a*0.5)
-		glVertex2(pos.x+Sin32(td)*spec.maxRange, pos.y+Cos32(td)*spec.maxRange)
-		glEnd()
+	td := this.baseDeg + this.deg
+	if this.spec.nway <= 1 {
+		gl.Begin(gl.LINE_STRIP)
+		setScreenColor(0.9, 0.1, 0.1, a)
+		gl.Vertex2(this.pos.x+Sin32(td)*this.spec.minRange, this.pos.y+Cos32(td)*this.spec.minRange)
+		setScreenColor(0.9, 0.1, 0.1, a*0.5)
+		gl.Vertex2(this.pos.x+Sin32(td)*this.spec.maxRange, this.pos.y+Cos32(td)*this.spec.maxRange)
+		gl.End()
 	} else {
-		td -= spec.nwayAngle * (spec.nway - 1) / 2
-		glBegin(GL_LINE_STRIP)
-		Screen.setColor(0.9, 0.1, 0.1, a*0.75)
-		glVertex2(pos.x+Sin32(td)*spec.minRange, pos.y+Cos32(td)*spec.minRange)
-		Screen.setColor(0.9, 0.1, 0.1, a*0.25)
-		glVertex2(pos.x+Sin32(td)*spec.maxRange, pos.y+Cos32(td)*spec.maxRange)
-		glEnd()
-		glBegin(GL_QUADS)
+		td -= this.spec.nwayAngle * (this.spec.nway - 1) / 2
+		gl.Begin(gl.LINE_STRIP)
+		setScreenColor(0.9, 0.1, 0.1, a*0.75)
+		gl.Vertex2(this.pos.x+Sin32(td)*this.spec.minRange, this.pos.y+Cos32(td)*this.spec.minRange)
+		setScreenColor(0.9, 0.1, 0.1, a*0.25)
+		gl.Vertex2(this.pos.x+Sin32(td)*this.spec.maxRange, this.pos.y+Cos32(td)*this.spec.maxRange)
+		gl.End()
+		gl.Begin(gl.QUADS)
 		for i := 0; i < spec.nway-1; i++ {
-			Screen.setColor(0.9, 0.1, 0.1, a*0.3)
-			glVertex2(pos.x+Sin32(td)*spec.minRange, pos.y+Cos32(td)*spec.minRange)
-			Screen.setColor(0.9, 0.1, 0.1, a*0.05)
-			glVertex2(pos.x+Sin32(td)*spec.maxRange, pos.y+Cos32(td)*spec.maxRange)
-			td += spec.nwayAngle
-			glVertex2(pos.x+Sin32(td)*spec.maxRange, pos.y+Cos32(td)*spec.maxRange)
-			Screen.setColor(0.9, 0.1, 0.1, a*0.3)
-			glVertex2(pos.x+Sin32(td)*spec.minRange, pos.y+Cos32(td)*spec.minRange)
+			setScreenColor(0.9, 0.1, 0.1, a*0.3)
+			gl.Vertex2(this.pos.x+Sin32(td)*this.spec.minRange, this.pos.y+Cos32(td)*this.spec.minRange)
+			setScreenColor(0.9, 0.1, 0.1, a*0.05)
+			gl.Vertex2(this.pos.x+Sin32(td)*this.spec.maxRange, this.pos.y+Cos32(td)*this.spec.maxRange)
+			td += this.spec.nwayAngle
+			gl.Vertex2(this.pos.x+Sin32(td)*this.spec.maxRange, this.pos.y+Cos32(td)*this.spec.maxRange)
+			setScreenColor(0.9, 0.1, 0.1, a*0.3)
+			gl.Vertex2(this.pos.x+Sin32(td)*this.spec.minRange, this.pos.y+Cos32(td)*this.spec.minRange)
 		}
-		glEnd()
-		glBegin(GL_LINE_STRIP)
-		Screen.setColor(0.9, 0.1, 0.1, a*0.75)
-		glVertex2(pos.x+Sin32(td)*spec.minRange, pos.y+Cos32(td)*spec.minRange)
-		Screen.setColor(0.9, 0.1, 0.1, a*0.25)
-		glVertex2(pos.x+Sin32(td)*spec.maxRange, pos.y+Cos32(td)*spec.maxRange)
-		glEnd()
+		gl.End()
+		gl.Begin(gl.LINE_STRIP)
+		setScreenColor(0.9, 0.1, 0.1, a*0.75)
+		gl.Vertex2(this.pos.x+Sin32(td)*this.spec.minRange, this.pos.y+Cos32(td)*this.spec.minRange)
+		setScreenColor(0.9, 0.1, 0.1, a*0.25)
+		gl.Vertex2(this.pos.x+Sin32(td)*this.spec.maxRange, this.pos.y+Cos32(td)*this.spec.maxRange)
+		gl.End()
 	}
 }
 
 func (this *Turret) checkCollision(x float32, y float32, c Collidable, shot Shot) bool {
-	if destroyedCnt >= 0 || spec.invisible {
+	if this.destroyedCnt >= 0 || this.spec.invisible {
 		return false
 	}
-	ox := fabs32(pos.x - x)
-	oy := fabs32(pos.y - y)
-	if spec.shape.checkCollision(ox, oy, c) {
-		addDamage(shot.damage)
+	ox := fabs32(this.pos.x - x)
+	oy := fabs32(this.pos.y - y)
+	if this.spec.shape.checkCollision(ox, oy, c) {
+		this.addDamage(shot.damage)
 		return true
 	}
 	return false
 }
 
 func (this *Turret) addDamage(n int) {
-	shield -= n
-	if shield <= 0 {
-		destroyed()
+	this.shield -= n
+	if this.shield <= 0 {
+		this.destroyed()
 	}
-	damaged = true
-	damagedCnt = 10
+	this.damaged = true
+	this.damagedCnt = 10
 }
 
 func (this *Turret) destroyed() {
-	SoundManager.playSe("turret_destroyed.wav")
-	destroyedCnt = 0
+	playSe("turret_destroyed.wav")
+	this.destroyedCnt = 0
 	for i := 0; i < 6; i++ {
-		NewSmoke(pos, rand.nextSignedfloat32(0.1), rand.nextSignedfloat32(0.1), rand.nextfloat32(0.04),
-			Smoke.SmokeType.EXPLOSION, 30+rand.nextInt(20), spec.size*1.5)
+		NewSmoke(this.pos, rand.nextSignedfloat32(0.1), rand.nextSignedfloat32(0.1), rand.nextfloat32(0.04),
+			Smoke.SmokeType.EXPLOSION, 30+rand.nextInt(20), this.spec.size*1.5)
 	}
 	for i := 0; i < 32; i++ {
-		NewSpark(pos, rand.nextSignedfloat32(0.5), rand.nextSignedfloat32(0.5),
+		NewSpark(this.pos, rand.nextSignedfloat32(0.5), rand.nextSignedfloat32(0.5),
 			0.5+rand.nextfloat32(0.5), 0.5+rand.nextfloat32(0.5), 0, 30+rand.nextInt(30))
 	}
 	for i := 0; i < 7; i++ {
-		NewFragment(pos, rand.nextSignedfloat32(0.25), rand.nextSignedfloat32(0.25), 0.05+rand.nextfloat32(0.05),
-			spec.size*(0.5+rand.nextfloat32(0.5)))
+		NewFragment(this.pos, rand.nextSignedfloat32(0.25), rand.nextSignedfloat32(0.25), 0.05+rand.nextfloat32(0.05),
+			this.spec.size*(0.5+rand.nextfloat32(0.5)))
 	}
-	switch spec.enemyType {
+	switch this.spec.enemyType {
 	case TurretSpec.TurretType.MAIN:
-		parent.increaseMultiplier(2)
-		parent.addScore(40)
+		this.parent.increaseMultiplier(2)
+		this.parent.addScore(40)
 		break
 	case TurretSpec.TurretType.SUB:
 	case TurretSpec.TurretType.SUB_DESTRUCTIVE:
-		parent.increaseMultiplier(1)
-		parent.addScore(20)
+		this.parent.increaseMultiplier(1)
+		this.parent.addScore(20)
 		break
 	}
 }
 
 func (this *Turret) remove() {
-	if destroyedCnt < 0 {
-		destroyedCnt = 999
+	if this.destroyedCnt < 0 {
+		this.destroyedCnt = 999
 	}
 }
 
@@ -334,180 +333,179 @@ func (this *TurretSpect) setParam(ts TurretSpec) {
 }
 
 func (this *TurretSpect) setParam(rank float32, turretType TurretType) {
-	init()
 	this.turretType = turretType
 	if turretType == TurretTypeDUMMY {
-		invisible = true
+		this.invisible = true
 		return
 	}
-	rk := rank
-	switch turretType {
+	rk := this.rank
+	switch this.turretType {
 	case TurretType.SMALL:
-		minRange = 8
-		bulletShape = BulletShape.BulletShapeType.SMALL
-		blind = true
-		invisible = true
+		this.minRange = 8
+		this.bulletShape = BulletShape.BulletShapeType.SMALL
+		this.blind = true
+		this.invisible = true
 		break
 	case TurretType.MOVING:
-		minRange = 6
-		bulletShape = BulletShape.BulletShapeType.MOVING_TURRET
-		blind = true
-		invisible = true
-		turnSpeed = 0
-		maxRange = 9 + rand.nextfloat32(12)
-		rk *= (10.0 / sqrt(maxRange))
+		this.minRange = 6
+		this.bulletShape = BulletShape.BulletShapeType.MOVING_TURRET
+		this.blind = true
+		this.invisible = true
+		this.turnSpeed = 0
+		this.maxRange = 9 + rand.nextfloat32(12)
+		rk *= (10.0 / sqrt(this.maxRange))
 		break
 	default:
-		maxRange = 9 + rand.nextfloat32(16)
-		minRange = maxRange / (4 + rand.nextfloat32(0.5))
-		if turretType == TurretType.SUB || turretType == TurretType.SUB_DESTRUCTIVE {
-			maxRange *= 0.72
-			minRange *= 0.9
+		this.maxRange = 9 + rand.nextfloat32(16)
+		this.minRange = this.maxRange / (4 + rand.nextfloat32(0.5))
+		if this.turretType == TurretType.SUB || turretType == TurretType.SUB_DESTRUCTIVE {
+			this.maxRange *= 0.72
+			this.minRange *= 0.9
 		}
-		rk *= (10.0 / sqrt(maxRange))
+		rk *= (10.0 / sqrt(this.maxRange))
 		if rand.nextInt(4) == 0 {
-			lar := rank * 0.1
+			lar := this.rank * 0.1
 			if lar > 1 {
 				lar = 1
 			}
-			lookAheadRatio = rand.nextfloat32(lar/2) + lar/2
-			rk /= (1 + lookAheadRatio*0.3)
+			this.lookAheadRatio = rand.nextfloat32(lar/2) + lar/2
+			rk /= (1 + this.lookAheadRatio*0.3)
 		}
-		if rand.nextInt(3) == 0 && lookAheadRatio == 0 {
-			blind = false
+		if rand.nextInt(3) == 0 && this.lookAheadRatio == 0 {
+			this.blind = false
 			rk *= 1.5
 		} else {
-			blind = true
+			this.blind = true
 		}
-		turnRange = Pi32/4 + rand.nextfloat32(Pi32/4)
-		turnSpeed = 0.005 + rand.nextfloat32(0.015)
-		if turretType == TurretType.MAIN {
-			turnRange *= 1.2
+		this.turnRange = Pi32/4 + rand.nextfloat32(Pi32/4)
+		this.turnSpeed = 0.005 + rand.nextfloat32(0.015)
+		if this.turretType == TurretType.MAIN {
+			this.turnRange *= 1.2
 		}
 		if rand.nextInt(4) == 0 {
-			burstTurnRatio = rand.nextfloat32(0.66) + 0.33
+			this.burstTurnRatio = rand.nextfloat32(0.66) + 0.33
 		}
 		break
 	}
-	burstInterval = 6 + rand.nextInt(8)
+	this.burstInterval = 6 + rand.nextInt(8)
 	switch turretType {
 	case TurretType.MAIN:
-		size = 0.42 + rand.nextfloat32(0.05)
+		this.size = 0.42 + rand.nextfloat32(0.05)
 		br := (rk * 0.3) * (1 + rand.nextSignedfloat32(0.2))
 		nr := (rk * 0.33) * rand.nextfloat32(1)
 		ir := (rk * 0.1) * (1 + rand.nextSignedfloat32(0.2))
-		burstNum = int(br) + 1
-		nway = int(nr*0.66 + 1)
-		interval = int(120.0/(ir*2+1)) + 1
-		sr := rk - burstNum + 1 - (nway-1)/0.66 - ir
+		this.burstNum = int(br) + 1
+		this.nway = int(nr*0.66 + 1)
+		this.interval = int(120.0/(ir*2+1)) + 1
+		sr := rk - this.burstNum + 1 - (this.nway-1)/0.66 - ir
 		if sr < 0 {
 			sr = 0
 		}
-		speed = sqrt(sr * 0.6)
-		speed *= 0.12
-		shield = 20
+		this.speed = sqrt(sr * 0.6)
+		this.speed *= 0.12
+		this.shield = 20
 		break
 	case TurretType.SUB:
-		size = 0.36 + rand.nextfloat32(0.025)
+		this.size = 0.36 + rand.nextfloat32(0.025)
 		br := (rk * 0.4) * (1 + rand.nextSignedfloat32(0.2))
 		nr := (rk * 0.2) * rand.nextfloat32(1)
 		ir := (rk * 0.2) * (1 + rand.nextSignedfloat32(0.2))
-		burstNum = int(br) + 1
-		nway = int(nr*0.66 + 1)
-		interval = int(120.0/(ir*2+1)) + 1
-		sr := rk - burstNum + 1 - (nway-1)/0.66 - ir
+		this.burstNum = int(br) + 1
+		this.nway = int(nr*0.66 + 1)
+		this.interval = int(120.0/(ir*2+1)) + 1
+		sr := rk - this.burstNum + 1 - (this.nway-1)/0.66 - ir
 		if sr < 0 {
 			sr = 0
 		}
-		speed = sqrt(sr * 0.7)
-		speed *= 0.2
-		shield = 12
+		this.speed = sqrt(sr * 0.7)
+		this.speed *= 0.2
+		this.shield = 12
 		break
 	case TurretType.SUB_DESTRUCTIVE:
-		size = 0.36 + rand.nextfloat32(0.025)
+		this.size = 0.36 + rand.nextfloat32(0.025)
 		br := (rk * 0.4) * (1 + rand.nextSignedfloat32(0.2))
 		nr := (rk * 0.2) * rand.nextfloat32(1)
 		ir := (rk * 0.2) * (1 + rand.nextSignedfloat32(0.2))
-		burstNum = int(br)*2 + 1
-		nway = int(nr*0.66 + 1)
-		interval = int(60.0/(ir*2+1)) + 1
-		burstInterval *= 0.88
-		bulletShape = BulletShape.BulletShapeType.DESTRUCTIVE
-		bulletDestructive = true
-		sr := rk - (burstNum-1)/2 - (nway-1)/0.66 - ir
+		this.burstNum = int(br)*2 + 1
+		this.nway = int(nr*0.66 + 1)
+		this.interval = int(60.0/(ir*2+1)) + 1
+		this.burstInterval *= 0.88
+		this.bulletShape = BulletShape.BulletShapeType.DESTRUCTIVE
+		this.bulletDestructive = true
+		sr := rk - (this.burstNum-1)/2 - (this.nway-1)/0.66 - ir
 		if sr < 0 {
 			sr = 0
 		}
-		speed = sqrt(sr * 0.7)
-		speed *= 0.33
-		shield = 12
+		this.speed = sqrt(sr * 0.7)
+		this.speed *= 0.33
+		this.shield = 12
 		break
 	case TurretType.SMALL:
-		size = 0.33
+		this.size = 0.33
 		br := (rk * 0.33) * (1 + rand.nextSignedfloat32(0.2))
 		ir := (rk * 0.2) * (1 + rand.nextSignedfloat32(0.2))
-		burstNum = int(br) + 1
-		nway = 1
-		interval = int(120.0/(ir*2+1)) + 1
-		sr := rk - burstNum + 1 - ir
+		this.burstNum = int(br) + 1
+		this.nway = 1
+		this.interval = int(120.0/(ir*2+1)) + 1
+		sr := rk - this.burstNum + 1 - ir
 		if sr < 0 {
 			sr = 0
 		}
-		speed = sqrt(sr)
-		speed *= 0.24
+		this.speed = sqrt(sr)
+		this.speed *= 0.24
 		break
 	case TurretType.MOVING:
-		size = 0.36
+		this.size = 0.36
 		br := (rk * 0.3) * (1 + rand.nextSignedfloat32(0.2))
 		nr := (rk * 0.1) * rand.nextfloat32(1)
 		ir := (rk * 0.33) * (1 + rand.nextSignedfloat32(0.2))
-		burstNum = int(br) + 1
-		nway = int(nr*0.66 + 1)
-		interval = int(120.0/(ir*2+1)) + 1
-		sr := rk - burstNum + 1 - (nway-1)/0.66 - ir
+		this.burstNum = int(br) + 1
+		this.nway = int(nr*0.66 + 1)
+		this.interval = int(120.0/(ir*2+1)) + 1
+		sr := rk - this.burstNum + 1 - (nway-1)/0.66 - ir
 		if sr < 0 {
 			sr = 0
 		}
-		speed = sqrt(sr * 0.7)
-		speed *= 0.2
+		this.speed = sqrt(sr * 0.7)
+		this.speed *= 0.2
 		break
 	}
-	if speed < 0.1 {
-		speed = 0.1
+	if this.speed < 0.1 {
+		this.speed = 0.1
 	} else {
-		speed = sqrt(speed*10) / 10
+		this.speed = sqrt(this.speed*10) / 10
 	}
-	if burstNum > 2 {
+	if this.burstNum > 2 {
 		if rand.nextInt(4) == 0 {
-			speed *= 0.8
-			burstInterval *= 0.7
-			speedAccel = (speed * (0.4 + rand.nextfloat32(0.3))) / burstNum
+			this.speed *= 0.8
+			this.burstInterval *= 0.7
+			this.speedAccel = (this.speed * (0.4 + rand.nextfloat32(0.3))) / this.burstNum
 			if rand.nextInt(2) == 0 {
-				speedAccel *= -1
+				this.speedAccel *= -1
 			}
-			speed -= speedAccel * burstNum / 2
+			this.speed -= this.speedAccel * this.burstNum / 2
 		}
 		if rand.nextInt(5) == 0 {
-			if nway > 1 {
-				nwayChange = true
+			if this.nway > 1 {
+				this.nwayChange = true
 			}
 		}
 	}
-	nwayAngle = (0.1 + rand.nextfloat32(0.33)) / (1 + nway*0.1)
+	this.nwayAngle = (0.1 + rand.nextfloat32(0.33)) / (1 + this.nway*0.1)
 }
 
 func (this *TurretSpect) setBossSpec() {
-	minRange = 0
-	maxRange *= 1.5
-	shield *= 2.1
+	this.minRange = 0
+	this.maxRange *= 1.5
+	this.shield *= 2.1
 }
 
 func (this *TurretSpect) sizes(float32 v) float32 {
-	_size = v
-	destroyedShape.size = _size
-	damagedShape.size = _size
-	shape.size = _size
-	return _size
+	this.size = v
+	this.destroyedShape.size = v
+	this.damagedShape.size = v
+	this.shape.size = v
+	return v
 }
 
 /**
@@ -535,66 +533,66 @@ func NewTurretGroup(field Field, ship Ship, parent Enemy, spec TurretGroupSpec) 
 
 func (this *TurretGroup) move(p Vector, deg float32) bool {
 	alive := false
-	centerPos.x = p.x
-	centerPos.y = p.y
+	this.centerPos.x = p.x
+	this.centerPos.y = p.y
 	var d, md, y, my float32
-	switch spec.alignType {
+	switch this.spec.alignType {
 	case TurretGroupSpec.AlignType.ROUND:
-		d = spec.alignDeg
-		if spec.num > 1 {
-			md = spec.alignWidth / (spec.num - 1)
-			d -= spec.alignWidth / 2
+		d = this.spec.alignDeg
+		if this.spec.num > 1 {
+			md = this.spec.alignWidth / (this.spec.num - 1)
+			d -= this.spec.alignWidth / 2
 		} else {
 			md = 0
 		}
 		break
 	case TurretGroupSpec.AlignType.STRAIGHT:
 		y = 0
-		my = spec.offset.y / (spec.num + 1)
+		my = this.spec.offset.y / (this.spec.num + 1)
 		break
 	}
-	for i := 0; i < spec.num; i++ {
+	for i := 0; i < this.spec.num; i++ {
 		var tbx, tby float32
-		switch spec.alignType {
+		switch this.spec.alignType {
 		case TurretGroupSpec.AlignType.ROUND:
-			tbx = Sin32(d) * spec.radius
-			tby = Cos32(d) * spec.radius
+			tbx = Sin32(d) * this.spec.radius
+			tby = Cos32(d) * this.spec.radius
 			break
 		case TurretGroupSpec.AlignType.STRAIGHT:
 			y += my
-			tbx = spec.offset.x
+			tbx = this.spec.offset.x
 			tby = y
 			d = atan2(tbx, tby)
 			break
 		}
-		tbx *= (1 - spec.distRatio)
+		tbx *= (1 - this.spec.distRatio)
 		bx := tbx*Cos32(-deg) - tby*Sin32(-deg)
 		by := tbx*Sin32(-deg) + tby*Cos32(-deg)
-		alive |= turret[i].move(centerPos.x+bx, centerPos.y+by, d+deg)
-		if spec.alignType == TurretGroupSpec.AlignType.ROUND {
+		alive |= this.turret[i].move(this.centerPos.x+bx, this.centerPos.y+by, d+deg)
+		if this.spec.alignType == TurretGroupSpec.AlignType.ROUND {
 			d += md
 		}
 	}
-	cnt++
+	this.cnt++
 	return alive
 }
 
 func (this *TurretGroup) draw() {
-	for i := 0; i < spec.num; i++ {
-		turret[i].draw()
+	for i := 0; i < this.spec.num; i++ {
+		this.turret[i].draw()
 	}
 }
 
 func (this *TurretGroup) remove() {
-	for i := 0; i < spec.num; i++ {
-		turret[i].remove()
+	for i := 0; i < this.spec.num; i++ {
+		this.turret[i].remove()
 	}
 }
 
 func (this *TurretGroup) checkCollision(x float32, y float32, c Collidable, shot Shot) bool {
 	col := false
-	for i := 0; i < spec.num; i++ {
-		col |= turret[i].checkCollision(x, y, c, shot)
+	for i := 0; i < this.spec.num; i++ {
+		col |= this.turret[i].checkCollision(x, y, c, shot)
 	}
 	return col
 }
@@ -648,92 +646,92 @@ func NewMovingTurretGroup(field Field, ship Ship, parent Enemy, spec MovingTurre
 }
 
 func (this *MovingTurretGroupt) move(p Vector, od float32) {
-	if spec.moveType == MovingTurretGroupSpec.MoveType.SWING_FIX {
-		swingFixDeg = ed
+	if this.spec.moveType == MovingTurretGroupSpec.MoveType.SWING_FIX {
+		this.swingFixDeg = ed
 	}
-	centerPos.x = p.x
-	centerPos.y = p.y
-	if spec.radiusAmp > 0 {
-		radiusAmpCnt += spec.radiusAmpVel
-		av := Sin32(radiusAmpCnt)
-		radius = spec.radiusBase + spec.radiusAmp*av
+	this.centerPos.x = p.x
+	this.centerPos.y = p.y
+	if this.spec.radiusAmp > 0 {
+		this.radiusAmpCnt += this.spec.radiusAmpVel
+		av := Sin32(this.radiusAmpCnt)
+		this.radius = this.spec.radiusBase + this.spec.radiusAmp*av
 	}
-	if spec.moveType == MovingTurretGroupSpec.MoveType.ROLL {
-		if spec.rollAmp != 0 {
-			rollAmpCnt += spec.rollAmpVel
-			av := Sin32(rollAmpCnt)
-			deg += spec.rollDegVel + spec.rollAmp*av
+	if this.spec.moveType == MovingTurretGroupSpec.MoveType.ROLL {
+		if this.spec.rollAmp != 0 {
+			this.rollAmpCnt += this.spec.rollAmpVel
+			av := Sin32(this.rollAmpCnt)
+			this.deg += this.spec.rollDegVel + this.spec.rollAmp*av
 		} else {
-			deg += spec.rollDegVel
+			this.deg += this.spec.rollDegVel
 		}
 	} else {
-		swingAmpCnt += spec.swingAmpVel
-		if Cos32(swingAmpCnt) > 0 {
-			swingAmpDeg += spec.swingDegVel
+		this.swingAmpCnt += this.spec.swingAmpVel
+		if Cos32(this.swingAmpCnt) > 0 {
+			this.swingAmpDeg += this.spec.swingDegVel
 		} else {
-			swingAmpDeg -= spec.swingDegVel
+			this.swingAmpDeg -= this.spec.swingDegVel
 		}
-		if spec.moveType == MovingTurretGroupSpec.MoveType.SWING_AIM {
+		if this.spec.moveType == MovingTurretGroupSpec.MoveType.SWING_AIM {
 			var od float32
-			shipPos := ship.nearPos(centerPos)
-			if shipPos.dist(centerPos) < 0.1 {
+			shipPos := ship.nearPos(this.centerPos)
+			if shipPos.dist(this.centerPos) < 0.1 {
 				od = 0
 			} else {
-				od = atan2(shipPos.x-centerPos.x, shipPos.y-centerPos.y)
+				od = atan2(shipPos.x-this.centerPos.x, shipPos.y-this.centerPos.y)
 			}
-			od += swingAmpDeg - deg
+			od += this.swingAmpDeg - this.deg
 			normalizeDeg(od)
 			deg += od * 0.1
 		} else {
-			od := swingFixDeg + swingAmpDeg - deg
+			od := this.swingFixDeg + this.swingAmpDeg - this.deg
 			normalizeDeg(od)
 			deg += od * 0.1
 		}
 	}
 	var d, ad, md float32
 	calcAlignDeg(d, ad, md)
-	for i := 0; i < spec.num; i++ {
+	for i := 0; i < this.spec.num; i++ {
 		d += md
-		bx := Sin32(d) * radius * spec.xReverse
-		by := Cos32(d) * radius * (1 - spec.distRatio)
+		bx := Sin32(d) * this.radius * this.spec.xReverse
+		by := Cos32(d) * this.radius * (1 - this.spec.distRatio)
 		var fs, fd float32
 		if fabs32(bx)+fabs32(by) < 0.1 {
-			fs = radius
+			fs = this.radius
 			fd = d
 		} else {
 			fs = sqrt(bx*bx + by*by)
 			fd = atan2(bx, by)
 		}
 		fs *= 0.06
-		turret[i].move(centerPos.x, centerPos.y, d, fs, fd)
+		this.turret[i].move(this.centerPos.x, this.centerPos.y, d, fs, fd)
 	}
 	cnt++
 }
 
 func (this *MovingTurretGroupt) calcAlignDeg(d *float32, ad *float32, md *float32) {
-	alignAmpCnt += spec.alignAmpVel
-	ad = spec.alignDeg * (1 + Sin32(alignAmpCnt)*spec.alignAmp)
-	if spec.num > 1 {
-		if spec.moveType == MovingTurretGroupSpec.MoveType.ROLL {
-			md = ad / spec.num
+	this.alignAmpCnt += this.spec.alignAmpVel
+	ad = this.spec.alignDeg * (1 + Sin32(this.alignAmpCnt)*this.spec.alignAmp)
+	if this.spec.num > 1 {
+		if this.spec.moveType == MovingTurretGroupSpec.MoveType.ROLL {
+			md = ad / this.spec.num
 		} else {
-			md = ad / (spec.num - 1)
+			md = ad / (this.spec.num - 1)
 		}
 	} else {
 		md = 0
 	}
-	d = deg - md - ad/2
+	d = this.deg - md - ad/2
 }
 
 func (this *MovingTurretGroupt) draw() {
-	for i := 0; i < spec.num; i++ {
-		turret[i].draw()
+	for i := 0; i < this.spec.num; i++ {
+		this.turret[i].draw()
 	}
 }
 
 func (this *MovingTurretGroupt) remove() {
-	for i := 0; i < spec.num; i++ {
-		turret[i].remove()
+	for i := 0; i < this.spec.num; i++ {
+		this.turret[i].remove()
 	}
 }
 
@@ -765,32 +763,32 @@ func NewMovingTurretGroupSpec() *MovingTurretGroupSpec {
 }
 
 func (this *MovingTurretGroupSpec) setAlignAmp(a float32, v float32) {
-	alignAmp = a
-	alignAmpVel = v
+	this.alignAmp = a
+	this.alignAmpVel = v
 }
 
 func (this *MovingTurretGroupSpec) setRadiusAmp(a float32, v float32) {
-	radiusAmp = a
-	radiusAmpVel = v
+	this.radiusAmp = a
+	this.radiusAmpVel = v
 }
 
 func (this *MovingTurretGroupSpec) setRoll(dv float32, a float32, v float32) {
-	moveType = MoveType.ROLL
-	rollDegVel = dv
-	rollAmp = a
-	rollAmpVel = v
+	this.moveType = MoveType.ROLL
+	this.rollDegVel = dv
+	this.rollAmp = a
+	this.rollAmpVel = v
 }
 
 func (this *MovingTurretGroupSpec) setSwing(dv float32, a float32, aim bool /*= false*/) {
 	if aim {
-		moveType = MoveType.SWING_AIM
+		this.moveType = MoveType.SWING_AIM
 	} else {
-		moveType = MoveType.SWING_FIX
+		this.moveType = MoveType.SWING_FIX
 	}
-	swingDegVel = dv
-	swingAmpVel = a
+	this.swingDegVel = dv
+	this.swingAmpVel = a
 }
 
 func (this *MovingTurretGroupSpec) setXReverse(xr float32) {
-	xReverse = xr
+	this.xReverse = xr
 }
