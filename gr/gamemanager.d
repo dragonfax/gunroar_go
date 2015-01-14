@@ -3,41 +3,10 @@
  *
  * Copyright 2005 Kenta Cho. Some rights reserved.
  */
-module abagames.gr.gamemanager;
-
-private import std.math;
-private import opengl;
-private import SDL;
-private import abagames.util.vector;
-private import abagames.util.rand;
-private import abagames.util.sdl.gamemanager;
-private import abagames.util.sdl.texture;
-private import abagames.util.sdl.input;
-private import abagames.util.sdl.pad;
-private import abagames.util.sdl.twinstick;
-private import abagames.util.sdl.mouse;
-private import abagames.util.sdl.shape;
-private import abagames.gr.prefmanager;
-private import abagames.gr.screen;
-private import abagames.gr.ship;
-private import abagames.gr.field;
-private import abagames.gr.bullet;
-private import abagames.gr.enemy;
-private import abagames.gr.turret;
-private import abagames.gr.stagemanager;
-private import abagames.gr.particle;
-private import abagames.gr.shot;
-private import abagames.gr.crystal;
-private import abagames.gr.letter;
-private import abagames.gr.title;
-private import abagames.gr.soundmanager;
-private import abagames.gr.replay;
-private import abagames.gr.shape;
-private import abagames.gr.reel;
-private import abagames.gr.mouseandpad;
+package gr
 
 /**
- * Manage the game state and actor pools.
+ * Manage the game state
  */
 public class GameManager: abagames.util.sdl.gamemanager.GameManager {
  public:
@@ -47,21 +16,10 @@ public class GameManager: abagames.util.sdl.gamemanager.GameManager {
   Pad pad;
   TwinStick twinStick;
   Mouse mouse;
-  RecordableMouseAndPad mouseAndPad;
-  PrefManager prefManager;
+  MouseAndPad mouseAndPad;
   Screen screen;
   Field field;
   Ship ship;
-  ShotPool shots;
-  BulletPool bullets;
-  EnemyPool enemies;
-  SparkPool sparks;
-  SmokePool smokes;
-  FragmentPool fragments;
-  SparkFragmentPool sparkFragments;
-  WakePool wakes;
-  CrystalPool crystals;
-  NumIndicatorPool numIndicators;
   StageManager stageManager;
   TitleManager titleManager;
   ScoreReel scoreReel;
@@ -80,77 +38,28 @@ public class GameManager: abagames.util.sdl.gamemanager.GameManager {
     Fragment.init();
     SparkFragment.init();
     Crystal.init();
-    prefManager = cast(PrefManager) abstPrefManager;
     screen = cast(Screen) abstScreen;
     pad = cast(Pad) (cast(MultipleInputDevice) input).inputs[0];
     twinStick = cast(TwinStick) (cast(MultipleInputDevice) input).inputs[1];
     twinStick.openJoystick(pad.openJoystick());
     mouse = cast(Mouse) (cast(MultipleInputDevice) input).inputs[2];
     mouse.init(screen);
-    mouseAndPad = new RecordableMouseAndPad(mouse, pad);
+    mouseAndPad = new MouseAndPad(mouse, pad);
     field = new Field;
-    Object[] pargs;
-    sparks = new SparkPool(120, pargs);
-    pargs ~= field;
-    wakes = new WakePool(100, pargs);
-    pargs ~= wakes;
-    smokes = new SmokePool(200, pargs);
-    Object[] fargs;
-    fargs ~= field;
-    fargs ~= smokes;
-    fragments = new FragmentPool(60, fargs);
-    sparkFragments = new SparkFragmentPool(40, fargs);
     ship = new Ship(pad, twinStick, mouse, mouseAndPad,
                     field, screen, sparks, smokes, fragments, wakes);
-    Object[] cargs;
-    cargs ~= ship;
-    CrystalPool crystals = new CrystalPool(80, cargs);
     scoreReel = new ScoreReel;
-    Object[] nargs;
-    nargs ~= scoreReel;
-    NumIndicatorPool numIndicators = new NumIndicatorPool(50, nargs);
-    Object[] bargs;
-    bargs ~= this;
-    bargs ~= field;
-    bargs ~= ship;
-    bargs ~= smokes;
-    bargs ~= wakes;
-    bargs ~= crystals;
-    bullets = new BulletPool(240, bargs);
-    Object[] eargs;
-    eargs ~= field;
-    eargs ~= screen;
-    eargs ~= bullets;
-    eargs ~= ship;
-    eargs ~= sparks;
-    eargs ~= smokes;
-    eargs ~= fragments;
-    eargs ~= sparkFragments;
-    eargs ~= numIndicators;
-    eargs ~= scoreReel;
-    enemies = new EnemyPool(40, eargs);
-    Object[] sargs;
-    sargs ~= field;
-    sargs ~= enemies;
-    sargs ~= sparks;
-    sargs ~= smokes;
-    sargs ~= bullets;
-    shots = new ShotPool(50, sargs);
-    ship.setShots(shots);
-    ship.setEnemies(enemies);
     stageManager = new StageManager(field, enemies, ship, bullets,
                                     sparks, smokes, fragments, wakes);
     ship.setStageManager(stageManager);
     field.setStageManager(stageManager);
     field.setShip(ship);
-    enemies.setStageManager(stageManager);
     SoundManager.loadSounds();
-    titleManager = new TitleManager(prefManager, pad, mouse, field, this);
+    titleManager = new TitleManager(pad, mouse, field, this);
     inGameState = new InGameState(this, screen, pad, twinStick, mouse, mouseAndPad,
                                   field, ship, shots, bullets, enemies,
                                   sparks, smokes, fragments, sparkFragments, wakes,
-                                  crystals, numIndicators, stageManager, scoreReel,
-                                  prefManager);
+                                  crystals, numIndicators, stageManager, scoreReel);
     titleState = new TitleState(this, screen, pad, twinStick, mouse, mouseAndPad,
                                 field, ship, shots, bullets, enemies,
                                 sparks, smokes, fragments, sparkFragments, wakes,
@@ -172,14 +81,10 @@ public class GameManager: abagames.util.sdl.gamemanager.GameManager {
   }
 
   public override void start() {
-    loadLastReplay();
     startTitle();
   }
 
   public void startTitle(bool fromGameover = false) {
-    if (fromGameover)
-      saveLastReplay();
-    titleState.replayData = inGameState.replayData;
     state = titleState;
     startState();
   }
@@ -192,33 +97,6 @@ public class GameManager: abagames.util.sdl.gamemanager.GameManager {
 
   private void startState() {
     state.start();
-  }
-
-  public void saveErrorReplay() {
-    if (state == inGameState)
-      inGameState.saveReplay("error.rpl");
-  }
-
-  private void saveLastReplay() {
-    try {
-      inGameState.saveReplay("last.rpl");
-    } catch (Object o) {}
-  }
-
-  private void loadLastReplay() {
-    try {
-      inGameState.loadReplay("last.rpl");
-    } catch (Object o) {
-      inGameState.resetReplay();
-    }
-  }
-
-  private void loadErrorReplay() {
-    try {
-      inGameState.loadReplay("error.rpl");
-    } catch (Object o) {
-      inGameState.resetReplay();
-    }
   }
 
   public void initInterval() {
@@ -288,30 +166,15 @@ public class GameState {
   Pad pad;
   TwinStick twinStick;
   Mouse mouse;
-  RecordableMouseAndPad mouseAndPad;
+  MouseAndPad mouseAndPad;
   Field field;
   Ship ship;
-  ShotPool shots;
-  BulletPool bullets;
-  EnemyPool enemies;
-  SparkPool sparks;
-  SmokePool smokes;
-  FragmentPool fragments;
-  SparkFragmentPool sparkFragments;
-  WakePool wakes;
-  CrystalPool crystals;
-  NumIndicatorPool numIndicators;
   StageManager stageManager;
   ScoreReel scoreReel;
-  ReplayData _replayData;
 
   public this(GameManager gameManager, Screen screen,
-              Pad pad, TwinStick twinStick, Mouse mouse, RecordableMouseAndPad mouseAndPad,
-              Field field, Ship ship, ShotPool shots, BulletPool bullets, EnemyPool enemies,
-              SparkPool sparks, SmokePool smokes,
-              FragmentPool fragments, SparkFragmentPool sparkFragments, WakePool wakes,
-              CrystalPool crystals, NumIndicatorPool numIndicators,
-              StageManager stageManager, ScoreReel scoreReel) {
+              Pad pad, TwinStick twinStick, Mouse mouse, MouseAndPad mouseAndPad,
+              Field field, Ship ship, StageManager stageManager, ScoreReel scoreReel) {
     this.gameManager = gameManager;
     this.screen = screen;
     this.pad = pad;
@@ -320,46 +183,8 @@ public class GameState {
     this.mouseAndPad = mouseAndPad;
     this.field = field;
     this.ship = ship;
-    this.shots = shots;
-    this.bullets = bullets;
-    this.enemies = enemies;
-    this.sparks = sparks;
-    this.smokes = smokes;
-    this.fragments = fragments;
-    this.sparkFragments = sparkFragments;
-    this.wakes = wakes;
-    this.crystals = crystals;
-    this.numIndicators = numIndicators;
     this.stageManager = stageManager;
     this.scoreReel = scoreReel;
-  }
-
-  public abstract void start();
-  public abstract void move();
-  public abstract void draw();
-  public abstract void drawLuminous();
-  public abstract void drawFront();
-  public abstract void drawOrtho();
-
-  protected void clearAll() {
-    shots.clear();
-    bullets.clear();
-    enemies.clear();
-    sparks.clear();
-    smokes.clear();
-    fragments.clear();
-    sparkFragments.clear();
-    wakes.clear();
-    crystals.clear();
-    numIndicators.clear();
-  }
-
-  public ReplayData replayData(ReplayData v) {
-    return _replayData = v;
-  }
-
-  public ReplayData replayData() {
-    return _replayData;
   }
 }
 
@@ -374,8 +199,6 @@ public class InGameState: GameState {
  private:
   static const float SCORE_REEL_SIZE_DEFAULT = 0.5f;
   static const float SCORE_REEL_SIZE_SMALL = 0.01f;
-  Rand rand;
-  PrefManager prefManager;
   int left;
   int time;
   int gameOverCnt;
@@ -393,50 +216,25 @@ public class InGameState: GameState {
   }
 
   public this(GameManager gameManager, Screen screen,
-              Pad pad, TwinStick twinStick, Mouse mouse, RecordableMouseAndPad mouseAndPad,
-              Field field, Ship ship, ShotPool shots, BulletPool bullets, EnemyPool enemies,
-              SparkPool sparks, SmokePool smokes,
-              FragmentPool fragments, SparkFragmentPool sparkFragments, WakePool wakes,
-              CrystalPool crystals, NumIndicatorPool numIndicators,
-              StageManager stageManager, ScoreReel scoreReel,
-              PrefManager prefManager) {
+              Pad pad, TwinStick twinStick, Mouse mouse, MouseAndPad mouseAndPad,
+              Field field, Ship ship, StageManager stageManager, ScoreReel scoreReel) {
     super(gameManager, screen, pad, twinStick, mouse, mouseAndPad,
-          field, ship, shots, bullets, enemies,
-          sparks, smokes, fragments, sparkFragments, wakes, crystals, numIndicators,
-          stageManager, scoreReel);
-    this.prefManager = prefManager;
-    rand = new Rand;
-    _replayData = null;
+          field, ship, stageManager, scoreReel);
     left = 0;
     gameOverCnt = pauseCnt = 0;
     scoreReelSize = SCORE_REEL_SIZE_DEFAULT;
   }
 
   public override void start() {
-    ship.unsetReplayMode();
-    _replayData = new ReplayData;
-    prefManager.prefData.recordGameMode(_gameMode);
     switch (_gameMode) {
     case GameMode.NORMAL:
-      RecordablePad rp = cast(RecordablePad) pad;
-      rp.startRecord();
-      _replayData.padInputRecord = rp.inputRecord;
       break;
     case GameMode.TWIN_STICK:
     case GameMode.DOUBLE_PLAY:
-      RecordableTwinStick rts = cast(RecordableTwinStick) twinStick;
-      rts.startRecord();
-      _replayData.twinStickInputRecord = rts.inputRecord;
       break;
     case GameMode.MOUSE:
-      mouseAndPad.startRecord();
-      _replayData.mouseAndPadInputRecord = mouseAndPad.inputRecord;
       break;
     }
-    _replayData.seed = rand.nextInt32();
-    _replayData.shipTurnSpeed = GameManager.shipTurnSpeed;
-    _replayData.shipReverseFire = GameManager.shipReverseFire;
-    _replayData.gameMode = _gameMode;
     SoundManager.enableBgm();
     SoundManager.enableSe();
     startInGame();
@@ -444,23 +242,6 @@ public class InGameState: GameState {
 
   public void startInGame() {
     clearAll();
-    long seed = _replayData.seed;
-    field.setRandSeed(seed);
-    EnemyState.setRandSeed(seed);
-    EnemySpec.setRandSeed(seed);
-    Turret.setRandSeed(seed);
-    Spark.setRandSeed(seed);
-    Smoke.setRandSeed(seed);
-    Fragment.setRandSeed(seed);
-    SparkFragment.setRandSeed(seed);
-    Screen.setRandSeed(seed);
-    BaseShape.setRandSeed(seed);
-    ship.setRandSeed(seed);
-    Shot.setRandSeed(seed);
-    stageManager.setRandSeed(seed);
-    NumReel.setRandSeed(seed);
-    NumIndicator.setRandSeed(seed);
-    SoundManager.setRandSeed(seed);
     stageManager.start(1);
     field.start();
     ship.start(_gameMode);
@@ -499,8 +280,8 @@ public class InGameState: GameState {
     moveInGame();
     if (isGameOver) {
       gameOverCnt++;
-      PadState input = (cast(RecordablePad) pad).getState(false);
-      MouseState mouseInput = (cast(RecordableMouse) mouse).getState(false);
+      PadState input =  pad.getState(false);
+      MouseState mouseInput = mouse.getState(false);
       if ((input.button & PadState.Button.A) ||
           (gameMode == InGameState.GameMode.MOUSE &&
            (mouseInput.button & MouseState.Button.LEFT))) {
@@ -523,16 +304,16 @@ public class InGameState: GameState {
     field.move();
     ship.move();
     stageManager.move();
-    enemies.move();
-    shots.move();
-    bullets.move();
-    crystals.move();
-    numIndicators.move();
-    sparks.move();
-    smokes.move();
-    fragments.move();
-    sparkFragments.move();
-    wakes.move();
+    enemiesMove();
+    shotsMove();
+    bulletsMove();
+    crystalsMove();
+    numIndicatorsMove();
+    sparksMove();
+    smokesMove();
+    fragmentsMove();
+    sparkFragmentsMove();
+    wakesMove();
     screen.move();
     scoreReelSize += (SCORE_REEL_SIZE_DEFAULT - scoreReelSize) * 0.05f;
     scoreReel.move();
@@ -544,21 +325,21 @@ public class InGameState: GameState {
   public override void draw() {
     field.draw();
     glBegin(GL_TRIANGLES);
-    wakes.draw();
-    sparks.draw();
+    wakesDraw();
+    sparksDraw();
     glEnd();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBegin(GL_QUADS);
     smokes.draw();
     glEnd();
-    fragments.draw();
-    sparkFragments.draw();
-    crystals.draw();
+    fragmentsDraw();
+    sparkFragmentsDraw();
+    crystalsDraw();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    enemies.draw();
-    shots.draw();
-    ship.draw();
-    bullets.draw();
+    enemiesDraw();
+    shotsDraw();
+    shipDraw();
+    bulletsDraw();
   }
 
   public void drawFront() {
@@ -610,11 +391,6 @@ public class InGameState: GameState {
       btnPressed = true;
       SoundManager.fadeBgm();
       scoreReel.accelerate();
-      if (!ship.replayMode) {
-        SoundManager.disableSe();
-        prefManager.prefData.recordResult(scoreReel.actualScore, _gameMode);
-        _replayData.score = scoreReel.actualScore;
-      }
     }
   }
 
@@ -624,19 +400,6 @@ public class InGameState: GameState {
 
   public void shrinkScoreReel() {
     scoreReelSize += (SCORE_REEL_SIZE_SMALL - scoreReelSize) * 0.08f;
-  }
-
-  public void saveReplay(char[] fileName) {
-    _replayData.save(fileName);
-  }
-
-  public void loadReplay(char[] fileName) {
-    _replayData = new ReplayData;
-    _replayData.load(fileName);
-  }
-
-  public void resetReplay() {
-    _replayData = null;
   }
 
   public int gameMode() {
@@ -659,17 +422,11 @@ public class TitleState: GameState {
   }
 
   public this(GameManager gameManager, Screen screen,
-              Pad pad, TwinStick twinStick, Mouse mouse, RecordableMouseAndPad mouseAndPad,
-              Field field, Ship ship, ShotPool shots, BulletPool bullets, EnemyPool enemies,
-              SparkPool sparks, SmokePool smokes,
-              FragmentPool fragments, SparkFragmentPool sparkFragments, WakePool wakes,
-              CrystalPool crystals, NumIndicatorPool numIndicators,
-              StageManager stageManager, ScoreReel scoreReel,
+              Pad pad, TwinStick twinStick, Mouse mouse, MouseAndPad mouseAndPad,
+              Field field, Ship ship,  StageManager stageManager, ScoreReel scoreReel,
               TitleManager titleManager, InGameState inGameState) {
     super(gameManager, screen, pad, twinStick, mouse, mouseAndPad,
-          field, ship, shots, bullets, enemies,
-          sparks, smokes, fragments, sparkFragments, wakes, crystals, numIndicators,
-          stageManager, scoreReel);
+          field, ship,  stageManager, scoreReel);
     this.titleManager = titleManager;
     this.inGameState = inGameState;
     gameOverCnt = 0;
@@ -684,61 +441,20 @@ public class TitleState: GameState {
     SoundManager.disableBgm();
     SoundManager.disableSe();
     titleManager.start();
-    if (replayData)
-      startReplay();
-    else
-      titleManager.replayData = null;
-  }
-
-  private void startReplay() {
-    ship.setReplayMode(_replayData.shipTurnSpeed, _replayData.shipReverseFire);
-    switch (_replayData.gameMode) {
-    case InGameState.GameMode.NORMAL:
-      RecordablePad rp = cast(RecordablePad) pad;
-      rp.startReplay(_replayData.padInputRecord);
-      break;
-    case InGameState.GameMode.TWIN_STICK:
-    case InGameState.GameMode.DOUBLE_PLAY:
-      RecordableTwinStick rts = cast(RecordableTwinStick) twinStick;
-      rts.startReplay(_replayData.twinStickInputRecord);
-      break;
-    case InGameState.GameMode.MOUSE:
-      mouseAndPad.startReplay(_replayData.mouseAndPadInputRecord);
-      break;
-    }
-    titleManager.replayData = _replayData;
-    inGameState.gameMode = _replayData.gameMode;
-    inGameState.startInGame();
   }
 
   public override void move() {
-    if (_replayData) {
-      if (inGameState.isGameOver) {
-        gameOverCnt++;
-        if (gameOverCnt > 120)
-          startReplay();
-      }
-      inGameState.moveInGame();
-    }
     titleManager.move();
   }
 
   public override void draw() {
-    if (_replayData) {
-      inGameState.draw();
-    } else {
-      field.draw();
-    }
+    field.draw();
   }
 
   public void drawFront() {
-    if (_replayData)
-      inGameState.drawFront();
   }
 
   public override void drawOrtho() {
-    if (_replayData)
-      inGameState.drawGameParams();
     titleManager.draw();
   }
 
