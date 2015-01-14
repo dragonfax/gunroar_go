@@ -17,16 +17,19 @@ type Spark struct{
   cnt int
 }
 
-func (this *Spark) set(Vector p, float32 vx, float32 vy, float32 r, float32 g, float32 b, int c) {
-	ppos.x = pos.x = p.x
-	ppos.y = pos.y = p.y
-	vel.x = vx
-	vel.y = vy
+func NewSpark( Vector p, float32 vx, float32 vy, float32 r, float32 g, float32 b, int c) *Spark {
+	this := &Spark{NewLuminousActor()}
+	this.pos.x = p.x
+	this.ppos.x = p.x
+	this.pos.y = p.y
+	this.ppos.y = p.y
+	this.vel.x = vx
+	this.vel.y = vy
 	this.r = r
 	this.g = g
 	this.b = b
-	cnt = c
-	exists = true
+	this.cnt = c
+	return this
 }
 
 func (this *Spark) move() {
@@ -99,7 +102,8 @@ type Smoke struct {
   size, r, g, b, a float32
 }
 
-this(field Field) {
+func NewSmoke(field Field) *Smoke{
+	this = &Smoke{NewLuminousActor()}
 	this.startCnt = 1
 	this.size = 1
 	this.field = field
@@ -115,8 +119,9 @@ func (this *Smoke) set(Vector3 p, float32 mx, float32 my, float32 mz, int t, int
 }
 
 func (this *Smoke) set(float32 x, float32 y, float32 mx, float32 my, float32 mz, int t, int c = 60, float32 sz = 2) {
-	if (!field.checkInOuterField(x, y))
+	if (!field.checkInOuterField(x, y)) {
 		return
+	}
 	pos.x = x
 	pos.y = y
 	pos.z = 0
@@ -220,12 +225,14 @@ func (this *Smoke) move() {
 		size *= 0.97
 		break
 	}
-	if (size > 5)
+	if (size > 5) {
 		size = 5
+	}
 	if (type == SmokeType.EXPLOSION && pos.z < 0.01) {
 		int bl = field.getBlock(pos.x, pos.y)
-		if (bl >= 1)
+		if (bl >= 1) {
 			vel *= 0.8
+		}
 		if (cnt % 3 == 0 && bl < -1) {
 			float32 sp = sqrt(vel.x * vel.x + vel.y * vel.y)
 			if (sp > 0.3) {
@@ -316,8 +323,9 @@ this() {
 }
 
 func (this *Fragment) set(Vector p, float32 mx, float32 my, float32 mz, float32 sz = 1) {
-	if (!field.checkInOuterField(p.x, p.y))
+	if (!field.checkInOuterField(p.x, p.y)) {
 		return
+	}
 	pos.x = p.x
 	pos.y = p.y
 	pos.z = 0
@@ -325,8 +333,9 @@ func (this *Fragment) set(Vector p, float32 mx, float32 my, float32 mz, float32 
 	vel.y = my
 	vel.z = mz
 	size = sz
-	if (size > 5)
+	if (size > 5) {
 		size = 5
+	}
 	d2 = rand.nextFloat(360)
 	md2 = rand.nextSignedFloat(20)
 	exists = true
@@ -343,10 +352,11 @@ func (this *Fragment) move() {
 	pos += vel
 	if (pos.z < 0) {
 		Smoke s = smokes.getInstanceForced()
-		if (field.getBlock(pos.x, pos.y) < 0)
+		if (field.getBlock(pos.x, pos.y) < 0) {
 			s.set(pos.x, pos.y, 0, 0, 0, Smoke.SmokeType.WAKE, 60, size * 0.66)
-		else
+		} else {
 			s.set(pos.x, pos.y, 0, 0, 0, Smoke.SmokeType.SAND, 60, size * 0.75)
+		}
 		exists = false
 		return
 	}
@@ -404,8 +414,9 @@ this() {
 }
 
 func (this *SparkFragment) set(Vector p, float32 mx, float32 my, float32 mz, float32 sz = 1) {
-	if (!field.checkInOuterField(p.x, p.y))
+	if (!field.checkInOuterField(p.x, p.y)) {
 		return
+	}
 	pos.x = p.x
 	pos.y = p.y
 	pos.z = 0
@@ -413,14 +424,16 @@ func (this *SparkFragment) set(Vector p, float32 mx, float32 my, float32 mz, flo
 	vel.y = my
 	vel.z = mz
 	size = sz
-	if (size > 5)
+	if (size > 5) {
 		size = 5
+	}
 	d2 = rand.nextFloat(360)
 	md2 = rand.nextSignedFloat(15)
-	if (rand.nextInt(4) == 0)
+	if (rand.nextInt(4) == 0) {
 		hasSmoke = true
-	else
+	} else {
 		hasSmoke = false
+	}
 	cnt = 0
 	exists = true
 }
@@ -436,10 +449,11 @@ func (this *SparkFragment) move() {
 	pos += vel
 	if (pos.z < 0) {
 		Smoke s = smokes.getInstanceForced()
-		if (field.getBlock(pos.x, pos.y) < 0)
+		if (field.getBlock(pos.x, pos.y) < 0) {
 			s.set(pos.x, pos.y, 0, 0, 0, Smoke.SmokeType.WAKE, 60, size * 0.66)
-		else
+		} else {
 			s.set(pos.x, pos.y, 0, 0, 0, Smoke.SmokeType.SAND, 60, size * 0.75)
+		}
 		exists = false
 		return
 	}
@@ -448,8 +462,9 @@ func (this *SparkFragment) move() {
 	cnt++
 	if (hasSmoke && cnt % 5 == 0) {
 		Smoke s = smokes.getInstance()
-		if (s)
+		if (s) {
 			s.set(pos, 0, 0, 0, Smoke.SmokeType.SMOKE, 90 + rand.nextInt(60), size * 0.5)
+		}
 	}
 }
 
@@ -497,8 +512,9 @@ this() {
 }
 
 func (this *Wake) set(Vector p, float32 deg, float32 speed, int c = 60, float32 sz = 1, bool rs = false) {
-	if (!field.checkInOuterField(p.x, p.y))
+	if (!field.checkInOuterField(p.x, p.y)) {
 		return
+	}
 	pos.x = p.x
 	pos.y = p.y
 	this.deg = deg
@@ -529,10 +545,11 @@ func (this *Wake) draw() {
 	setScreenColor(0.33, 0.33, 1)
 	ox *= size
 	oy *= size
-	if (revShape)
+	if (revShape) {
 		gl.Vertex3(pos.x + ox, pos.y + oy, 0)
-	else
+	} else {
 		gl.Vertex3(pos.x - ox, pos.y - oy, 0)
+	}
 	ox *= 0.2
 	oy *= 0.2
 	setScreenColor(0.2, 0.2, 0.6, 0.5)
