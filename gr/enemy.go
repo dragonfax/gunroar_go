@@ -9,13 +9,13 @@ package gr
  * Enemy ships.
  */
 type Enemy struct {
-  spec EnemySpec
-  state EnemyState
+	spec  EnemySpec
+	state EnemyState
 }
 
 func NewEnemy(field Field, screen Screen, ship Ship, scoreReel ScoreReel) *Enemy {
 	e := new(Enemy)
-	e.state = NewEnemyState (field, screen, ship, scoreReel)
+	e.state = NewEnemyState(field, screen, ship, scoreReel)
 	return e
 }
 
@@ -29,17 +29,17 @@ func (this *Enemy) set(spec EnemySpec) {
 }
 
 func (this *Enemy) move() {
-	if (!this.spec.move(this.state)) {
+	if !this.spec.move(this.state) {
 		this.remove()
 	}
 }
 
 func (this *Enemy) checkShotHit(p Vector, shape Collidable, shot Shot) {
-	if (this.state.destroyedCnt >= 0) {
+	if this.state.destroyedCnt >= 0 {
 		return
 	}
-	if (this.spec.checkCollision(this.state, p.x, p.y, shape, shot)) {
-		if (shot) {
+	if this.spec.checkCollision(this.state, p.x, p.y, shape, shot) {
+		if shot {
 			shot.removeHitToEnemy(this.spec.isSmallEnemy)
 		}
 	}
@@ -105,25 +105,25 @@ var edgePos, explodeVel, damagedPos Vector
 var idxCount int = 0
 
 type EnemyState struct {
-  appType int
-  ppos, pos Vector
-  shield int
-  deg, velDeg, speed, turnWay, trgDeg float32
-  turnCnt, state, cnt int
-  vel Vector
-  turretGroup [TURRET_GROUP_MAX]turretGroup
-  movingTurretGroup [MOVING_TURRET_GROUP_MAX]MovingTurretGroup
-  damaged bool
-  damagedCnt, destroyedCnt, explodeCnt, explodeItv, idx int
-  multiplier float32
-  spec EnemySpec
+	appType                                               int
+	ppos, pos                                             Vector
+	shield                                                int
+	deg, velDeg, speed, turnWay, trgDeg                   float32
+	turnCnt, state, cnt                                   int
+	vel                                                   Vector
+	turretGroup                                           [TURRET_GROUP_MAX]turretGroup
+	movingTurretGroup                                     [MOVING_TURRET_GROUP_MAX]MovingTurretGroup
+	damaged                                               bool
+	damagedCnt, destroyedCnt, explodeCnt, explodeItv, idx int
+	multiplier                                            float32
+	spec                                                  EnemySpec
 
-  field Field
-  screen Screen
-  ship Ship
-  enemy Enemy
-  stageManager StageManager
-  scoreReel ScoreReel
+	field        Field
+	screen       Screen
+	ship         Ship
+	enemy        Enemy
+	stageManager StageManager
+	scoreReel    ScoreReel
 }
 
 func NewEnemyState(field Field, screen Screen, ship Ship, scoreReel ScoreReel) EnemyState {
@@ -178,14 +178,14 @@ func (this *EnemyState) setSpec(spec EnemySpec) {
 	this.multiplier = 1
 }
 
-func (this *EnemyState) setAppearancePos(field Field, ship Ship, appType int /*= AppearanceType.TOP*/)  bool {
+func (this *EnemyState) setAppearancePos(field Field, ship Ship, appType int /*= AppearanceType.TOP*/) bool {
 	this.appType = appType
-	for i := 0 ; i < 8 ; i++ {
-		switch (appType) {
+	for i := 0; i < 8; i++ {
+		switch appType {
 		case AppearanceType.TOP:
 			this.pos.x = rand.nextSignedfloat32(field.size.x)
-			this.pos.y = field.outerSize.y * 0.99 + this.spec.size
-			if (this.pos.x < 0) {
+			this.pos.y = field.outerSize.y*0.99 + this.spec.size
+			if this.pos.x < 0 {
 				this.deg = Pi3232 - rand.nextfloat32(0.5)
 				this.velDeg = this.deg
 			} else {
@@ -194,20 +194,20 @@ func (this *EnemyState) setAppearancePos(field Field, ship Ship, appType int /*=
 			}
 			break
 		case AppearanceType.SIDE:
-			if (rand.nextInt(2) == 0) {
+			if rand.nextInt(2) == 0 {
 				this.pos.x = -field.outerSize.x * 0.99
-				this.deg = Pi3232 / 2 + rand.nextfloat32(0.66)
+				this.deg = Pi3232/2 + rand.nextfloat32(0.66)
 				this.velDeg = this.deg
 			} else {
 				this.pos.x = field.outerSize.x * 0.99
-				this.deg = -Pi32 / 2 - rand.nextfloat32(0.66)
+				this.deg = -Pi32/2 - rand.nextfloat32(0.66)
 				this.velDeg = this.deg
 			}
 			this.pos.y = field.size.y + rand.nextfloat32(field.size.y) + this.spec.size
 			break
 		case AppearanceType.CENTER:
 			this.pos.x = 0
-			this.pos.y = field.outerSize.y * 0.99 + this.spec.size
+			this.pos.y = field.outerSize.y*0.99 + this.spec.size
 			this.deg = 0
 			this.velDeg = this.deg
 			break
@@ -217,25 +217,25 @@ func (this *EnemyState) setAppearancePos(field Field, ship Ship, appType int /*=
 		this.vel.y = 0
 		this.vel.x = 0
 		this.speed = 0
-		if (this.appType == AppearanceType.CENTER || this.checkFrontClear(true)) {
+		if this.appType == AppearanceType.CENTER || this.checkFrontClear(true) {
 			return true
 		}
 	}
 	return false
 }
 
-func (this *EnemyState) checkFrontClear( checkCurrentPos bool /*= false*/) bool {
+func (this *EnemyState) checkFrontClear(checkCurrentPos bool /*= false*/) bool {
 	var si = 1
-	if (this.checkCurrentPos()) {
+	if this.checkCurrentPos() {
 		si = 0
 	}
 	for i := si; i < 5; i++ {
-		cx := this.pos.x + Sin32(deg) * i * this.spec.size
-		cy := this.pos.y + Cos32(deg) * i * this.spec.size
-		if (this.field.getBlock(cx, cy) >= 0) {
+		cx := this.pos.x + Sin32(deg)*i*this.spec.size
+		cy := this.pos.y + Cos32(deg)*i*this.spec.size
+		if this.field.getBlock(cx, cy) >= 0 {
 			return false
 		}
-		if (checkAllEnemiesHitShip(cx, cy, enemy, true)) {
+		if checkAllEnemiesHitShip(cx, cy, enemy, true) {
 			return false
 		}
 	}
@@ -246,21 +246,21 @@ func (this *EnemyState) move() bool {
 	this.ppos.x = this.pos.x
 	this.ppos.y = this.pos.y
 	this.multiplier -= MULTIPLIER_DECREASE_RATIO
-	if (this.multiplier < 1) {
+	if this.multiplier < 1 {
 		this.multiplier = 1
 	}
-	if (this.destroyedCnt >= 0) {
+	if this.destroyedCnt >= 0 {
 		this.destroyedCnt++
 		this.explodeCnt--
-		if (this.explodeCnt < 0) {
+		if this.explodeCnt < 0 {
 			this.explodeItv += 2
 			this.explodeItv = this.explodeItv * (1.2 + rand.nextfloat32(1))
 			this.explodeCnt = this.explodeItv
-			this.destroyedEdge(sqrt(this.spec.size) * 27.0 / (this.explodeItv * 0.1 + 1))
+			this.destroyedEdge(sqrt(this.spec.size) * 27.0 / (this.explodeItv*0.1 + 1))
 		}
 	}
 	this.damaged = false
-	if (this.damagedCnt > 0) {
+	if this.damagedCnt > 0 {
 		this.damagedCnt--
 	}
 	alive := false
@@ -270,237 +270,219 @@ func (this *EnemyState) move() bool {
 	for i := 0; i < this.spec.movingTurretGroupNum; i++ {
 		this.movingTurretGroup[i].move(this.pos, this.deg)
 	}
-	if (this.destroyedCnt < 0 && !alive) {
+	if this.destroyedCnt < 0 && !alive {
 		return this.destroyed()
 	}
 	return true
 }
 
 func (this *EnemyState) checkCollision(x float32, y float32, c Collidable, shot Shot) bool {
-	ox := fabs32(pos.x - x), oy = fabs32(pos.y - y)
-	if (ox + oy > spec.size * 2) {
+	ox := fabs32(this.pos.x - x)
+	oy := fabs32(this.pos.y - y)
+	if ox+oy > this.spec.size*2 {
 		return false
 	}
-	for i := 0; i < spec.turretGroupNum; i++ {
-		if (turretGroup[i].checkCollision(x, y, c, shot)) {
+	for i := 0; i < this.spec.turretGroupNum; i++ {
+		if this.turretGroup[i].checkCollision(x, y, c, shot) {
 			return true
 		}
 	}
-	if (spec.bridgeShape.checkCollision(ox, oy, c)) {
-		addDamage(shot.damage, shot)
+	if this.spec.bridgeShape.checkCollision(ox, oy, c) {
+		this.addDamage(shot.damage, shot)
 		return true
 	}
 	return false
 }
 
 func (this *EnemyState) increaseMultiplier(m float32) {
-	multiplier += m
+	this.multiplier += m
 }
 
 func (this *EnemyState) addScore(s int) {
-	setScoreIndicator(s, 1)
+	this.setScoreIndicator(s, 1)
 }
 
 func (this *EnemyState) addDamage(n int, shot Shot /*= null*/) {
-	shield -= n
-	if (shield <= 0) {
-		destroyed(shot)
+	this.shield -= n
+	if this.shield <= 0 {
+		this.destroyed(shot)
 	} else {
-		damaged = true
-		damagedCnt = 7
+		this.damaged = true
+		this.damagedCnt = 7
 	}
 }
 
 func (this *EnemyState) destroyed(shot Shot /*= null*/) bool {
-	float32 vz
-	if (shot) func (this *EnemyState) {
-		explodeVel.x = Shot.SPEED * Sin32(shot.deg) / 2
-		explodeVel.y = Shot.SPEED * Cos32(shot.deg) / 2
+	var vz float32
+	if shot != nil {
+		this.explodeVel.x = Shot.SPEED * Sin32(shot.deg) / 2
+		this.explodeVel.y = Shot.SPEED * Cos32(shot.deg) / 2
 		vz = 0
 	} else {
-		explodeVel.x = explodeVel.y = 0
+		this.explodeVel.x = 0
+		this.explodeVel.y = 0
 		vz = 0.05
 	}
-	float32 ss = spec.size * 1.5
-	if (ss > 2) {
+	ss := this.spec.size * 1.5
+	if ss > 2 {
 		ss = 2
 	}
-	float32 sn
-	if (spec.size < 1) {
-		sn = spec.size
+	var sn float32
+	if this.spec.size < 1 {
+		sn = this.spec.size
+	} else {
+		sn = sqrt32(spec.size)
 	}
-	else
-		sn = sqrt(spec.size)
-	assert(sn <>= 0)
-	if (sn > 3) {
+	if sn > 3 {
 		sn = 3
 	}
-	for i := 0; i < sn * 8; i++ {
-		Smoke s = smokes.getInstanceForced()
-		s.set(pos, rand.nextSignedfloat32(0.1) + explodeVel.x, rand.nextSignedfloat32(0.1) + explodeVel.y,
-					rand.nextfloat32(vz),
-					Smoke.SmokeType.EXPLOSION, 32 + rand.nextInt(30), ss)
+	for i := 0; i < sn*8; i++ {
+		NewSmoke(this.pos, rand.nextSignedfloat32(0.1)+this.explodeVel.x, rand.nextSignedfloat32(0.1)+this.explodeVel.y, rand.nextfloat32(vz), SmokeTypeEXPLOSION, 32+rand.nextInt(30), ss)
 	}
-	for i := 0; i < sn * 36; i++ {
-		Spark sp = sparks.getInstanceForced()
-		sp.set(pos, rand.nextSignedfloat32(0.8) + explodeVel.x, rand.nextSignedfloat32(0.8) + explodeVel.y,
-					 0.5 + rand.nextfloat32(0.5), 0.5 + rand.nextfloat32(0.5), 0, 30 + rand.nextInt(30))
+	for i := 0; i < sn*36; i++ {
+		NewSpark(this.pos, rand.nextSignedfloat32(0.8)+this.explodeVel.x, rand.nextSignedfloat32(0.8)+this.explodeVel.y, 0.5+rand.nextfloat32(0.5), 0.5+rand.nextfloat32(0.5), 0, 30+rand.nextInt(30))
 	}
-	for i := 0; i < sn * 12; i++ {
-		Fragment f = fragments.getInstanceForced()
-		f.set(pos, rand.nextSignedfloat32(0.33) + explodeVel.x, rand.nextSignedfloat32(0.33) + explodeVel.y,
-					0.05 + rand.nextfloat32(0.1),
-					0.2 + rand.nextfloat32(0.33))
+	for i := 0; i < sn*12; i++ {
+		NewFragment(this.pos, rand.nextSignedfloat32(0.33)+this.explodeVel.x, rand.nextSignedfloat32(0.33)+this.explodeVel.y, 0.05+rand.nextfloat32(0.1), 0.2+rand.nextfloat32(0.33))
 	}
-	removeTurrets()
-	int sc = spec.score
-	bool r
-	if (spec.type == EnemySpec.EnemyType.SMALL) {
-		SoundManager.playSe("small_destroyed.wav")
+	this.removeTurrets()
+	sc := this.spec.score
+	var r bool
+	if this.spec.enemyType == EnemyTypeSMALL {
+		playSe("small_destroyed.wav")
 		r = false
 	} else {
-		SoundManager.playSe("destroyed.wav")
-		int bn = bullets.removeIndexedBullets(idx)
-		destroyedCnt = 0
-		explodeCnt = 1
-		explodeItv = 3
+		playSe("destroyed.wav")
+		bn := removeAllBulletsIndexedBullets(idx)
+		this.destroyedCnt = 0
+		this.explodeCnt = 1
+		this.explodeItv = 3
 		sc += bn * 10
 		r = true
-		if (spec.isBoss) {
-			screen.setScreenShake(45, 0.04)
+		if this.spec.isBoss {
+			setScreenShake(45, 0.04)
 		}
 	}
-	setScoreIndicator(sc, multiplier)
+	this.setScoreIndicator(sc, multiplier)
 	return r
 }
 
 func (this *EnemyState) setScoreIndicator(sc int, mp float32) {
-	float32 ty = NumIndicator.getTargetY()
-	if (mp > 1) {
-		NumIndicator ni = numIndicators.getInstanceForced()
-		ni.set(sc, NumIndicator.IndicatorType.SCORE, 0.5, pos)
-		ni.addTarget(8, ty, NumIndicator.FlyingToType.RIGHT, 1, 0.5, sc, 40)
-		ni.addTarget(11, ty, NumIndicator.FlyingToType.RIGHT, 0.5, 0.75,
-								 cast(int) (sc * mp), 30)
-		ni.addTarget(13, ty, NumIndicator.FlyingToType.RIGHT, 0.25, 1,
-								 cast(int) (sc * mp * stageManager.rankMultiplier), 20)
-		ni.addTarget(12, -8, NumIndicator.FlyingToType.BOTTOM, 0.5, 0.1,
-								 cast(int) (sc * mp * stageManager.rankMultiplier), 40)
+	ty := getTargetY()
+	if mp > 1 {
+		ni := NewNumIndicator(sc, NumIndicator.IndicatorType.SCORE, 0.5, this.pos)
+		ni.addTarget(8, ty, FlyingToTypeRIGHT, 1, 0.5, sc, 40)
+		ni.addTarget(11, ty, FlyingToTypeRIGHT, 0.5, 0.75,
+			(sc * mp), 30)
+		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.25, 1,
+			(sc * mp * this.stageManager.rankMultiplier), 20)
+		ni.addTarget(12, -8, FlyingToTypeBOTTOM, 0.5, 0.1,
+			(sc * mp * this.stageManager.rankMultiplier), 40)
 		ni.gotoNextTarget()
-		ni = numIndicators.getInstanceForced()
-		int mn = cast(int) (mp * 1000)
-		ni.set(mn, NumIndicator.IndicatorType.MULTIPLIER, 0.7, pos)
-		ni.addTarget(10.5, ty, NumIndicator.FlyingToType.RIGHT, 0.5, 0.2, mn, 70)
+
+		mn := int(mp * 1000)
+		ni = NewNumIndicator(mn, IndicatorTypeMULTIPLIER, 0.7, this.pos)
+		ni.addTarget(10.5, ty, FlyingToTypeRIGHT, 0.5, 0.2, mn, 70)
 		ni.gotoNextTarget()
-		ni = numIndicators.getInstanceForced()
-		int rn = cast(int) (stageManager.rankMultiplier * 1000)
-		ni.set(rn, NumIndicator.IndicatorType.MULTIPLIER, 0.4, 11, 8)
-		ni.addTarget(13, ty, NumIndicator.FlyingToType.RIGHT, 0.5, 0.2, rn, 40)
+
+		rn := int(this.stageManager.rankMultiplier * 1000)
+		ni = NewNumIndicator(rn, IndicatorTypeMULTIPLIER, 0.4, 11, 8)
+		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.5, 0.2, rn, 40)
 		ni.gotoNextTarget()
-		scoreReel.addActualScore(cast(int) (sc * mp * stageManager.rankMultiplier))
+		this.scoreReel.addActualScore(int(sc * mp * stageManager.rankMultiplier))
 	} else {
-		NumIndicator ni = numIndicators.getInstanceForced()
-		ni.set(sc, NumIndicator.IndicatorType.SCORE, 0.3, pos)
-		ni.addTarget(11, ty, NumIndicator.FlyingToType.RIGHT, 1.5, 0.2, sc, 40)
-		ni.addTarget(13, ty, NumIndicator.FlyingToType.RIGHT, 0.25, 0.25,
-								 cast(int) (sc * stageManager.rankMultiplier), 20)
-		ni.addTarget(12, -8, NumIndicator.FlyingToType.BOTTOM, 0.5, 0.1,
-								 cast(int) (sc * stageManager.rankMultiplier), 40)
+		ni := NewNumIndicator(sc, IndicatorTypeSCORE, 0.3, this.pos)
+		ni.addTarget(11, ty, FlyingToTypeRIGHT, 1.5, 0.2, sc, 40)
+		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.25, 0.25, int(sc*this.stageManager.rankMultiplier), 20)
+		ni.addTarget(12, -8, FlyingToTypeBOTTOM, 0.5, 0.1, int(sc*this.stageManager.rankMultiplier), 40)
 		ni.gotoNextTarget()
-		ni = numIndicators.getInstanceForced()
-		int rn = cast(int) (stageManager.rankMultiplier * 1000)
-		ni.set(rn, NumIndicator.IndicatorType.MULTIPLIER, 0.4, 11, 8)
-		ni.addTarget(13, ty, NumIndicator.FlyingToType.RIGHT, 0.5, 0.2, rn, 40)
+
+		rn := int(this.stageManager.rankMultiplier * 1000)
+		ni = NewNumIndicator(rn, IndicatorTypeMULTIPLIER, 0.4, 11, 8)
+		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.5, 0.2, rn, 40)
 		ni.gotoNextTarget()
-		scoreReel.addActualScore(cast(int) (sc * stageManager.rankMultiplier))
+
+		this.scoreReel.addActualScore(int(sc * this.stageManager.rankMultiplier))
 	}
 }
 
 func (this *EnemyState) destroyedEdge(n int) {
-	SoundManager.playSe("explode.wav")
-	int sn = n
-	if (sn > 48) {
+	playSe("explode.wav")
+	sn := n
+	if sn > 48 {
 		sn = 48
 	}
-	Vector[] spp = (cast(BaseShape) spec.shape.shape).pointPos
-	float32[] spd = (cast(BaseShape)spec.shape.shape).pointDeg
-	int si = rand.nextInt(spp.length)
-	edgePos.x = spp[si].x * spec.size + pos.x
-	edgePos.y = spp[si].y * spec.size + pos.y
-	float32 ss = spec.size * 0.5
-	if (ss > 1) {
+	spp := this.spec.shape.shape.pointPos
+	spd := this.spec.shape.shape.pointDeg
+	i := rand.nextInt(spp.length)
+	this.edgePos.x = spp[si].x*this.spec.size + this.pos.x
+	this.edgePos.y = spp[si].y*this.spec.size + this.pos.y
+	ss := this.spec.size * 0.5
+	if ss > 1 {
 		ss = 1
 	}
 	for i := 0; i < sn; i++ {
-		Smoke s = smokes.getInstanceForced()
-		float32 sr = rand.nextfloat32(0.5)
-		float32 sd = spd[si] + rand.nextSignedfloat32(0.2)
-		assert(sd <>= 0)
-		s.set(edgePos, Sin32(sd) * sr, Cos32(sd) * sr, -0.004,
-					Smoke.SmokeType.EXPLOSION, 75 + rand.nextInt(25), ss)
+		sr := rand.nextfloat32(0.5)
+		sd := spd[si] + rand.nextSignedfloat32(0.2)
+		s := NewSmoke(this.edgePos, Sin32(sd)*sr, Cos32(sd)*sr, -0.004, SmokeTypeEXPLOSION, 75+rand.nextInt(25), ss)
 		for j := 0; j < 2; j++ {
-			Spark sp = sparks.getInstanceForced()
-			sp.set(edgePos, Sin32(sd) * sr * 2, Cos32(sd) * sr * 2,
-						 0.5 + rand.nextfloat32(0.5), 0.5 + rand.nextfloat32(0.5), 0, 30 + rand.nextInt(30))
+			NewSpark(this.edgePos, Sin32(sd)*sr*2, Cos32(sd)*sr*2, 0.5+rand.nextfloat32(0.5), 0.5+rand.nextfloat32(0.5), 0, 30+rand.nextInt(30))
 		}
-		if (i % 2 == 0) {
-			SparkFragment sf = sparkFragments.getInstanceForced()
-			sf.set(edgePos, Sin32(sd) * sr * 0.5, Cos32(sd) * sr * 0.5, 0.06 + rand.nextfloat32(0.07),
-						 (0.2 + rand.nextfloat32(0.1)))
+		if i%2 == 0 {
+			NewSparkFragment(this.edgePos, Sin32(sd)*sr*0.5, Cos32(sd)*sr*0.5, 0.06+rand.nextfloat32(0.07), (0.2 + rand.nextfloat32(0.1)))
 		}
 	}
 }
 
 func (this *EnemyState) removeTurrets() {
-	for i := 0; i < spec.turretGroupNum; i++ {
-		turretGroup[i].remove()
+	for i := 0; i < this.spec.turretGroupNum; i++ {
+		this.turretGroup[i].remove()
 	}
-	for i := 0; i < spec.movingTurretGroupNum; i++ {
-		movingTurretGroup[i].remove()
+	for i := 0; i < this.spec.movingTurretGroupNum; i++ {
+		this.movingTurretGroup[i].remove()
 	}
 }
 
 func (this *EnemyState) draw() {
 	glPushMatrix()
-	if (destroyedCnt < 0 && damagedCnt > 0) {
-		damagedPos.x = pos.x + rand.nextSignedfloat32(damagedCnt * 0.01)
-		damagedPos.y = pos.y + rand.nextSignedfloat32(damagedCnt * 0.01)
-		Screen.glTranslate(damagedPos)
+	if this.destroyedCnt < 0 && this.damagedCnt > 0 {
+		this.damagedPos.x = this.pos.x + rand.nextSignedfloat32(damagedCnt*0.01)
+		this.damagedPos.y = this.pos.y + rand.nextSignedfloat32(damagedCnt*0.01)
+		glTranslate(this.damagedPos)
 	} else {
-		Screen.glTranslate(pos)
+		glTranslate(this.pos)
 	}
-	glRotatef(-deg * 180 / Pi32, 0, 0, 1)
-	if (destroyedCnt >= 0) {
-		spec.destroyedShape.draw()
-	} else if (!damaged) {
-		spec.shape.draw()
+	glRotatef(-this.deg*180/Pi32, 0, 0, 1)
+	if this.destroyedCnt >= 0 {
+		this.spec.destroyedShape.draw()
+	} else if !this.damaged {
+		this.spec.shape.draw()
 	} else {
-		spec.damagedShape.draw()
+		this.spec.damagedShape.draw()
 	}
-	if (destroyedCnt < 0) {
-		spec.bridgeShape.draw()
+	if destroyedCnt < 0 {
+		this.spec.bridgeShape.draw()
 	}
 	glPopMatrix()
-	if (destroyedCnt >= 0) {
+	if this.destroyedCnt >= 0 {
 		return
 	}
-	for i := 0; i < spec.turretGroupNum; i++ {
-		turretGroup[i].draw()
+	for i := 0; i < this.spec.turretGroupNum; i++ {
+		this.turretGroup[i].draw()
 	}
-	if (multiplier > 1) {
-		float32 ox, oy
-		if (multiplier < 10) {
+	if this.multiplier > 1 {
+		var ox, oy float32
+		if this.multiplier < 10 {
 			ox = 2.1
 		} else {
 			ox = 1.4
 		}
 		oy = 1.25
-		if(spec.isBoss) {
+		if this.spec.isBoss() {
 			ox += 4
 			oy -= 1.25
 		}
-		Letter.drawNumSign(cast(int) (multiplier * 1000),
-											 pos.x + ox, pos.y + oy, 0.33, 1, 33, 3)
+		drawNumSign(int(multiplier*1000), this.pos.x+ox, this.pos.y+oy, 0.33, 1, 33, 3)
 	}
 }
 
@@ -508,107 +490,104 @@ func (this *EnemyState) draw() {
  * Base class for a specification of an enemy.
  */
 type EnemyType int
+
 const (
 	EnemyTypeSMALL EnemyType = iota
-	EnemyTypeLARGE 
+	EnemyTypeLARGE
 	EnemyTypePLATFORM
 )
 
 type EnemySpec struct {
-  field Field
-  ship Ship
-  shield int
-  size float32
-  distRatio float32
-  turretGroupSpec [EnemyState.TURRET_GROUP_MAX]TurretGroupSpec
-  turretGroupNum int
-  movingTurretGroupSpec [EnemyState.MOVING_TURRET_GROUP_MAX]MovingTurretGroupSpec
-  movingTurretGroupNum int
-  shape, damagedShape, destroyedShape, bridgeShape EnemyShape
-  enemyType int
+	field                                            Field
+	ship                                             Ship
+	shield                                           int
+	size                                             float32
+	distRatio                                        float32
+	turretGroupSpec                                  [TURRET_GROUP_MAX]TurretGroupSpec
+	turretGroupNum                                   int
+	movingTurretGroupSpec                            [MOVING_TURRET_GROUP_MAX]MovingTurretGroupSpec
+	movingTurretGroupNum                             int
+	shape, damagedShape, destroyedShape, bridgeShape EnemyShape
+	enemyType                                        EnemyType
 }
 
-this(field Field, ship Ship ) {
+func NewEnemySpec(field Field, ship Ship, enemyType EnemyType) *EnemySpec {
+	this := new(EnemySpec)
 	this.field = field
 	this.ship = ship
 	this.sparks = sparks
 	this.smokes = smokes
 	this.fragments = fragments
 	this.wakes = wakes
-	foreach (inout TurretGroupSpec tgs; turretGroupSpec)
-		tgs = new TurretGroupSpec
-	foreach (inout MovingTurretGroupSpec tgs; movingTurretGroupSpec)
-		tgs = new MovingTurretGroupSpec
-	distRatio = 0
-	shield = 1
-	_size = 1
-}
-
-func (this *EnemySpec) set(enemyType int) {
+	for i, _ := range this.turretGroupSpec {
+		this.turretGroupSpec[i] = NewTurretGroupSpec()
+	}
+	for i, _ := range this.movingTurretGroupSpec {
+		this.movingTurretGroupSpec[i] = NewMovingTurretGroupSpec()
+	}
+	this.shield = 1
+	this.size = 1
 	this.enemyType = enemyType
-	_size = 1
-	distRatio = 0
-	turretGroupNum = movingTurretGroupNum = 0
 }
 
 func (this *EnemySpec) getTurretGroupSpec() *TurretGroupSpec {
-	turretGroupNum++
-	turretGroupSpec[turretGroupNum - 1].init()
-	return turretGroupSpec[turretGroupNum - 1]
+	this.turretGroupNum++
+	this.turretGroupSpec[this.turretGroupNum-1].init()
+	return this.turretGroupSpec[this.turretGroupNum-1]
 }
 
 func (this *EnemySpec) getMovingTurretGroupSpec() *MovingTurretGroupSpec {
-	movingTurretGroupNum++
-	movingTurretGroupSpec[movingTurretGroupNum - 1].init()
-	return movingTurretGroupSpec[movingTurretGroupNum - 1]
+	this.movingTurretGroupNum++
+	this.movingTurretGroupSpec[this.movingTurretGroupNum-1].init()
+	return this.movingTurretGroupSpec[this.movingTurretGroupNum-1]
 }
 
 func (this *EnemySpec) addMovingTurret(rank float32, bossMode bool /*= false*/) {
-	int mtn = cast(int) (rank * 0.2)
-	if (mtn > EnemyState.MOVING_TURRET_GROUP_MAX) {
-		mtn = EnemyState.MOVING_TURRET_GROUP_MAX
+	mtn := int(rank * 0.2)
+	if mtn > MOVING_TURRET_GROUP_MAX {
+		mtn = MOVING_TURRET_GROUP_MAX
 	}
-	if (mtn >= 2) {
-		mtn = 1 + rand.nextInt(mtn - 1)
+	if mtn >= 2 {
+		mtn = 1 + rand.nextInt(mtn-1)
 	} else {
 		mtn = 1
 	}
-	float32 br = rank / mtn
-	int moveType
-	if (!bossMode) {
-		switch (rand.nextInt(4)) {
+	br := this.rank / mtn
+	var moveType TurretMoveType
+	if !this.bossMode {
+		switch rand.nextInt(4) {
 		case 0:
 		case 1:
-			moveType = MovingTurretGroupSpec.MoveType.ROLL
+			moveType = TurretMoveTypeROLL
 			break
 		case 2:
-			moveType = MovingTurretGroupSpec.MoveType.SWING_FIX
+			moveType = TurretMoveTypeSWING_FIX
 			break
 		case 3:
-			moveType = MovingTurretGroupSpec.MoveType.SWING_AIM
+			moveType = TurretMoveTypeSWING_AIM
 			break
 		}
 	} else {
-		moveType = MovingTurretGroupSpec.MoveType.ROLL
+		moveType = TurretMoveTypeROLL
 	}
-	float32 rad = 0.9 + rand.nextfloat32(0.4) - mtn * 0.1
-	float32 radInc = 0.5 + rand.nextfloat32(0.25)
-	float32 ad = Pi32 * 2
-	float32 a, av, dv, s, sv
-	switch (moveType) {
-	case MovingTurretGroupSpec.MoveType.ROLL:
+	rad := 0.9 + rand.nextfloat32(0.4) - mtn*0.1
+	radInc := 0.5 + rand.nextfloat32(0.25)
+	ad := Pi32 * 2
+	var a, av, dv, s, sv float32
+	switch moveType {
+	case TurretMoveTypeROLL:
 		a = 0.01 + rand.nextfloat32(0.04)
 		av = 0.01 + rand.nextfloat32(0.03)
 		dv = 0.01 + rand.nextfloat32(0.04)
 		break
-	case MovingTurretGroupSpec.MoveType.SWING_FIX:
-		ad = Pi32 / 10 + rand.nextfloat32(Pi32 / 15)
+	case TurretMoveTypeSWING_FIX:
+		ad = Pi32/10 + rand.nextfloat32(Pi32/15)
 		s = 0.01 + rand.nextfloat32(0.02)
 		sv = 0.01 + rand.nextfloat32(0.03)
 		break
-	case MovingTurretGroupSpec.MoveType.SWING_AIM:
-		ad = Pi32 / 10 + rand.nextfloat32(Pi32 / 15)
-		if (rand.nextInt(5) == 0) {
+	case TurretMoveTypeSWING_AIM:
+		ad = Pi32/10 + rand.nextfloat32(Pi32/15)
+		if rand.nextInt(5) == 0 {
 			s = 0.01 + rand.nextfloat32(0.01)
 		} else {
 			s = 0
@@ -617,75 +596,75 @@ func (this *EnemySpec) addMovingTurret(rank float32, bossMode bool /*= false*/) 
 		break
 	}
 	for i := 0; i < mtn; i++ {
-		MovingTurretGroupSpec tgs = getMovingTurretGroupSpec()
+		tgs := this.getMovingTurretGroupSpec()
 		tgs.moveType = moveType
 		tgs.radiusBase = rad
-		float32 sr
-		switch (moveType) {
-		case MovingTurretGroupSpec.MoveType.ROLL:
+		var sr float32
+		switch moveType {
+		case TurretMoveTypeROLL:
 			tgs.alignDeg = ad
 			tgs.num = 4 + rand.nextInt(6)
-			if (rand.nextInt(2) == 0) {
-				if (rand.nextInt(2) == 0) {
+			if rand.nextInt(2) == 0 {
+				if rand.nextInt(2) == 0 {
 					tgs.setRoll(dv, 0, 0)
 				} else {
 					tgs.setRoll(-dv, 0, 0)
 				}
 			} else {
-				if (rand.nextInt(2) == 0) {
+				if rand.nextInt(2) == 0 {
 					tgs.setRoll(0, a, av)
 				} else {
 					tgs.setRoll(0, -a, av)
 				}
 			}
-			if (rand.nextInt(3) == 0) {
-				tgs.setRadiusAmp(1 + rand.nextfloat32(1), 0.01 + rand.nextfloat32(0.03))
+			if rand.nextInt(3) == 0 {
+				tgs.setRadiusAmp(1+rand.nextfloat32(1), 0.01+rand.nextfloat32(0.03))
 			}
-			if (rand.nextInt(2) == 0) {
+			if rand.nextInt(2) == 0 {
 				tgs.distRatio = 0.8 + rand.nextSignedfloat32(0.3)
 			}
 			sr = br / tgs.num
 			break
-		case MovingTurretGroupSpec.MoveType.SWING_FIX:
+		case TurretMoveTypeSWING_FIX:
 			tgs.num = 3 + rand.nextInt(5)
-			tgs.alignDeg = ad * (tgs.num * 0.1 + 0.3)
-			if (rand.nextInt(2) == 0) {
+			tgs.alignDeg = ad * (tgs.num*0.1 + 0.3)
+			if rand.nextInt(2) == 0 {
 				tgs.setSwing(s, sv)
 			} else {
 				tgs.setSwing(-s, sv)
 			}
-			if (rand.nextInt(6) == 0) {
-				tgs.setRadiusAmp(1 + rand.nextfloat32(1), 0.01 + rand.nextfloat32(0.03))
+			if rand.nextInt(6) == 0 {
+				tgs.setRadiusAmp(1+rand.nextfloat32(1), 0.01+rand.nextfloat32(0.03))
 			}
-			if (rand.nextInt(4) == 0) {
-				tgs.setAlignAmp(0.25 + rand.nextfloat32(0.25), 0.01 + rand.nextfloat32(0.02))
+			if rand.nextInt(4) == 0 {
+				tgs.setAlignAmp(0.25+rand.nextfloat32(0.25), 0.01+rand.nextfloat32(0.02))
 			}
 			sr = br / tgs.num
 			sr *= 0.6
 			break
-		case MovingTurretGroupSpec.MoveType.SWING_AIM:
+		case TurretMoveTypeSWING_AIM:
 			tgs.num = 3 + rand.nextInt(4)
-			tgs.alignDeg = ad * (tgs.num * 0.1 + 0.3)
-			if (rand.nextInt(2) == 0) {
+			tgs.alignDeg = ad * (tgs.num*0.1 + 0.3)
+			if rand.nextInt(2) == 0 {
 				tgs.setSwing(s, sv, true)
 			} else {
 				tgs.setSwing(-s, sv, true)
 			}
-			if (rand.nextInt(4) == 0) {
-				tgs.setRadiusAmp(1 + rand.nextfloat32(1), 0.01 + rand.nextfloat32(0.03))
+			if rand.nextInt(4) == 0 {
+				tgs.setRadiusAmp(1+rand.nextfloat32(1), 0.01+rand.nextfloat32(0.03))
 			}
-			if (rand.nextInt(5) == 0) {
-				tgs.setAlignAmp(0.25 + rand.nextfloat32(0.25), 0.01 + rand.nextfloat32(0.02))
+			if rand.nextInt(5) == 0 {
+				tgs.setAlignAmp(0.25+rand.nextfloat32(0.25), 0.01+rand.nextfloat32(0.02))
 			}
 			sr = br / tgs.num
 			sr *= 0.4
 			break
 		}
-		if (rand.nextInt(4) == 0) {
+		if rand.nextInt(4) == 0 {
 			tgs.setXReverse(-1)
 		}
-		tgs.turretSpec.setParam(sr, TurretSpec.TurretType.MOVING, rand)
-		if (bossMode) {
+		tgs.turretSpec.setParam(sr, TurretTypeMOVING, rand)
+		if this.bossMode {
 			tgs.turretSpec.setBossSpec()
 		}
 		rad += radInc
@@ -697,11 +676,11 @@ func (this *EnemySpec) checkCollision(es EnemyState, x float32, y float32, c Col
 	return es.checkCollision(x, y, c, shot)
 }
 
-func (this *EnemySpec) checkShipCollision(es EnemyState, x float32, y float32 y,largeOnly bool /*= false*/) bool {
-	if (es.destroyedCnt >= 0 || (largeOnly && enemyType != EnemyType.LARGE)) {
+func (this *EnemySpec) checkShipCollision(es EnemyState, x float32, y float32, largeOnly bool /*= false*/) bool {
+	if es.destroyedCnt >= 0 || (largeOnly && this.enemyType != EnemyTypeLARGE) {
 		return false
 	}
-	return shape.checkShipCollision(x - es.pos.x, y - es.pos.y, es.deg); 
+	return this.shape.checkShipCollision(x-es.pos.x, y-es.pos.y, es.deg)
 }
 
 func (this *EnemySpec) move(es EnemyState) bool {
@@ -713,27 +692,26 @@ func (this *EnemySpec) draw(es EnemyState) {
 }
 
 func (this *EnemySpec) size(v float32) float32 {
-	_size = v
-	if (shape) {
-		shape.size = _size
+	this.size = v
+	if this.shape {
+		this.shape.size = this.size
 	}
-	if (damagedShape) {
-		damagedShape.size = _size
+	if this.damagedShape {
+		this.damagedShape.size = this.size
 	}
-	if (destroyedShape) {
-		destroyedShape.size = _size
+	if this.destroyedShape {
+		this.destroyedShape.size = this.size
 	}
-	if (bridgeShape) {
-		float32 s = 0.9
-		bridgeShape.size = s * (1 - distRatio)
+	if this.bridgeShape {
+		s := 0.9
+		this.bridgeShape.size = s * (1 - this.distRatio)
 	}
-	return _size
+	return this.size
 }
 
 func (this *EnemySpec) isSmallEnemy() bool {
-	return enemyType == EnemyType.SMALL
+	return this.enemyType == EnemyTypeSMALL
 }
-
 
 /**
  * Specification for a small class ship.
@@ -755,142 +733,143 @@ const (
 type SmallShipEnemySpec struct {
 	*EnemySpec
 
-  moveType int
-  accel, maxSpeed, staySpeed float32
-  moveDuration, stayDuration int
-  speed, turnDeg float32
+	moveType                   int
+	accel, maxSpeed, staySpeed float32
+	moveDuration, stayDuration int
+	speed, turnDeg             float32
 }
 
-this(Field field, Ship ship){
-	super(field, ship)
-	moveDuration = stayDuration = 1
+func NewSmallShipEnemySpec(Field field, Ship ship) *SmallShipEnemySpec {
+	this := SmallShipEnemySpec{NewEnemySpec(field, ship)}
+	this.moveDuration = 1
+	this.stayDuration = 1
+	return this
 }
 
 func (this *SmallShipEnemySpec) setParam(rank float32) {
-	set(EnemyType.SMALL)
-	shape = new EnemyShape(EnemyShape.EnemyShapeType.SMALL)
-	damagedShape = new EnemyShape(EnemyShape.EnemyShapeType.SMALL_DAMAGED)
-	bridgeShape = new EnemyShape(EnemyShape.EnemyShapeType.SMALL_BRIDGE)
-	moveType = rand.nextInt(2)
-	float32 sr = rand.nextfloat32(rank * 0.8)
-	if (sr > 25) {
+	this.set(EnemyType.SMALL)
+	this.shape = NewEnemyShape(EnemyShapeTypeSMALL)
+	this.damagedShape = NewEnemyShape(EnemyShapeTypeSMALL_DAMAGED)
+	this.bridgeShape = NewEnemyShape(EnemyShapeTypeSMALL_BRIDGE)
+	this.moveType = rand.nextInt(2)
+	sr := rand.nextfloat32(rank * 0.8)
+	if sr > 25 {
 		sr = 25
 	}
-	switch (moveType) {
-	case MoveType.STOPANDGO:
-		distRatio = 0.5
-		size = 0.47 + rand.nextfloat32(0.1)
-		accel = 0.5 - 0.5 / (2.0 + rand.nextfloat32(rank))
-		maxSpeed = 0.05 * (1.0 + sr)
-		staySpeed = 0.03
-		moveDuration = 32 + rand.nextSignedInt(12)
-		stayDuration = 32 + rand.nextSignedInt(12)
+	switch this.moveType {
+	case MoveTypeSTOPANDGO:
+		this.distRatio = 0.5
+		this.size = 0.47 + rand.nextfloat32(0.1)
+		this.accel = 0.5 - 0.5/(2.0+rand.nextfloat32(rank))
+		this.maxSpeed = 0.05 * (1.0 + sr)
+		this.staySpeed = 0.03
+		this.moveDuration = 32 + rand.nextSignedInt(12)
+		this.stayDuration = 32 + rand.nextSignedInt(12)
 		break
-	case MoveType.CHASE:
-		distRatio = 0.5
-		size = 0.5 + rand.nextfloat32(0.1)
-		speed = 0.036 * (1.0 + sr)
-		turnDeg = 0.02 + rand.nextSignedfloat32(0.04)
+	case MoveTypeCHASE:
+		this.distRatio = 0.5
+		this.size = 0.5 + rand.nextfloat32(0.1)
+		this.speed = 0.036 * (1.0 + sr)
+		this.turnDeg = 0.02 + rand.nextSignedfloat32(0.04)
 		break
 	}
-	shield = 1
-	TurretGroupSpec tgs = getTurretGroupSpec()
-	tgs.turretSpec.setParam(rank - sr * 0.5, TurretSpec.TurretType.SMALL, rand)
+	this.shield = 1
+	tgs := this.getTurretGroupSpec()
+	tgs.turretSpec.setParam(rank-sr*0.5, TurretTypeSMALL)
 }
 
 func (this *SmallShipEnemySpec) setFirstState(es EnemyState, appType int) bool {
 	es.setSpec(this)
-	if (!es.setAppearancePos(field, ship, rand, appType)) {
+	if !es.setAppearancePos(this.field, this.ship, this.appType) {
 		return false
 	}
-	switch (moveType) {
-	case MoveType.STOPANDGO:
+	switch this.moveType {
+	case MoveTypeSTOPANDGO:
 		es.speed = 0
-		es.state = MoveState.MOVING
-		es.cnt = moveDuration
+		es.state = MoveStateMOVING
+		es.cnt = this.moveDuration
 		break
-	case MoveType.CHASE:
-		es.speed = speed
+	case MoveTypeCHASE:
+		es.speed = this.speed
 		break
 	}
 	return true
 }
 
 func (this *SmallShipEnemySpec) move(es EnemyState) bool {
-	if (!super.move(es)) {
+	if !super.move(es) {
 		return false
 	}
-	switch (moveType) {
-	case MoveType.STOPANDGO:
+	switch this.moveType {
+	case MoveTypeSTOPANDGO:
 		es.pos.x += Sin32(es.velDeg) * es.speed
 		es.pos.y += Cos32(es.velDeg) * es.speed
-		es.pos.y -= field.lastScrollY
-		if  (es.pos.y <= -field.outerSize.y) {
+		es.pos.y -= this.field.lastScrollY
+		if es.pos.y <= -this.field.outerSize.y {
 			return false
 		}
-		if (field.getBlock(es.pos) >= 0 || !field.checkInOuterHeightField(es.pos)) {
+		if this.field.getBlock(es.pos) >= 0 || !this.field.checkInOuterHeightField(es.pos) {
 			es.velDeg += Pi32
 			es.pos.x += Sin32(es.velDeg) * es.speed * 2
 			es.pos.y += Cos32(es.velDeg) * es.speed * 2
 		}
-		switch (es.state) {
-		case MoveState.MOVING:
-			es.speed += (maxSpeed - es.speed) * accel
+		switch es.state {
+		case MoveStateMOVING:
+			es.speed += (maxSpeed - es.speed) * this.accel
 			es.cnt--
-			if (es.cnt <= 0) {
+			if es.cnt <= 0 {
 				es.velDeg = rand.nextfloat32(Pi32 * 2)
-				es.cnt = stayDuration
-				es.state = MoveState.STAYING
+				es.cnt = this.stayDuration
+				es.state = MoveStateSTAYING
 			}
 			break
-		case MoveState.STAYING:
-			es.speed += (staySpeed - es.speed) * accel
+		case MoveStateSTAYING:
+			es.speed += (this.staySpeed - es.speed) * this.accel
 			es.cnt--
-			if (es.cnt <= 0) {
-				es.cnt = moveDuration
-				es.state = MoveState.MOVING
+			if es.cnt <= 0 {
+				es.cnt = this.moveDuration
+				es.state = MoveStateMOVING
 			}
 			break
 		}
 		break
-	case MoveType.CHASE:
-		es.pos.x += Sin32(es.velDeg) * speed
-		es.pos.y += Cos32(es.velDeg) * speed
-		es.pos.y -= field.lastScrollY
-		if  (es.pos.y <= -field.outerSize.y) {
+	case MoveTypeCHASE:
+		es.pos.x += Sin32(es.velDeg) * this.speed
+		es.pos.y += Cos32(es.velDeg) * this.speed
+		es.pos.y -= this.field.lastScrollY
+		if es.pos.y <= -this.field.outerSize.y {
 			return false
 		}
-		if (field.getBlock(es.pos) >= 0 || !field.checkInOuterHeightField(es.pos)) {
+		if this.field.getBlock(es.pos) >= 0 || !this.field.checkInOuterHeightField(es.pos) {
 			es.velDeg += Pi32
 			es.pos.x += Sin32(es.velDeg) * es.speed * 2
 			es.pos.y += Cos32(es.velDeg) * es.speed * 2
 		}
-		float32 ad
-		Vector shipPos = ship.nearPos(es.pos)
-		if (shipPos.dist(es.pos) < 0.1) {
+		var od float32
+		shipPos := this.ship.nearPos(es.pos)
+		if shipPos.dist(es.pos) < 0.1 {
 			ad = 0
 		} else {
-			ad = atan2(shipPos.x - es.pos.x, shipPos.y - es.pos.y)
+			ad = atan2(shipPos.x-es.pos.x, shipPos.y-es.pos.y)
 		}
-		assert(ad <>= 0)
-		float32 od = ad - es.velDeg
-		Math.normalizeDeg(od)
-		if (od <= turnDeg && od >= -turnDeg) {
+		od = ad - es.velDeg
+		normalizeDeg(od)
+		if od <= this.turnDeg && od >= -this.turnDeg {
 			es.velDeg = ad
-		} else if (od < 0) {
-			es.velDeg -= turnDeg
+		} else if od < 0 {
+			es.velDeg -= this.turnDeg
 		} else {
-			es.velDeg += turnDeg
+			es.velDeg += this.turnDeg
 		}
-		Math.normalizeDeg(es.velDeg)
+		normalizeDeg(es.velDeg)
 		es.cnt++
 	}
-	float32 od = es.velDeg - es.deg
-	Math.normalizeDeg(od)
+	od := es.velDeg - es.deg
+	normalizeDeg(od)
 	es.deg += od * 0.05
-	Math.normalizeDeg(es.deg)
-	if (es.cnt % 6 == 0 && es.speed >= 0.03) {
-		shape.addWake(wakes, es.pos, es.deg, es.speed)
+	normalizeDeg(es.deg)
+	if es.cnt%6 == 0 && es.speed >= 0.03 {
+		this.shape.addWake(wakes, es.pos, es.deg, es.speed)
 	}
 	return true
 }
@@ -907,203 +886,203 @@ func (this *SmallShipEnemySpec) isBoss() bool {
  * Specification for a large/middle class ship.
  */
 type ShipClass int
+
 const (
 	ShipClassMIDDLE ShipClass = iota
-	LARGE 
+	LARGE
 	BOSS
 )
 
 const SINK_INTERVAL = 120
 
-type ShipEnemySpec struct{
+type ShipEnemySpec struct {
 	*EnemySpec
 
-  speed, degVel float32
-  shipClass int
+	speed, degVel float32
+	shipClass     int
 }
 
-
-this(Field field, Ship ship ) {
-	super(field, ship)
+func NewShipEnemySpec(field Field, ship Ship) *ShipEnemySpec {
+	return ShipEnemySpec{NewEnemySpec(field.ship)}
 }
 
 func (this *ShipClass) setParam(rank float32, cls int) {
-	shipClass = cls
-	set(EnemyType.LARGE)
-	shape = new EnemyShape(EnemyShape.EnemyShapeType.MIDDLE)
-	damagedShape = new EnemyShape(EnemyShape.EnemyShapeType.MIDDLE_DAMAGED)
-	destroyedShape = new EnemyShape(EnemyShape.EnemyShapeType.MIDDLE_DESTROYED)
-	bridgeShape = new EnemyShape(EnemyShape.EnemyShapeType.MIDDLE_BRIDGE)
-	distRatio = 0.7
-	int mainTurretNum = 0, subTurretNum = 0
-	float32 movingTurretRatio = 0
-	float32 rk = rank
-	switch (cls) {
-	case ShipClass.MIDDLE:
-		float32 sz = 1.5 + rank / 15 + rand.nextfloat32(rank / 15)
-		float32 ms = 2 + rand.nextfloat32(0.5)
-		if (sz > ms) {
+	this.shipClass = cls
+	this.set(EnemyTypeLARGE)
+	this.shape = NewEnemyShape(EnemyShapeTypeMIDDLE)
+	this.damagedShape = NewEnemyShape(EnemyShapeTypeMIDDLE_DAMAGED)
+	this.destroyedShape = NewEnemyShape(EnemyShapeTypeMIDDLE_DESTROYED)
+	this.bridgeShape = NewEnemyShape(EnemyShapeTypeMIDDLE_BRIDGE)
+	this.distRatio = 0.7
+	var mainTurretNum, subTurretNum int
+	var movingTurretRatio float32
+	rk := this.rank
+	switch cls {
+	case ShipClassMIDDLE:
+		sz := 1.5 + this.rank/15 + rand.nextfloat32(this.rank/15)
+		ms := 2 + rand.nextfloat32(0.5)
+		if sz > ms {
 			sz = ms
 		}
-		size = sz
-		speed = 0.015 + rand.nextSignedfloat32(0.005)
-		degVel = 0.005 + rand.nextSignedfloat32(0.003)
-		switch (rand.nextInt(3)) {
+		this.size = sz
+		this.speed = 0.015 + rand.nextSignedfloat32(0.005)
+		this.degVel = 0.005 + rand.nextSignedfloat32(0.003)
+		switch rand.nextInt(3) {
 		case 0:
-			mainTurretNum = cast(int) (size * (1 + rand.nextSignedfloat32(0.25)) + 1)
+			mainTurretNum = int(this.size*(1+rand.nextSignedfloat32(0.25)) + 1)
 			break
 		case 1:
-			subTurretNum = cast(int) (size * 1.6 * (1 + rand.nextSignedfloat32(0.5)) + 2)
+			subTurretNum = int(this.size*1.6*(1+rand.nextSignedfloat32(0.5)) + 2)
 			break
 		case 2:
-			mainTurretNum = cast(int) (size * (0.5 + rand.nextSignedfloat32(0.12)) + 1)
+			mainTurretNum = int(this.size*(0.5+rand.nextSignedfloat32(0.12)) + 1)
 			movingTurretRatio = 0.5 + rand.nextfloat32(0.25)
-			rk = rank * (1 - movingTurretRatio)
+			rk = this.rank * (1 - movingTurretRatio)
 			movingTurretRatio *= 2
 			break
 		}
 		break
-	case ShipClass.LARGE:
-		float32 sz = 2.5 + rank / 24 + rand.nextfloat32(rank / 24)
-		float32 ms = 3 + rand.nextfloat32(1)
-		if (sz > ms) {
+	case ShipClassLARGE:
+		sz := 2.5 + this.rank/24 + rand.nextfloat32(this.rank/24)
+		ms := 3 + rand.nextfloat32(1)
+		if sz > ms {
 			sz = ms
 		}
-		size = sz
-		speed = 0.01 + rand.nextSignedfloat32(0.005)
-		degVel = 0.003 + rand.nextSignedfloat32(0.002)
-		mainTurretNum = cast(int) (size * (0.7 + rand.nextSignedfloat32(0.2)) + 1)
-		subTurretNum = cast(int) (size * 1.6 * (0.7 + rand.nextSignedfloat32(0.33)) + 2)
+		this.size = sz
+		this.speed = 0.01 + rand.nextSignedfloat32(0.005)
+		this.degVel = 0.003 + rand.nextSignedfloat32(0.002)
+		mainTurretNum = int(this.size*(0.7+rand.nextSignedfloat32(0.2)) + 1)
+		subTurretNum = (this.size*1.6*(0.7+rand.nextSignedfloat32(0.33)) + 2)
 		movingTurretRatio = 0.25 + rand.nextfloat32(0.5)
-		rk = rank * (1 - movingTurretRatio)
+		rk = this.rank * (1 - movingTurretRatio)
 		movingTurretRatio *= 3
 		break
-	case ShipClass.BOSS:
-		float32 sz = 5 + rank / 30 + rand.nextfloat32(rank / 30)
-		float32 ms = 9 + rand.nextfloat32(3)
-		if (sz > ms) {
+	case ShipClassBOSS:
+		sz := 5 + this.rank/30 + rand.nextfloat32(this.rank/30)
+		ms := 9 + this.rand.nextfloat32(3)
+		if sz > ms {
 			sz = ms
 		}
-		size = sz
-		speed = ship.scrollSpeedBase + 0.0025 + rand.nextSignedfloat32(0.001)
-		degVel = 0.003 + rand.nextSignedfloat32(0.002)
-		mainTurretNum = cast(int) (size * 0.8 * (1.5 + rand.nextSignedfloat32(0.4)) + 2)
-		subTurretNum = cast(int) (size * 0.8 * (2.4 + rand.nextSignedfloat32(0.6)) + 2)
+		this.size = sz
+		this.speed = this.ship.scrollSpeedBase + 0.0025 + rand.nextSignedfloat32(0.001)
+		this.degVel = 0.003 + rand.nextSignedfloat32(0.002)
+		mainTurretNum = int(size*0.8*(1.5+rand.nextSignedfloat32(0.4)) + 2)
+		subTurretNum = int(size*0.8*(2.4+rand.nextSignedfloat32(0.6)) + 2)
 		movingTurretRatio = 0.2 + rand.nextfloat32(0.3)
-		rk = rank * (1 - movingTurretRatio)
+		rk = this.rank * (1 - movingTurretRatio)
 		movingTurretRatio *= 2.5
 		break
 	}
-	shield = cast(int) (size * 10)
-	if (cls == ShipClass.BOSS) {
-		shield *= 2.4
+	this.shield = int(this.size * 10)
+	if cls == ShipClassBOSS {
+		this.shield *= 2.4
 	}
-	if (mainTurretNum + subTurretNum <= 0) {
-		TurretGroupSpec tgs = getTurretGroupSpec()
-		tgs.turretSpec.setParam(0, TurretSpec.TurretType.DUMMY, rand)
+	if mainTurretNum+subTurretNum <= 0 {
+		tgs := this.getTurretGroupSpec()
+		tgs.turretSpec.setParam(0, TurretTypeDUMMY)
 	} else {
-		float32 subTurretRank = rk / (mainTurretNum * 3 + subTurretNum)
-		float32 mainTurretRank = subTurretRank * 2.5
-		if (cls != ShipClass.BOSS) {
-			int frontMainTurretNum = cast(int) (mainTurretNum / 2 + 0.99)
-			int rearMainTurretNum = mainTurretNum - frontMainTurretNum
-			if (frontMainTurretNum > 0) {
-				TurretGroupSpec tgs = getTurretGroupSpec()
-				tgs.turretSpec.setParam(mainTurretRank, TurretSpec.TurretType.MAIN, rand)
+		subTurretRank := rk / (mainTurretNum*3 + subTurretNum)
+		mainTurretRank := subTurretRank * 2.5
+		if cls != ShipClassBOSS {
+			frontMainTurretNum := int(mainTurretNum/2 + 0.99)
+			rearMainTurretNum := mainTurretNum - frontMainTurretNum
+			if frontMainTurretNum > 0 {
+				tgs := this.getTurretGroupSpec()
+				tgs.turretSpec.setParam(mainTurretRank, TurretTypeMAIN)
 				tgs.num = frontMainTurretNum
-				tgs.alignType = TurretGroupSpec.AlignType.STRAIGHT
-				tgs.offset.y = -size * (0.9 + rand.nextSignedfloat32(0.05))
+				tgs.alignType = AlignTypeSTRAIGHT
+				tgs.offset.y = -this.size * (0.9 + rand.nextSignedfloat32(0.05))
 			}
-			if (rearMainTurretNum > 0) {
-				TurretGroupSpec tgs = getTurretGroupSpec()
-				tgs.turretSpec.setParam(mainTurretRank, TurretSpec.TurretType.MAIN, rand)
+			if rearMainTurretNum > 0 {
+				tgs := this.getTurretGroupSpec()
+				tgs.turretSpec.setParam(mainTurretRank, TurretTypeMAIN)
 				tgs.num = rearMainTurretNum
-				tgs.alignType = TurretGroupSpec.AlignType.STRAIGHT
-				tgs.offset.y = size * (0.9 + rand.nextSignedfloat32(0.05))
-			} 
-			TurretSpec pts
-			if (subTurretNum > 0) {
-				int frontSubTurretNum = (subTurretNum + 2) / 4
-				int rearSubTurretNum = (subTurretNum - frontSubTurretNum * 2) / 2
-				int tn = frontSubTurretNum
-				float32 ad = -Pi32 / 4
+				tgs.alignType = AlignTypeSTRAIGHT
+				tgs.offset.y = this.size * (0.9 + rand.nextSignedfloat32(0.05))
+			}
+			var pts TurretSpec
+			if subTurretNum > 0 {
+				frontSubTurretNum := (subTurretNum + 2) / 4
+				rearSubTurretNum := (subTurretNum - frontSubTurretNum*2) / 2
+				tn := frontSubTurretNum
+				ad := -Pi32 / 4
 				for i := 0; i < 4; i++ {
-					if (i == 2) {
+					if i == 2 {
 						tn = rearSubTurretNum
 					}
-					if (tn <= 0) {
+					if tn <= 0 {
 						continue
 					}
-					TurretGroupSpec tgs = getTurretGroupSpec()
-					if (i == 0 || i == 2) {
-						if (rand.nextInt(2) == 0) {
-							tgs.turretSpec.setParam(subTurretRank, TurretSpec.TurretType.SUB, rand)
+					tgs := this.getTurretGroupSpec()
+					if i == 0 || i == 2 {
+						if rand.nextInt(2) == 0 {
+							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
+						} else {
+							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB_DESTRUCTIVE)
 						}
-						else
-							tgs.turretSpec.setParam(subTurretRank, TurretSpec.TurretType.SUB_DESTRUCTIVE, rand)
 						pts = tgs.turretSpec
 					} else {
 						tgs.turretSpec.setParam(pts)
 					}
 					tgs.num = tn
-					tgs.alignType = TurretGroupSpec.AlignType.ROUND
+					tgs.alignType = AlignTypeROUND
 					tgs.alignDeg = ad
 					ad += Pi32 / 2
-					tgs.alignWidth = Pi32 / 6 + rand.nextfloat32(Pi32 / 8)
-					tgs.radius = size * 0.75
-					tgs.distRatio = distRatio
+					tgs.alignWidth = Pi32/6 + rand.nextfloat32(Pi32/8)
+					tgs.radius = this.size * 0.75
+					tgs.distRatio = this.distRatio
 				}
 			}
 		} else {
 			mainTurretRank *= 2.5
 			subTurretRank *= 2
-			TurretSpec pts
-			if (mainTurretNum > 0) {
-				int frontMainTurretNum = (mainTurretNum + 2) / 4
-				int rearMainTurretNum = (mainTurretNum - frontMainTurretNum * 2) / 2
-				int tn = frontMainTurretNum
-				float32 ad = -Pi32 / 4
+			var pts TurretSpec
+			if mainTurretNum > 0 {
+				frontMainTurretNum := (mainTurretNum + 2) / 4
+				rearMainTurretNum := (mainTurretNum - frontMainTurretNum*2) / 2
+				tn := frontMainTurretNum
+				ad := -Pi32 / 4
 				for i := 0; i < 4; i++ {
-					if (i == 2) {
+					if i == 2 {
 						tn = rearMainTurretNum
 					}
-					if (tn <= 0) {
+					if tn <= 0 {
 						continue
 					}
-					TurretGroupSpec tgs = getTurretGroupSpec()
-					if (i == 0 || i == 2) {
-						tgs.turretSpec.setParam(mainTurretRank, TurretSpec.TurretType.MAIN, rand)
+					tgs := this.getTurretGroupSpec()
+					if i == 0 || i == 2 {
+						tgs.turretSpec.setParam(mainTurretRank, TurretTypeMAIN)
 						pts = tgs.turretSpec
 						pts.setBossSpec()
 					} else {
 						tgs.turretSpec.setParam(pts)
 					}
 					tgs.num = tn
-					tgs.alignType = TurretGroupSpec.AlignType.ROUND
+					tgs.alignType = AlignTypeROUND
 					tgs.alignDeg = ad
 					ad += Pi32 / 2
-					tgs.alignWidth = Pi32 / 6 + rand.nextfloat32(Pi32 / 8)
-					tgs.radius = size * 0.45
-					tgs.distRatio = distRatio
+					tgs.alignWidth = Pi32/6 + rand.nextfloat32(Pi32/8)
+					tgs.radius = this.size * 0.45
+					tgs.distRatio = this.distRatio
 				}
 			}
-			if (subTurretNum > 0) {
-				int[3] tn
+			if subTurretNum > 0 {
+				var tn [3]int
 				tn[0] = (subTurretNum + 2) / 6
-				tn[1] = (subTurretNum - tn[0] * 2) / 4
-				tn[2] = (subTurretNum - tn[0] * 2 - tn[1] * 2) / 2
-				static const float32[] ad = [Pi32 / 4, -Pi32 / 4, Pi32 / 2, -Pi32 / 2, Pi32 / 4 * 3, -Pi32 / 4 * 3]
+				tn[1] = (subTurretNum - tn[0]*2) / 4
+				tn[2] = (subTurretNum - tn[0]*2 - tn[1]*2) / 2
+				ad := []float32{Pi32 / 4, -Pi32 / 4, Pi32 / 2, -Pi32 / 2, Pi32 / 4 * 3, -Pi32 / 4 * 3}
 				for i := 0; i < 6; i++ {
-					int idx = i / 2
-					if (tn[idx] <= 0) {
+					idx := i / 2
+					if tn[idx] <= 0 {
 						continue
 					}
-					TurretGroupSpec tgs = getTurretGroupSpec()
-					if (i == 0 || i == 2 || i == 4) {
-						if (rand.nextInt(2) == 0) {
-							tgs.turretSpec.setParam(subTurretRank, TurretSpec.TurretType.SUB, rand)
+					tgs := this.getTurretGroupSpec()
+					if i == 0 || i == 2 || i == 4 {
+						if rand.nextInt(2) == 0 {
+							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
 						} else {
-							tgs.turretSpec.setParam(subTurretRank, TurretSpec.TurretType.SUB_DESTRUCTIVE, rand)
+							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB_DESTRUCTIVE)
 						}
 						pts = tgs.turretSpec
 						pts.setBossSpec()
@@ -1111,38 +1090,38 @@ func (this *ShipClass) setParam(rank float32, cls int) {
 						tgs.turretSpec.setParam(pts)
 					}
 					tgs.num = tn[idx]
-					tgs.alignType = TurretGroupSpec.AlignType.ROUND
+					tgs.alignType = AlignTypeROUND
 					tgs.alignDeg = ad[i]
-					tgs.alignWidth = Pi32 / 7 + rand.nextfloat32(Pi32 / 9)
-					tgs.radius = size * 0.75
-					tgs.distRatio = distRatio
+					tgs.alignWidth = Pi32/7 + rand.nextfloat32(Pi32/9)
+					tgs.radius = this.size * 0.75
+					tgs.distRatio = this.distRatio
 				}
 			}
 		}
 	}
-	if (movingTurretRatio > 0) {
-		if (cls == ShipClass.BOSS) {
-			addMovingTurret(rank * movingTurretRatio, true)
+	if movingTurretRatio > 0 {
+		if cls == ShipClassBOSS {
+			this.addMovingTurret(rank*movingTurretRatio, true)
 		} else {
-			addMovingTurret(rank * movingTurretRatio)
+			this.addMovingTurret(rank * movingTurretRatio)
 		}
 	}
 }
 
 func (this *ShipClass) setFirstState(es EnemyState, appType int) bool {
 	es.setSpec(this)
-	if (!es.setAppearancePos(field, ship, rand, appType)) {
+	if !es.setAppearancePos(this.field, this.ship, appType) {
 		return false
 	}
-	es.speed = speed
-	if (es.pos.x < 0) {
+	es.speed = this.speed
+	if es.pos.x < 0 {
 		es.turnWay = -1
 	} else {
 		es.turnWay = 1
 	}
-	if (isBoss) {
+	if isBoss {
 		es.trgDeg = rand.nextfloat32(0.1) + 0.1
-		if (rand.nextInt(2) == 0) {
+		if rand.nextInt(2) == 0 {
 			es.trgDeg *= -1
 		}
 		es.turnCnt = 250 + rand.nextInt(150)
@@ -1151,167 +1130,167 @@ func (this *ShipClass) setFirstState(es EnemyState, appType int) bool {
 }
 
 func (this *ShipClass) move(EnemyState es) bool {
-	if (es.destroyedCnt >= SINK_INTERVAL) {
+	if es.destroyedCnt >= SINK_INTERVAL {
 		return false
 	}
-	if (!super.move(es)) {
+	if !super.move(es) {
 		return false
 	}
 	es.pos.x += Sin32(es.deg) * es.speed
 	es.pos.y += Cos32(es.deg) * es.speed
-	es.pos.y -= field.lastScrollY
-	if  (es.pos.x <= -field.outerSize.x - size || es.pos.x >= field.outerSize.x + size ||
-			 es.pos.y <= -field.outerSize.y - size) {
+	es.pos.y -= this.field.lastScrollY
+	if es.pos.x <= -this.field.outerSize.x-this.size || es.pos.x >= this.field.outerSize.x+this.size ||
+		es.pos.y <= -this.field.outerSize.y-this.size {
 		return false
 	}
-	if (es.pos.y > field.outerSize.y * 2.2 + size) {
-		es.pos.y = field.outerSize.y * 2.2 + size
+	if es.pos.y > this.field.outerSize.y*2.2+this.size {
+		es.pos.y = this.field.outerSize.y*2.2 + this.size
 	}
-	if (isBoss) {
+	if isBoss {
 		es.turnCnt--
-		if (es.turnCnt <= 0) {
+		if es.turnCnt <= 0 {
 			es.turnCnt = 250 + rand.nextInt(150)
 			es.trgDeg = rand.nextfloat32(0.1) + 0.2
-			if (es.pos.x > 0) {
+			if es.pos.x > 0 {
 				es.trgDeg *= -1
 			}
 		}
 		es.deg += (es.trgDeg - es.deg) * 0.0025
-		if (ship.higherPos.y > es.pos.y) {
-			es.speed += (speed * 2 - es.speed) * 0.005
+		if this.ship.higherPos.y > es.pos.y {
+			es.speed += (this.speed*2 - es.speed) * 0.005
 		} else {
-			es.speed += (speed - es.speed) * 0.01
+			es.speed += (this.speed - es.speed) * 0.01
 		}
 	} else {
-		if (!es.checkFrontClear()) {
-			es.deg += degVel * es.turnWay
+		if !es.checkFrontClear() {
+			es.deg += this.degVel * es.turnWay
 			es.speed *= 0.98
 		} else {
-			if (es.destroyedCnt < 0) {
-				es.speed += (speed - es.speed) * 0.01
+			if es.destroyedCnt < 0 {
+				es.speed += (this.speed - es.speed) * 0.01
 			} else {
 				es.speed *= 0.98
 			}
 		}
 	}
 	es.cnt++
-	if (es.cnt % 6 == 0 && es.speed >= 0.01 && es.destroyedCnt < SINK_INTERVAL / 2) {
-		shape.addWake(wakes, es.pos, es.deg, es.speed)
+	if es.cnt%6 == 0 && es.speed >= 0.01 && es.destroyedCnt < SINK_INTERVAL/2 {
+		this.shape.addWake(es.pos, es.deg, es.speed)
 	}
 	return true
 }
 
 func (this *ShipClass) draw(es EnemyState) {
-	if (es.destroyedCnt >= 0) {
-		Screen.setColor(
-			EnemyShape.MIDDLE_COLOR_R * (1 - cast(float32) es.destroyedCnt / SINK_INTERVAL) * 0.5,
-			EnemyShape.MIDDLE_COLOR_G * (1 - cast(float32) es.destroyedCnt / SINK_INTERVAL) * 0.5,
-			EnemyShape.MIDDLE_COLOR_B * (1 - cast(float32) es.destroyedCnt / SINK_INTERVAL) * 0.5)
+	if es.destroyedCnt >= 0 {
+		setScreenColor(
+			EnemyShapeMIDDLE_COLOR_R*(1-float32(es.destroyedCnt)/SINK_INTERVAL)*0.5,
+			EnemyShapeMIDDLE_COLOR_G*(1-float32(es.destroyedCnt)/SINK_INTERVAL)*0.5,
+			EnemyShapeMIDDLE_COLOR_B*(1-float32(es.destroyedCnt)/SINK_INTERVAL)*0.5)
 	}
 	super.draw(es)
 }
 
 func (this *ShipClass) score() int {
-	switch (shipClass) {
-	case ShipClass.MIDDLE:
+	switch this.shipClass {
+	case ShipClassMIDDLE:
 		return 100
-	case ShipClass.LARGE:
+	case ShipClassLARGE:
 		return 300
-	case ShipClass.BOSS:
+	case ShipClassBOSS:
 		return 1000
 	}
 }
 
 func (this *ShipClass) isBoss() bool {
-	return shipClass == ShipClass.BOSS
+	return this.shipClass == ShipClassBOSS
 }
 
 /**
  * Specification for a sea-based platform.
  */
-type PlatformEnemySpec struct{
+type PlatformEnemySpec struct {
 	*EnemySpec
 }
 
-this(field Field, ship Ship ) {
-	super(field, ship)
+func NewPlatformEnemySpec(field Field, ship Ship) *PlatformEnemySpec {
+	return &PlatformEnemySpec{NewEnemySpec(field, ship)}
 }
 
 func (this *PlatformEnemySpec) setParam(rank float32) {
-	set(EnemyType.PLATFORM)
-	shape = new EnemyShape(EnemyShape.EnemyShapeType.PLATFORM)
-	damagedShape = new EnemyShape(EnemyShape.EnemyShapeType.PLATFORM_DAMAGED)
-	destroyedShape = new EnemyShape(EnemyShape.EnemyShapeType.PLATFORM_DESTROYED)
-	bridgeShape = new EnemyShape(EnemyShape.EnemyShapeType.PLATFORM_BRIDGE)
-	distRatio = 0
-	size = 1 + rank / 30 + rand.nextfloat32(rank / 30)
-	float32 ms = 1 + rand.nextfloat32(0.25)
-	if (size > ms) {
-		size = ms
+	this.set(EnemyType.PLATFORM)
+	this.shape = NewEnemyShape(EnemyShapeTypePLATFORM)
+	this.damagedShape = NewEnemyShape(EnemyShapeTypePLATFORM_DAMAGED)
+	this.destroyedShape = NewEnemyShape(EnemyShapeTypePLATFORM_DESTROYED)
+	this.bridgeShape = NewEnemyShape(EnemyShapeTypePLATFORM_BRIDGE)
+	this.distRatio = 0
+	this.size = 1 + this.rank/30 + rand.nextfloat32(this.rank/30)
+	ms := 1 + rand.nextfloat32(0.25)
+	if this.size > ms {
+		this.size = ms
 	}
-	int mainTurretNum = 0, frontTurretNum = 0, sideTurretNum = 0
-	float32 rk = rank
-	float32 movingTurretRatio = 0
-	switch (rand.nextInt(3)) {
+	var mainTurretNum, frontTurretNum, sideTurretNum int
+	rk := this.rank
+	var movingTurretRatio float32
+	switch rand.nextInt(3) {
 	case 0:
-		frontTurretNum = cast(int) (size * (2 + rand.nextSignedfloat32(0.5)) + 1)
+		frontTurretNum = int(size*(2+rand.nextSignedfloat32(0.5)) + 1)
 		movingTurretRatio = 0.33 + rand.nextfloat32(0.46)
 		rk *= (1 - movingTurretRatio)
 		movingTurretRatio *= 2.5
 		break
 	case 1:
-		frontTurretNum = cast(int) (size * (0.5 + rand.nextSignedfloat32(0.2)) + 1)
-		sideTurretNum = cast(int) (size * (0.5 + rand.nextSignedfloat32(0.2)) + 1) * 2
+		frontTurretNum = int(this.size*(0.5+rand.nextSignedfloat32(0.2)) + 1)
+		sideTurretNum = int(this.size*(0.5+rand.nextSignedfloat32(0.2))+1) * 2
 		break
 	case 2:
-		mainTurretNum = cast(int) (size * (1 + rand.nextSignedfloat32(0.33)) + 1)
+		mainTurretNum = int(this.size*(1+rand.nextSignedfloat32(0.33)) + 1)
 		break
 	}
-	shield = cast(int) (size * 20)
-	int subTurretNum = frontTurretNum + sideTurretNum
-	float32 subTurretRank = rk / (mainTurretNum * 3 + subTurretNum)
-	float32 mainTurretRank = subTurretRank * 2.5
-	if (mainTurretNum > 0) {
-		TurretGroupSpec tgs = getTurretGroupSpec()
-		tgs.turretSpec.setParam(mainTurretRank, TurretSpec.TurretType.MAIN, rand)
+	this.shield = int(this.size * 20)
+	subTurretNum := frontTurretNum + sideTurretNum
+	subTurretRank := rk / (mainTurretNum*3 + subTurretNum)
+	mainTurretRank := subTurretRank * 2.5
+	if mainTurretNum > 0 {
+		tgs := this.getTurretGroupSpec()
+		tgs.turretSpec.setParam(mainTurretRank, TurretTypeMAIN)
 		tgs.num = mainTurretNum
-		tgs.alignType = TurretGroupSpec.AlignType.ROUND
+		tgs.alignType = AlignTypeROUND
 		tgs.alignDeg = 0
-		tgs.alignWidth = Pi32 * 0.66 + rand.nextfloat32(Pi32 / 2)
-		tgs.radius = size * 0.7
-		tgs.distRatio = distRatio
+		tgs.alignWidth = Pi32*0.66 + rand.nextfloat32(Pi32/2)
+		tgs.radius = this.size * 0.7
+		tgs.distRatio = this.distRatio
 	}
-	if (frontTurretNum > 0) {
-		TurretGroupSpec tgs = getTurretGroupSpec()
-		tgs.turretSpec.setParam(subTurretRank, TurretSpec.TurretType.SUB, rand)
+	if frontTurretNum > 0 {
+		tgs := this.getTurretGroupSpec()
+		tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
 		tgs.num = frontTurretNum
-		tgs.alignType = TurretGroupSpec.AlignType.ROUND
+		tgs.alignType = AlignTypeROUND
 		tgs.alignDeg = 0
-		tgs.alignWidth = Pi32 / 5 + rand.nextfloat32(Pi32 / 6)
-		tgs.radius = size * 0.8
-		tgs.distRatio = distRatio
+		tgs.alignWidth = Pi32/5 + rand.nextfloat32(Pi32/6)
+		tgs.radius = this.size * 0.8
+		tgs.distRatio = this.distRatio
 	}
 	sideTurretNum /= 2
-	if (sideTurretNum > 0) {
-		TurretSpec pts
+	if sideTurretNum > 0 {
+		var pts TurretSpec
 		for i := 0; i < 2; i++ {
-			TurretGroupSpec tgs = getTurretGroupSpec()
-			if (i == 0) {
-				tgs.turretSpec.setParam(subTurretRank, TurretSpec.TurretType.SUB, rand)
+			tgs := this.getTurretGroupSpec()
+			if i == 0 {
+				tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
 				pts = tgs.turretSpec
 			} else {
 				tgs.turretSpec.setParam(pts)
 			}
 			tgs.num = sideTurretNum
-			tgs.alignType = TurretGroupSpec.AlignType.ROUND
-			tgs.alignDeg = Pi32 / 2 - Pi32 * i
-			tgs.alignWidth = Pi32 / 5 + rand.nextfloat32(Pi32 / 6)
-			tgs.radius = size * 0.75
-			tgs.distRatio = distRatio
+			tgs.alignType = AlignTypeROUND
+			tgs.alignDeg = Pi32/2 - Pi32*i
+			tgs.alignWidth = Pi32/5 + rand.nextfloat32(Pi32/6)
+			tgs.radius = this.size * 0.75
+			tgs.distRatio = this.distRatio
 		}
 	}
-	if (movingTurretRatio > 0) {
-		addMovingTurret(rank * movingTurretRatio)
+	if movingTurretRatio > 0 {
+		this.addMovingTurret(this.rank * movingTurretRatio)
 	}
 }
 
@@ -1325,11 +1304,11 @@ func (this *PlatformEnemySpec) setFirstState(es EnemyState, x float32, y float32
 }
 
 func (this *PlatformEnemySpec) move(es EnemyState) bool {
-	if (!super.move(es)) {
+	if !super.move(es) {
 		return false
 	}
-	es.pos.y -= field.lastScrollY
-	return ! ( es.pos.y <= -field.outerSize.y) 
+	es.pos.y -= this.field.lastScrollY
+	return !(es.pos.y <= -this.field.outerSize.y)
 }
 
 func (this *PlatformEnemySpec) score() int {
@@ -1340,26 +1319,25 @@ func (this *PlatformEnemySpec) isBoss() bool {
 	return false
 }
 
-
 /* Actor Pool Functions
  *
- * functions that run across all enemies 
+ * functions that run across all enemies
  */
 
 func checkAllEnemiesShotHit(pos Vector, shape Collidable, shot Shot /*= null*/) {
-	for a,_ := range actor {
+	for a, _ := range actor {
 		e, ok := a.(Enemy)
-		if (ok && e.exists) {
+		if ok && e.exists {
 			e.checkShotHit(pos, shape, shot)
 		}
 	}
 }
 
 func checkAllEnemiesHitShip(x float32, y float32, deselection Enemy /*= null*/, largeOnly bool /*= false*/) *Enemy {
-	for a,_ := range actor {
+	for a, _ := range actor {
 		e, ok := a.(Enemy)
-		if (ok && e.exists && e != deselection) {
-			if (e.checkHitShip(x, y, largeOnly)) {
+		if ok && e.exists && e != deselection {
+			if e.checkHitShip(x, y, largeOnly) {
 				return e
 			}
 		}
@@ -1368,8 +1346,9 @@ func checkAllEnemiesHitShip(x float32, y float32, deselection Enemy /*= null*/, 
 }
 
 func hasBoss() bool {
-	foreach (Enemy e; actor) {
-		if (e.exists && e.isBoss) {
+	for a, _ := range actor {
+		e, ok := a.(Enemy)
+		if ok && e.exists && e.isBoss() {
 			return true
 		}
 	}
