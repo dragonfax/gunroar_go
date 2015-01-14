@@ -17,7 +17,7 @@ type Spark struct{
   cnt int
 }
 
-func NewSpark( Vector p, float32 vx, float32 vy, float32 r, float32 g, float32 b, int c) *Spark {
+func NewSpark(p  Vector, vx float32, vy float32 , r float32 , g float32 , b float32 , c int ) *Spark {
 	this := &Spark{NewLuminousActor()}
 	this.pos.x = p.x
 	this.ppos.x = p.x
@@ -45,8 +45,8 @@ func (this *Spark) move() {
 }
 
 func (this *Spark) draw() {
-	float32 ox = vel.x
-	float32 oy = vel.y
+	ox := vel.x
+	oy := vel.y
 	setScreenColor(r, g, b, 1)
 	ox *= 2
 	oy *= 2
@@ -59,8 +59,8 @@ func (this *Spark) draw() {
 }
 
 func (this *Spark) drawLuminous() {
-	float32 ox = vel.x
-	float32 oy = vel.y
+	ox := vel.x
+	oy := vel.y
 	setScreenColor(r, g, b, 1)
 	ox *= 2
 	oy *= 2
@@ -70,7 +70,6 @@ func (this *Spark) drawLuminous() {
 	setScreenColor(r * 0.5, g * 0.5, b * 0.5, 0)
 	gl.Vertex3(pos.x - oy, pos.y + ox, 0)
 	gl.Vertex3(pos.x + oy, pos.y - ox, 0)
-}
 }
 
 
@@ -110,16 +109,16 @@ func NewSmoke(field Field) *Smoke{
 	return this
 }
 
-func (this *Smoke) set(Vector p, float32 mx, float32 my, float32 mz, int t, int c = 60, float32 sz = 2) {
+func (this *Smoke) set(p Vector , mx float32 , my float32 , mz float32 , t int , c int /*= 60*/, sz float32 /* = 2 */) {
 	set(p.x, p.y, mx, my, mz, t, c, sz)
 }
 
-func (this *Smoke) set(Vector3 p, float32 mx, float32 my, float32 mz, int t, int c = 60, float32 sz = 2) {
+func (this *Smoke) set(p Vector3 , mx float32 , my float32 , mz float32 , t int , c int /*= 60*/, sz float32 /* = 2*/) {
 	set(p.x, p.y, mx, my, mz, t, c, sz)
 	pos.z = p.z
 }
 
-func (this *Smoke) set(float32 x, float32 y, float32 mx, float32 my, float32 mz, int t, int c = 60, float32 sz = 2) {
+func (this *Smoke) set(x float32 , y float32 , mx float32 , my float32 , mz float32 , t int , c int /* = 60 */, sz float32 /* = 2 */) {
 	if (!field.checkInOuterField(x, y)) {
 		return
 	}
@@ -129,10 +128,10 @@ func (this *Smoke) set(float32 x, float32 y, float32 mx, float32 my, float32 mz,
 	vel.x = mx
 	vel.y = my
 	vel.z = mz
-	type = t
+	smokeType = t
 	startCnt = cnt = c
 	size = sz
-	switch (type) {
+	switch (smokeType) {
 	case SmokeType.FIRE:
 		r = rand.nextFloat(0.1) + 0.9
 		g = rand.nextFloat(0.2) + 0.2
@@ -185,14 +184,14 @@ func (this *Smoke) move() {
 		exists = false
 		return
 	}
-	if (type != SmokeType.WAKE) {
+	if (smokeType != SmokeType.WAKE) {
 		vel.x += (windVel.x - vel.x) * 0.01
 		vel.y += (windVel.y - vel.y) * 0.01
 		vel.z += (windVel.z - vel.z) * 0.01
 	}
 	pos += vel
 	pos.y -= field.lastScrollY
-	switch (type) {
+	switch (smokeType) {
 	case SmokeType.FIRE:
 	case SmokeType.EXPLOSION:
 	case SmokeType.SMOKE:
@@ -229,15 +228,15 @@ func (this *Smoke) move() {
 	if (size > 5) {
 		size = 5
 	}
-	if (type == SmokeType.EXPLOSION && pos.z < 0.01) {
-		int bl = field.getBlock(pos.x, pos.y)
+	if (smokeType == SmokeType.EXPLOSION && pos.z < 0.01) {
+		bl := field.getBlock(pos.x, pos.y)
 		if (bl >= 1) {
 			vel *= 0.8
 		}
 		if (cnt % 3 == 0 && bl < -1) {
-			float32 sp = sqrt(vel.x * vel.x + vel.y * vel.y)
+			sp := sqrt(vel.x * vel.x + vel.y * vel.y)
 			if (sp > 0.3) {
-				float32 d = atan2(vel.x, vel.y)
+				d := atan2(vel.x, vel.y)
 				assert(d <>= 0)
 				wakePos.x = pos.x + sin(d + PI / 2) * size * 0.25
 				wakePos.y = pos.y + cos(d + PI / 2) * size * 0.25
@@ -259,7 +258,7 @@ func (this *Smoke) move() {
 }
 
 func (this *Smoke) draw() {
-	float32 quadSize = size / 2
+	quadSize := size / 2
 	setScreenColor(r, g, b, a)
 	gl.Vertex3(pos.x - quadSize, pos.y - quadSize, pos.z)
 	gl.Vertex3(pos.x + quadSize, pos.y - quadSize, pos.z)
@@ -269,7 +268,7 @@ func (this *Smoke) draw() {
 
 func (this *Smoke) drawLuminous() {
 	if (r + g > 0.8 && b < 0.5) {
-		float32 quadSize = size / 2
+		quadSize := size / 2
 		setScreenColor(r, g, b, a)
 		gl.Vertex3(pos.x - quadSize, pos.y - quadSize, pos.z)
 		gl.Vertex3(pos.x + quadSize, pos.y - quadSize, pos.z)
@@ -322,7 +321,7 @@ func NewFragment(field Field) {
 	return this
 }
 
-func (this *Fragment) set(Vector p, float32 mx, float32 my, float32 mz, float32 sz = 1) {
+func (this *Fragment) set( p Vector , mx float32 , my float32 , mz float32 , sz float32 /* = 1*/) {
 	if (!field.checkInOuterField(p.x, p.y)) {
 		return
 	}
@@ -507,7 +506,7 @@ func NewWake(field Field) *Wake {
 	return this
 }
 
-func (this *Wake) set(Vector p, float32 deg, float32 speed, int c = 60, float32 sz = 1, bool rs = false) {
+func (this *Wake) set(p Vector , deg float32 , speed float32 speed, c int /*= 60*/, sz float32 /*= 1*/ , rs bool /* = false */) {
 	if (!field.checkInOuterField(p.x, p.y)) {
 		return
 	}
@@ -536,8 +535,8 @@ func (this *Wake) move() {
 }
 
 func (this *Wake) draw() {
-	float32 ox = vel.x
-	float32 oy = vel.y
+	ox := vel.x
+	oy := vel.y
 	setScreenColor(0.33, 0.33, 1)
 	ox *= size
 	oy *= size
