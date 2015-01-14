@@ -107,6 +107,7 @@ func NewSmoke(field Field) *Smoke{
 	this.startCnt = 1
 	this.size = 1
 	this.field = field
+	return this
 }
 
 func (this *Smoke) set(Vector p, float32 mx, float32 my, float32 mz, int t, int c = 60, float32 sz = 2) {
@@ -290,9 +291,9 @@ type Fragment struct {
   size, d2, md2 float32
 }
 
-static init() {
-	displayList = new DisplayList(1)
-	displayList.beginNewList()
+func InitFragments() {
+	fragmentDisplayList = new DisplayList(1)
+	fragmentDisplayList.beginNewList()
 	setScreenColor(0.7, 0.5, 0.5, 0.5)
 	gl.Begin(gl.TRIANgl.E_FAN)
 	gl.Vertex2(-0.5, -0.25)
@@ -307,19 +308,18 @@ static init() {
 	gl.Vertex2(0.5, 0.25)
 	gl.Vertex2(-0.5, 0.25)
 	gl.End()
-	displayList.endNewList()
+	fragmentDisplayList.endNewList()
 }
 
-static close() {
-	displayList.close()
+func CloseFragments() {
+	fragmentDisplayList.close()
 }
 
-this() {
-	pos = new Vector3
-	vel = new Vector3
-	size = 1
-	d2 = md2 = 0
-	field = cast(Field) args[0]
+func NewFragment(field Field) {
+	this := new(Fragment)
+	this.size = 1
+	this.field = field
+	return this
 }
 
 func (this *Fragment) set(Vector p, float32 mx, float32 my, float32 mz, float32 sz = 1) {
@@ -378,6 +378,7 @@ func (this *Fragment) draw() {
  * Luminous fragments.
  */
 var sparkFragmentdisplayList *DisplayList
+
 type SparkFragment struct {
 	*LuminousActor
 
@@ -388,29 +389,27 @@ type SparkFragment struct {
   hasSmoke bool
 }
 
-static init() {
-	displayList = new DisplayList(1)
-	displayList.beginNewList()
+func InitSparkFragments() {
+	sparkFragmentDisplayList = new DisplayList(1)
+	sparkFragmentDisplayList.beginNewList()
 	gl.Begin(gl.TRIANGLE_FAN)
 	gl.Vertex2(-0.25, -0.25)
 	gl.Vertex2(0.25, -0.25)
 	gl.Vertex2(0.25, 0.25)
 	gl.Vertex2(-0.25, 0.25)
 	gl.End()
-	displayList.endNewList()
+	sparkFragmentDisplayList.endNewList()
 }
 
-func (this *SparkFragment) static close() {
-	displayList.close()
+func CloseSparkFragments() {
+	sparkFragmentDisplayList.close()
 }
 
-this() {
-	pos = new Vector3
-	vel = new Vector3
-	size = 1
-	d2 = md2 = 0
-	cnt = 0
-	field = cast(Field) args[0]
+func NewSparkFragment(field Field) *SparkFragment {
+	this := &SparkFragment{NewLuminousActor()}
+	this.size = 1
+	this.field = field
+	return this
 }
 
 func (this *SparkFragment) set(Vector p, float32 mx, float32 my, float32 mz, float32 sz = 1) {
@@ -501,14 +500,11 @@ type Wake struct {
   revShape bool
 }
 
-this() {
-	pos = new Vector
-	vel = new Vector
-	size = 1
-	deg = 0
-	speed = 0
-	cnt = 0
-	field = cast(Field) args[0]
+func NewWake(field Field) *Wake {
+	this := new(Wake)
+	this.size = 1
+	this.field = field
+	return this
 }
 
 func (this *Wake) set(Vector p, float32 deg, float32 speed, int c = 60, float32 sz = 1, bool rs = false) {
