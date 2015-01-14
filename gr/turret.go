@@ -117,7 +117,7 @@ func (this *Turret) move(x float32, y float32, d float32, bulletFireSpeed float3
 			nw--
 		}
 		bd -= spec.nwayAngle * (nw - 1) / 2
-		for (int i = 0; i < nw; i++) {
+		for i := 0; i < nw; i++ {
 			Bullet b = bullets.getInstance()
 			if (!b) {
 				break
@@ -186,7 +186,7 @@ func (this *Turret) draw() {
 		glVertex2(pos.x + sin(td) * spec.maxRange, pos.y + cos(td) * spec.maxRange)
 		glEnd()
 		glBegin(GL_QUADS)
-		for (int i = 0; i < spec.nway - 1; i++) {
+		for i := 0; i < spec.nway - 1; i++ {
 			Screen.setColor(0.9, 0.1, 0.1, a * 0.3)
 			glVertex2(pos.x + sin(td) * spec.minRange, pos.y + cos(td) * spec.minRange)
 			Screen.setColor(0.9, 0.1, 0.1, a * 0.05)
@@ -230,17 +230,17 @@ func (this *Turret) addDamage(n int) {
 func (this *Turret) destroyed() {
 	SoundManager.playSe("turret_destroyed.wav")
 	destroyedCnt = 0
-	for (int i = 0; i < 6; i++) {
+	for  i := 0; i < 6; i++ {
 		Smoke s = smokes.getInstanceForced()
 		s.set(pos, rand.nextSignedfloat32(0.1), rand.nextSignedfloat32(0.1), rand.nextfloat32(0.04),
 					Smoke.SmokeType.EXPLOSION, 30 + rand.nextInt(20), spec.size * 1.5)
 	}
-	for (int i = 0; i < 32; i++) {
+	for  i := 0; i < 32; i++ {
 		Spark sp = sparks.getInstanceForced()
 		sp.set(pos, rand.nextSignedfloat32(0.5), rand.nextSignedfloat32(0.5),
 					 0.5 + rand.nextfloat32(0.5), 0.5 + rand.nextfloat32(0.5), 0, 30 + rand.nextInt(30))
 	}
-	for (int i = 0; i < 7; i++) {
+	for  i := 0; i < 7; i++ {
 		Fragment f = fragments.getInstanceForced()
 		f.set(pos, rand.nextSignedfloat32(0.25), rand.nextSignedfloat32(0.25), 0.05 + rand.nextfloat32(0.05),
 					spec.size * (0.5 + rand.nextfloat32(0.5)))
@@ -407,9 +407,9 @@ func (this *TurretSpect) setParam(rank float32, type int) {
 		br := (rk * 0.3) * (1 + rand.nextSignedfloat32(0.2))
 		nr := (rk * 0.33) * rand.nextfloat32(1)
 		ir := (rk * 0.1) * (1 + rand.nextSignedfloat32(0.2))
-		burstNum = cast(int) br + 1
-		nway = cast(int) (nr * 0.66 + 1)
-		interval = cast(int) (120.0 / (ir * 2 + 1)) + 1
+		burstNum = int(br) + 1
+		nway = int(nr * 0.66 + 1)
+		interval = int(120.0 / (ir * 2 + 1)) + 1
 		sr := rk - burstNum + 1 - (nway - 1) / 0.66 - ir
 		if (sr < 0) {
 			sr = 0
@@ -423,9 +423,9 @@ func (this *TurretSpect) setParam(rank float32, type int) {
 		br := (rk * 0.4) * (1 + rand.nextSignedfloat32(0.2))
 		nr := (rk * 0.2) * rand.nextfloat32(1)
 		ir := (rk * 0.2) * (1 + rand.nextSignedfloat32(0.2))
-		burstNum = cast(int) br + 1
-		nway = cast(int) (nr * 0.66 + 1)
-		interval = cast(int) (120.0 / (ir * 2 + 1)) + 1
+		burstNum = int(br) + 1
+		nway = int(nr * 0.66 + 1)
+		interval = int(120.0 / (ir * 2 + 1)) + 1
 		sr := rk - burstNum + 1 - (nway - 1) / 0.66 - ir
 		if (sr < 0) {
 			sr = 0
@@ -439,9 +439,9 @@ func (this *TurretSpect) setParam(rank float32, type int) {
 		br := (rk * 0.4) * (1 + rand.nextSignedfloat32(0.2))
 		nr := (rk * 0.2) * rand.nextfloat32(1)
 		ir := (rk * 0.2) * (1 + rand.nextSignedfloat32(0.2))
-		burstNum = cast(int) br * 2 + 1
-		nway = cast(int) (nr * 0.66 + 1)
-		interval = cast(int) (60.0 / (ir * 2 + 1)) + 1
+		burstNum = int(br) * 2 + 1
+		nway = int(nr * 0.66 + 1)
+		interval = int(60.0 / (ir * 2 + 1)) + 1
 		burstInterval *= 0.88
 		bulletShape = BulletShape.BulletShapeType.DESTRUCTIVE
 		bulletDestructive = true
@@ -457,9 +457,9 @@ func (this *TurretSpect) setParam(rank float32, type int) {
 		size = 0.33
 		br := (rk * 0.33) * (1 + rand.nextSignedfloat32(0.2))
 		ir := (rk * 0.2) * (1 + rand.nextSignedfloat32(0.2))
-		burstNum = cast(int) br + 1
+		burstNum = int(br) + 1
 		nway = 1
-		interval = cast(int) (120.0 / (ir * 2 + 1)) + 1
+		interval = int(120.0 / (ir * 2 + 1)) + 1
 		sr := rk - burstNum + 1 - ir
 		if (sr < 0) {
 			sr = 0
@@ -472,9 +472,9 @@ func (this *TurretSpect) setParam(rank float32, type int) {
 		br := (rk * 0.3) * (1 + rand.nextSignedfloat32(0.2))
 		nr := (rk * 0.1) * rand.nextfloat32(1)
 		ir := (rk * 0.33) * (1 + rand.nextSignedfloat32(0.2))
-		burstNum = cast(int) br + 1
-		nway = cast(int) (nr * 0.66 + 1)
-		interval = cast(int) (120.0 / (ir * 2 + 1)) + 1
+		burstNum = int(br) + 1
+		nway = int(nr * 0.66 + 1)
+		interval = int(120.0 / (ir * 2 + 1)) + 1
 		sr := rk - burstNum + 1 - (nway - 1) / 0.66 - ir
 		if (sr < 0) {
 			sr = 0
@@ -566,7 +566,7 @@ func (this *TurretGroup) move(p Vector, deg float32) bool {
 		my = spec.offset.y / (spec.num + 1)
 		break
 	}
-	for (int i = 0; i < spec.num; i++) {
+	for i := 0; i < spec.num; i++ {
 		var tbx, tby float32
 		switch (spec.alignType) {
 		case TurretGroupSpec.AlignType.ROUND:
@@ -593,19 +593,22 @@ func (this *TurretGroup) move(p Vector, deg float32) bool {
 }
 
 func (this *TurretGroup) draw() {
-	for (int i = 0; i < spec.num; i++)
+	for i := 0; i < spec.num; i++ {
 		turret[i].draw()
+	}
 }
 
 func (this *TurretGroup) remove() {
-	for (int i = 0; i < spec.num; i++)
+	for i := 0; i < spec.num; i++ {
 		turret[i].remove()
+	}
 }
 
 func (this *TurretGroup) checkCollision( x float32, y float32, c Collidable, shot Shot) bool {
 	col := false
-	for (int i = 0; i < spec.num; i++)
+	for i := 0; i < spec.num; i++ {
 		col |= turret[i].checkCollision(x, y, c, shot)
+	}
 	return col
 }
 
@@ -700,7 +703,7 @@ func (this *MovingTurretGroupt) move(p Vector, od float32) {
 	}
 	float32 d, ad, md
 	calcAlignDeg(d, ad, md)
-	for (int i = 0; i < spec.num; i++) {
+	for i := 0; i < spec.num; i++ {
 		d += md
 		bx := sin(d) * radius * spec.xReverse
 		by := cos(d) * radius * (1 - spec.distRatio)
@@ -733,13 +736,15 @@ func (this *MovingTurretGroupt) calcAlignDeg(d *float32, ad *float32, md *float3
 }
 
 func (this *MovingTurretGroupt) draw() {
-	for (int i = 0; i < spec.num; i++)
+	for i := 0; i < spec.num; i++ {
 		turret[i].draw()
+	}
 }
 
 func (this *MovingTurretGroupt) remove() {
-	for (int i = 0; i < spec.num; i++)
+	for i := 0; i < spec.num; i++ {
 		turret[i].remove()
+	}
 }
 
 type TurretMoveType int 
