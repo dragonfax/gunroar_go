@@ -84,13 +84,13 @@ func (this *TitleManager) close() {
 
 func (this *TitleManager) start() {
 	this.cnt = 0
-	this.field.start()
+	field.start()
 	this.btnPressedCnt = 1
 }
 
 func (this *TitleManager) move() {
-	this.field.move()
-	this.field.scroll(TITLE_SCROLL_SPEED_BASE, true)
+	field.move()
+	field.scroll(TITLE_SCROLL_SPEED_BASE, true)
 	input := this.pad.getState(false)
 	mouseInput := this.mouse.getState(false)
 	if this.btnPressedCnt <= 0 {

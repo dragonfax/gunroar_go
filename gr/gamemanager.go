@@ -12,13 +12,14 @@ package gr
 var shipTurnSpeed float32 = 1
 var shipReverseFire bool = false
 
+var field *Field
+
 type GameManager struct {
 	pad Pad
 	// twinStick TwinStick
 	mouse        *Mouse
 	mouseAndPad  *MouseAndPad
 	screen       *Screen
-	field        *Field
 	ship         *Ship
 	stageManager *StageManager
 	titleManager *TitleManager
@@ -45,19 +46,19 @@ func (this *GameManager) init() {
 	this.mouse = input.inputs[2]
 	this.mouse.init(screen)
 	this.mouseAndPad = NewMouseAndPad(mouse, pad)
-	this.field = NewField()
-	this.ship = NewShip(pad, twinStick, mouse, mouseAndPad, field, screen)
+	field = NewField()
+	this.ship = NewShip(pad, twinStick, mouse, mouseAndPad, screen)
 	this.scoreReel = NewScoreReel()
-	this.stageManager = NewStageManager(field, enemies, ship)
+	this.stageManager = NewStageManager(enemies, ship)
 	this.ship.setStageManager(stageManager)
-	this.field.setStageManager(stageManager)
-	this.field.setShip(ship)
+	field.setStageManager(stageManager)
+	field.setShip(ship)
 	loadSounds()
-	this.titleManager = NewTitleManager(pad, mouse, field, this)
+	this.titleManager = NewTitleManager(pad, mouse, this)
 	this.inGameState = NewInGameState(this, screen, pad /*twinStick, */, mouse, mouseAndPad,
-		field, ship, stageManager, scoreReel)
+		ship, stageManager, scoreReel)
 	this.titleState = NewTitleState(this, screen, pad /*twinStick, */, mouse, mouseAndPad,
-		field, ship, stageManager, scoreReel,
+		ship, stageManager, scoreReel,
 		titleManager, inGameState)
 	this.ship.setGameState(this.inGameState)
 }
@@ -145,7 +146,7 @@ func (this *GameManager) draw() {
 	this.screen.drawLuminous()
 	glPushMatrix()
 	this.screen.setEyepos()
-	this.field.drawSideWalls()
+	field.drawSideWalls()
 	this.state.drawFront()
 	glPopMatrix()
 	this.screen.viewOrthoFixed()
@@ -164,7 +165,6 @@ type GameState struct {
 	// TwinStick twinStick
 	mouse        Mouse
 	mouseAndPad  MouseAndPad
-	field        Field
 	ship         Ship
 	stageManager StageManager
 	scoreReel    ScoreReel
@@ -172,7 +172,7 @@ type GameState struct {
 
 func NewGameState(gameManager GameManager, screen Screen,
 	pad Pad /*twinStick twinStick,*/, mouse Mouse, mouseAndPad MouseAndPad,
-	field Field, ship Ship, stageManager StageManager, scoreReel ScoreReel) *GameState {
+	ship Ship, stageManager StageManager, scoreReel ScoreReel) *GameState {
 	this := new(GameState)
 	this.gameManager = gameManager
 	this.screen = screen
@@ -180,7 +180,6 @@ func NewGameState(gameManager GameManager, screen Screen,
 	this.twinStick = twinStick
 	this.mouse = mouse
 	this.mouseAndPad = mouseAndPad
-	this.field = field
 	this.ship = ship
 	this.stageManager = stageManager
 	this.scoreReel = scoreReel
@@ -217,9 +216,9 @@ type InGameState struct {
 
 func NewInGameState(gameManager GameManager, screen Screen,
 	pad Pad /*TwinStick twinStick,*/, mouse Mouse, mouseAndPad MouseAndPad,
-	field Field, ship Ship, stageManager StageManager, scoreReel ScoreReel) *InGameState {
+	ship Ship, stageManager StageManager, scoreReel ScoreReel) *InGameState {
 
-	this := InGameState{NewGameState(gameManager, screen, pad /*twinStick, */, mouse, mouseAndPad, field, ship, stageManager, scoreReel)}
+	this := InGameState{NewGameState(gameManager, screen, pad /*twinStick, */, mouse, mouseAndPad, ship, stageManager, scoreReel)}
 	this.scoreReelSize = SCORE_REEL_SIZE_DEFAULT
 	return this
 }
@@ -233,7 +232,7 @@ func (this *InGameState) start() {
 func (this *InGameState) startInGame() {
 	this.clearAll()
 	this.stageManager.start(1)
-	this.field.start()
+	field.start()
 	this.ship.start(this.gameMode)
 	this.initGameState()
 	this.screen.setScreenShake(0, 0)
@@ -292,7 +291,7 @@ func (this *InGameState) move() {
 }
 
 func (this *InGameState) moveInGame() {
-	this.field.move()
+	field.move()
 	this.ship.move()
 	this.stageManager.move()
 	enemiesMove()
@@ -315,7 +314,7 @@ func (this *InGameState) moveInGame() {
 }
 
 func (this *InGameState) draw() {
-	this.field.draw()
+	field.draw()
 	glBegin(GL_TRIANGLES)
 	wakesDraw()
 	sparksDraw()
@@ -402,10 +401,10 @@ type TitleState struct {
 
 func NewTitleState(gameManager GameManager, screen Screen,
 	pad Pad /*TwinStick twinStick, */, mouse Mouse, mouseAndPad MouseAndPad,
-	field Field, ship Ship, stageManager StageManager, scoreReel ScoreReel,
+	ship Ship, stageManager StageManager, scoreReel ScoreReel,
 	titleManager TitleManager, inGameState InGameState) *TitleState {
 
-	this := TitleState{NewGameState(gameManager, screen, pad /*twinStick, */, mouse, mouseAndPad, field, ship, stageManager, scoreReel)}
+	this := TitleState{NewGameState(gameManager, screen, pad /*twinStick, */, mouse, mouseAndPad, ship, stageManager, scoreReel)}
 
 	this.titleManager = titleManager
 	this.inGameState = inGameState
@@ -429,7 +428,7 @@ func (this *TitleState) move() {
 }
 
 func (this *TitleState) draw() {
-	this.field.draw()
+	field.draw()
 }
 
 func (this *TitleState) drawFront() {

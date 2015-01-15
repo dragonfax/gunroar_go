@@ -130,7 +130,7 @@ func NewEnemyState(field *Field, screen *Screen, ship *Ship, scoreReel *ScoreRee
 	this := new(EnemyState)
 	this.idx = idxCount
 	idxCount++
-	this.field = field
+	field = field
 	this.screen = screen
 	this.bullets = bullets
 	this.ship = ship
@@ -232,7 +232,7 @@ func (this *EnemyState) checkFrontClear(checkCurrentPos bool /*= false*/) bool {
 	for i := si; i < 5; i++ {
 		cx := this.pos.x + Sin32(deg)*i*this.spec.size
 		cy := this.pos.y + Cos32(deg)*i*this.spec.size
-		if this.field.getBlock(cx, cy) >= 0 {
+		if field.getBlock(cx, cy) >= 0 {
 			return false
 		}
 		if checkAllEnemiesHitShip(cx, cy, enemy, true) {
@@ -513,7 +513,7 @@ type EnemySpec struct {
 
 func NewEnemySpec(field Field, ship Ship, enemyType EnemyType) *EnemySpec {
 	this := new(EnemySpec)
-	this.field = field
+	field = field
 	this.ship = ship
 	this.sparks = sparks
 	this.smokes = smokes
@@ -779,7 +779,7 @@ func (this *SmallShipEnemySpec) setParam(rank float32) {
 
 func (this *SmallShipEnemySpec) setFirstState(es EnemyState, appType int) bool {
 	es.setSpec(this)
-	if !es.setAppearancePos(this.field, this.ship, this.appType) {
+	if !es.setAppearancePos(field, this.ship, this.appType) {
 		return false
 	}
 	switch this.moveType {
@@ -803,11 +803,11 @@ func (this *SmallShipEnemySpec) move(es EnemyState) bool {
 	case MoveTypeSTOPANDGO:
 		es.pos.x += Sin32(es.velDeg) * es.speed
 		es.pos.y += Cos32(es.velDeg) * es.speed
-		es.pos.y -= this.field.lastScrollY
-		if es.pos.y <= -this.field.outerSize.y {
+		es.pos.y -= field.lastScrollY
+		if es.pos.y <= -field.outerSize.y {
 			return false
 		}
-		if this.field.getBlock(es.pos) >= 0 || !this.field.checkInOuterHeightField(es.pos) {
+		if field.getBlock(es.pos) >= 0 || !field.checkInOuterHeightField(es.pos) {
 			es.velDeg += Pi32
 			es.pos.x += Sin32(es.velDeg) * es.speed * 2
 			es.pos.y += Cos32(es.velDeg) * es.speed * 2
@@ -835,11 +835,11 @@ func (this *SmallShipEnemySpec) move(es EnemyState) bool {
 	case MoveTypeCHASE:
 		es.pos.x += Sin32(es.velDeg) * this.speed
 		es.pos.y += Cos32(es.velDeg) * this.speed
-		es.pos.y -= this.field.lastScrollY
-		if es.pos.y <= -this.field.outerSize.y {
+		es.pos.y -= field.lastScrollY
+		if es.pos.y <= -field.outerSize.y {
 			return false
 		}
-		if this.field.getBlock(es.pos) >= 0 || !this.field.checkInOuterHeightField(es.pos) {
+		if field.getBlock(es.pos) >= 0 || !field.checkInOuterHeightField(es.pos) {
 			es.velDeg += Pi32
 			es.pos.x += Sin32(es.velDeg) * es.speed * 2
 			es.pos.y += Cos32(es.velDeg) * es.speed * 2
@@ -1109,7 +1109,7 @@ func (this *ShipClass) setParam(rank float32, cls int) {
 
 func (this *ShipClass) setFirstState(es EnemyState, appType int) bool {
 	es.setSpec(this)
-	if !es.setAppearancePos(this.field, this.ship, appType) {
+	if !es.setAppearancePos(field, this.ship, appType) {
 		return false
 	}
 	es.speed = this.speed
@@ -1137,13 +1137,13 @@ func (this *ShipClass) move(es EnemyState) bool {
 	}
 	es.pos.x += Sin32(es.deg) * es.speed
 	es.pos.y += Cos32(es.deg) * es.speed
-	es.pos.y -= this.field.lastScrollY
-	if es.pos.x <= -this.field.outerSize.x-this.size || es.pos.x >= this.field.outerSize.x+this.size ||
-		es.pos.y <= -this.field.outerSize.y-this.size {
+	es.pos.y -= field.lastScrollY
+	if es.pos.x <= -field.outerSize.x-this.size || es.pos.x >= field.outerSize.x+this.size ||
+		es.pos.y <= -field.outerSize.y-this.size {
 		return false
 	}
-	if es.pos.y > this.field.outerSize.y*2.2+this.size {
-		es.pos.y = this.field.outerSize.y*2.2 + this.size
+	if es.pos.y > field.outerSize.y*2.2+this.size {
+		es.pos.y = field.outerSize.y*2.2 + this.size
 	}
 	if isBoss {
 		es.turnCnt--
@@ -1306,8 +1306,8 @@ func (this *PlatformEnemySpec) move(es EnemyState) bool {
 	if !super.move(es) {
 		return false
 	}
-	es.pos.y -= this.field.lastScrollY
-	return !(es.pos.y <= -this.field.outerSize.y)
+	es.pos.y -= field.lastScrollY
+	return !(es.pos.y <= -field.outerSize.y)
 }
 
 func (this *PlatformEnemySpec) score() int {

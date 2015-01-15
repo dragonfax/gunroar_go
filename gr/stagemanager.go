@@ -27,7 +27,7 @@ type StageManager struct {
 }
 
 func NewStateManager(field Field, ship Ship) {
-	this.field = field
+	field = field
 	this.ship = ship
 	for i, _ := range this.enemyApp {
 		this.enemyApp[i] = NewEnemyAppearance()
@@ -85,7 +85,7 @@ func (this *StageManager) move() {
 			this.resetBossMode()
 		}
 	} else {
-		rv := this.field.lastScrollY/this.ship.scrollSpeedBase - 2
+		rv := field.lastScrollY/this.ship.scrollSpeedBase - 2
 		this.bossAppTime -= 17
 		if this.bossAppTime <= 0 {
 			this.bossAppTime = 0
@@ -105,7 +105,7 @@ func (this *StageManager) move() {
 	}
 	this.rank = this.baseRank + this.addRank
 	for _, ea := range this.enemyApp {
-		ea.move(this.field)
+		ea.move(field)
 	}
 }
 
@@ -122,7 +122,7 @@ func (this *StageManager) gotoNextBlockArea() {
 	if this.bossMode {
 		this.bossAppCnt--
 		if this.bossAppCnt == 0 {
-			ses := NewShipEnemySpec(this.field, this.ship)
+			ses := NewShipEnemySpec(field, this.ship)
 			ses.setParam(rank, ShipEnemySpec.ShipClass.BOSS)
 			en := NewEnemy()
 			if ses.setFirstState(en.state, EnemyState.AppearanceType.CENTER) {
@@ -228,7 +228,7 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 		en := NewEnemy()
 		platformPos[ppi].used = true
 		ppn--
-		p := this.field.convertToScreenPos(platformPos[ppi].pos.x, platformPos[ppi].pos.y)
+		p := field.convertToScreenPos(platformPos[ppi].pos.x, platformPos[ppi].pos.y)
 		if !platformEnemySpec.setFirstState(en.state, p.x, p.y, platformPos[ppi].deg) {
 			continue
 		}
@@ -270,7 +270,7 @@ func (this *EnemyAppearance) move(field Field) {
 	if spec == nil {
 		return
 	}
-	this.nextAppDist -= this.field.lastScrollY
+	this.nextAppDist -= field.lastScrollY
 	if this.nextAppDist <= 0 {
 		this.nextAppDist += this.nextAppDistInterval
 		this.appear()

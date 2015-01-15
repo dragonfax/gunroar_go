@@ -100,13 +100,13 @@ type Smoke struct {
 	size, r, g, b, a float32
 }
 
-func NewSmoke(x float32, y float32, z float32 /*=0*/, mx float32, my float32, mz float32, t int, c int /* = 60 */, sz float32 /* = 2 */) *Smoke {
+func NewSmoke(x float32, y float32, z float32 /*=0*/, mx float32, my float32, mz float32, t SmokeType, c int /* = 60 */, sz float32 /* = 2 */) *Smoke {
 	this := new(Smoke)
 	this.startCnt = 1
 	this.size = 1
-	this.field = field
+	field = field
 	actors[this] = true
-	if !this.field.checkInOuterField(x, y) {
+	if !field.checkInOuterField(x, y) {
 		return
 	}
 	this.pos.x = x
@@ -168,7 +168,7 @@ func NewSmoke(x float32, y float32, z float32 /*=0*/, mx float32, my float32, mz
 
 func (this *Smoke) move() {
 	this.cnt--
-	if this.cnt <= 0 || !this.field.checkInOuterField(this.pos.x, this.pos.y) {
+	if this.cnt <= 0 || !field.checkInOuterField(this.pos.x, this.pos.y) {
 		this.exists = false
 		return
 	}
@@ -178,7 +178,7 @@ func (this *Smoke) move() {
 		this.vel.z += (this.windVel.z - this.vel.z) * 0.01
 	}
 	this.pos += this.vel
-	this.pos.y -= this.field.lastScrollY
+	this.pos.y -= field.lastScrollY
 	switch this.smokeType {
 	case SmokeType.FIRE, SmokeType.EXPLOSION, SmokeType.SMOKE:
 		if this.cnt < this.startCnt/2 {
@@ -215,7 +215,7 @@ func (this *Smoke) move() {
 		this.size = 5
 	}
 	if this.smokeType == SmokeType.EXPLOSION && this.pos.z < 0.01 {
-		bl := this.field.getBlock(this.pos.x, this.pos.y)
+		bl := field.getBlock(this.pos.x, this.pos.y)
 		if bl >= 1 {
 			this.vel *= 0.8
 		}
@@ -298,13 +298,13 @@ func CloseFragments() {
 func NewFragment(field Field) {
 	this := new(Fragment)
 	this.size = 1
-	this.field = field
+	field = field
 	actors[this] = true
 	return this
 }
 
 func (this *Fragment) set(p Vector, mx float32, my float32, mz float32, sz float32 /* = 1*/) {
-	if !this.field.checkInOuterField(p.x, p.y) {
+	if !field.checkInOuterField(p.x, p.y) {
 		return
 	}
 	this.pos.x = p.x
@@ -323,7 +323,7 @@ func (this *Fragment) set(p Vector, mx float32, my float32, mz float32, sz float
 }
 
 func (this *Fragment) move() {
-	if !this.field.checkInOuterField(pos.x, pos.y) {
+	if !field.checkInOuterField(pos.x, pos.y) {
 		this.exists = false
 		return
 	}
@@ -332,7 +332,7 @@ func (this *Fragment) move() {
 	this.vel.z += (-0.04 - this.vel.z) * 0.01
 	this.pos += this.vel
 	if this.pos.z < 0 {
-		if this.field.getBlock(this.pos.x, this.pos.y) < 0 {
+		if field.getBlock(this.pos.x, this.pos.y) < 0 {
 			NewSmoke(this.pos.x, this.pos.y, 0, 0, 0, Smoke.SmokeType.WAKE, 60, this.size*0.66)
 		} else {
 			NewSmoke(this.pos.x, this.pos.y, 0, 0, 0, Smoke.SmokeType.SAND, 60, this.size*0.75)
@@ -340,7 +340,7 @@ func (this *Fragment) move() {
 		this.exists = false
 		return
 	}
-	this.pos.y -= this.field.lastScrollY
+	this.pos.y -= field.lastScrollY
 	d2 += md2
 }
 
@@ -389,13 +389,13 @@ func CloseSparkFragments() {
 func NewSparkFragment(field Field) *SparkFragment {
 	this := new(SparkFragment)
 	this.size = 1
-	this.field = field
+	field = field
 	actors[this] = true
 	return this
 }
 
 func (this *SparkFragment) set(p Vector, mx float32, my float32, mz float32, sz float32 /*= 1*/) {
-	if !this.field.checkInOuterField(p.x, p.y) {
+	if !field.checkInOuterField(p.x, p.y) {
 		return
 	}
 	this.pos.x = p.x
@@ -420,7 +420,7 @@ func (this *SparkFragment) set(p Vector, mx float32, my float32, mz float32, sz 
 }
 
 func (this *SparkFragment) move() {
-	if !this.field.checkInOuterField(this.pos.x, this.pos.y) {
+	if !field.checkInOuterField(this.pos.x, this.pos.y) {
 		this.exists = false
 		return
 	}
@@ -429,7 +429,7 @@ func (this *SparkFragment) move() {
 	this.vel.z += (-0.08 - this.vel.z) * 0.01
 	this.pos += vel
 	if this.pos.z < 0 {
-		if this.field.getBlock(this.pos.x, this.pos.y) < 0 {
+		if field.getBlock(this.pos.x, this.pos.y) < 0 {
 			NewSmoke(this.pos.x, this.pos.y, 0, 0, 0, Smoke.SmokeType.WAKE, 60, this.size*0.66)
 		} else {
 			NewSmoke(this.pos.x, this.pos.y, 0, 0, 0, Smoke.SmokeType.SAND, 60, this.size*0.75)
@@ -437,7 +437,7 @@ func (this *SparkFragment) move() {
 		this.exists = false
 		return
 	}
-	this.pos.y -= this.field.lastScrollY
+	this.pos.y -= field.lastScrollY
 	d2 += md2
 	this.cnt++
 	if this.hasSmoke && this.cnt%5 == 0 {
@@ -473,23 +473,17 @@ func (this *SparkFragment) close() {
  * Wakes of ships and smokes.
  */
 type Wake struct {
-	field            Field
 	pos, vel         Vector
 	deg, speed, size float32
 	cnt              int
 	revShape         bool
 }
 
-func NewWake(field Field) *Wake {
+func NewWake(p Vector, deg float32, speed float32, c int /*= 60*/, sz float32 /*= 1*/, rs bool /* = false */) *Wake {
 	this := new(Wake)
 	this.size = 1
-	this.field = field
-	actors[this] = true
-	return this
-}
 
-func (this *Wake) set(p Vector, deg float32, speed float32, c int /*= 60*/, sz float32 /*= 1*/, rs bool /* = false */) {
-	if !this.field.checkInOuterField(p.x, p.y) {
+	if !field.checkInOuterField(p.x, p.y) {
 		return
 	}
 	this.pos.x = p.x
@@ -501,17 +495,19 @@ func (this *Wake) set(p Vector, deg float32, speed float32, c int /*= 60*/, sz f
 	this.cnt = c
 	this.size = sz
 	this.revShape = rs
-	this.exists = true
+	actors[this] = true
+
+	return this
 }
 
 func (this *Wake) move() {
 	this.cnt--
-	if this.cnt <= 0 || this.vel.dist() < 0.005 || !this.field.checkInOuterField(this.pos.x, this.pos.y) {
+	if this.cnt <= 0 || this.vel.dist() < 0.005 || !field.checkInOuterField(this.pos.x, this.pos.y) {
 		this.exists = false
 		return
 	}
 	this.pos += this.vel
-	this.pos.y -= this.field.lastScrollY
+	this.pos.y -= field.lastScrollY
 	this.vel *= 0.96
 	this.size *= 1.02
 }

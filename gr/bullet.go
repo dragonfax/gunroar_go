@@ -72,15 +72,15 @@ func (this *Bullet) move() {
 			this.deg = this.trgDeg
 		}
 	}
-	if this.field.checkInOuterFieldVector(this.pos) {
+	if field.checkInOuterFieldVector(this.pos) {
 		this.gameManager.addSlowdownRatio(this.speed * 0.24)
 	}
 	mx := Sin32(this.deg) * this.speed
 	my := Cos32(this.deg) * this.speed
 	this.pos.x += mx
 	this.pos.y += my
-	this.pos.y -= this.field.lastScrollY
-	if this.ship.checkBulletHit(this.pos, this.ppos) || !this.field.checkInOuterFieldExceptTop(this.pos) {
+	this.pos.y -= field.lastScrollY
+	if this.ship.checkBulletHit(this.pos, this.ppos) || !field.checkInOuterFieldExceptTop(this.pos) {
 		this.close()
 		return
 	}
@@ -89,13 +89,13 @@ func (this *Bullet) move() {
 	if this.rng <= 0 {
 		this.startDisappear()
 	}
-	if this.field.getBlockVector(this.pos) >= ON_BLOCK_THRESHOLD {
+	if field.getBlockVector(this.pos) >= ON_BLOCK_THRESHOLD {
 		this.startDisappear()
 	}
 }
 
 func (this *Bullet) startDisappear() {
-	if this.field.getBlockVector(this.pos) >= 0 {
+	if field.getBlockVector(this.pos) >= 0 {
 		NewSmoke(this.pos.x, this.pos.y, 0, Sin32(this.deg)*this.speed*0.2, Cos32(this.deg)*this.speed*0.2, 0, SAND, 30, this.size*0.5)
 	} else {
 		NewWake(this.pos, this.deg, this.speed, 60, this.size*3, true)
@@ -109,7 +109,7 @@ func (this *Bullet) changeToCrystal() {
 }
 
 func (this *Bullet) draw() {
-	if !this.field.checkInOuterFieldVector(this.pos) {
+	if !field.checkInOuterFieldVector(this.pos) {
 		return
 	}
 	gl.PushMatrix()

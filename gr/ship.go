@@ -26,7 +26,7 @@ type Ship struct {
 
 func NewShip(pad Pad /*TwinStick twinStick, */, mouse Mouse, mouseAndPad MouseAndPad, field Field, screen Screen) *Ship {
 	this := new(Ship)
-	this.field = field
+	field = field
 	Boat.init()
 	for i, _ := range this.boat {
 		boat[i] = NewBoat(i, this, pad /*twinStick, */, mouse, mouseAndPad, field, screen, sparks, smokes, fragments, wakes)
@@ -90,12 +90,12 @@ func (this *Ship) restart() {
 }
 
 func (this *Ship) move() {
-	this.field.scroll(scrollSpeed)
+	field.scroll(scrollSpeed)
 	sf := false
 	for i := 0; i < boatNum; i++ {
 		this.boat[i].move()
 		if this.boat[i].hasCollision &&
-			this.boat[i].pos.x > this.field.size.x/3 && this.boat[i].pos.y < -this.field.size.y/4*3 {
+			this.boat[i].pos.x > field.size.x/3 && this.boat[i].pos.y < -field.size.y/4*3 {
 			sf = true
 		}
 	}
@@ -286,7 +286,7 @@ func NewBoat(idx int, ship Ship, pad Pad /*TwinStick twinStick, */, mouse Mouse,
 	//this.twinStick = cast(TwinStick) twinStick
 	this.mouse = mouse
 	this.mouseAndPad = mouseAndPad
-	this.field = field
+	field = field
 	this.screen = screen
 	this.sparks = sparks
 	this.smokes = smokes
@@ -361,7 +361,7 @@ func (this *Boat) restart() {
 	this.fireSprCnt = 0
 	this.fireSprDeg = 0.5
 	this.fireLanceCnt = 0
-	if this.field.getBlock(this.pos) >= 0 {
+	if field.getBlock(this.pos) >= 0 {
 		this.onBlock = true
 	} else {
 		this.onBlock = false
@@ -406,11 +406,11 @@ func (this *Boat) move() {
 	this.vx += this.refVel.x
 	this.vy += this.refVel.y
 	this.refVel *= 0.9
-	if this.field.checkInField(this.pos.x, this.pos.y-this.field.lastScrollY) {
-		this.pos.y -= this.field.lastScrollY
+	if field.checkInField(this.pos.x, this.pos.y-field.lastScrollY) {
+		this.pos.y -= field.lastScrollY
 	}
-	if (this.onBlock || this.field.getBlock(this.pos.x+this.vx, this.pos.y) < 0) &&
-		this.field.checkInField(this.pos.x+this.vx, this.pos.y) {
+	if (this.onBlock || field.getBlock(this.pos.x+this.vx, this.pos.y) < 0) &&
+		field.checkInField(this.pos.x+this.vx, this.pos.y) {
 		this.pos.x += this.vx
 		this.vel.x = this.vx
 	} else {
@@ -418,20 +418,20 @@ func (this *Boat) move() {
 		this.refVel.x = 0
 	}
 	srf := false
-	if (this.onBlock || this.field.getBlock(this.px, this.pos.y+this.vy) < 0) &&
-		this.field.checkInField(this.pos.x, this.pos.y+this.vy) {
+	if (this.onBlock || field.getBlock(this.px, this.pos.y+this.vy) < 0) &&
+		field.checkInField(this.pos.x, this.pos.y+this.vy) {
 		this.pos.y += this.vy
 		this.vel.y = this.vy
 	} else {
 		this.vel.y = 0
 		this.refVel.y = 0
 	}
-	if this.field.getBlock(this.pos.x, this.pos.y) >= 0 {
+	if field.getBlock(this.pos.x, this.pos.y) >= 0 {
 		if !this.onBlock {
 			if this.cnt <= 0 {
 				this.onBlock = true
 			} else {
-				if this.field.checkInField(this.pos.x, this.pos.y-this.field.lastScrollY) {
+				if field.checkInField(this.pos.x, this.pos.y-field.lastScrollY) {
 					this.pos.x = this.px
 					this.pos.y = this.py
 				} else {

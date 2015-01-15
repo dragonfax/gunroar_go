@@ -27,7 +27,7 @@ type Turret struct {
 
 func NewTurret(field Field, ship Ship, parent *Enemy, spec TurretSpec) *Turret {
 	this := new(Turret)
-	this.field = field
+	field = field
 	this.ship = ship
 	this.parent = parent
 	this.bulletSpeed = 1
@@ -88,7 +88,7 @@ func (this *Turret) move(x float32, y float32, d float32, bulletFireSpeed float3
 		this.deg = -this.spec.turnRange
 	}
 	this.cnt++
-	if this.field.checkInField(this.pos) || (this.parent.isBoss && this.cnt%4 == 0) {
+	if field.checkInField(this.pos) || (this.parent.isBoss && this.cnt%4 == 0) {
 		this.appCnt++
 	}
 	if this.cnt >= this.spec.interval {
@@ -101,9 +101,9 @@ func (this *Turret) move(x float32, y float32, d float32, bulletFireSpeed float3
 		}
 	}
 	if this.cnt <= 0 && -this.cnt%this.spec.burstInterval == 0 &&
-		((this.spec.invisible && this.field.checkInField(this.pos)) ||
-			(this.spec.invisible && this.parent.isBoss && this.field.checkInOuterField(this.pos)) ||
-			(!this.spec.invisible && this.field.checkInFieldExceptTop(this.pos))) &&
+		((this.spec.invisible && field.checkInField(this.pos)) ||
+			(this.spec.invisible && this.parent.isBoss && field.checkInOuterField(this.pos)) ||
+			(!this.spec.invisible && field.checkInFieldExceptTop(this.pos))) &&
 		this.pos.dist(shipPos) > this.spec.minRange {
 		bd := this.baseDeg + this.deg
 		NewSmoke(this.pos.x, this.pos.y, 0, Sin32(bd)*this.bulletSpeed, Cos32(bd)*this.bulletSpeed, 0,
