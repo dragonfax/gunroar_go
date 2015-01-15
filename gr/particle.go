@@ -33,43 +33,43 @@ func NewSpark(p Vector, vx float32, vy float32, r float32, g float32, b float32,
 }
 
 func (this *Spark) move() {
-	cnt--
-	if cnt <= 0 || vel.dist() < 0.005 {
-		exists = false
+	this.cnt--
+	if this.cnt <= 0 || this.vel.dist() < 0.005 {
+		this.exists = false
 		return
 	}
-	ppos.x = pos.x
-	ppos.y = pos.y
-	pos += vel
-	vel *= 0.96
+	this.ppos.x = this.pos.x
+	this.ppos.y = this.pos.y
+	this.pos += this.vel
+	this.vel *= 0.96
 }
 
 func (this *Spark) draw() {
-	ox := vel.x
-	oy := vel.y
+	ox := this.vel.x
+	oy := this.vel.y
 	setScreenColor(r, g, b, 1)
 	ox *= 2
 	oy *= 2
-	gl.Vertex3(pos.x-ox, pos.y-oy, 0)
+	gl.Vertex3(this.pos.x-ox, this.pos.y-oy, 0)
 	ox *= 0.5
 	oy *= 0.5
 	setScreenColor(r*0.5, g*0.5, b*0.5, 0)
-	gl.Vertex3(pos.x-oy, pos.y+ox, 0)
-	gl.Vertex3(pos.x+oy, pos.y-ox, 0)
+	gl.Vertex3(this.pos.x-oy, this.pos.y+ox, 0)
+	gl.Vertex3(this.pos.x+oy, this.pos.y-ox, 0)
 }
 
 func (this *Spark) drawLuminous() {
-	ox := vel.x
-	oy := vel.y
+	ox := this.vel.x
+	oy := this.vel.y
 	setScreenColor(r, g, b, 1)
 	ox *= 2
 	oy *= 2
-	gl.Vertex3(pos.x-ox, pos.y-oy, 0)
+	gl.Vertex3(this.pos.x-ox, this.pos.y-oy, 0)
 	ox *= 0.5
 	oy *= 0.5
 	setScreenColor(r*0.5, g*0.5, b*0.5, 0)
-	gl.Vertex3(pos.x-oy, pos.y+ox, 0)
-	gl.Vertex3(pos.x+oy, pos.y-ox, 0)
+	gl.Vertex3(this.pos.x-oy, this.pos.y+ox, 0)
+	gl.Vertex3(this.pos.x+oy, this.pos.y-ox, 0)
 }
 
 /**
@@ -114,159 +114,159 @@ func (this *Smoke) set(p Vector, mx float32, my float32, mz float32, t int, c in
 
 func (this *Smoke) set(p Vector3, mx float32, my float32, mz float32, t int, c int /*= 60*/, sz float32 /* = 2*/) {
 	set(p.x, p.y, mx, my, mz, t, c, sz)
-	pos.z = p.z
+	this.pos.z = p.z
 }
 
 func (this *Smoke) set(x float32, y float32, mx float32, my float32, mz float32, t int, c int /* = 60 */, sz float32 /* = 2 */) {
-	if !field.checkInOuterField(x, y) {
+	if !this.field.checkInOuterField(x, y) {
 		return
 	}
-	pos.x = x
-	pos.y = y
-	pos.z = 0
-	vel.x = mx
-	vel.y = my
-	vel.z = mz
-	smokeType = t
-	startCnt = c
-	cnt = c
-	size = sz
-	switch smokeType {
+	this.pos.x = x
+	this.pos.y = y
+	this.pos.z = 0
+	this.vel.x = mx
+	this.vel.y = my
+	this.vel.z = mz
+	this.smokeType = t
+	this.startCnt = c
+	this.cnt = c
+	this.size = sz
+	switch this.smokeType {
 	case SmokeType.FIRE:
-		r = rand.nextFloat(0.1) + 0.9
-		g = rand.nextFloat(0.2) + 0.2
-		b = 0
-		a = 1
+		this.r = rand.nextFloat(0.1) + 0.9
+		this.g = rand.nextFloat(0.2) + 0.2
+		this.b = 0
+		this.a = 1
 		break
 	case SmokeType.EXPLOSION:
-		r = rand.nextFloat(0.3) + 0.7
-		g = rand.nextFloat(0.3) + 0.3
-		b = 0
-		a = 1
+		this.r = rand.nextFloat(0.3) + 0.7
+		this.g = rand.nextFloat(0.3) + 0.3
+		this.b = 0
+		this.a = 1
 		break
 	case SmokeType.SAND:
-		r = 0.8
-		g = 0.8
-		b = 0.6
-		a = 0.6
+		this.r = 0.8
+		this.g = 0.8
+		this.b = 0.6
+		this.a = 0.6
 		break
 	case SmokeType.SPARK:
-		r = rand.nextFloat(0.3) + 0.7
-		g = rand.nextFloat(0.5) + 0.5
-		b = 0
-		a = 1
+		this.r = rand.nextFloat(0.3) + 0.7
+		this.g = rand.nextFloat(0.5) + 0.5
+		this.b = 0
+		this.a = 1
 		break
 	case SmokeType.WAKE:
-		r = 0.6
-		g = 0.6
-		b = 0.8
-		a = 0.6
+		this.r = 0.6
+		this.g = 0.6
+		this.b = 0.8
+		this.a = 0.6
 		break
 	case SmokeType.SMOKE:
-		r = rand.nextFloat(0.1) + 0.1
-		g = rand.nextFloat(0.1) + 0.1
-		b = 0.1
-		a = 0.5
+		this.r = rand.nextFloat(0.1) + 0.1
+		this.g = rand.nextFloat(0.1) + 0.1
+		this.b = 0.1
+		this.a = 0.5
 		break
 	case SmokeType.LANCE_SPARK:
-		r = 0.4
-		g = rand.nextFloat(0.2) + 0.7
-		b = rand.nextFloat(0.2) + 0.7
-		a = 1
+		this.r = 0.4
+		this.g = rand.nextFloat(0.2) + 0.7
+		this.b = rand.nextFloat(0.2) + 0.7
+		this.a = 1
 		break
 	}
-	exists = true
+	this.exists = true
 }
 
 func (this *Smoke) move() {
-	cnt--
-	if cnt <= 0 || !field.checkInOuterField(pos.x, pos.y) {
-		exists = false
+	this.cnt--
+	if this.cnt <= 0 || !this.field.checkInOuterField(this.pos.x, this.pos.y) {
+		this.exists = false
 		return
 	}
-	if smokeType != SmokeType.WAKE {
-		vel.x += (windVel.x - vel.x) * 0.01
-		vel.y += (windVel.y - vel.y) * 0.01
-		vel.z += (windVel.z - vel.z) * 0.01
+	if this.smokeType != SmokeType.WAKE {
+		this.vel.x += (this.windVel.x - this.vel.x) * 0.01
+		this.vel.y += (this.windVel.y - this.vel.y) * 0.01
+		this.vel.z += (this.windVel.z - this.vel.z) * 0.01
 	}
-	pos += vel
-	pos.y -= field.lastScrollY
-	switch smokeType {
+	this.pos += this.vel
+	this.pos.y -= this.field.lastScrollY
+	switch this.smokeType {
 	case SmokeType.FIRE:
 	case SmokeType.EXPLOSION:
 	case SmokeType.SMOKE:
-		if cnt < startCnt/2 {
-			r *= 0.95
-			g *= 0.95
-			b *= 0.95
+		if this.cnt < this.startCnt/2 {
+			this.r *= 0.95
+			this.g *= 0.95
+			this.b *= 0.95
 		} else {
-			a *= 0.97
+			this.a *= 0.97
 		}
-		size *= 1.01
+		this.size *= 1.01
 		break
 	case SmokeType.SAND:
-		r *= 0.98
-		g *= 0.98
-		b *= 0.98
-		a *= 0.98
+		this.r *= 0.98
+		this.g *= 0.98
+		this.b *= 0.98
+		this.a *= 0.98
 		break
 	case SmokeType.SPARK:
-		r *= 0.92
-		g *= 0.92
-		a *= 0.95
-		vel *= 0.9
+		this.r *= 0.92
+		this.g *= 0.92
+		this.a *= 0.95
+		this.vel *= 0.9
 		break
 	case SmokeType.WAKE:
-		a *= 0.98
-		size *= 1.005
+		this.a *= 0.98
+		this.size *= 1.005
 		break
 	case SmokeType.LANCE_SPARK:
-		a *= 0.95
-		size *= 0.97
+		this.a *= 0.95
+		this.size *= 0.97
 		break
 	}
-	if size > 5 {
-		size = 5
+	if this.size > 5 {
+		this.size = 5
 	}
-	if smokeType == SmokeType.EXPLOSION && pos.z < 0.01 {
-		bl := field.getBlock(pos.x, pos.y)
+	if this.smokeType == SmokeType.EXPLOSION && this.pos.z < 0.01 {
+		bl := this.field.getBlock(this.pos.x, this.pos.y)
 		if bl >= 1 {
-			vel *= 0.8
+			this.vel *= 0.8
 		}
-		if cnt%3 == 0 && bl < -1 {
-			sp := sqrt(vel.x*vel.x + vel.y*vel.y)
+		if this.cnt%3 == 0 && bl < -1 {
+			sp := sqrt(this.vel.x*this.vel.x + this.vel.y*this.vel.y)
 			if sp > 0.3 {
-				d := atan2(vel.x, vel.y)
-				wakePos.x = pos.x + sin(d+PI/2)*size*0.25
-				wakePos.y = pos.y + cos(d+PI/2)*size*0.25
-				NewWake(wakePos, d+PI-0.2+rand.nextSignedFloat(0.1), sp*0.33,
-					20+rand.nextInt(12), size*(7.0+rand.nextFloat(3)))
-				wakePos.x = pos.x + sin(d-PI/2)*size*0.25
-				wakePos.y = pos.y + cos(d-PI/2)*size*0.25
-				NewWake(wakePos, d+PI+0.2+rand.nextSignedFloat(0.1), sp*0.33,
-					20+rand.nextInt(12), size*(7.0+rand.nextFloat(3)))
+				d := atan2(this.vel.x, this.vel.y)
+				this.wakePos.x = this.pos.x + sin(d+PI/2)*this.size*0.25
+				this.wakePos.y = this.pos.y + cos(d+PI/2)*this.size*0.25
+				NewWake(this.wakePos, d+PI-0.2+rand.nextSignedFloat(0.1), sp*0.33,
+					20+rand.nextInt(12), this.size*(7.0+rand.nextFloat(3)))
+				this.wakePos.x = this.pos.x + sin(d-PI/2)*this.size*0.25
+				this.wakePos.y = this.pos.y + cos(d-PI/2)*this.size*0.25
+				NewWake(this.wakePos, d+PI+0.2+rand.nextSignedFloat(0.1), sp*0.33,
+					20+rand.nextInt(12), this.size*(7.0+rand.nextFloat(3)))
 			}
 		}
 	}
 }
 
 func (this *Smoke) draw() {
-	quadSize := size / 2
-	setScreenColor(r, g, b, a)
-	gl.Vertex3(pos.x-quadSize, pos.y-quadSize, pos.z)
-	gl.Vertex3(pos.x+quadSize, pos.y-quadSize, pos.z)
-	gl.Vertex3(pos.x+quadSize, pos.y+quadSize, pos.z)
-	gl.Vertex3(pos.x-quadSize, pos.y+quadSize, pos.z)
+	quadSize := this.size / 2
+	setScreenColor(this.r, this.g, this.b, this.a)
+	gl.Vertex3(this.pos.x-quadSize, this.pos.y-quadSize, this.pos.z)
+	gl.Vertex3(this.pos.x+quadSize, this.pos.y-quadSize, this.pos.z)
+	gl.Vertex3(this.pos.x+quadSize, this.pos.y+quadSize, this.pos.z)
+	gl.Vertex3(this.pos.x-quadSize, this.pos.y+quadSize, this.pos.z)
 }
 
 func (this *Smoke) drawLuminous() {
-	if r+g > 0.8 && b < 0.5 {
-		quadSize := size / 2
-		setScreenColor(r, g, b, a)
-		gl.Vertex3(pos.x-quadSize, pos.y-quadSize, pos.z)
-		gl.Vertex3(pos.x+quadSize, pos.y-quadSize, pos.z)
-		gl.Vertex3(pos.x+quadSize, pos.y+quadSize, pos.z)
-		gl.Vertex3(pos.x-quadSize, pos.y+quadSize, pos.z)
+	if this.r+this.g > 0.8 && this.b < 0.5 {
+		quadSize := this.size / 2
+		setScreenColor(this.r, this.g, this.b, this.a)
+		gl.Vertex3(this.pos.x-quadSize, this.pos.y-quadSize, this.pos.z)
+		gl.Vertex3(this.pos.x+quadSize, this.pos.y-quadSize, this.pos.z)
+		gl.Vertex3(this.pos.x+quadSize, this.pos.y+quadSize, this.pos.z)
+		gl.Vertex3(this.pos.x-quadSize, this.pos.y+quadSize, this.pos.z)
 	}
 }
 
@@ -313,52 +313,52 @@ func NewFragment(field Field) {
 }
 
 func (this *Fragment) set(p Vector, mx float32, my float32, mz float32, sz float32 /* = 1*/) {
-	if !field.checkInOuterField(p.x, p.y) {
+	if !this.field.checkInOuterField(p.x, p.y) {
 		return
 	}
-	pos.x = p.x
-	pos.y = p.y
-	pos.z = 0
-	vel.x = mx
-	vel.y = my
-	vel.z = mz
-	size = sz
-	if size > 5 {
-		size = 5
+	this.pos.x = p.x
+	this.pos.y = p.y
+	this.pos.z = 0
+	this.vel.x = mx
+	this.vel.y = my
+	this.vel.z = mz
+	this.size = sz
+	if this.size > 5 {
+		this.size = 5
 	}
 	d2 = rand.nextFloat(360)
 	md2 = rand.nextSignedFloat(20)
-	exists = true
+	this.exists = true
 }
 
 func (this *Fragment) move() {
-	if !field.checkInOuterField(pos.x, pos.y) {
-		exists = false
+	if !this.field.checkInOuterField(pos.x, pos.y) {
+		this.exists = false
 		return
 	}
-	vel.x *= 0.96
-	vel.y *= 0.96
-	vel.z += (-0.04 - vel.z) * 0.01
-	pos += vel
-	if pos.z < 0 {
-		if field.getBlock(pos.x, pos.y) < 0 {
-			NewSmoke(pos.x, pos.y, 0, 0, 0, Smoke.SmokeType.WAKE, 60, size*0.66)
+	this.vel.x *= 0.96
+	this.vel.y *= 0.96
+	this.vel.z += (-0.04 - this.vel.z) * 0.01
+	this.pos += this.vel
+	if this.pos.z < 0 {
+		if this.field.getBlock(this.pos.x, this.pos.y) < 0 {
+			NewSmoke(this.pos.x, this.pos.y, 0, 0, 0, Smoke.SmokeType.WAKE, 60, this.size*0.66)
 		} else {
-			NewSmoke(pos.x, pos.y, 0, 0, 0, Smoke.SmokeType.SAND, 60, size*0.75)
+			NewSmoke(this.pos.x, this.pos.y, 0, 0, 0, Smoke.SmokeType.SAND, 60, this.size*0.75)
 		}
-		exists = false
+		this.exists = false
 		return
 	}
-	pos.y -= field.lastScrollY
+	this.pos.y -= this.field.lastScrollY
 	d2 += md2
 }
 
 func (this *Fragment) draw() {
 	gl.PushMatrix()
-	Screen.gl.Translate(pos)
+	Screen.gl.Translate(this.pos)
 	gl.Rotatef(d2, 1, 0, 0)
-	gl.Scalef(size, size, 1)
-	displayList.call(0)
+	gl.Scalef(this.size, this.size, 1)
+	fragmentDisplayList.call(0)
 	gl.PopMatrix()
 }
 
@@ -401,75 +401,73 @@ func NewSparkFragment(field Field) *SparkFragment {
 }
 
 func (this *SparkFragment) set(p Vector, mx float32, my float32, mz float32, sz float32 /*= 1*/) {
-	if !field.checkInOuterField(p.x, p.y) {
+	if !this.field.checkInOuterField(p.x, p.y) {
 		return
 	}
-	pos.x = p.x
-	pos.y = p.y
-	pos.z = 0
-	vel.x = mx
-	vel.y = my
-	vel.z = mz
-	size = sz
-	if size > 5 {
-		size = 5
+	this.pos.x = p.x
+	this.pos.y = p.y
+	this.pos.z = 0
+	this.vel.x = mx
+	this.vel.y = my
+	this.vel.z = mz
+	this.size = sz
+	if this.size > 5 {
+		this.size = 5
 	}
 	d2 = rand.nextFloat(360)
 	md2 = rand.nextSignedFloat(15)
 	if rand.nextInt(4) == 0 {
-		hasSmoke = true
+		this.hasSmoke = true
 	} else {
-		hasSmoke = false
+		this.hasSmoke = false
 	}
-	cnt = 0
-	exists = true
+	this.cnt = 0
+	this.exists = true
 }
 
 func (this *SparkFragment) move() {
-	if !field.checkInOuterField(pos.x, pos.y) {
-		exists = false
+	if !this.field.checkInOuterField(this.pos.x, this.pos.y) {
+		this.exists = false
 		return
 	}
-	vel.x *= 0.99
-	vel.y *= 0.99
-	vel.z += (-0.08 - vel.z) * 0.01
-	pos += vel
-	if pos.z < 0 {
-		if field.getBlock(pos.x, pos.y) < 0 {
-			NewSmoke(pos.x, pos.y, 0, 0, 0, Smoke.SmokeType.WAKE, 60, size*0.66)
+	this.vel.x *= 0.99
+	this.vel.y *= 0.99
+	this.vel.z += (-0.08 - this.vel.z) * 0.01
+	this.pos += vel
+	if this.pos.z < 0 {
+		if this.field.getBlock(this.pos.x, this.pos.y) < 0 {
+			NewSmoke(this.pos.x, this.pos.y, 0, 0, 0, Smoke.SmokeType.WAKE, 60, this.size*0.66)
 		} else {
-			NewSmoke(pos.x, pos.y, 0, 0, 0, Smoke.SmokeType.SAND, 60, size*0.75)
+			NewSmoke(this.pos.x, this.pos.y, 0, 0, 0, Smoke.SmokeType.SAND, 60, this.size*0.75)
 		}
-		exists = false
+		this.exists = false
 		return
 	}
-	pos.y -= field.lastScrollY
+	this.pos.y -= this.field.lastScrollY
 	d2 += md2
-	cnt++
-	if hasSmoke && cnt%5 == 0 {
-		if s {
-			NewSmoke(pos, 0, 0, 0, Smoke.SmokeType.SMOKE, 90+rand.nextInt(60), size*0.5)
-		}
+	this.cnt++
+	if this.hasSmoke && this.cnt%5 == 0 {
+		NewSmoke(this.pos, 0, 0, 0, Smoke.SmokeType.SMOKE, 90+rand.nextInt(60), this.size*0.5)
 	}
 }
 
 func (this *SparkFragment) draw() {
 	gl.PushMatrix()
 	setScreenColor(1, rand.nextFloat(1), 0, 0.8)
-	Screen.gl.Translate(pos)
+	Screen.gl.Translate(this.pos)
 	gl.Rotatef(d2, 1, 0, 0)
-	gl.Scalef(size, size, 1)
-	displayList.call(0)
+	gl.Scalef(this.size, this.size, 1)
+	sparkFragmentDisplayList.call(0)
 	gl.PopMatrix()
 }
 
 func (this *SparkFragment) drawLuminous() {
 	gl.PushMatrix()
 	setScreenColor(1, rand.nextFloat(1), 0, 0.8)
-	Screen.gl.Translate(pos)
+	Screen.gl.Translate(this.pos)
 	gl.Rotatef(d2, 1, 0, 0)
 	gl.Scalef(size, size, 1)
-	displayList.call(0)
+	sparkFragmentDisplayList.call(0)
 	gl.PopMatrix()
 }
 
@@ -492,47 +490,47 @@ func NewWake(field Field) *Wake {
 }
 
 func (this *Wake) set(p Vector, deg float32, speed float32, c int /*= 60*/, sz float32 /*= 1*/, rs bool /* = false */) {
-	if !field.checkInOuterField(p.x, p.y) {
+	if !this.field.checkInOuterField(p.x, p.y) {
 		return
 	}
-	pos.x = p.x
-	pos.y = p.y
+	this.pos.x = p.x
+	this.pos.y = p.y
 	this.deg = deg
 	this.speed = speed
-	vel.x = sin(deg) * speed
-	vel.y = cos(deg) * speed
-	cnt = c
-	size = sz
-	revShape = rs
-	exists = true
+	this.vel.x = sin(deg) * speed
+	this.vel.y = cos(deg) * speed
+	this.cnt = c
+	this.size = sz
+	this.revShape = rs
+	this.exists = true
 }
 
 func (this *Wake) move() {
-	cnt--
-	if cnt <= 0 || vel.dist() < 0.005 || !field.checkInOuterField(pos.x, pos.y) {
-		exists = false
+	this.cnt--
+	if this.cnt <= 0 || this.vel.dist() < 0.005 || !this.field.checkInOuterField(this.pos.x, this.pos.y) {
+		this.exists = false
 		return
 	}
-	pos += vel
-	pos.y -= field.lastScrollY
-	vel *= 0.96
-	size *= 1.02
+	this.pos += this.vel
+	this.pos.y -= this.field.lastScrollY
+	this.vel *= 0.96
+	this.size *= 1.02
 }
 
 func (this *Wake) draw() {
-	ox := vel.x
-	oy := vel.y
+	ox := this.vel.x
+	oy := this.vel.y
 	setScreenColor(0.33, 0.33, 1)
-	ox *= size
-	oy *= size
-	if revShape {
-		gl.Vertex3(pos.x+ox, pos.y+oy, 0)
+	ox *= this.size
+	oy *= this.size
+	if this.revShape {
+		gl.Vertex3(this.pos.x+ox, this.pos.y+oy, 0)
 	} else {
-		gl.Vertex3(pos.x-ox, pos.y-oy, 0)
+		gl.Vertex3(this.pos.x-ox, this.pos.y-oy, 0)
 	}
 	ox *= 0.2
 	oy *= 0.2
 	setScreenColor(0.2, 0.2, 0.6, 0.5)
-	gl.Vertex3(pos.x-oy, pos.y+ox, 0)
-	gl.Vertex3(pos.x+oy, pos.y-ox, 0)
+	gl.Vertex3(this.pos.x-oy, this.pos.y+ox, 0)
+	gl.Vertex3(this.pos.x+oy, this.pos.y-ox, 0)
 }
