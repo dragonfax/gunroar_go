@@ -59,7 +59,7 @@ func (s *Shot) move() {
 	if s.hitCnt > 0 {
 		s.hitCnt++
 		if s.hitCnt > 30 {
-			s.remove()
+			s.close()
 		}
 		return
 	}
@@ -78,7 +78,7 @@ func (s *Shot) move() {
 	s.pos.y -= s.field.lastScrollY
 	if s.field.getBlock(s.pos) >= ON_BLOCK_THRESHOLD ||
 		!s.field.checkInOuterField(s.pos) || s.pos.y > s.field.size.y {
-		s.remove()
+		s.close()
 	}
 	if s.lance {
 		checkAllEnemiesShotHit(s.pos, s.lanceShape, s)
@@ -88,7 +88,7 @@ func (s *Shot) move() {
 	}
 }
 
-func (s *Shot) remove() {
+func (s *Shot) close() {
 	if s.lance && s.hitCnt <= 0 {
 		s.hitCnt = 1
 		return
@@ -109,7 +109,7 @@ func (s *Shot) removeHitToEnemy(isSmallEnemy bool /*= false*/) {
 }
 
 func (this *Shot) removeHit() {
-	this.remove()
+	this.close()
 	var sn int
 	if this.lance {
 		for i := 0; i < 10; i++ {

@@ -240,14 +240,14 @@ func (this *Turret) destroyed() {
 		this.parent.increaseMultiplier(2)
 		this.parent.addScore(40)
 		break
-	case TurretSpec.TurretType.SUB,TurretSpec.TurretType.SUB_DESTRUCTIVE:
+	case TurretSpec.TurretType.SUB, TurretSpec.TurretType.SUB_DESTRUCTIVE:
 		this.parent.increaseMultiplier(1)
 		this.parent.addScore(20)
 		break
 	}
 }
 
-func (this *Turret) remove() {
+func (this *Turret) close() {
 	if this.destroyedCnt < 0 {
 		this.destroyedCnt = 999
 	}
@@ -582,9 +582,9 @@ func (this *TurretGroup) draw() {
 	}
 }
 
-func (this *TurretGroup) remove() {
+func (this *TurretGroup) close() {
 	for i := 0; i < this.spec.num; i++ {
-		this.turret[i].remove()
+		this.turret[i].close()
 	}
 }
 
@@ -728,9 +728,9 @@ func (this *MovingTurretGroupt) draw() {
 	}
 }
 
-func (this *MovingTurretGroupt) remove() {
+func (this *MovingTurretGroupt) close() {
 	for i := 0; i < this.spec.num; i++ {
-		this.turret[i].remove()
+		this.turret[i].close()
 	}
 }
 

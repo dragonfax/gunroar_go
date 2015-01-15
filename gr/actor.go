@@ -15,16 +15,13 @@ import (
 type Actor interface {
 	move()
 	draw()
-	remove()
+	close()
 }
 
-/* NOTE: you must always insert a POINTER to the struct implementing Actor
- *	golang and the map below will accept a struct value just the same.
- *	but the pointer is needed to make every new struct act as a unique key.
+/* Each Actor must insert its pointer into actors when created
  *
- * the value of the map replaces `exists` and is used to identify if an actor
- * is still in play. or has been decommissions, but not yet garbage collected.
- *
- * TODO use weak references throughout the system to improve this.
+ * NOTE: You must always insert a POINTER to the Actor.
+ *	Golang will accept a struct value just the same as a pointer.
+ *	But the pointer is needed to make every struct act as a unique key in the map.
  */
 var actors = make(map[Actor]bool)

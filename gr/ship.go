@@ -35,12 +35,14 @@ func NewShip(Pad pad /*TwinStick twinStick, */, Mouse mouse, MouseAndPad mouseAn
 	this.scrollSpeed = SCROLL_SPEED_BASE
 	this.scrollSpeedBase = SCROLL_SPEED_BASE
 	this.bridgeShape = NewBaseShape(0.3, 0.2, 0.1, ShapeTypeBRIDGE, 0.3, 0.7, 0.7)
+	actors[this] = true
 }
 
 func (this *Ship) close() {
 	for _, b := range this.boat {
 		b.close()
 	}
+	delete(actors, this)
 }
 
 func (this *Ship) setStageManager(stageManager StageManager) {

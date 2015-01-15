@@ -37,8 +37,9 @@ func NewCrystal(p Vector, ship *Ship) *Crystal {
 	return c
 }
 
-func (c *Crystal) Close() {
+func (c *Crystal) close() {
 	c.shape.Close()
+	delete(actors, c)
 }
 
 func (c *Crystal) move() {
@@ -72,8 +73,4 @@ func (c *Crystal) draw() {
 		gl.PopMatrix()
 		d += math.Pi / 2
 	}
-}
-
-func (c *Crystal) remove() {
-	delete(actors, c)
 }

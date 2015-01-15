@@ -35,13 +35,17 @@ func NewSpark(p Vector, vx float32, vy float32, r float32, g float32, b float32,
 func (this *Spark) move() {
 	this.cnt--
 	if this.cnt <= 0 || this.vel.dist() < 0.005 {
-		this.exists = false
+		this.close()
 		return
 	}
 	this.ppos.x = this.pos.x
 	this.ppos.y = this.pos.y
 	this.pos += this.vel
 	this.vel *= 0.96
+}
+
+func (this *Spark) close() {
+	delete(actors, this)
 }
 
 func (this *Spark) draw() {

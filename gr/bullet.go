@@ -85,7 +85,7 @@ func (this *Bullet) move() {
 	this.pos.y += my
 	this.pos.y -= this.field.lastScrollY
 	if this.ship.checkBulletHit(this.pos, this.ppos) || !this.field.checkInOuterFieldExceptTop(this.pos) {
-		this.remove()
+		this.close()
 		return
 	}
 	this.cnt++
@@ -104,12 +104,12 @@ func (this *Bullet) startDisappear() {
 	} else {
 		NewWake(pos, deg, speed, 60, size*3, true)
 	}
-	this.remove()
+	this.close()
 }
 
 func (this *Bullet) changeToCrystal() {
 	NewCrystal(pos)
-	this.remove()
+	this.close()
 }
 
 func (this *Bullet) draw() {
@@ -134,12 +134,11 @@ func (this *Bullet) checkShotHit(p Vector, s Collidable, shot Shot) {
 	if ox+oy < 0.5 {
 		shot.removeHitToBullet()
 		NewSmoke(pos, Sin32(deg)*speed, Cos32(deg)*speed, 0, Smoke.SmokeType.SPARK, 30, size*0.5)
-		this.remove()
+		this.close()
 	}
 }
 
-// TODO how to DRY this? can't just let the underlying type get put into the actor list
-func (this *Bullet) remove() {
+func (this *Bullet) close() {
 	delete(actors, this)
 }
 
@@ -149,7 +148,7 @@ func removeIndexedBullets(idx int) int {
 	n := 0
 	for a := range actors {
 		b, ok := a.(Bullet)
-		if ok && b.exists && b.enemyIdx == idx {
+		if ok && b.enemyIdx == idx {
 			b.changeToCrystal()
 			n++
 		}
@@ -160,7 +159,7 @@ func removeIndexedBullets(idx int) int {
 func checkAllBulletsShotHit(pos Vector, shape Collidable, shot Shot) {
 	for a := range actors {
 		b, ok := a.(Bullet)
-		if ok && b.exists && b.destructive {
+		if ok && b.destructive {
 			b.checkShotHit(pos, shape, shot)
 		}
 	}

@@ -80,7 +80,7 @@ func (sr *ScoreReel) AddActualScore(as int) {
 	sr.actualScore += as
 }
 
-func (sr *ScoreReel) remove() {
+func (sr *ScoreReel) close() {
 	delete(actors, sr)
 }
 
@@ -161,7 +161,7 @@ func (nr *NumReel) accelerate() {
 	nr.velRatio = 4
 }
 
-func (nr *NumReel) remove() {
+func (nr *NumReel) close() {
 	delete(actors, nr)
 }
 
@@ -360,6 +360,6 @@ func (ni *NumIndicator) draw() {
 	}
 }
 
-func (ni *NumIndicator) remove() {
+func (ni *NumIndicator) close() {
 	delete(actors, ni)
 }

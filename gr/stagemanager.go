@@ -130,7 +130,7 @@ func (this *StageManager) gotoNextBlockArea() {
 			}
 		}
 		for _, ea := range this.enemyApp {
-			ea.remove()
+			ea.close()
 		}
 		return
 	}
@@ -165,7 +165,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		ses.setParam(lr/largeShipNum, ShipEnemySpec.ShipClass.LARGE, rand)
 		this.enemyApp[0].set(ses, largeShipNum, appType, rand)
 	} else {
-		this.enemyApp[0].remove()
+		this.enemyApp[0].close()
 	}
 	if batteryNum > 0 {
 		this.platformEnemySpec = NewPlatformEnemySpec(field, ship, sparks, smokes, fragments, wakes)
@@ -189,7 +189,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		ses.setParam(mr/middleShipNum, ShipEnemySpec.ShipClass.MIDDLE, rand)
 		this.enemyApp[1].set(ses, middleShipNum, appType, rand)
 	} else {
-		this.enemyApp[1].remove()
+		this.enemyApp[1].close()
 	}
 	if !noSmallShip {
 		appType = EnemyState.AppearanceType.TOP

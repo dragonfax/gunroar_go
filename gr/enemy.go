@@ -25,12 +25,11 @@ func (this *Enemy) setStageManager(stageManager StageManager) {
 
 func (this *Enemy) set(spec EnemySpec) {
 	this.spec = spec
-	this.exists = true
 }
 
 func (this *Enemy) move() {
 	if !this.spec.move(this.state) {
-		this.remove()
+		this.close()
 	}
 }
 
@@ -61,9 +60,9 @@ func (this *Enemy) addScore(s int) {
 	this.state.addScore(s)
 }
 
-func (this *Enemy) remove() {
+func (this *Enemy) close() {
 	this.state.removeTurrets()
-	this.exists = false
+	delete(actors, this)
 }
 
 func (this *Enemy) draw() {
@@ -436,10 +435,10 @@ func (this *EnemyState) destroyedEdge(n int) {
 
 func (this *EnemyState) removeTurrets() {
 	for i := 0; i < this.spec.turretGroupNum; i++ {
-		this.turretGroup[i].remove()
+		this.turretGroup[i].close()
 	}
 	for i := 0; i < this.spec.movingTurretGroupNum; i++ {
-		this.movingTurretGroup[i].remove()
+		this.movingTurretGroup[i].close()
 	}
 }
 
@@ -556,7 +555,7 @@ func (this *EnemySpec) addMovingTurret(rank float32, bossMode bool /*= false*/) 
 	var moveType TurretMoveType
 	if !this.bossMode {
 		switch rand.nextInt(4) {
-		case 0,1:
+		case 0, 1:
 			moveType = TurretMoveTypeROLL
 			break
 		case 2:
@@ -1326,7 +1325,7 @@ func (this *PlatformEnemySpec) isBoss() bool {
 func checkAllEnemiesShotHit(pos Vector, shape Collidable, shot Shot /*= null*/) {
 	for a, _ := range actor {
 		e, ok := a.(Enemy)
-		if ok && e.exists {
+		if ok {
 			e.checkShotHit(pos, shape, shot)
 		}
 	}
@@ -1335,7 +1334,7 @@ func checkAllEnemiesShotHit(pos Vector, shape Collidable, shot Shot /*= null*/) 
 func checkAllEnemiesHitShip(x float32, y float32, deselection Enemy /*= null*/, largeOnly bool /*= false*/) *Enemy {
 	for a, _ := range actor {
 		e, ok := a.(Enemy)
-		if ok && e.exists && e != deselection {
+		if ok && e != deselection {
 			if e.checkHitShip(x, y, largeOnly) {
 				return e
 			}
@@ -1347,7 +1346,7 @@ func checkAllEnemiesHitShip(x float32, y float32, deselection Enemy /*= null*/, 
 func hasBoss() bool {
 	for a, _ := range actor {
 		e, ok := a.(Enemy)
-		if ok && e.exists && e.isBoss() {
+		if ok && e.isBoss() {
 			return true
 		}
 	}
