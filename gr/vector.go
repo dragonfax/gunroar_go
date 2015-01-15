@@ -10,11 +10,11 @@ type Vector struct {
 }
 
 /* dot product */
-func (this Vector) Mul(Vector v2) float32 {
+func (this Vector) Mul(v2 Vector) float32 {
 	return this.x*v2.x + this.y*v2.y
 }
 
-func (this Vector) getElement(Vector v) Vector {
+func (this Vector) getElement(v Vector) Vector {
 	var rsl Vector
 	ll := v.Mul(v)
 	if ll != 0 {

@@ -26,3 +26,11 @@ func normalizeDeg360(d float32) float32 {
 	d = Mod32((d+180), 360) - 180
 	return d
 }
+
+func Sin32(d float32) float32 {
+	return float32(math.Sin(float64(d)))
+}
+
+func Cos32(d float32) float32 {
+	return float32(math.Cos(float64(d)))
+}

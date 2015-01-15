@@ -75,8 +75,8 @@ func (this *Bullet) move() {
 	if this.field.checkInOuterField(this.pos) {
 		this.gameManager.addSlowdownRatio(this.speed * 0.24)
 	}
-	mx := Sin32(deg) * this.speed
-	my := Cos32(deg) * this.speed
+	mx := Sin32(this.deg) * this.speed
+	my := Cos32(this.deg) * this.speed
 	this.pos.x += mx
 	this.pos.y += my
 	this.pos.y -= this.field.lastScrollY
