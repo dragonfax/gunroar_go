@@ -145,8 +145,8 @@ func (s *Screen) setEyepos() {
 	var lx, ly, lz float32
 	ez = 13.0
 	if s.screenShakeCnt > 0 {
-		mx := rand.Float32() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
-		my := rand.Float32() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
+		mx := rand.nextSignedFloat() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
+		my := rand.nextSignedFloat() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
 		ex += mx
 		ey += my
 		lx += mx

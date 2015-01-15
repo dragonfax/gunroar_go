@@ -113,20 +113,20 @@ func (this *Shot) removeHit() {
 	var sn int
 	if this.lance {
 		for i := 0; i < 10; i++ {
-			d := this.deg + rand.Float32(0.1)
-			sp = rand.SignedFloat32(LANCE_SPEED)
+			d := this.deg + rand.nextSignedFloat(0.1)
+			sp = rand.nextSignedFloat(LANCE_SPEED)
 			NewSmoke(this.pos, Sin32(d)*sp, Cos32(d)*sp, 0, SmokeType.LANCE_SPARK, 30+rand.Int(30), 1)
 
-			d = this.deg + rand.Float32(0.1)
+			d = this.deg + rand.nextSignedFloat(0.1)
 			sp = rand.nextFloat(LANCE_SPEED)
 			NewSmoke(this.pos, -Sin32(d)*sp, -Cos32(d)*sp, 0, SmokeType.LANCE_SPARK, 30+rand.Int(30), 1)
 		}
 	} else {
-		d := this.deg + rand.Float32(0.5)
-		NewSpark(this.pos, Sin32(d)*SPEED, Cos32(d)*SPEED, 0.6+rand.Float32(0.4), 0.6+rand.Float32(0.4), 0.1, 20)
+		d := this.deg + rand.nextSignedFloat(0.5)
+		NewSpark(this.pos, Sin32(d)*SPEED, Cos32(d)*SPEED, 0.6+rand.nextSignedFloat(0.4), 0.6+rand.nextSignedFloat(0.4), 0.1, 20)
 
-		d = this.deg + rand.Float32(0.5)
-		NewSpark(this.pos, -Sin32(d)*SPEED, -Cos32(d)*SPEED, 0.6+rand.Float32(0.4), 0.6+rand.Float32(0.4), 0.1, 20)
+		d = this.deg + rand.nextSignedFloat(0.5)
+		NewSpark(this.pos, -Sin32(d)*SPEED, -Cos32(d)*SPEED, 0.6+rand.nextSignedFloat(0.4), 0.6+rand.nextSignedFloat(0.4), 0.1, 20)
 	}
 }
 
