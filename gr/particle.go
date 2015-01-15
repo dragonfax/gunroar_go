@@ -29,6 +29,7 @@ func NewSpark(p Vector, vx float32, vy float32, r float32, g float32, b float32,
 	this.g = g
 	this.b = b
 	this.cnt = c
+	actors[this] = true
 	return this
 }
 
@@ -109,6 +110,7 @@ func NewSmoke(field Field) *Smoke {
 	this.startCnt = 1
 	this.size = 1
 	this.field = field
+	actors[this] = true
 	return this
 }
 
@@ -272,6 +274,10 @@ func (this *Smoke) drawLuminous() {
 	}
 }
 
+func (this *Smoke) close() {
+	delete(actors, this)
+}
+
 /**
  * Fragments of destroyed enemies.
  */
@@ -311,6 +317,7 @@ func NewFragment(field Field) {
 	this := new(Fragment)
 	this.size = 1
 	this.field = field
+	actors[this] = true
 	return this
 }
 
@@ -364,6 +371,10 @@ func (this *Fragment) draw() {
 	gl.PopMatrix()
 }
 
+func (this *Fragment) close() {
+	delete(actors, this)
+}
+
 /**
  * Luminous fragments.
  */
@@ -399,6 +410,7 @@ func NewSparkFragment(field Field) *SparkFragment {
 	this := &SparkFragment{NewLuminousActor()}
 	this.size = 1
 	this.field = field
+	actors[this] = true
 	return this
 }
 
@@ -473,6 +485,10 @@ func (this *SparkFragment) drawLuminous() {
 	gl.PopMatrix()
 }
 
+func (this *SparkFragment) close() {
+	delete(actors, this)
+}
+
 /**
  * Wakes of ships and smokes.
  */
@@ -488,6 +504,7 @@ func NewWake(field Field) *Wake {
 	this := new(Wake)
 	this.size = 1
 	this.field = field
+	actors[this] = true
 	return this
 }
 
@@ -535,4 +552,8 @@ func (this *Wake) draw() {
 	setScreenColor(0.2, 0.2, 0.6, 0.5)
 	gl.Vertex3(this.pos.x-oy, this.pos.y+ox, 0)
 	gl.Vertex3(this.pos.x+oy, this.pos.y-ox, 0)
+}
+
+func (this *Wake) close() {
+	delete(actors, this)
 }

@@ -16,6 +16,7 @@ type Enemy struct {
 func NewEnemy(field Field, screen Screen, ship Ship, scoreReel ScoreReel) *Enemy {
 	e := new(Enemy)
 	e.state = NewEnemyState(field, screen, ship, scoreReel)
+	actors[this] = true
 	return e
 }
 

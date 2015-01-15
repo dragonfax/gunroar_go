@@ -252,6 +252,7 @@ func NewNumIndicator(n int, t IndicatorType, size float32, x float32, y float32)
 	ni.targetIdx = -1
 	ni.alpha = 0.1
 	actors[ni] = true
+	return this
 }
 
 func (ni *NumIndicator) addTarget(x float32, y float32, flyingTo FlyingToType, initialVelRatio float32,

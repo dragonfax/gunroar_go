@@ -89,11 +89,11 @@ func (s *Shot) move() {
 }
 
 func (s *Shot) close() {
+	delete(actors, s)
 	if s.lance && s.hitCnt <= 0 {
 		s.hitCnt = 1
 		return
 	}
-	delete(actors, s)
 }
 
 func (s *Shot) removeHitToBullet() {
