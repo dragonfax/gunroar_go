@@ -6,72 +6,68 @@
 package gr
 
 type PlatformPos struct {
-  Vector pos
-  float deg
-  bool used
+  pos Vector
+  deg float32
+  used bool
 }
+
+type Panel struct {
+	x, y, z float32
+	ci int
+	or, og, ob float32
+}
+
+const BLOCK_SIZE_X = 20
+const BLOCK_SIZE_Y = 64
+const ON_BLOCK_THRESHOLD = 1
+const NEXT_BLOCK_AREA_SIZE = 16
+const SIDEWALL_X1 = 18
+const SIDEWALL_X2 = 9.3
+const SIDEWALL_Y = 15
+const TIME_COLOR_INDEX = 5
+const TIME_CHANGE_RATIO = 0.00033
+const SCREEN_BLOCK_SIZE_X = 20
+const SCREEN_BLOCK_SIZE_Y = 24
+const BLOCK_WIDTH = 1
+const PANEL_WIDTH = 1.8
+const PANEL_HEIGHT_BASE = 0.66
+
+var baseColorTime = [3][6][5]float32{
+	[6][5]float32{[]float32{0.15, 0.15, 0.3}, [5]float32{0.25, 0.25, 0.5}, [5]float32{0.35, 0.35, 0.45}, [5]float32{0.6, 0.7, 0.35}, [5]float32{0.45, 0.8, 0.3}, [5]float32{0.2, 0.6, 0.1}},
+	[6][5]float32{[5]float32{0.1, 0.1, 0.3}, [5]float32{0.2, 0.2, 0.5}, [5]float32{0.3, 0.3, 0.4}, [5]float32{0.5, 0.65, 0.35}, [5]float32{0.4, 0.7, 0.3}, [5]float32{0.1, 0.5, 0.1}},
+	[6][5]float32{[5]float32{0.1, 0.1, 0.3}, [5]float32{0.2, 0.2, 0.5}, [5]float32{0.3, 0.3, 0.4}, [5]float32{0.5, 0.65, 0.35}, [5]float32{0.4, 0.7, 0.3}, [5]float32{0.1, 0.5, 0.1}},
+	[6][5]float32{[5]float32{0.2, 0.15, 0.25}, [5]float32{0.35, 0.2, 0.4}, [5]float32{0.5, 0.35, 0.45}, [5]float32{0.7, 0.6, 0.3}, [5]float32{0.6, 0.65, 0.25}, [5]float32{0.2, 0.45, 0.1}},
+	[6][5]float32{[5]float32{0.0, 0.0, 0.1}, [5]float32{0.1, 0.1, 0.3}, [5]float32{0.2, 0.2, 0.3}, [5]float32{0.2, 0.3, 0.15}, [5]float32{0.2, 0.2, 0.1}, [5]float32{0.0, 0.15, 0.0}},
+	}
 
 /**
  * Game field.
  */
-class Field {
- public:
-  static const int BLOCK_SIZE_X = 20
-  static const int BLOCK_SIZE_Y = 64
-  static const int ON_BLOCK_THRESHOLD = 1
-  static const int NEXT_BLOCK_AREA_SIZE = 16
- private:
-  static const float SIDEWALL_X1 = 18
-  static const float SIDEWALL_X2 = 9.3
-  static const float SIDEWALL_Y = 15
-  static const float TIME_COLOR_INDEX = 5
-  static const float TIME_CHANGE_RATIO = 0.00033
-  StageManager stageManager
-  Ship ship
-  Vector _size, _outerSize
-  const int SCREEN_BLOCK_SIZE_X = 20
-  const int SCREEN_BLOCK_SIZE_Y = 24
-  const float BLOCK_WIDTH = 1
-  int[BLOCK_SIZE_Y][BLOCK_SIZE_X] block
-  struct Panel {
-    float x, y, z
-    int ci
-    float or, og, ob
-  }
-  static const float PANEL_WIDTH = 1.8
-  static const float PANEL_HEIGHT_BASE = 0.66
-  Panel[BLOCK_SIZE_Y][BLOCK_SIZE_X] panel
-  int nextBlockY
-  float screenY, blockCreateCnt
-  float _lastScrollY
-  Vector screenPos
-  PlatformPos[SCREEN_BLOCK_SIZE_X * NEXT_BLOCK_AREA_SIZE] platformPos
-  int platformPosNum
-  float[3][6][TIME_COLOR_INDEX] baseColorTime = [
-    [[0.15, 0.15, 0.3], [0.25, 0.25, 0.5], [0.35, 0.35, 0.45],
-     [0.6, 0.7, 0.35], [0.45, 0.8, 0.3], [0.2, 0.6, 0.1]],
-    [[0.1, 0.1, 0.3], [0.2, 0.2, 0.5], [0.3, 0.3, 0.4],
-     [0.5, 0.65, 0.35], [0.4, 0.7, 0.3], [0.1, 0.5, 0.1]],
-    [[0.1, 0.1, 0.3], [0.2, 0.2, 0.5], [0.3, 0.3, 0.4],
-     [0.5, 0.65, 0.35], [0.4, 0.7, 0.3], [0.1, 0.5, 0.1]],
-    [[0.2, 0.15, 0.25], [0.35, 0.2, 0.4], [0.5, 0.35, 0.45],
-     [0.7, 0.6, 0.3], [0.6, 0.65, 0.25], [0.2, 0.45, 0.1]],
-    [[0.0, 0.0, 0.1], [0.1, 0.1, 0.3], [0.2, 0.2, 0.3],
-     [0.2, 0.3, 0.15], [0.2, 0.2, 0.1], [0.0, 0.15, 0.0]],
-    ]
-  float[3][6] baseColor
-  float time
+type Field struct {
+  stageManager StageManager
+  ship Ship
+  size, outerSize Vector
+  block [BLOCK_SIZE_Y][BLOCK_SIZE_X]int
+  panel [BLOCK_SIZE_Y][BLOCK_SIZE_X]panel
+  nextBlockY int
+  screenY, blockCreateCnt float32
+  lastScrollY float32
+  screenPos Vector
+  platformPos [SCREEN_BLOCK_SIZE_X * NEXT_BLOCK_AREA_SIZE]platformPos
+  platformPosNum int
+  baseColor [3][6]float32
+  time float32
+}
 
-  this() {
-    _size = new Vector(SCREEN_BLOCK_SIZE_X / 2 * 0.9, SCREEN_BLOCK_SIZE_Y / 2 * 0.8)
-    _outerSize = new Vector(SCREEN_BLOCK_SIZE_X / 2, SCREEN_BLOCK_SIZE_Y / 2)
-    screenPos = new Vector
-    foreach (inout PlatformPos pp; platformPos)
-      pp.pos = new Vector
-    _lastScrollY = 0
-    platformPosNum = 0
-    time = 0
-  }
+func NewField() *Field {
+	this = new(Field)
+	this.size = Vector{SCREEN_BLOCK_SIZE_X / 2 * 0.9, SCREEN_BLOCK_SIZE_Y / 2 * 0.8}
+	this.outerSize = Vector{SCREEN_BLOCK_SIZE_X / 2, SCREEN_BLOCK_SIZE_Y / 2}
+	for i,_ := range this.platformPos {
+		this.pp.pos = Vector{}
+	}
+	return this
+}
 
   start() {
     _lastScrollY = 0
@@ -84,24 +80,24 @@ class Field {
         createPanel(x, y)
       }
     }
-    time = rand.nextFloat(TIME_COLOR_INDEX)
+    time = rand.nextfloat32(TIME_COLOR_INDEX)
   }
 
   createPanel(int x, int y) {
     Panel* p = &(panel[x][y])
-    p.x = rand.nextFloat(1) - 0.75
-    p.y = rand.nextFloat(1) - 0.75
-    p.z = block[x][y] * PANEL_HEIGHT_BASE + rand.nextFloat(PANEL_HEIGHT_BASE)
+    p.x = rand.nextfloat32(1) - 0.75
+    p.y = rand.nextfloat32(1) - 0.75
+    p.z = block[x][y] * PANEL_HEIGHT_BASE + rand.nextfloat32(PANEL_HEIGHT_BASE)
     p.ci = block[x][y] + 3
-    p.or = 1 + rand.nextSignedFloat(0.1)
-    p.og = 1 + rand.nextSignedFloat(0.1)
-    p.ob = 1 + rand.nextSignedFloat(0.1)
+    p.or = 1 + rand.nextSignedfloat32(0.1)
+    p.og = 1 + rand.nextSignedfloat32(0.1)
+    p.ob = 1 + rand.nextSignedfloat32(0.1)
     p.or *= 0.33
     p.og *= 0.33
     p.ob *= 0.33
   }
 
-  scroll(float my, bool isDemo = false) {
+  scroll(float32 my, bool isDemo = false) {
     _lastScrollY = my
     screenY -= my
     if (screenY < 0)
@@ -183,7 +179,7 @@ class Field {
         }
         block[bx][by] = b
         if (b == -1 && bx >= 2 && bx < BLOCK_SIZE_X - 2) {
-          float pd = calcPlatformDeg(bx, by)
+          float32 pd = calcPlatformDeg(bx, by)
           if (pd >= -PI * 2) {
             platformPos[platformPosNum].pos.x = bx
             platformPos[platformPosNum].pos.y = by
@@ -231,27 +227,27 @@ class Field {
     int h = rand.nextInt(cast(int) (NEXT_BLOCK_AREA_SIZE * 0.24)) + cast(int) (NEXT_BLOCK_AREA_SIZE * 0.33)
     cx -= w / 2
     cy -= h / 2
-    float wr, hr
+    float32 wr, hr
     for (int y = nextBlockY; y < nextBlockY + NEXT_BLOCK_AREA_SIZE; y++) {
       int by = y % BLOCK_SIZE_Y
       for (int bx = 0; bx < BLOCK_SIZE_X; bx++) {
         if (bx >= cx && bx < cx + w && y >= cy && y < cy + h) {
-          float o, to
-          wr = rand.nextFloat(0.2) + 0.2
-          hr = rand.nextFloat(0.3) + 0.4
+          float32 o, to
+          wr = rand.nextfloat32(0.2) + 0.2
+          hr = rand.nextfloat32(0.3) + 0.4
           o = (bx - cx) * wr + (y - cy) * hr
-          wr = rand.nextFloat(0.2) + 0.2
-          hr = rand.nextFloat(0.3) + 0.4
+          wr = rand.nextfloat32(0.2) + 0.2
+          hr = rand.nextfloat32(0.3) + 0.4
           to = (cx + w - 1 - bx) * wr + (y - cy) * hr
           if (to < o)
             o = to
-          wr = rand.nextFloat(0.2) + 0.2
-          hr = rand.nextFloat(0.3) + 0.4
+          wr = rand.nextfloat32(0.2) + 0.2
+          hr = rand.nextfloat32(0.3) + 0.4
           to = (bx - cx) * wr + (cy + h - 1 - y) * hr
           if (to < o)
             o = to
-          wr = rand.nextFloat(0.2) + 0.2
-          hr = rand.nextFloat(0.3) + 0.4
+          wr = rand.nextfloat32(0.2) + 0.2
+          hr = rand.nextfloat32(0.3) + 0.4
           to = (cx + w - 1 - bx) * wr + (cy + h - 1 - y) * hr
           if (to < o)
             o = to
@@ -273,7 +269,7 @@ class Field {
     return getBlock(p.x, p.y)
   }
 
-  int getBlock(float x, float y) {
+  int getBlock(float32 x, float32 y) {
     y -= screenY - cast(int) screenY
     int bx, by
     bx = cast(int) ((x + BLOCK_WIDTH * SCREEN_BLOCK_SIZE_X / 2) / BLOCK_WIDTH)
@@ -288,7 +284,7 @@ class Field {
   }
 
   Vector convertToScreenPos(int bx, int y) {
-    float oy = screenY - cast(int) screenY
+    float32 oy = screenY - cast(int) screenY
     int by = y - cast(int) screenY
     if (by <= -BLOCK_SIZE_Y)
       by += BLOCK_SIZE_Y
@@ -332,14 +328,14 @@ class Field {
     int nci = ci + 1
     if (nci >= TIME_COLOR_INDEX)
       nci = 0
-    float co = time - ci
+    float32 co = time - ci
     for (int i = 0; i < 6; i++)
       for (int j = 0; j < 3; j++)
         baseColor[i][j] = baseColorTime[ci][i][j] * (1 - co) + baseColorTime[nci][i][j] * co
     int by = cast(int) screenY
-    float oy = screenY - by
-    float sx
-    float sy = BLOCK_WIDTH * SCREEN_BLOCK_SIZE_Y / 2 + oy
+    float32 oy = screenY - by
+    float32 sx
+    float32 sy = BLOCK_WIDTH * SCREEN_BLOCK_SIZE_Y / 2 + oy
     by--
     if (by < 0)
       by += BLOCK_SIZE_Y
@@ -375,11 +371,11 @@ class Field {
 
   static int[2][4] degBlockOfs = [[0, -1], [1, 0], [0, 1], [-1, 0]]
 
-  float calcPlatformDeg(int x, int y) {
+  float32 calcPlatformDeg(int x, int y) {
     int d = rand.nextInt(4)
     for (int i = 0; i < 4; i++) {
       if (!checkBlock(x + degBlockOfs[d][0], y + degBlockOfs[d][1], -1, true)) {
-        float pd = d * PI / 2
+        float32 pd = d * PI / 2
         int ox = x + degBlockOfs[d][0]
         int oy = y + degBlockOfs[d][1]
         int td = d
@@ -434,7 +430,7 @@ class Field {
     return _size.contains(p)
   }
 
-  bool checkInField(float x, float y) {
+  bool checkInField(float32 x, float32 y) {
     return _size.contains(x, y)
   }
 
@@ -442,7 +438,7 @@ class Field {
     return _outerSize.contains(p)
   }
 
-  bool checkInOuterField(float x, float y) {
+  bool checkInOuterField(float32 x, float32 y) {
     return _outerSize.contains(x, y)
   }
 
