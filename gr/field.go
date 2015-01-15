@@ -74,8 +74,8 @@ func NewField() *Field {
     nextBlockY = 0
     screenY = NEXT_BLOCK_AREA_SIZE
     blockCreateCnt = 0
-    for (int y = 0; y < BLOCK_SIZE_Y; y++) {
-      for (int x = 0; x < BLOCK_SIZE_X; x++) {
+		for y := 0; y < BLOCK_SIZE_Y; y++ {
+			for x := 0; x < BLOCK_SIZE_X; x++ {
         block[x][y] = -3
         createPanel(x, y)
       }
@@ -100,16 +100,18 @@ func NewField() *Field {
   scroll(float32 my, bool isDemo = false) {
     _lastScrollY = my
     screenY -= my
-    if (screenY < 0)
+    if (screenY < 0) {
       screenY += BLOCK_SIZE_Y
+		}
     blockCreateCnt -= my
     if (blockCreateCnt < 0) {
       stageManager.gotoNextBlockArea()
       int bd
-      if (stageManager.bossMode)
+      if (stageManager.bossMode) {
         bd = 0
-      else
+			} else {
         bd = stageManager.blockDensity
+			}
       createBlocks(bd)
       if (!isDemo) {
         stageManager.addBatteries(platformPos, platformPosNum)
@@ -119,35 +121,42 @@ func NewField() *Field {
   }
 
   createBlocks(int groundDensity) {
-    for (int y = nextBlockY; y < nextBlockY + NEXT_BLOCK_AREA_SIZE; y++) {
+		for y := nextBlockY; y < nextBlockY + NEXT_BLOCK_AREA_SIZE; y++ {
       int by = y % BLOCK_SIZE_Y
-      for (int bx = 0; bx < BLOCK_SIZE_X; bx++)
+			for bx := 0; bx < BLOCK_SIZE_X; bx++ {
         block[bx][by] = -3
+			}
     }
     platformPosNum = 0
     int type = rand.nextInt(3)
-    for (int i = 0; i < groundDensity; i++)
+		for i := 0; i < groundDensity; i++ {
       addGround(type)
-    for (int y = nextBlockY; y < nextBlockY + NEXT_BLOCK_AREA_SIZE; y++) {
+		}
+		for y := nextBlockY; y < nextBlockY + NEXT_BLOCK_AREA_SIZE; y++ {
       int by = y % BLOCK_SIZE_Y
-      for (int bx = 0; bx < BLOCK_SIZE_X; bx++) {
-        if (y == nextBlockY || y == nextBlockY + NEXT_BLOCK_AREA_SIZE - 1)
+      for bx = 0; bx < BLOCK_SIZE_X; bx++ {
+        if (y == nextBlockY || y == nextBlockY + NEXT_BLOCK_AREA_SIZE - 1) {
           block[bx][by] = -3
+				}
       }
     }
-    for (int y = nextBlockY; y < nextBlockY + NEXT_BLOCK_AREA_SIZE; y++) {
+		for y := nextBlockY; y < nextBlockY + NEXT_BLOCK_AREA_SIZE; y++ {
       int by = y % BLOCK_SIZE_Y
-      for (int bx = 0; bx < BLOCK_SIZE_X - 1; bx++) {
-        if (block[bx][by] == 0)
-          if (countAroundBlock(bx, by) <= 1)
+			for bx := 0; bx < BLOCK_SIZE_X - 1; bx++ {
+        if (block[bx][by] == 0) {
+          if (countAroundBlock(bx, by) <= 1) {
             block[bx][by] = -2
+					}
+				}
       }
-      for (int bx = BLOCK_SIZE_X - 1; bx >= 0; bx--) {
-        if (block[bx][by] == 0)
-          if (countAroundBlock(bx, by) <= 1)
+			for bx := BLOCK_SIZE_X - 1; bx >= 0; bx-- {
+        if (block[bx][by] == 0) {
+          if (countAroundBlock(bx, by) <= 1) {
             block[bx][by] = -2
+					}
+				}
       }
-      for (int bx = 0; bx < BLOCK_SIZE_X; bx++) {
+      for bx = 0; bx < BLOCK_SIZE_X; bx++ {
         int b
         int c = countAroundBlock(bx, by)
         if (block[bx][by] >= 0) {
@@ -190,15 +199,17 @@ func NewField() *Field {
         }
       }
     }
-    for (int y = nextBlockY; y < nextBlockY + NEXT_BLOCK_AREA_SIZE; y++) {
+    for y = nextBlockY; y < nextBlockY + NEXT_BLOCK_AREA_SIZE; y++ {
       int by = y % BLOCK_SIZE_Y
-      for (int bx = 0; bx < BLOCK_SIZE_X; bx++) {
+      for bx = 0; bx < BLOCK_SIZE_X; bx++ {
         if (block[bx][by] == -3) {
-          if (countAroundBlock(bx, by, -1) > 0)
+          if (countAroundBlock(bx, by, -1) > 0) {
             block[bx][by] = -2
+					}
         } else if (block[bx][by] == 2) {
-          if (countAroundBlock(bx, by, 1) < 4)
+          if (countAroundBlock(bx, by, 1) < 4) {
             block[bx][by] = 1
+					}
         }
         createPanel(bx, by)
       }
@@ -209,28 +220,29 @@ func NewField() *Field {
     int cx
     switch (type) {
     case 0:
-      cx = rand.nextInt(cast(int) (BLOCK_SIZE_X * 0.4)) + cast(int) (BLOCK_SIZE_X * 0.1)
+      cx = rand.nextInt(int(BLOCK_SIZE_X * 0.4)) + int(BLOCK_SIZE_X * 0.1)
       break
     case 1:
-      cx = rand.nextInt(cast(int) (BLOCK_SIZE_X * 0.4)) + cast(int) (BLOCK_SIZE_X * 0.5)
+      cx = rand.nextInt(int(BLOCK_SIZE_X * 0.4)) + int(BLOCK_SIZE_X * 0.5)
       break
     case 2:
-      if (rand.nextInt(2) == 0)
-        cx = rand.nextInt(cast(int) (BLOCK_SIZE_X * 0.4)) - cast(int) (BLOCK_SIZE_X * 0.2)
-      else
-        cx = rand.nextInt(cast(int) (BLOCK_SIZE_X * 0.4)) + cast(int) (BLOCK_SIZE_X * 0.8)
+      if (rand.nextInt(2) == 0) {
+        cx = rand.nextInt(int(BLOCK_SIZE_X * 0.4)) - int(BLOCK_SIZE_X * 0.2)
+			} else {
+        cx = rand.nextInt(int(BLOCK_SIZE_X * 0.4)) + int(BLOCK_SIZE_X * 0.8)
+			}
       break
     }
-    int cy = rand.nextInt(cast(int) (NEXT_BLOCK_AREA_SIZE * 0.6)) + cast(int) (NEXT_BLOCK_AREA_SIZE * 0.2)
+    int cy = rand.nextInt(int(NEXT_BLOCK_AREA_SIZE * 0.6)) + int(NEXT_BLOCK_AREA_SIZE * 0.2)
     cy += nextBlockY
-    int w = rand.nextInt(cast(int) (BLOCK_SIZE_X * 0.33)) + cast(int) (BLOCK_SIZE_X * 0.33)
-    int h = rand.nextInt(cast(int) (NEXT_BLOCK_AREA_SIZE * 0.24)) + cast(int) (NEXT_BLOCK_AREA_SIZE * 0.33)
+    int w = rand.nextInt(int(BLOCK_SIZE_X * 0.33)) + int(BLOCK_SIZE_X * 0.33)
+    int h = rand.nextInt(int(NEXT_BLOCK_AREA_SIZE * 0.24)) + int(NEXT_BLOCK_AREA_SIZE * 0.33)
     cx -= w / 2
     cy -= h / 2
     float32 wr, hr
-    for (int y = nextBlockY; y < nextBlockY + NEXT_BLOCK_AREA_SIZE; y++) {
+		for y := nextBlockY; y < nextBlockY + NEXT_BLOCK_AREA_SIZE; y++ {
       int by = y % BLOCK_SIZE_Y
-      for (int bx = 0; bx < BLOCK_SIZE_X; bx++) {
+			for bx := 0; bx < BLOCK_SIZE_X; bx++ {
         if (bx >= cx && bx < cx + w && y >= cy && y < cy + h) {
           float32 o, to
           wr = rand.nextfloat32(0.2) + 0.2
@@ -239,20 +251,24 @@ func NewField() *Field {
           wr = rand.nextfloat32(0.2) + 0.2
           hr = rand.nextfloat32(0.3) + 0.4
           to = (cx + w - 1 - bx) * wr + (y - cy) * hr
-          if (to < o)
+          if (to < o) {
             o = to
+					}
           wr = rand.nextfloat32(0.2) + 0.2
           hr = rand.nextfloat32(0.3) + 0.4
           to = (bx - cx) * wr + (cy + h - 1 - y) * hr
-          if (to < o)
+          if (to < o) {
             o = to
+					}
           wr = rand.nextfloat32(0.2) + 0.2
           hr = rand.nextfloat32(0.3) + 0.4
           to = (cx + w - 1 - bx) * wr + (cy + h - 1 - y) * hr
-          if (to < o)
+          if (to < o) {
             o = to
-          if (o > 1)
+					}
+          if (o > 1) {
             block[bx][by] = 0
+					}
         }
       }
     }
@@ -261,8 +277,9 @@ func NewField() *Field {
   gotoNextBlockArea() {
     blockCreateCnt += NEXT_BLOCK_AREA_SIZE
     nextBlockY -= NEXT_BLOCK_AREA_SIZE
-    if (nextBlockY < 0)
+    if (nextBlockY < 0) {
       nextBlockY += BLOCK_SIZE_Y
+		}
   }
 
   int getBlock(Vector p) {
@@ -270,26 +287,30 @@ func NewField() *Field {
   }
 
   int getBlock(float32 x, float32 y) {
-    y -= screenY - cast(int) screenY
+    y -= screenY - screenY
     int bx, by
-    bx = cast(int) ((x + BLOCK_WIDTH * SCREEN_BLOCK_SIZE_X / 2) / BLOCK_WIDTH)
-    by = cast(int)screenY + cast(int) ((-y + BLOCK_WIDTH * SCREEN_BLOCK_SIZE_Y / 2) / BLOCK_WIDTH)
-    if (bx < 0 || bx >= BLOCK_SIZE_X)
+    bx = int((x + BLOCK_WIDTH * SCREEN_BLOCK_SIZE_X / 2) / BLOCK_WIDTH)
+    by = screenY + int((-y + BLOCK_WIDTH * SCREEN_BLOCK_SIZE_Y / 2) / BLOCK_WIDTH)
+    if (bx < 0 || bx >= BLOCK_SIZE_X) {
       return -1
-    if (by < 0)
+		}
+    if (by < 0) {
       by += BLOCK_SIZE_Y
-    else if (by >= BLOCK_SIZE_Y)
+		} else if (by >= BLOCK_SIZE_Y) {
       by -= BLOCK_SIZE_Y
+		}
     return block[bx][by]
   }
 
   Vector convertToScreenPos(int bx, int y) {
-    float32 oy = screenY - cast(int) screenY
-    int by = y - cast(int) screenY
-    if (by <= -BLOCK_SIZE_Y)
+    float32 oy = screenY - screenY
+    int by = y - screenY
+    if (by <= -BLOCK_SIZE_Y) {
       by += BLOCK_SIZE_Y
-    if (by > 0)
+		}
+    if (by > 0) {
       by -= BLOCK_SIZE_Y
+		}
     screenPos.x = bx * BLOCK_WIDTH - BLOCK_WIDTH * SCREEN_BLOCK_SIZE_X / 2 + BLOCK_WIDTH / 2
     screenPos.y = by * -BLOCK_WIDTH + BLOCK_WIDTH * SCREEN_BLOCK_SIZE_Y / 2 + oy - BLOCK_WIDTH / 2
     return screenPos
@@ -297,8 +318,9 @@ func NewField() *Field {
 
   move() {
     time += TIME_CHANGE_RATIO
-    if (time >= TIME_COLOR_INDEX)
+    if (time >= TIME_COLOR_INDEX) {
       time -= TIME_COLOR_INDEX
+		}
   }
 
   draw() {
@@ -324,28 +346,33 @@ func NewField() *Field {
   }
 
   drawPanel() {
-    int ci = cast(int) time
+    int ci = time
     int nci = ci + 1
-    if (nci >= TIME_COLOR_INDEX)
+    if (nci >= TIME_COLOR_INDEX) {
       nci = 0
+		}
     float32 co = time - ci
-    for (int i = 0; i < 6; i++)
-      for (int j = 0; j < 3; j++)
+		for i := 0; i < 6; i++ {
+			for j := 0; j < 3; j++ {
         baseColor[i][j] = baseColorTime[ci][i][j] * (1 - co) + baseColorTime[nci][i][j] * co
-    int by = cast(int) screenY
+			}
+		}
+    int by = screenY
     float32 oy = screenY - by
     float32 sx
     float32 sy = BLOCK_WIDTH * SCREEN_BLOCK_SIZE_Y / 2 + oy
     by--
-    if (by < 0)
+    if (by < 0) {
       by += BLOCK_SIZE_Y
+		}
     sy += BLOCK_WIDTH
     glBegin(GL_QUADS)
-    for (int y = -1; y < SCREEN_BLOCK_SIZE_Y + NEXT_BLOCK_AREA_SIZE; y++) {
-      if (by >= BLOCK_SIZE_Y)
+		for y := -1; y < SCREEN_BLOCK_SIZE_Y + NEXT_BLOCK_AREA_SIZE; y++ {
+      if (by >= BLOCK_SIZE_Y) {
         by -= BLOCK_SIZE_Y
+			}
       sx = -BLOCK_WIDTH * SCREEN_BLOCK_SIZE_X / 2
-      for (int bx = 0; bx < SCREEN_BLOCK_SIZE_X; bx++) {
+			for bx := 0; bx < SCREEN_BLOCK_SIZE_X; bx++ {
         Panel* p = &(panel[bx][by])
         Screen.setColor(baseColor[p.ci][0] * p.or * 0.66,
                         baseColor[p.ci][1] * p.og * 0.66,
@@ -373,56 +400,68 @@ func NewField() *Field {
 
   float32 calcPlatformDeg(int x, int y) {
     int d = rand.nextInt(4)
-    for (int i = 0; i < 4; i++) {
+		for i := 0; i < 4; i++ {
       if (!checkBlock(x + degBlockOfs[d][0], y + degBlockOfs[d][1], -1, true)) {
         float32 pd = d * PI / 2
         int ox = x + degBlockOfs[d][0]
         int oy = y + degBlockOfs[d][1]
         int td = d
         td--
-        if (td < 0)
+        if (td < 0) {
           td = 3
+				}
         bool b1 = checkBlock(ox +  degBlockOfs[td][0], oy +  degBlockOfs[td][1], -1, true)
         td = d
         td++
-        if (td >= 4)
+        if (td >= 4) {
           td = 0
+				}
         bool b2 = checkBlock(ox +  degBlockOfs[td][0], oy +  degBlockOfs[td][1], -1, true)
-        if (!b1 && b2)
+        if (!b1 && b2) {
           pd -= PI / 4
-        if (b1 && !b2)
+				}
+        if (b1 && !b2) {
           pd += PI / 4
+				}
         Math.normalizeDeg(pd)
         return pd
       }
       d++
-      if (d >= 4)
+      if (d >= 4) {
         d = 0
+			}
     }
     return -99999
   }
 
   int countAroundBlock(int x, int y, int th = 0) {
     int c = 0
-    if (checkBlock(x, y - 1, th))
+    if (checkBlock(x, y - 1, th)) {
       c++
-    if (checkBlock(x + 1, y, th))
+		}
+    if (checkBlock(x + 1, y, th)) {
       c++
-    if (checkBlock(x, y + 1, th))
+		}
+    if (checkBlock(x, y + 1, th)) {
       c++
-    if (checkBlock(x - 1, y, th))
+		}
+    if (checkBlock(x - 1, y, th)) {
       c++
+		}
     return c
   }
 
   bool checkBlock(int x, int y, int th = 0, bool outScreen = false) {
-    if (x < 0 || x >= BLOCK_SIZE_X)
+    if (x < 0 || x >= BLOCK_SIZE_X) {
       return outScreen
+		}
     int by = y
-    if (by < 0)
+    if (by < 0) {
       by += BLOCK_SIZE_Y
-    if (by >= BLOCK_SIZE_Y)
+		}
+    if (by >= BLOCK_SIZE_Y) {j
       by -= BLOCK_SIZE_Y
+		}
     return (block[x][by] >= th)
   }
 
