@@ -556,8 +556,7 @@ func (this *EnemySpec) addMovingTurret(rank float32, bossMode bool /*= false*/) 
 	var moveType TurretMoveType
 	if !this.bossMode {
 		switch rand.nextInt(4) {
-		case 0:
-		case 1:
+		case 0,1:
 			moveType = TurretMoveTypeROLL
 			break
 		case 2:

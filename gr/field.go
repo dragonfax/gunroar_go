@@ -164,9 +164,7 @@ func (this *Field) createBlocks(groundDensity int) {
 				case 0:
 					b = -2
 					break
-				case 1:
-				case 2:
-				case 3:
+				case 1,2,3:
 					b = 0
 					break
 				case 4:
@@ -178,10 +176,7 @@ func (this *Field) createBlocks(groundDensity int) {
 				case 0:
 					b = -3
 					break
-				case 1:
-				case 2:
-				case 3:
-				case 4:
+				case 1,2,3,4:
 					b = -1
 					break
 				}

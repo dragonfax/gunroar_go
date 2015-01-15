@@ -192,9 +192,7 @@ func (this *Smoke) move() {
 	this.pos += this.vel
 	this.pos.y -= this.field.lastScrollY
 	switch this.smokeType {
-	case SmokeType.FIRE:
-	case SmokeType.EXPLOSION:
-	case SmokeType.SMOKE:
+	case SmokeType.FIRE, SmokeType.EXPLOSION, SmokeType.SMOKE:
 		if this.cnt < this.startCnt/2 {
 			this.r *= 0.95
 			this.g *= 0.95

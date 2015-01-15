@@ -240,8 +240,7 @@ func (this *Turret) destroyed() {
 		this.parent.increaseMultiplier(2)
 		this.parent.addScore(40)
 		break
-	case TurretSpec.TurretType.SUB:
-	case TurretSpec.TurretType.SUB_DESTRUCTIVE:
+	case TurretSpec.TurretType.SUB,TurretSpec.TurretType.SUB_DESTRUCTIVE:
 		this.parent.increaseMultiplier(1)
 		this.parent.addScore(20)
 		break
