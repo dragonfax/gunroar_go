@@ -164,7 +164,7 @@ func (this *Field) createBlocks(groundDensity int) {
 				case 0:
 					b = -2
 					break
-				case 1,2,3:
+				case 1, 2, 3:
 					b = 0
 					break
 				case 4:
@@ -176,7 +176,7 @@ func (this *Field) createBlocks(groundDensity int) {
 				case 0:
 					b = -3
 					break
-				case 1,2,3,4:
+				case 1, 2, 3, 4:
 					b = -1
 					break
 				}
@@ -277,7 +277,7 @@ func (this *Field) gotoNextBlockArea() {
 	}
 }
 
-func (this *Field) getBlock(p Vector) int {
+func (this *Field) getBlockVector(p Vector) int {
 	return this.getBlock(p.x, p.y)
 }
 
@@ -461,7 +461,7 @@ func (this *Field) checkBlock(x int, y int, th int /*= 0*/, outScreen bool /*= f
 	return (this.block[x][by] >= th)
 }
 
-func (this *Field) checkInField(p Vector) bool {
+func (this *Field) checkInFieldVector(p Vector) bool {
 	return this.size.contains(p)
 }
 
@@ -469,7 +469,7 @@ func (this *Field) checkInField(x float32, y float32) bool {
 	return this.size.contains(x, y)
 }
 
-func (this *Field) checkInOuterField(p Vector) bool {
+func (this *Field) checkInOuterFieldVector(p Vector) bool {
 	return this.outerSize.contains(p)
 }
 

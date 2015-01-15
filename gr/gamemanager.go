@@ -5,10 +5,6 @@
  */
 package gr
 
-import (
-	"github.com/dragonfax/gunroar_go/rand"
-)
-
 /**
  * Manage the game state
  */

@@ -5,10 +5,6 @@
  */
 package gr
 
-import (
-	"github.com/dragonfax/gunroar_go/rand"
-)
-
 /**
  * Actor in the game that has the interface to move and draw.
  */

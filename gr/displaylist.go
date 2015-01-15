@@ -7,7 +7,6 @@ package gr
 
 import (
 	"errors"
-	"github.com/dragonfax/gunroar_go/rand"
 	"github.com/go-gl/gl"
 )
 

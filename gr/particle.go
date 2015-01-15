@@ -3,7 +3,7 @@
  *
  * Copyright 2005 Kenta Cho. Some rights reserved.
  */
-package gtr
+package gr
 
 /**
  * Sparks.
@@ -114,11 +114,11 @@ func NewSmoke(field Field) *Smoke {
 	return this
 }
 
-func (this *Smoke) set(p Vector, mx float32, my float32, mz float32, t int, c int /*= 60*/, sz float32 /* = 2 */) {
+func (this *Smoke) setVector(p Vector, mx float32, my float32, mz float32, t int, c int /*= 60*/, sz float32 /* = 2 */) {
 	set(p.x, p.y, mx, my, mz, t, c, sz)
 }
 
-func (this *Smoke) set(p Vector3, mx float32, my float32, mz float32, t int, c int /*= 60*/, sz float32 /* = 2*/) {
+func (this *Smoke) setVector3(p Vector3, mx float32, my float32, mz float32, t int, c int /*= 60*/, sz float32 /* = 2*/) {
 	set(p.x, p.y, mx, my, mz, t, c, sz)
 	this.pos.z = p.z
 }

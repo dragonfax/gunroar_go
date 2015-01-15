@@ -6,7 +6,6 @@
 package gr
 
 import (
-	"github.com/dragonfax/gunroar_go/rand"
 	"math"
 )
 

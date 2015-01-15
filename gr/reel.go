@@ -11,7 +11,6 @@ package gr
 
 import (
 	"github.com/go-gl/gl"
-	"math/rand"
 )
 
 const MAX_DIGIT = 16
