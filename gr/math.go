@@ -34,3 +34,7 @@ func Sin32(d float32) float32 {
 func Cos32(d float32) float32 {
 	return float32(math.Cos(float64(d)))
 }
+
+func fabs32(d float32) float32 {
+	return float32(Abs(float64(d)))
+}

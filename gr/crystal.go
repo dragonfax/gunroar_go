@@ -16,44 +16,42 @@ type Crystal struct {
 	Actor
 
 	shape CrystalShape
-	ship  Ship
 	pos   Vector
-	vel   Vector
+	vel   *Vector
 	cnt   int
 }
 
-func NewCrystal(p Vector, ship *Ship) *Crystal {
-	c = new(Crystal)
-	c.shape = NewCrystalshape()
+func NewCrystal(p Vector) *Crystal {
+	c := new(Crystal)
+	c.shape = NewCrystalShape()
 	c.pos = p
 	c.cnt = COUNT
-	c.vel = Vector{0, 0.1}
-	c.ship = ship
+	c.vel = &Vector{0, 0.1}
 	actors[c] = true
 	return c
 }
 
 func (c *Crystal) close() {
-	c.shape.Close()
+	c.shape.close()
 	delete(actors, c)
 }
 
 func (c *Crystal) move() {
 	c.cnt--
-	dist := c.pos.dist(c.ship.midstPos)
+	dist := c.pos.distVector(ship.midstPos)
 	if dist < 0.1 {
 		dist = 0.1
 	}
 	if c.cnt < PULLIN_COUNT {
-		c.vel.x += (c.ship.midstPos.x - c.pos.x) / dist * 0.07
-		c.vel.y += (c.ship.midstPos.y - c.pos.y) / dist * 0.07
+		c.vel.x += (ship.midstPos.x - c.pos.x) / dist * 0.07
+		c.vel.y += (ship.midstPos.y - c.pos.y) / dist * 0.07
 		if c.cnt < 0 || dist < 2 {
-			c.Done()
+			c.close()
 			return
 		}
 	}
-	c.vel *= 0.95
-	c.pos += vel
+	c.vel.MulAssign(0.95)
+	c.pos += c.vel
 }
 
 func (c *Crystal) draw() {

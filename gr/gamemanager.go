@@ -10,24 +10,25 @@ package gr
  */
 
 var shipTurnSpeed float32 = 1
-var shipReverseFire bool = false
+var shipReverseFire bool
 
 var field *Field
+var pad *Pad
+
+// twinStick TwinStick
+var mouse *Mouse
+var mouseAndPad *MouseAndPad
+var screen *Screen
+var ship *Ship
+var stageManager *StageManager
+var titleManager *TitleManager
+var scoreReel *ScoreReel
+var state *GameState
+var titleState *TitleState
+var inGameState *InGameState
 
 type GameManager struct {
-	pad Pad
-	// twinStick TwinStick
-	mouse        *Mouse
-	mouseAndPad  *MouseAndPad
-	screen       *Screen
-	ship         *Ship
-	stageManager *StageManager
-	titleManager *TitleManager
-	scoreReel    *ScoreReel
-	state        *GameState
-	titleState   *TitleState
-	inGameState  *InGameState
-	escPressed   bool
+	escPressed bool
 }
 
 func (this *GameManager) init() {
@@ -40,38 +41,38 @@ func (this *GameManager) init() {
 	InitFragment.init()
 	InitSparkFragment.init()
 	InitCrystal.init()
-	this.pad = input.inputs[0]
+	pad = input.inputs[0]
 	// twinStick = cast(TwinStick) (cast(MultipleInputDevice) input).inputs[1]
 	// twinStick.openJoystick(pad.openJoystick())
-	this.mouse = input.inputs[2]
-	this.mouse.init(screen)
-	this.mouseAndPad = NewMouseAndPad(mouse, pad)
+	mouse = input.inputs[2]
+	mouse.init(screen)
+	mouseAndPad = NewMouseAndPad(mouse, pad)
 	field = NewField()
-	this.ship = NewShip(pad, twinStick, mouse, mouseAndPad, screen)
-	this.scoreReel = NewScoreReel()
-	this.stageManager = NewStageManager(enemies, ship)
-	this.ship.setStageManager(stageManager)
+	ship = NewShip(pad, twinStick, mouse, mouseAndPad, screen)
+	scoreReel = NewScoreReel()
+	stageManager = NewStageManager(enemies, ship)
+	ship.setStageManager(stageManager)
 	field.setStageManager(stageManager)
 	field.setShip(ship)
 	loadSounds()
-	this.titleManager = NewTitleManager(pad, mouse, this)
-	this.inGameState = NewInGameState(this, screen, pad /*twinStick, */, mouse, mouseAndPad,
+	titleManager = NewTitleManager(pad, mouse, this)
+	inGameState = NewInGameState(this, screen, pad /*twinStick, */, mouse, mouseAndPad,
 		ship, stageManager, scoreReel)
-	this.titleState = NewTitleState(this, screen, pad /*twinStick, */, mouse, mouseAndPad,
+	titleState = NewTitleState(this, screen, pad /*twinStick, */, mouse, mouseAndPad,
 		ship, stageManager, scoreReel,
 		titleManager, inGameState)
-	this.ship.setGameState(this.inGameState)
+	ship.setGameState(this.inGameState)
 }
 
 func (this *GameManager) close() {
-	this.ship.close()
+	ship.close()
 	CloseBulletShape()
 	CloseEnemyShape()
 	CloseTurretShape()
 	CloseFragment()
 	CloseSparkFragment()
 	CloseCrystal()
-	this.titleState()
+	titleState()
 	CloseLetter()
 }
 
@@ -80,13 +81,13 @@ func (this *GameManager) start() {
 }
 
 func (this *GameManager) startTitle(fromGameover bool /*= false*/) {
-	this.state = this.titleState
+	this.state = titleState
 	this.startState()
 }
 
 func (this *GameManager) startInGame(gameMode GameMode) {
-	this.state = this.inGameState
-	this.inGameState.gameMode = gameMode
+	this.state = inGameState
+	inGameState.gameMode = gameMode
 	this.startState()
 }
 

@@ -5,6 +5,10 @@
  */
 package gr
 
+import (
+	"github.com/go-gl/gl"
+)
+
 type Bullet struct {
 	gameManager      *GameManager
 	field            *Field
@@ -104,7 +108,7 @@ func (this *Bullet) startDisappear() {
 }
 
 func (this *Bullet) changeToCrystal() {
-	NewCrystal(pos)
+	NewCrystal(this.pos)
 	this.close()
 }
 
@@ -113,12 +117,12 @@ func (this *Bullet) draw() {
 		return
 	}
 	gl.PushMatrix()
-	glTranslate(pos)
+	glTranslate(this.pos)
 	if this.destructive {
-		gl.Rotatef(this.cnt*13, 0, 0, 1)
+		gl.Rotatef(float32(this.cnt)*13, 0, 0, 1)
 	} else {
 		gl.Rotatef(-this.deg*180/Pi32, 0, 0, 1)
-		gl.Rotatef(this.cnt*13, 0, 1, 0)
+		gl.Rotatef(float32(this.cnt)*13, 0, 1, 0)
 	}
 	this.shape.draw()
 	gl.PopMatrix()
@@ -129,7 +133,7 @@ func (this *Bullet) checkShotHit(p Vector, s Shape, shot Shot) {
 	oy := fabs32(this.pos.y - p.y)
 	if ox+oy < 0.5 {
 		shot.removeHitToBullet()
-		NewSmoke(this.pos.x, this.pos.y, 0, Sin32(deg)*speed, Cos32(deg)*speed, 0, SPARK, 30, size*0.5)
+		NewSmoke(this.pos.x, this.pos.y, 0, Sin32(this.deg)*this.speed, Cos32(this.deg)*this.speed, 0, SPARK, 30, this.size*0.5)
 		this.close()
 	}
 }
@@ -143,7 +147,7 @@ func (this *Bullet) close() {
 func removeIndexedBullets(idx int) int {
 	n := 0
 	for a := range actors {
-		b, ok := a.(Bullet)
+		b, ok := a.(*Bullet)
 		if ok && b.enemyIdx == idx {
 			b.changeToCrystal()
 			n++
@@ -154,7 +158,7 @@ func removeIndexedBullets(idx int) int {
 
 func checkAllBulletsShotHit(pos Vector, shape Shape, shot Shot) {
 	for a := range actors {
-		b, ok := a.(Bullet)
+		b, ok := a.(*Bullet)
 		if ok && b.destructive {
 			b.checkShotHit(pos, shape, shot)
 		}
