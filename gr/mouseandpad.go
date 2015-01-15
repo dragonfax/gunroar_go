@@ -5,6 +5,10 @@
  */
 package gr
 
+import (
+	"github.com/dragonfax/gunroar_go/rand"
+)
+
 type MouseAndPadState struct {
 	mouseState MouseState
 	padState   PadState

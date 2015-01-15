@@ -6,6 +6,7 @@
 package gr
 
 import (
+	"github.com/dragonfax/gunroar_go/rand"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
