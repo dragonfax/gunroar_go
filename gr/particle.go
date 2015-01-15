@@ -100,31 +100,18 @@ type Smoke struct {
 	size, r, g, b, a float32
 }
 
-func NewSmoke(field Field) *Smoke {
-	this = new(Smoke)
+func NewSmoke(x float32, y float32, z float32 /*=0*/, mx float32, my float32, mz float32, t int, c int /* = 60 */, sz float32 /* = 2 */) *Smoke {
+	this := new(Smoke)
 	this.startCnt = 1
 	this.size = 1
 	this.field = field
 	actors[this] = true
-	return this
-}
-
-func (this *Smoke) setVector(p Vector, mx float32, my float32, mz float32, t int, c int /*= 60*/, sz float32 /* = 2 */) {
-	set(p.x, p.y, mx, my, mz, t, c, sz)
-}
-
-func (this *Smoke) setVector3(p Vector3, mx float32, my float32, mz float32, t int, c int /*= 60*/, sz float32 /* = 2*/) {
-	set(p.x, p.y, mx, my, mz, t, c, sz)
-	this.pos.z = p.z
-}
-
-func (this *Smoke) set(x float32, y float32, mx float32, my float32, mz float32, t int, c int /* = 60 */, sz float32 /* = 2 */) {
 	if !this.field.checkInOuterField(x, y) {
 		return
 	}
 	this.pos.x = x
 	this.pos.y = y
-	this.pos.z = 0
+	this.pos.z = z
 	this.vel.x = mx
 	this.vel.y = my
 	this.vel.z = mz
@@ -176,7 +163,7 @@ func (this *Smoke) set(x float32, y float32, mx float32, my float32, mz float32,
 		this.a = 1
 		break
 	}
-	this.exists = true
+	return this
 }
 
 func (this *Smoke) move() {
@@ -454,7 +441,7 @@ func (this *SparkFragment) move() {
 	d2 += md2
 	this.cnt++
 	if this.hasSmoke && this.cnt%5 == 0 {
-		NewSmoke(this.pos, 0, 0, 0, Smoke.SmokeType.SMOKE, 90+nextInt(60), this.size*0.5)
+		NewSmoke(this.pos.x, this.pos.y, this.pos.z, 0, 0, 0, Smoke.SmokeType.SMOKE, 90+nextInt(60), this.size*0.5)
 	}
 }
 

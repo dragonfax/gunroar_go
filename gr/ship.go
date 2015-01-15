@@ -639,7 +639,7 @@ func (this *Boat) fireNormal() {
 		NewShot(this.firePos, this.fireDeg+td)
 
 		sd := this.fireDeg + td/2
-		NewSmoke(this.firePos, Sin32(sd)*SPEED*0.33, Cos32(sd)*SPEED*0.33, 0, SmokeTypeSPARK, 10, 0.33)
+		NewSmoke(this.firePos.x, this.firePos.y, 0, Sin32(sd)*SPEED*0.33, Cos32(sd)*SPEED*0.33, 0, SmokeTypeSPARK, 10, 0.33)
 	}
 	this.fireCnt--
 	if this.padInput.button & PadStateButtonB {
@@ -652,7 +652,7 @@ func (this *Boat) fireNormal() {
 			NewShot(this.pos, fd, true)
 			for i := 0; i < 4; i++ {
 				sd := fd + nextSignedFloat(1)
-				NewSmoke(this.pos,
+				NewSmoke(this.pos.x, this.pos.y, 0,
 					Sin32(sd)*LANCE_SPEED*i*0.2,
 					Cos32(sd)*LANCE_SPEED*i*0.2,
 					0, SmokeTypeSPARK, 15, 0.5)
@@ -800,7 +800,7 @@ func (this *Boat) fireMouse() {
 			NewShot(this.firePos, this.fireDeg+td/2, false, 2)
 			NewShot(this.firePos, this.fireDeg+td, false, 2)
 			sd := this.fireDeg + td/2
-			NewSmoke(this.firePos, Sin32(sd)*SPEED*0.33, Cos32(sd)*SPEED*0.33, 0,
+			NewSmoke(this.firePos.x, this.firePos.y, 0, Sin32(sd)*SPEED*0.33, Cos32(sd)*SPEED*0.33, 0,
 				SmokeTypeSPARK, 10, 0.33)
 		}
 	}
@@ -867,7 +867,7 @@ func (this *Boat) destroyedBoat() {
 	}
 	playSe("ship_destroyed.wav")
 	for i := 0; i < 64; i++ {
-		NewSmoke(pos, nextSignedFloat(0.2), nextSignedFloat(0.2),
+		NewSmoke(pos.x, pos.y, 0, nextSignedFloat(0.2), nextSignedFloat(0.2),
 			nextFloat(0.1),
 			SmokeTypeEXPLOSION, 50+nextInt(30), 1)
 	}

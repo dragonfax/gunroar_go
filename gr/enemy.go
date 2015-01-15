@@ -337,7 +337,7 @@ func (this *EnemyState) destroyed(shot Shot /*= null*/) bool {
 		sn = 3
 	}
 	for i := 0; i < sn*8; i++ {
-		NewSmoke(this.pos, nextSignedFloat(0.1)+this.explodeVel.x, nextSignedFloat(0.1)+this.explodeVel.y, nextFloat(vz), SmokeTypeEXPLOSION, 32+nextInt(30), ss)
+		NewSmoke(this.pos.x, this.pos.y, 0, nextSignedFloat(0.1)+this.explodeVel.x, nextSignedFloat(0.1)+this.explodeVel.y, nextFloat(vz), SmokeTypeEXPLOSION, 32+nextInt(30), ss)
 	}
 	for i := 0; i < sn*36; i++ {
 		NewSpark(this.pos, nextSignedFloat(0.8)+this.explodeVel.x, nextSignedFloat(0.8)+this.explodeVel.y, 0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0, 30+nextInt(30))
@@ -424,7 +424,7 @@ func (this *EnemyState) destroyedEdge(n int) {
 	for i := 0; i < sn; i++ {
 		sr := nextFloat(0.5)
 		sd := spd[si] + nextSignedFloat(0.2)
-		s := NewSmoke(this.edgePos, Sin32(sd)*sr, Cos32(sd)*sr, -0.004, SmokeTypeEXPLOSION, 75+nextInt(25), ss)
+		s := NewSmoke(this.edgePos.x, this.edgePos.y, 0, Sin32(sd)*sr, Cos32(sd)*sr, -0.004, SmokeTypeEXPLOSION, 75+nextInt(25), ss)
 		for j := 0; j < 2; j++ {
 			NewSpark(this.edgePos, Sin32(sd)*sr*2, Cos32(sd)*sr*2, 0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0, 30+nextInt(30))
 		}

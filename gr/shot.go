@@ -115,11 +115,11 @@ func (this *Shot) removeHit() {
 		for i := 0; i < 10; i++ {
 			d := this.deg + nextSignedFloat(0.1)
 			sp = nextSignedFloat(LANCE_SPEED)
-			NewSmoke(this.pos, Sin32(d)*sp, Cos32(d)*sp, 0, SmokeType.LANCE_SPARK, 30+Int(30), 1)
+			NewSmoke(this.pos.x, this.pos.y, 0, Sin32(d)*sp, Cos32(d)*sp, 0, SmokeType.LANCE_SPARK, 30+Int(30), 1)
 
 			d = this.deg + nextSignedFloat(0.1)
 			sp = nextFloat(LANCE_SPEED)
-			NewSmoke(this.pos, -Sin32(d)*sp, -Cos32(d)*sp, 0, SmokeType.LANCE_SPARK, 30+Int(30), 1)
+			NewSmoke(this.pos.x, this.pos.y, 0, -Sin32(d)*sp, -Cos32(d)*sp, 0, SmokeType.LANCE_SPARK, 30+Int(30), 1)
 		}
 	} else {
 		d := this.deg + nextSignedFloat(0.5)

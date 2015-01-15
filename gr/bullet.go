@@ -72,7 +72,7 @@ func (this *Bullet) move() {
 			this.deg = this.trgDeg
 		}
 	}
-	if this.field.checkInOuterField(this.pos) {
+	if this.field.checkInOuterFieldVector(this.pos) {
 		this.gameManager.addSlowdownRatio(this.speed * 0.24)
 	}
 	mx := Sin32(this.deg) * this.speed
@@ -89,16 +89,16 @@ func (this *Bullet) move() {
 	if this.rng <= 0 {
 		this.startDisappear()
 	}
-	if this.field.getBlock(this.pos) >= this.Field.ON_BLOCK_THRESHOLD {
+	if this.field.getBlockVector(this.pos) >= ON_BLOCK_THRESHOLD {
 		this.startDisappear()
 	}
 }
 
 func (this *Bullet) startDisappear() {
-	if this.field.getBlock(this.pos) >= 0 {
-		NewSmoke(pos, Sin32(deg)*speed*0.2, Cos32(deg)*speed*0.2, 0, Smoke.SmokeType.SAND, 30, size*0.5)
+	if this.field.getBlockVector(this.pos) >= 0 {
+		NewSmoke(this.pos.x, this.pos.y, 0, Sin32(this.deg)*this.speed*0.2, Cos32(this.deg)*this.speed*0.2, 0, SAND, 30, this.size*0.5)
 	} else {
-		NewWake(pos, deg, speed, 60, size*3, true)
+		NewWake(this.pos, this.deg, this.speed, 60, this.size*3, true)
 	}
 	this.close()
 }
@@ -109,7 +109,7 @@ func (this *Bullet) changeToCrystal() {
 }
 
 func (this *Bullet) draw() {
-	if !this.field.checkInOuterField(this.pos) {
+	if !this.field.checkInOuterFieldVector(this.pos) {
 		return
 	}
 	gl.PushMatrix()
@@ -129,7 +129,7 @@ func (this *Bullet) checkShotHit(p Vector, s Shape, shot Shot) {
 	oy := fabs32(this.pos.y - p.y)
 	if ox+oy < 0.5 {
 		shot.removeHitToBullet()
-		NewSmoke(pos, Sin32(deg)*speed, Cos32(deg)*speed, 0, Smoke.SmokeType.SPARK, 30, size*0.5)
+		NewSmoke(this.pos.x, this.pos.y, 0, Sin32(deg)*speed, Cos32(deg)*speed, 0, SPARK, 30, size*0.5)
 		this.close()
 	}
 }

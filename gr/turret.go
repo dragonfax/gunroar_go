@@ -46,7 +46,7 @@ func (this *Turret) move(x float32, y float32, d float32, bulletFireSpeed float3
 		this.destroyedCnt++
 		itv := 5 + this.destroyedCnt/12
 		if itv < 60 && this.destroyedCnt%itv == 0 {
-			NewSmoke(this.pos, 0, 0, 0.01+nextFloat(0.01), SmokeType.FIRE, 90+nextInt(30), this.spec.size)
+			NewSmoke(this.pos.x, this.pos.y, 0, 0, 0, 0.01+nextFloat(0.01), SmokeType.FIRE, 90+nextInt(30), this.spec.size)
 		}
 		return false
 	}
@@ -106,7 +106,7 @@ func (this *Turret) move(x float32, y float32, d float32, bulletFireSpeed float3
 			(!this.spec.invisible && this.field.checkInFieldExceptTop(this.pos))) &&
 		this.pos.dist(shipPos) > this.spec.minRange {
 		bd := this.baseDeg + this.deg
-		NewSmoke(this.pos, Sin32(bd)*this.bulletSpeed, Cos32(bd)*this.bulletSpeed, 0,
+		NewSmoke(this.pos.x, this.pos.y, 0, Sin32(bd)*this.bulletSpeed, Cos32(bd)*this.bulletSpeed, 0,
 			Smoke.SmokeType.SPARK, 20, this.spec.size*2)
 		nw := this.spec.nway
 		if this.spec.nwayChange && this.burstCnt%2 == 1 {
@@ -224,7 +224,7 @@ func (this *Turret) destroyed() {
 	playSe("turret_destroyed.wav")
 	this.destroyedCnt = 0
 	for i := 0; i < 6; i++ {
-		NewSmoke(this.pos, nextSignedFloat(0.1), nextSignedFloat(0.1), nextFloat(0.04),
+		NewSmoke(this.pos.x, this.pos.y, 0, nextSignedFloat(0.1), nextSignedFloat(0.1), nextFloat(0.04),
 			Smoke.SmokeType.EXPLOSION, 30+nextInt(20), this.spec.size*1.5)
 	}
 	for i := 0; i < 32; i++ {
