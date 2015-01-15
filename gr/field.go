@@ -80,18 +80,18 @@ func (this *Field) start() {
 			this.createPanel(x, y)
 		}
 	}
-	this.time = rand.nextfloat32(TIME_COLOR_INDEX)
+	this.time = rand.nextFloat(TIME_COLOR_INDEX)
 }
 
 func (this *Field) createPanel(x int, y int) {
 	Panel * p = &(this.panel[x][y])
-	p.x = rand.nextfloat32(1) - 0.75
-	p.y = rand.nextfloat32(1) - 0.75
-	p.z = this.block[x][y]*PANEL_HEIGHT_BASE + rand.nextfloat32(PANEL_HEIGHT_BASE)
+	p.x = rand.nextFloat(1) - 0.75
+	p.y = rand.nextFloat(1) - 0.75
+	p.z = this.block[x][y]*PANEL_HEIGHT_BASE + rand.nextFloat(PANEL_HEIGHT_BASE)
 	p.ci = this.block[x][y] + 3
-	p.or = 1 + rand.nextSignedfloat32(0.1)
-	p.og = 1 + rand.nextSignedfloat32(0.1)
-	p.ob = 1 + rand.nextSignedfloat32(0.1)
+	p.or = 1 + rand.nextSignedFloat(0.1)
+	p.og = 1 + rand.nextSignedFloat(0.1)
+	p.ob = 1 + rand.nextSignedFloat(0.1)
 	p.or *= 0.33
 	p.og *= 0.33
 	p.ob *= 0.33
@@ -245,23 +245,23 @@ func (this *Field) addGround(grountType int) {
 		for bx := 0; bx < BLOCK_SIZE_X; bx++ {
 			if bx >= cx && bx < cx+w && y >= cy && y < cy+h {
 				var o, to float32
-				wr = rand.nextfloat32(0.2) + 0.2
-				hr = rand.nextfloat32(0.3) + 0.4
+				wr = rand.nextFloat(0.2) + 0.2
+				hr = rand.nextFloat(0.3) + 0.4
 				o = (bx-cx)*wr + (y-cy)*hr
-				wr = rand.nextfloat32(0.2) + 0.2
-				hr = rand.nextfloat32(0.3) + 0.4
+				wr = rand.nextFloat(0.2) + 0.2
+				hr = rand.nextFloat(0.3) + 0.4
 				to = (cx+w-1-bx)*wr + (y-cy)*hr
 				if to < o {
 					o = to
 				}
-				wr = rand.nextfloat32(0.2) + 0.2
-				hr = rand.nextfloat32(0.3) + 0.4
+				wr = rand.nextFloat(0.2) + 0.2
+				hr = rand.nextFloat(0.3) + 0.4
 				to = (bx-cx)*wr + (cy+h-1-y)*hr
 				if to < o {
 					o = to
 				}
-				wr = rand.nextfloat32(0.2) + 0.2
-				hr = rand.nextfloat32(0.3) + 0.4
+				wr = rand.nextFloat(0.2) + 0.2
+				hr = rand.nextFloat(0.3) + 0.4
 				to = (cx+w-1-bx)*wr + (cy+h-1-y)*hr
 				if to < o {
 					o = to
