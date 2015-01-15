@@ -80,18 +80,18 @@ func (this *Field) start() {
 			this.createPanel(x, y)
 		}
 	}
-	this.time = rand.nextFloat(TIME_COLOR_INDEX)
+	this.time = nextFloat(TIME_COLOR_INDEX)
 }
 
 func (this *Field) createPanel(x int, y int) {
 	Panel * p = &(this.panel[x][y])
-	p.x = rand.nextFloat(1) - 0.75
-	p.y = rand.nextFloat(1) - 0.75
-	p.z = this.block[x][y]*PANEL_HEIGHT_BASE + rand.nextFloat(PANEL_HEIGHT_BASE)
+	p.x = nextFloat(1) - 0.75
+	p.y = nextFloat(1) - 0.75
+	p.z = this.block[x][y]*PANEL_HEIGHT_BASE + nextFloat(PANEL_HEIGHT_BASE)
 	p.ci = this.block[x][y] + 3
-	p.or = 1 + rand.nextSignedFloat(0.1)
-	p.og = 1 + rand.nextSignedFloat(0.1)
-	p.ob = 1 + rand.nextSignedFloat(0.1)
+	p.or = 1 + nextSignedFloat(0.1)
+	p.og = 1 + nextSignedFloat(0.1)
+	p.ob = 1 + nextSignedFloat(0.1)
 	p.or *= 0.33
 	p.og *= 0.33
 	p.ob *= 0.33
@@ -128,7 +128,7 @@ func (this *Field) createBlocks(groundDensity int) {
 		}
 	}
 	this.platformPosNum = 0
-	groundType := rand.nextInt(3)
+	groundType := nextInt(3)
 	for i := 0; i < this.groundDensity; i++ {
 		this.addGround(groundType)
 	}
@@ -215,23 +215,23 @@ func (this *Field) addGround(grountType int) {
 	var cx int
 	switch groundType {
 	case 0:
-		cx = rand.nextInt(int(BLOCK_SIZE_X*0.4)) + int(BLOCK_SIZE_X*0.1)
+		cx = nextInt(int(BLOCK_SIZE_X*0.4)) + int(BLOCK_SIZE_X*0.1)
 		break
 	case 1:
-		cx = rand.nextInt(int(BLOCK_SIZE_X*0.4)) + int(BLOCK_SIZE_X*0.5)
+		cx = nextInt(int(BLOCK_SIZE_X*0.4)) + int(BLOCK_SIZE_X*0.5)
 		break
 	case 2:
-		if rand.nextInt(2) == 0 {
-			cx = rand.nextInt(int(BLOCK_SIZE_X*0.4)) - int(BLOCK_SIZE_X*0.2)
+		if nextInt(2) == 0 {
+			cx = nextInt(int(BLOCK_SIZE_X*0.4)) - int(BLOCK_SIZE_X*0.2)
 		} else {
-			cx = rand.nextInt(int(BLOCK_SIZE_X*0.4)) + int(BLOCK_SIZE_X*0.8)
+			cx = nextInt(int(BLOCK_SIZE_X*0.4)) + int(BLOCK_SIZE_X*0.8)
 		}
 		break
 	}
-	cy := rand.nextInt(int(NEXT_BLOCK_AREA_SIZE*0.6)) + int(NEXT_BLOCK_AREA_SIZE*0.2)
+	cy := nextInt(int(NEXT_BLOCK_AREA_SIZE*0.6)) + int(NEXT_BLOCK_AREA_SIZE*0.2)
 	cy += this.nextBlockY
-	w := rand.nextInt(int(BLOCK_SIZE_X*0.33)) + int(BLOCK_SIZE_X*0.33)
-	h := rand.nextInt(int(NEXT_BLOCK_AREA_SIZE*0.24)) + int(NEXT_BLOCK_AREA_SIZE*0.33)
+	w := nextInt(int(BLOCK_SIZE_X*0.33)) + int(BLOCK_SIZE_X*0.33)
+	h := nextInt(int(NEXT_BLOCK_AREA_SIZE*0.24)) + int(NEXT_BLOCK_AREA_SIZE*0.33)
 	cx -= w / 2
 	cy -= h / 2
 	var wr, hr float32
@@ -240,23 +240,23 @@ func (this *Field) addGround(grountType int) {
 		for bx := 0; bx < BLOCK_SIZE_X; bx++ {
 			if bx >= cx && bx < cx+w && y >= cy && y < cy+h {
 				var o, to float32
-				wr = rand.nextFloat(0.2) + 0.2
-				hr = rand.nextFloat(0.3) + 0.4
+				wr = nextFloat(0.2) + 0.2
+				hr = nextFloat(0.3) + 0.4
 				o = (bx-cx)*wr + (y-cy)*hr
-				wr = rand.nextFloat(0.2) + 0.2
-				hr = rand.nextFloat(0.3) + 0.4
+				wr = nextFloat(0.2) + 0.2
+				hr = nextFloat(0.3) + 0.4
 				to = (cx+w-1-bx)*wr + (y-cy)*hr
 				if to < o {
 					o = to
 				}
-				wr = rand.nextFloat(0.2) + 0.2
-				hr = rand.nextFloat(0.3) + 0.4
+				wr = nextFloat(0.2) + 0.2
+				hr = nextFloat(0.3) + 0.4
 				to = (bx-cx)*wr + (cy+h-1-y)*hr
 				if to < o {
 					o = to
 				}
-				wr = rand.nextFloat(0.2) + 0.2
-				hr = rand.nextFloat(0.3) + 0.4
+				wr = nextFloat(0.2) + 0.2
+				hr = nextFloat(0.3) + 0.4
 				to = (cx+w-1-bx)*wr + (cy+h-1-y)*hr
 				if to < o {
 					o = to
@@ -394,7 +394,7 @@ func (this *Field) drawPanel() {
 var degBlockOfs = [4][2]int{[2]int{0, -1}, [2]int{1, 0}, [2]int{0, 1}, [2]int{-1, 0}}
 
 func (this *Field) calcPlatformDeg(x int, y int) float32 {
-	d := rand.nextInt(4)
+	d := nextInt(4)
 	for i := 0; i < 4; i++ {
 		if !this.checkBlock(x+degBlockOfs[d][0], y+degBlockOfs[d][1], -1, true) {
 			pd := d * PI / 2

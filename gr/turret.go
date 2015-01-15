@@ -46,7 +46,7 @@ func (this *Turret) move(x float32, y float32, d float32, bulletFireSpeed float3
 		this.destroyedCnt++
 		itv := 5 + this.destroyedCnt/12
 		if itv < 60 && this.destroyedCnt%itv == 0 {
-			NewSmoke(this.pos, 0, 0, 0.01+rand.nextFloat(0.01), SmokeType.FIRE, 90+rand.nextInt(30), this.spec.size)
+			NewSmoke(this.pos, 0, 0, 0.01+nextFloat(0.01), SmokeType.FIRE, 90+nextInt(30), this.spec.size)
 		}
 		return false
 	}
@@ -136,8 +136,8 @@ func (this *Turret) draw() {
 	}
 	gl.PushMatrix()
 	if this.destroyedCnt < 0 && this.damagedCnt > 0 {
-		this.damagedPos.x = this.pos.x + rand.nextSignedFloat(this.damagedCnt*0.015)
-		this.damagedPos.y = this.pos.y + rand.nextSignedFloat(this.damagedCnt*0.015)
+		this.damagedPos.x = this.pos.x + nextSignedFloat(this.damagedCnt*0.015)
+		this.damagedPos.y = this.pos.y + nextSignedFloat(this.damagedCnt*0.015)
 		gl.Translate(this.damagedPos)
 	} else {
 		gl.Translate(this.pos)
@@ -224,16 +224,16 @@ func (this *Turret) destroyed() {
 	playSe("turret_destroyed.wav")
 	this.destroyedCnt = 0
 	for i := 0; i < 6; i++ {
-		NewSmoke(this.pos, rand.nextSignedFloat(0.1), rand.nextSignedFloat(0.1), rand.nextFloat(0.04),
-			Smoke.SmokeType.EXPLOSION, 30+rand.nextInt(20), this.spec.size*1.5)
+		NewSmoke(this.pos, nextSignedFloat(0.1), nextSignedFloat(0.1), nextFloat(0.04),
+			Smoke.SmokeType.EXPLOSION, 30+nextInt(20), this.spec.size*1.5)
 	}
 	for i := 0; i < 32; i++ {
-		NewSpark(this.pos, rand.nextSignedFloat(0.5), rand.nextSignedFloat(0.5),
-			0.5+rand.nextFloat(0.5), 0.5+rand.nextFloat(0.5), 0, 30+rand.nextInt(30))
+		NewSpark(this.pos, nextSignedFloat(0.5), nextSignedFloat(0.5),
+			0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0, 30+nextInt(30))
 	}
 	for i := 0; i < 7; i++ {
-		NewFragment(this.pos, rand.nextSignedFloat(0.25), rand.nextSignedFloat(0.25), 0.05+rand.nextFloat(0.05),
-			this.spec.size*(0.5+rand.nextFloat(0.5)))
+		NewFragment(this.pos, nextSignedFloat(0.25), nextSignedFloat(0.25), 0.05+nextFloat(0.05),
+			this.spec.size*(0.5+nextFloat(0.5)))
 	}
 	switch this.spec.enemyType {
 	case TurretSpec.TurretType.MAIN:
@@ -351,48 +351,48 @@ func (this *TurretSpect) setParam(rank float32, turretType TurretType) {
 		this.blind = true
 		this.invisible = true
 		this.turnSpeed = 0
-		this.maxRange = 9 + rand.nextFloat(12)
+		this.maxRange = 9 + nextFloat(12)
 		rk *= (10.0 / sqrt(this.maxRange))
 		break
 	default:
-		this.maxRange = 9 + rand.nextFloat(16)
-		this.minRange = this.maxRange / (4 + rand.nextFloat(0.5))
+		this.maxRange = 9 + nextFloat(16)
+		this.minRange = this.maxRange / (4 + nextFloat(0.5))
 		if this.turretType == TurretType.SUB || turretType == TurretType.SUB_DESTRUCTIVE {
 			this.maxRange *= 0.72
 			this.minRange *= 0.9
 		}
 		rk *= (10.0 / sqrt(this.maxRange))
-		if rand.nextInt(4) == 0 {
+		if nextInt(4) == 0 {
 			lar := this.rank * 0.1
 			if lar > 1 {
 				lar = 1
 			}
-			this.lookAheadRatio = rand.nextFloat(lar/2) + lar/2
+			this.lookAheadRatio = nextFloat(lar/2) + lar/2
 			rk /= (1 + this.lookAheadRatio*0.3)
 		}
-		if rand.nextInt(3) == 0 && this.lookAheadRatio == 0 {
+		if nextInt(3) == 0 && this.lookAheadRatio == 0 {
 			this.blind = false
 			rk *= 1.5
 		} else {
 			this.blind = true
 		}
-		this.turnRange = Pi32/4 + rand.nextFloat(Pi32/4)
-		this.turnSpeed = 0.005 + rand.nextFloat(0.015)
+		this.turnRange = Pi32/4 + nextFloat(Pi32/4)
+		this.turnSpeed = 0.005 + nextFloat(0.015)
 		if this.turretType == TurretType.MAIN {
 			this.turnRange *= 1.2
 		}
-		if rand.nextInt(4) == 0 {
-			this.burstTurnRatio = rand.nextFloat(0.66) + 0.33
+		if nextInt(4) == 0 {
+			this.burstTurnRatio = nextFloat(0.66) + 0.33
 		}
 		break
 	}
-	this.burstInterval = 6 + rand.nextInt(8)
+	this.burstInterval = 6 + nextInt(8)
 	switch turretType {
 	case TurretType.MAIN:
-		this.size = 0.42 + rand.nextFloat(0.05)
-		br := (rk * 0.3) * (1 + rand.nextSignedFloat(0.2))
-		nr := (rk * 0.33) * rand.nextFloat(1)
-		ir := (rk * 0.1) * (1 + rand.nextSignedFloat(0.2))
+		this.size = 0.42 + nextFloat(0.05)
+		br := (rk * 0.3) * (1 + nextSignedFloat(0.2))
+		nr := (rk * 0.33) * nextFloat(1)
+		ir := (rk * 0.1) * (1 + nextSignedFloat(0.2))
 		this.burstNum = int(br) + 1
 		this.nway = int(nr*0.66 + 1)
 		this.interval = int(120.0/(ir*2+1)) + 1
@@ -405,10 +405,10 @@ func (this *TurretSpect) setParam(rank float32, turretType TurretType) {
 		this.shield = 20
 		break
 	case TurretType.SUB:
-		this.size = 0.36 + rand.nextFloat(0.025)
-		br := (rk * 0.4) * (1 + rand.nextSignedFloat(0.2))
-		nr := (rk * 0.2) * rand.nextFloat(1)
-		ir := (rk * 0.2) * (1 + rand.nextSignedFloat(0.2))
+		this.size = 0.36 + nextFloat(0.025)
+		br := (rk * 0.4) * (1 + nextSignedFloat(0.2))
+		nr := (rk * 0.2) * nextFloat(1)
+		ir := (rk * 0.2) * (1 + nextSignedFloat(0.2))
 		this.burstNum = int(br) + 1
 		this.nway = int(nr*0.66 + 1)
 		this.interval = int(120.0/(ir*2+1)) + 1
@@ -421,10 +421,10 @@ func (this *TurretSpect) setParam(rank float32, turretType TurretType) {
 		this.shield = 12
 		break
 	case TurretType.SUB_DESTRUCTIVE:
-		this.size = 0.36 + rand.nextFloat(0.025)
-		br := (rk * 0.4) * (1 + rand.nextSignedFloat(0.2))
-		nr := (rk * 0.2) * rand.nextFloat(1)
-		ir := (rk * 0.2) * (1 + rand.nextSignedFloat(0.2))
+		this.size = 0.36 + nextFloat(0.025)
+		br := (rk * 0.4) * (1 + nextSignedFloat(0.2))
+		nr := (rk * 0.2) * nextFloat(1)
+		ir := (rk * 0.2) * (1 + nextSignedFloat(0.2))
 		this.burstNum = int(br)*2 + 1
 		this.nway = int(nr*0.66 + 1)
 		this.interval = int(60.0/(ir*2+1)) + 1
@@ -441,8 +441,8 @@ func (this *TurretSpect) setParam(rank float32, turretType TurretType) {
 		break
 	case TurretType.SMALL:
 		this.size = 0.33
-		br := (rk * 0.33) * (1 + rand.nextSignedFloat(0.2))
-		ir := (rk * 0.2) * (1 + rand.nextSignedFloat(0.2))
+		br := (rk * 0.33) * (1 + nextSignedFloat(0.2))
+		ir := (rk * 0.2) * (1 + nextSignedFloat(0.2))
 		this.burstNum = int(br) + 1
 		this.nway = 1
 		this.interval = int(120.0/(ir*2+1)) + 1
@@ -455,9 +455,9 @@ func (this *TurretSpect) setParam(rank float32, turretType TurretType) {
 		break
 	case TurretType.MOVING:
 		this.size = 0.36
-		br := (rk * 0.3) * (1 + rand.nextSignedFloat(0.2))
-		nr := (rk * 0.1) * rand.nextFloat(1)
-		ir := (rk * 0.33) * (1 + rand.nextSignedFloat(0.2))
+		br := (rk * 0.3) * (1 + nextSignedFloat(0.2))
+		nr := (rk * 0.1) * nextFloat(1)
+		ir := (rk * 0.33) * (1 + nextSignedFloat(0.2))
 		this.burstNum = int(br) + 1
 		this.nway = int(nr*0.66 + 1)
 		this.interval = int(120.0/(ir*2+1)) + 1
@@ -475,22 +475,22 @@ func (this *TurretSpect) setParam(rank float32, turretType TurretType) {
 		this.speed = sqrt(this.speed*10) / 10
 	}
 	if this.burstNum > 2 {
-		if rand.nextInt(4) == 0 {
+		if nextInt(4) == 0 {
 			this.speed *= 0.8
 			this.burstInterval *= 0.7
-			this.speedAccel = (this.speed * (0.4 + rand.nextFloat(0.3))) / this.burstNum
-			if rand.nextInt(2) == 0 {
+			this.speedAccel = (this.speed * (0.4 + nextFloat(0.3))) / this.burstNum
+			if nextInt(2) == 0 {
 				this.speedAccel *= -1
 			}
 			this.speed -= this.speedAccel * this.burstNum / 2
 		}
-		if rand.nextInt(5) == 0 {
+		if nextInt(5) == 0 {
 			if this.nway > 1 {
 				this.nwayChange = true
 			}
 		}
 	}
-	this.nwayAngle = (0.1 + rand.nextFloat(0.33)) / (1 + this.nway*0.1)
+	this.nwayAngle = (0.1 + nextFloat(0.33)) / (1 + this.nway*0.1)
 }
 
 func (this *TurretSpect) setBossSpec() {

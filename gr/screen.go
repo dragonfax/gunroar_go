@@ -10,7 +10,7 @@ import (
 	"github.com/go-gl/gl"
 	"github.com/go-gl/glu"
 	"github.com/veandco/go-sdl2/sdl"
-	"math/rand"
+	"math/
 )
 
 /**
@@ -145,8 +145,8 @@ func (s *Screen) setEyepos() {
 	var lx, ly, lz float32
 	ez = 13.0
 	if s.screenShakeCnt > 0 {
-		mx := rand.nextSignedFloat() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
-		my := rand.nextSignedFloat() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
+		mx := nextSignedFloat() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
+		my := nextSignedFloat() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
 		ex += mx
 		ey += my
 		lx += mx

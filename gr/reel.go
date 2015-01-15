@@ -121,7 +121,7 @@ func (nr *NumReel) draw(x float32, y float32, s float32) {
 	for i := 0; i < 3; i++ {
 		gl.PushMatrix()
 		if nr.ofs > 0.005 {
-			gl.Translatef(x+rand.nextSignedFloat()*nr.ofs, y+rand.nextSignedFloat()*nr.ofs, 0)
+			gl.Translatef(x+nextSignedFloat()*nr.ofs, y+nextSignedFloat()*nr.ofs, 0)
 		} else {
 			gl.Translatef(x, y, 0)
 		}
@@ -279,13 +279,13 @@ func (ni *NumIndicator) gotoNextTarget() {
 	}
 	switch ni.target[ni.targetIdx].flyingTo {
 	case FlyingToTypeRIGHT:
-		x := -0.3 + rand.nextSignedFloat()*0.05
-		y := rand.nextSignedFloat() * 0.1
+		x := -0.3 + nextSignedFloat()*0.05
+		y := nextSignedFloat() * 0.1
 		ni.vel = NewVector(x, y)
 		break
 	case FlyingToTypeBOTTOM:
-		x := rand.nextSignedFloat() * 0.1
-		y := 0.3 + rand.nextSignedFloat()*0.05
+		x := nextSignedFloat() * 0.1
+		y := 0.3 + nextSignedFloat()*0.05
 		ni.vel = NewVector(x, y)
 		decTargetY()
 		break

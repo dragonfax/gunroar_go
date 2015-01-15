@@ -44,7 +44,7 @@ func (this *StateManager) start(rankIncRatio float32) {
 	this.addRank = 0
 	this.rankVel = 0
 	this.rankInc = RANK_INC_BASE * this.rankIncRatio
-	this.blockDensity = rand.Int(BLOCK_DENSITY_MAX-BLOCK_DENSITY_MIN+1) + BLOCK_DENSITY_MIN
+	this.blockDensity = Int(BLOCK_DENSITY_MAX-BLOCK_DENSITY_MIN+1) + BLOCK_DENSITY_MIN
 	this.bossMode = false
 	this.bossAppTimeBase = 60 * 1000
 	this.resetBossMode()
@@ -123,7 +123,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		this.bossAppCnt--
 		if this.bossAppCnt == 0 {
 			ses := NewShipEnemySpec(this.field, this.ship)
-			ses.setParam(rank, ShipEnemySpec.ShipClass.BOSS, rand)
+			ses.setParam(rank, ShipEnemySpec.ShipClass.BOSS, 
 			en = NewEnemy()
 			if ses.setFirstState(en.state, EnemyState.AppearanceType.CENTER) {
 				en.set(ses)
@@ -135,45 +135,45 @@ func (this *StageManager) gotoNextBlockArea() {
 		return
 	}
 	var noSmallShip bool
-	if this.blockDensity < BLOCK_DENSITY_MAX && rand.Int(2) == 0 {
+	if this.blockDensity < BLOCK_DENSITY_MAX && Int(2) == 0 {
 		noSmallShip = true
 	} else {
 		noSmallShip = false
 	}
-	this.blockDensity += rand.SignedInt(1)
+	this.blockDensity += SignedInt(1)
 	if this.blockDensity < BLOCK_DENSITY_MIN {
 		this.blockDensity = BLOCK_DENSITY_MIN
 	} else if this.blockDensity > BLOCK_DENSITY_MAX {
 		this.blockDensity = BLOCK_DENSITY_MAX
 	}
-	this.batteryNum = (this.blockDensity + rand.SignedFloat(1)) * 0.75
+	this.batteryNum = (this.blockDensity + SignedFloat(1)) * 0.75
 	tr := this.rank
-	largeShipNum := (2 - this.blockDensity + rand.SignedFloat(1)) * 0.5
+	largeShipNum := (2 - this.blockDensity + SignedFloat(1)) * 0.5
 	if noSmallShip {
 		largeShipNum *= 1.5
 	} else {
 		largeShipNum *= 0.5
 	}
-	appType := rand.Int(2)
+	appType := Int(2)
 	if largeShipNum > 0 {
-		lr := tr * (0.25 + rand.nextFloat(0.15))
+		lr := tr * (0.25 + nextFloat(0.15))
 		if noSmallShip {
 			lr *= 1.5
 		}
 		tr -= lr
 		ses := NewShipEnemySpec(field, ship)
-		ses.setParam(lr/largeShipNum, ShipEnemySpec.ShipClass.LARGE, rand)
-		this.enemyApp[0].set(ses, largeShipNum, appType, rand)
+		ses.setParam(lr/largeShipNum, ShipEnemySpec.ShipClass.LARGE, 
+		this.enemyApp[0].set(ses, largeShipNum, appType, 
 	} else {
 		this.enemyApp[0].close()
 	}
 	if batteryNum > 0 {
 		this.platformEnemySpec = NewPlatformEnemySpec(field, ship, sparks, smokes, fragments, wakes)
-		pr := tr * (0.3 + rand.nextFloat(0.1))
-		this.platformEnemySpec.setParam(pr/batteryNum, rand)
+		pr := tr * (0.3 + nextFloat(0.1))
+		this.platformEnemySpec.setParam(pr/batteryNum, 
 	}
 	appType = (appType + 1) % 2
-	middleShipNum := (4 - _blockDensity + rand.nextSignedFloat(1)) * 0.66
+	middleShipNum := (4 - _blockDensity + nextSignedFloat(1)) * 0.66
 	if noSmallShip {
 		middleShipNum *= 2
 	}
@@ -182,24 +182,24 @@ func (this *StageManager) gotoNextBlockArea() {
 		if noSmallShip {
 			mr = tr
 		} else {
-			mr = tr * (0.33 + rand.nextFloat(0.33))
+			mr = tr * (0.33 + nextFloat(0.33))
 		}
 		tr -= mr
 		ses := NewShipEnemySpec(field, ship)
-		ses.setParam(mr/middleShipNum, ShipEnemySpec.ShipClass.MIDDLE, rand)
-		this.enemyApp[1].set(ses, middleShipNum, appType, rand)
+		ses.setParam(mr/middleShipNum, ShipEnemySpec.ShipClass.MIDDLE, 
+		this.enemyApp[1].set(ses, middleShipNum, appType, 
 	} else {
 		this.enemyApp[1].close()
 	}
 	if !noSmallShip {
 		appType = EnemyState.AppearanceType.TOP
-		smallShipNum := (sqrt(3+tr) * (1 + rand.nextSignedFloat(0.5)) * 2) + 1
+		smallShipNum := (sqrt(3+tr) * (1 + nextSignedFloat(0.5)) * 2) + 1
 		if smallShipNum > 256 {
 			smallShipNum = 256
 		}
 		sses := NewSmallShipEnemySpec(field, ship, sparks, smokes, fragments, wakes)
-		sses.setParam(tr/smallShipNum, rand)
-		enemyApp[2].set(sses, smallShipNum, appType, rand)
+		sses.setParam(tr/smallShipNum, 
+		enemyApp[2].set(sses, smallShipNum, appType, 
 	} else {
 		enemyApp[2].unset()
 	}
@@ -212,7 +212,7 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 		if ppn <= 0 || bn <= 0 {
 			break
 		}
-		ppi := rand.Int(platformPosNum)
+		ppi := Int(platformPosNum)
 		for j := 0; j < platformPosNum; j++ {
 			if !platformPos[ppi].used {
 				break
@@ -261,7 +261,7 @@ func NewEnemyAppearance(s EnemySpec, num int, appType int) *EnemyAppearance {
 	this.nextAppDistInterval = 1
 	this.spec = s
 	this.nextAppDistInterval = NEXT_BLOCK_AREA_SIZE / num
-	this.nextAppDist = rand.SignedFloat(nextAppDistInterval)
+	this.nextAppDist = SignedFloat(nextAppDistInterval)
 	this.appType = appType
 	return this
 }

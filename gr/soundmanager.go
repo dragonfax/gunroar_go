@@ -11,7 +11,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_mixer"
 	"io/ioutil"
-	"math/rand"
+	"math/
 	"path/filepath"
 )
 
@@ -79,8 +79,8 @@ func playBgmByName(name string) {
 }
 
 func playBgm() {
-	bgmIdx := rand.Intn(len(bgm)-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
-	nextIdxMv = rand.Intn(2)*2 - 1
+	bgmIdx := Intn(len(bgm)-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
+	nextIdxMv = Intn(2)*2 - 1
 	prevBgmIdx = bgmIdx
 	playBgmByName(bgmFileName[bgmIdx])
 }

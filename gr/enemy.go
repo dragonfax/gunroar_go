@@ -183,27 +183,27 @@ func (this *EnemyState) setAppearancePos(field Field, ship Ship, appType int /*=
 	for i := 0; i < 8; i++ {
 		switch appType {
 		case AppearanceType.TOP:
-			this.pos.x = rand.nextSignedFloat(field.size.x)
+			this.pos.x = nextSignedFloat(field.size.x)
 			this.pos.y = field.outerSize.y*0.99 + this.spec.size
 			if this.pos.x < 0 {
-				this.deg = Pi3232 - rand.nextFloat(0.5)
+				this.deg = Pi3232 - nextFloat(0.5)
 				this.velDeg = this.deg
 			} else {
-				this.deg = Pi3232 + rand.nextFloat(0.5)
+				this.deg = Pi3232 + nextFloat(0.5)
 				this.velDeg = this.deg
 			}
 			break
 		case AppearanceType.SIDE:
-			if rand.nextInt(2) == 0 {
+			if nextInt(2) == 0 {
 				this.pos.x = -field.outerSize.x * 0.99
-				this.deg = Pi3232/2 + rand.nextFloat(0.66)
+				this.deg = Pi3232/2 + nextFloat(0.66)
 				this.velDeg = this.deg
 			} else {
 				this.pos.x = field.outerSize.x * 0.99
-				this.deg = -Pi32/2 - rand.nextFloat(0.66)
+				this.deg = -Pi32/2 - nextFloat(0.66)
 				this.velDeg = this.deg
 			}
-			this.pos.y = field.size.y + rand.nextFloat(field.size.y) + this.spec.size
+			this.pos.y = field.size.y + nextFloat(field.size.y) + this.spec.size
 			break
 		case AppearanceType.CENTER:
 			this.pos.x = 0
@@ -254,7 +254,7 @@ func (this *EnemyState) move() bool {
 		this.explodeCnt--
 		if this.explodeCnt < 0 {
 			this.explodeItv += 2
-			this.explodeItv = this.explodeItv * (1.2 + rand.nextFloat(1))
+			this.explodeItv = this.explodeItv * (1.2 + nextFloat(1))
 			this.explodeCnt = this.explodeItv
 			this.destroyedEdge(sqrt(this.spec.size) * 27.0 / (this.explodeItv*0.1 + 1))
 		}
@@ -337,13 +337,13 @@ func (this *EnemyState) destroyed(shot Shot /*= null*/) bool {
 		sn = 3
 	}
 	for i := 0; i < sn*8; i++ {
-		NewSmoke(this.pos, rand.nextSignedFloat(0.1)+this.explodeVel.x, rand.nextSignedFloat(0.1)+this.explodeVel.y, rand.nextFloat(vz), SmokeTypeEXPLOSION, 32+rand.nextInt(30), ss)
+		NewSmoke(this.pos, nextSignedFloat(0.1)+this.explodeVel.x, nextSignedFloat(0.1)+this.explodeVel.y, nextFloat(vz), SmokeTypeEXPLOSION, 32+nextInt(30), ss)
 	}
 	for i := 0; i < sn*36; i++ {
-		NewSpark(this.pos, rand.nextSignedFloat(0.8)+this.explodeVel.x, rand.nextSignedFloat(0.8)+this.explodeVel.y, 0.5+rand.nextFloat(0.5), 0.5+rand.nextFloat(0.5), 0, 30+rand.nextInt(30))
+		NewSpark(this.pos, nextSignedFloat(0.8)+this.explodeVel.x, nextSignedFloat(0.8)+this.explodeVel.y, 0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0, 30+nextInt(30))
 	}
 	for i := 0; i < sn*12; i++ {
-		NewFragment(this.pos, rand.nextSignedFloat(0.33)+this.explodeVel.x, rand.nextSignedFloat(0.33)+this.explodeVel.y, 0.05+rand.nextFloat(0.1), 0.2+rand.nextFloat(0.33))
+		NewFragment(this.pos, nextSignedFloat(0.33)+this.explodeVel.x, nextSignedFloat(0.33)+this.explodeVel.y, 0.05+nextFloat(0.1), 0.2+nextFloat(0.33))
 	}
 	this.removeTurrets()
 	sc := this.spec.score
@@ -414,7 +414,7 @@ func (this *EnemyState) destroyedEdge(n int) {
 	}
 	spp := this.spec.shape.shape.pointPos
 	spd := this.spec.shape.shape.pointDeg
-	i := rand.nextInt(spp.length)
+	i := nextInt(spp.length)
 	this.edgePos.x = spp[si].x*this.spec.size + this.pos.x
 	this.edgePos.y = spp[si].y*this.spec.size + this.pos.y
 	ss := this.spec.size * 0.5
@@ -422,14 +422,14 @@ func (this *EnemyState) destroyedEdge(n int) {
 		ss = 1
 	}
 	for i := 0; i < sn; i++ {
-		sr := rand.nextFloat(0.5)
-		sd := spd[si] + rand.nextSignedFloat(0.2)
-		s := NewSmoke(this.edgePos, Sin32(sd)*sr, Cos32(sd)*sr, -0.004, SmokeTypeEXPLOSION, 75+rand.nextInt(25), ss)
+		sr := nextFloat(0.5)
+		sd := spd[si] + nextSignedFloat(0.2)
+		s := NewSmoke(this.edgePos, Sin32(sd)*sr, Cos32(sd)*sr, -0.004, SmokeTypeEXPLOSION, 75+nextInt(25), ss)
 		for j := 0; j < 2; j++ {
-			NewSpark(this.edgePos, Sin32(sd)*sr*2, Cos32(sd)*sr*2, 0.5+rand.nextFloat(0.5), 0.5+rand.nextFloat(0.5), 0, 30+rand.nextInt(30))
+			NewSpark(this.edgePos, Sin32(sd)*sr*2, Cos32(sd)*sr*2, 0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0, 30+nextInt(30))
 		}
 		if i%2 == 0 {
-			NewSparkFragment(this.edgePos, Sin32(sd)*sr*0.5, Cos32(sd)*sr*0.5, 0.06+rand.nextFloat(0.07), (0.2 + rand.nextFloat(0.1)))
+			NewSparkFragment(this.edgePos, Sin32(sd)*sr*0.5, Cos32(sd)*sr*0.5, 0.06+nextFloat(0.07), (0.2 + nextFloat(0.1)))
 		}
 	}
 }
@@ -446,8 +446,8 @@ func (this *EnemyState) removeTurrets() {
 func (this *EnemyState) draw() {
 	glPushMatrix()
 	if this.destroyedCnt < 0 && this.damagedCnt > 0 {
-		this.damagedPos.x = this.pos.x + rand.nextSignedFloat(damagedCnt*0.01)
-		this.damagedPos.y = this.pos.y + rand.nextSignedFloat(damagedCnt*0.01)
+		this.damagedPos.x = this.pos.x + nextSignedFloat(damagedCnt*0.01)
+		this.damagedPos.y = this.pos.y + nextSignedFloat(damagedCnt*0.01)
 		glTranslate(this.damagedPos)
 	} else {
 		glTranslate(this.pos)
@@ -548,14 +548,14 @@ func (this *EnemySpec) addMovingTurret(rank float32, bossMode bool /*= false*/) 
 		mtn = MOVING_TURRET_GROUP_MAX
 	}
 	if mtn >= 2 {
-		mtn = 1 + rand.nextInt(mtn-1)
+		mtn = 1 + nextInt(mtn-1)
 	} else {
 		mtn = 1
 	}
 	br := this.rank / mtn
 	var moveType TurretMoveType
 	if !this.bossMode {
-		switch rand.nextInt(4) {
+		switch nextInt(4) {
 		case 0, 1:
 			moveType = TurretMoveTypeROLL
 			break
@@ -569,29 +569,29 @@ func (this *EnemySpec) addMovingTurret(rank float32, bossMode bool /*= false*/) 
 	} else {
 		moveType = TurretMoveTypeROLL
 	}
-	rad := 0.9 + rand.nextFloat(0.4) - mtn*0.1
-	radInc := 0.5 + rand.nextFloat(0.25)
+	rad := 0.9 + nextFloat(0.4) - mtn*0.1
+	radInc := 0.5 + nextFloat(0.25)
 	ad := Pi32 * 2
 	var a, av, dv, s, sv float32
 	switch moveType {
 	case TurretMoveTypeROLL:
-		a = 0.01 + rand.nextFloat(0.04)
-		av = 0.01 + rand.nextFloat(0.03)
-		dv = 0.01 + rand.nextFloat(0.04)
+		a = 0.01 + nextFloat(0.04)
+		av = 0.01 + nextFloat(0.03)
+		dv = 0.01 + nextFloat(0.04)
 		break
 	case TurretMoveTypeSWING_FIX:
-		ad = Pi32/10 + rand.nextFloat(Pi32/15)
-		s = 0.01 + rand.nextFloat(0.02)
-		sv = 0.01 + rand.nextFloat(0.03)
+		ad = Pi32/10 + nextFloat(Pi32/15)
+		s = 0.01 + nextFloat(0.02)
+		sv = 0.01 + nextFloat(0.03)
 		break
 	case TurretMoveTypeSWING_AIM:
-		ad = Pi32/10 + rand.nextFloat(Pi32/15)
-		if rand.nextInt(5) == 0 {
-			s = 0.01 + rand.nextFloat(0.01)
+		ad = Pi32/10 + nextFloat(Pi32/15)
+		if nextInt(5) == 0 {
+			s = 0.01 + nextFloat(0.01)
 		} else {
 			s = 0
 		}
-		sv = 0.01 + rand.nextFloat(0.02)
+		sv = 0.01 + nextFloat(0.02)
 		break
 	}
 	for i := 0; i < mtn; i++ {
@@ -602,72 +602,72 @@ func (this *EnemySpec) addMovingTurret(rank float32, bossMode bool /*= false*/) 
 		switch moveType {
 		case TurretMoveTypeROLL:
 			tgs.alignDeg = ad
-			tgs.num = 4 + rand.nextInt(6)
-			if rand.nextInt(2) == 0 {
-				if rand.nextInt(2) == 0 {
+			tgs.num = 4 + nextInt(6)
+			if nextInt(2) == 0 {
+				if nextInt(2) == 0 {
 					tgs.setRoll(dv, 0, 0)
 				} else {
 					tgs.setRoll(-dv, 0, 0)
 				}
 			} else {
-				if rand.nextInt(2) == 0 {
+				if nextInt(2) == 0 {
 					tgs.setRoll(0, a, av)
 				} else {
 					tgs.setRoll(0, -a, av)
 				}
 			}
-			if rand.nextInt(3) == 0 {
-				tgs.setRadiusAmp(1+rand.nextFloat(1), 0.01+rand.nextFloat(0.03))
+			if nextInt(3) == 0 {
+				tgs.setRadiusAmp(1+nextFloat(1), 0.01+nextFloat(0.03))
 			}
-			if rand.nextInt(2) == 0 {
-				tgs.distRatio = 0.8 + rand.nextSignedFloat(0.3)
+			if nextInt(2) == 0 {
+				tgs.distRatio = 0.8 + nextSignedFloat(0.3)
 			}
 			sr = br / tgs.num
 			break
 		case TurretMoveTypeSWING_FIX:
-			tgs.num = 3 + rand.nextInt(5)
+			tgs.num = 3 + nextInt(5)
 			tgs.alignDeg = ad * (tgs.num*0.1 + 0.3)
-			if rand.nextInt(2) == 0 {
+			if nextInt(2) == 0 {
 				tgs.setSwing(s, sv)
 			} else {
 				tgs.setSwing(-s, sv)
 			}
-			if rand.nextInt(6) == 0 {
-				tgs.setRadiusAmp(1+rand.nextFloat(1), 0.01+rand.nextFloat(0.03))
+			if nextInt(6) == 0 {
+				tgs.setRadiusAmp(1+nextFloat(1), 0.01+nextFloat(0.03))
 			}
-			if rand.nextInt(4) == 0 {
-				tgs.setAlignAmp(0.25+rand.nextFloat(0.25), 0.01+rand.nextFloat(0.02))
+			if nextInt(4) == 0 {
+				tgs.setAlignAmp(0.25+nextFloat(0.25), 0.01+nextFloat(0.02))
 			}
 			sr = br / tgs.num
 			sr *= 0.6
 			break
 		case TurretMoveTypeSWING_AIM:
-			tgs.num = 3 + rand.nextInt(4)
+			tgs.num = 3 + nextInt(4)
 			tgs.alignDeg = ad * (tgs.num*0.1 + 0.3)
-			if rand.nextInt(2) == 0 {
+			if nextInt(2) == 0 {
 				tgs.setSwing(s, sv, true)
 			} else {
 				tgs.setSwing(-s, sv, true)
 			}
-			if rand.nextInt(4) == 0 {
-				tgs.setRadiusAmp(1+rand.nextFloat(1), 0.01+rand.nextFloat(0.03))
+			if nextInt(4) == 0 {
+				tgs.setRadiusAmp(1+nextFloat(1), 0.01+nextFloat(0.03))
 			}
-			if rand.nextInt(5) == 0 {
-				tgs.setAlignAmp(0.25+rand.nextFloat(0.25), 0.01+rand.nextFloat(0.02))
+			if nextInt(5) == 0 {
+				tgs.setAlignAmp(0.25+nextFloat(0.25), 0.01+nextFloat(0.02))
 			}
 			sr = br / tgs.num
 			sr *= 0.4
 			break
 		}
-		if rand.nextInt(4) == 0 {
+		if nextInt(4) == 0 {
 			tgs.setXReverse(-1)
 		}
-		tgs.turretSpec.setParam(sr, TurretTypeMOVING, rand)
+		tgs.turretSpec.setParam(sr, TurretTypeMOVING, 
 		if this.bossMode {
 			tgs.turretSpec.setBossSpec()
 		}
 		rad += radInc
-		ad *= 1 + rand.nextSignedFloat(0.2)
+		ad *= 1 + nextSignedFloat(0.2)
 	}
 }
 
@@ -750,26 +750,26 @@ func (this *SmallShipEnemySpec) setParam(rank float32) {
 	this.shape = NewEnemyShape(EnemyShapeTypeSMALL)
 	this.damagedShape = NewEnemyShape(EnemyShapeTypeSMALL_DAMAGED)
 	this.bridgeShape = NewEnemyShape(EnemyShapeTypeSMALL_BRIDGE)
-	this.moveType = rand.nextInt(2)
-	sr := rand.nextFloat(rank * 0.8)
+	this.moveType = nextInt(2)
+	sr := nextFloat(rank * 0.8)
 	if sr > 25 {
 		sr = 25
 	}
 	switch this.moveType {
 	case MoveTypeSTOPANDGO:
 		this.distRatio = 0.5
-		this.size = 0.47 + rand.nextFloat(0.1)
-		this.accel = 0.5 - 0.5/(2.0+rand.nextFloat(rank))
+		this.size = 0.47 + nextFloat(0.1)
+		this.accel = 0.5 - 0.5/(2.0+nextFloat(rank))
 		this.maxSpeed = 0.05 * (1.0 + sr)
 		this.staySpeed = 0.03
-		this.moveDuration = 32 + rand.nextSignedInt(12)
-		this.stayDuration = 32 + rand.nextSignedInt(12)
+		this.moveDuration = 32 + nextSignedInt(12)
+		this.stayDuration = 32 + nextSignedInt(12)
 		break
 	case MoveTypeCHASE:
 		this.distRatio = 0.5
-		this.size = 0.5 + rand.nextFloat(0.1)
+		this.size = 0.5 + nextFloat(0.1)
 		this.speed = 0.036 * (1.0 + sr)
-		this.turnDeg = 0.02 + rand.nextSignedFloat(0.04)
+		this.turnDeg = 0.02 + nextSignedFloat(0.04)
 		break
 	}
 	this.shield = 1
@@ -817,7 +817,7 @@ func (this *SmallShipEnemySpec) move(es EnemyState) bool {
 			es.speed += (maxSpeed - es.speed) * this.accel
 			es.cnt--
 			if es.cnt <= 0 {
-				es.velDeg = rand.nextFloat(Pi32 * 2)
+				es.velDeg = nextFloat(Pi32 * 2)
 				es.cnt = this.stayDuration
 				es.state = MoveStateSTAYING
 			}
@@ -918,56 +918,56 @@ func (this *ShipClass) setParam(rank float32, cls int) {
 	rk := this.rank
 	switch cls {
 	case ShipClassMIDDLE:
-		sz := 1.5 + this.rank/15 + rand.nextFloat(this.rank/15)
-		ms := 2 + rand.nextFloat(0.5)
+		sz := 1.5 + this.rank/15 + nextFloat(this.rank/15)
+		ms := 2 + nextFloat(0.5)
 		if sz > ms {
 			sz = ms
 		}
 		this.size = sz
-		this.speed = 0.015 + rand.nextSignedFloat(0.005)
-		this.degVel = 0.005 + rand.nextSignedFloat(0.003)
-		switch rand.nextInt(3) {
+		this.speed = 0.015 + nextSignedFloat(0.005)
+		this.degVel = 0.005 + nextSignedFloat(0.003)
+		switch nextInt(3) {
 		case 0:
-			mainTurretNum = int(this.size*(1+rand.nextSignedFloat(0.25)) + 1)
+			mainTurretNum = int(this.size*(1+nextSignedFloat(0.25)) + 1)
 			break
 		case 1:
-			subTurretNum = int(this.size*1.6*(1+rand.nextSignedFloat(0.5)) + 2)
+			subTurretNum = int(this.size*1.6*(1+nextSignedFloat(0.5)) + 2)
 			break
 		case 2:
-			mainTurretNum = int(this.size*(0.5+rand.nextSignedFloat(0.12)) + 1)
-			movingTurretRatio = 0.5 + rand.nextFloat(0.25)
+			mainTurretNum = int(this.size*(0.5+nextSignedFloat(0.12)) + 1)
+			movingTurretRatio = 0.5 + nextFloat(0.25)
 			rk = this.rank * (1 - movingTurretRatio)
 			movingTurretRatio *= 2
 			break
 		}
 		break
 	case ShipClassLARGE:
-		sz := 2.5 + this.rank/24 + rand.nextFloat(this.rank/24)
-		ms := 3 + rand.nextFloat(1)
+		sz := 2.5 + this.rank/24 + nextFloat(this.rank/24)
+		ms := 3 + nextFloat(1)
 		if sz > ms {
 			sz = ms
 		}
 		this.size = sz
-		this.speed = 0.01 + rand.nextSignedFloat(0.005)
-		this.degVel = 0.003 + rand.nextSignedFloat(0.002)
-		mainTurretNum = int(this.size*(0.7+rand.nextSignedFloat(0.2)) + 1)
-		subTurretNum = (this.size*1.6*(0.7+rand.nextSignedFloat(0.33)) + 2)
-		movingTurretRatio = 0.25 + rand.nextFloat(0.5)
+		this.speed = 0.01 + nextSignedFloat(0.005)
+		this.degVel = 0.003 + nextSignedFloat(0.002)
+		mainTurretNum = int(this.size*(0.7+nextSignedFloat(0.2)) + 1)
+		subTurretNum = (this.size*1.6*(0.7+nextSignedFloat(0.33)) + 2)
+		movingTurretRatio = 0.25 + nextFloat(0.5)
 		rk = this.rank * (1 - movingTurretRatio)
 		movingTurretRatio *= 3
 		break
 	case ShipClassBOSS:
-		sz := 5 + this.rank/30 + rand.nextFloat(this.rank/30)
-		ms := 9 + this.rand.nextFloat(3)
+		sz := 5 + this.rank/30 + nextFloat(this.rank/30)
+		ms := 9 + this.nextFloat(3)
 		if sz > ms {
 			sz = ms
 		}
 		this.size = sz
-		this.speed = this.ship.scrollSpeedBase + 0.0025 + rand.nextSignedFloat(0.001)
-		this.degVel = 0.003 + rand.nextSignedFloat(0.002)
-		mainTurretNum = int(size*0.8*(1.5+rand.nextSignedFloat(0.4)) + 2)
-		subTurretNum = int(size*0.8*(2.4+rand.nextSignedFloat(0.6)) + 2)
-		movingTurretRatio = 0.2 + rand.nextFloat(0.3)
+		this.speed = this.ship.scrollSpeedBase + 0.0025 + nextSignedFloat(0.001)
+		this.degVel = 0.003 + nextSignedFloat(0.002)
+		mainTurretNum = int(size*0.8*(1.5+nextSignedFloat(0.4)) + 2)
+		subTurretNum = int(size*0.8*(2.4+nextSignedFloat(0.6)) + 2)
+		movingTurretRatio = 0.2 + nextFloat(0.3)
 		rk = this.rank * (1 - movingTurretRatio)
 		movingTurretRatio *= 2.5
 		break
@@ -990,14 +990,14 @@ func (this *ShipClass) setParam(rank float32, cls int) {
 				tgs.turretSpec.setParam(mainTurretRank, TurretTypeMAIN)
 				tgs.num = frontMainTurretNum
 				tgs.alignType = AlignTypeSTRAIGHT
-				tgs.offset.y = -this.size * (0.9 + rand.nextSignedFloat(0.05))
+				tgs.offset.y = -this.size * (0.9 + nextSignedFloat(0.05))
 			}
 			if rearMainTurretNum > 0 {
 				tgs := this.getTurretGroupSpec()
 				tgs.turretSpec.setParam(mainTurretRank, TurretTypeMAIN)
 				tgs.num = rearMainTurretNum
 				tgs.alignType = AlignTypeSTRAIGHT
-				tgs.offset.y = this.size * (0.9 + rand.nextSignedFloat(0.05))
+				tgs.offset.y = this.size * (0.9 + nextSignedFloat(0.05))
 			}
 			var pts TurretSpec
 			if subTurretNum > 0 {
@@ -1014,7 +1014,7 @@ func (this *ShipClass) setParam(rank float32, cls int) {
 					}
 					tgs := this.getTurretGroupSpec()
 					if i == 0 || i == 2 {
-						if rand.nextInt(2) == 0 {
+						if nextInt(2) == 0 {
 							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
 						} else {
 							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB_DESTRUCTIVE)
@@ -1027,7 +1027,7 @@ func (this *ShipClass) setParam(rank float32, cls int) {
 					tgs.alignType = AlignTypeROUND
 					tgs.alignDeg = ad
 					ad += Pi32 / 2
-					tgs.alignWidth = Pi32/6 + rand.nextFloat(Pi32/8)
+					tgs.alignWidth = Pi32/6 + nextFloat(Pi32/8)
 					tgs.radius = this.size * 0.75
 					tgs.distRatio = this.distRatio
 				}
@@ -1060,7 +1060,7 @@ func (this *ShipClass) setParam(rank float32, cls int) {
 					tgs.alignType = AlignTypeROUND
 					tgs.alignDeg = ad
 					ad += Pi32 / 2
-					tgs.alignWidth = Pi32/6 + rand.nextFloat(Pi32/8)
+					tgs.alignWidth = Pi32/6 + nextFloat(Pi32/8)
 					tgs.radius = this.size * 0.45
 					tgs.distRatio = this.distRatio
 				}
@@ -1078,7 +1078,7 @@ func (this *ShipClass) setParam(rank float32, cls int) {
 					}
 					tgs := this.getTurretGroupSpec()
 					if i == 0 || i == 2 || i == 4 {
-						if rand.nextInt(2) == 0 {
+						if nextInt(2) == 0 {
 							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
 						} else {
 							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB_DESTRUCTIVE)
@@ -1091,7 +1091,7 @@ func (this *ShipClass) setParam(rank float32, cls int) {
 					tgs.num = tn[idx]
 					tgs.alignType = AlignTypeROUND
 					tgs.alignDeg = ad[i]
-					tgs.alignWidth = Pi32/7 + rand.nextFloat(Pi32/9)
+					tgs.alignWidth = Pi32/7 + nextFloat(Pi32/9)
 					tgs.radius = this.size * 0.75
 					tgs.distRatio = this.distRatio
 				}
@@ -1119,11 +1119,11 @@ func (this *ShipClass) setFirstState(es EnemyState, appType int) bool {
 		es.turnWay = 1
 	}
 	if isBoss {
-		es.trgDeg = rand.nextFloat(0.1) + 0.1
-		if rand.nextInt(2) == 0 {
+		es.trgDeg = nextFloat(0.1) + 0.1
+		if nextInt(2) == 0 {
 			es.trgDeg *= -1
 		}
-		es.turnCnt = 250 + rand.nextInt(150)
+		es.turnCnt = 250 + nextInt(150)
 	}
 	return true
 }
@@ -1148,8 +1148,8 @@ func (this *ShipClass) move(EnemyState es) bool {
 	if isBoss {
 		es.turnCnt--
 		if es.turnCnt <= 0 {
-			es.turnCnt = 250 + rand.nextInt(150)
-			es.trgDeg = rand.nextFloat(0.1) + 0.2
+			es.turnCnt = 250 + nextInt(150)
+			es.trgDeg = nextFloat(0.1) + 0.2
 			if es.pos.x > 0 {
 				es.trgDeg *= -1
 			}
@@ -1222,27 +1222,27 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 	this.destroyedShape = NewEnemyShape(EnemyShapeTypePLATFORM_DESTROYED)
 	this.bridgeShape = NewEnemyShape(EnemyShapeTypePLATFORM_BRIDGE)
 	this.distRatio = 0
-	this.size = 1 + this.rank/30 + rand.nextFloat(this.rank/30)
-	ms := 1 + rand.nextFloat(0.25)
+	this.size = 1 + this.rank/30 + nextFloat(this.rank/30)
+	ms := 1 + nextFloat(0.25)
 	if this.size > ms {
 		this.size = ms
 	}
 	var mainTurretNum, frontTurretNum, sideTurretNum int
 	rk := this.rank
 	var movingTurretRatio float32
-	switch rand.nextInt(3) {
+	switch nextInt(3) {
 	case 0:
-		frontTurretNum = int(size*(2+rand.nextSignedFloat(0.5)) + 1)
-		movingTurretRatio = 0.33 + rand.nextFloat(0.46)
+		frontTurretNum = int(size*(2+nextSignedFloat(0.5)) + 1)
+		movingTurretRatio = 0.33 + nextFloat(0.46)
 		rk *= (1 - movingTurretRatio)
 		movingTurretRatio *= 2.5
 		break
 	case 1:
-		frontTurretNum = int(this.size*(0.5+rand.nextSignedFloat(0.2)) + 1)
-		sideTurretNum = int(this.size*(0.5+rand.nextSignedFloat(0.2))+1) * 2
+		frontTurretNum = int(this.size*(0.5+nextSignedFloat(0.2)) + 1)
+		sideTurretNum = int(this.size*(0.5+nextSignedFloat(0.2))+1) * 2
 		break
 	case 2:
-		mainTurretNum = int(this.size*(1+rand.nextSignedFloat(0.33)) + 1)
+		mainTurretNum = int(this.size*(1+nextSignedFloat(0.33)) + 1)
 		break
 	}
 	this.shield = int(this.size * 20)
@@ -1255,7 +1255,7 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 		tgs.num = mainTurretNum
 		tgs.alignType = AlignTypeROUND
 		tgs.alignDeg = 0
-		tgs.alignWidth = Pi32*0.66 + rand.nextFloat(Pi32/2)
+		tgs.alignWidth = Pi32*0.66 + nextFloat(Pi32/2)
 		tgs.radius = this.size * 0.7
 		tgs.distRatio = this.distRatio
 	}
@@ -1265,7 +1265,7 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 		tgs.num = frontTurretNum
 		tgs.alignType = AlignTypeROUND
 		tgs.alignDeg = 0
-		tgs.alignWidth = Pi32/5 + rand.nextFloat(Pi32/6)
+		tgs.alignWidth = Pi32/5 + nextFloat(Pi32/6)
 		tgs.radius = this.size * 0.8
 		tgs.distRatio = this.distRatio
 	}
@@ -1283,7 +1283,7 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 			tgs.num = sideTurretNum
 			tgs.alignType = AlignTypeROUND
 			tgs.alignDeg = Pi32/2 - Pi32*i
-			tgs.alignWidth = Pi32/5 + rand.nextFloat(Pi32/6)
+			tgs.alignWidth = Pi32/5 + nextFloat(Pi32/6)
 			tgs.radius = this.size * 0.75
 			tgs.distRatio = this.distRatio
 		}

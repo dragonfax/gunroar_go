@@ -139,14 +139,14 @@ func (this *Smoke) set(x float32, y float32, mx float32, my float32, mz float32,
 	this.size = sz
 	switch this.smokeType {
 	case SmokeType.FIRE:
-		this.r = rand.nextFloat(0.1) + 0.9
-		this.g = rand.nextFloat(0.2) + 0.2
+		this.r = nextFloat(0.1) + 0.9
+		this.g = nextFloat(0.2) + 0.2
 		this.b = 0
 		this.a = 1
 		break
 	case SmokeType.EXPLOSION:
-		this.r = rand.nextFloat(0.3) + 0.7
-		this.g = rand.nextFloat(0.3) + 0.3
+		this.r = nextFloat(0.3) + 0.7
+		this.g = nextFloat(0.3) + 0.3
 		this.b = 0
 		this.a = 1
 		break
@@ -157,8 +157,8 @@ func (this *Smoke) set(x float32, y float32, mx float32, my float32, mz float32,
 		this.a = 0.6
 		break
 	case SmokeType.SPARK:
-		this.r = rand.nextFloat(0.3) + 0.7
-		this.g = rand.nextFloat(0.5) + 0.5
+		this.r = nextFloat(0.3) + 0.7
+		this.g = nextFloat(0.5) + 0.5
 		this.b = 0
 		this.a = 1
 		break
@@ -169,15 +169,15 @@ func (this *Smoke) set(x float32, y float32, mx float32, my float32, mz float32,
 		this.a = 0.6
 		break
 	case SmokeType.SMOKE:
-		this.r = rand.nextFloat(0.1) + 0.1
-		this.g = rand.nextFloat(0.1) + 0.1
+		this.r = nextFloat(0.1) + 0.1
+		this.g = nextFloat(0.1) + 0.1
 		this.b = 0.1
 		this.a = 0.5
 		break
 	case SmokeType.LANCE_SPARK:
 		this.r = 0.4
-		this.g = rand.nextFloat(0.2) + 0.7
-		this.b = rand.nextFloat(0.2) + 0.7
+		this.g = nextFloat(0.2) + 0.7
+		this.b = nextFloat(0.2) + 0.7
 		this.a = 1
 		break
 	}
@@ -243,12 +243,12 @@ func (this *Smoke) move() {
 				d := atan2(this.vel.x, this.vel.y)
 				this.wakePos.x = this.pos.x + sin(d+PI/2)*this.size*0.25
 				this.wakePos.y = this.pos.y + cos(d+PI/2)*this.size*0.25
-				NewWake(this.wakePos, d+PI-0.2+rand.nextSignedFloat(0.1), sp*0.33,
-					20+rand.nextInt(12), this.size*(7.0+rand.nextFloat(3)))
+				NewWake(this.wakePos, d+PI-0.2+nextSignedFloat(0.1), sp*0.33,
+					20+nextInt(12), this.size*(7.0+nextFloat(3)))
 				this.wakePos.x = this.pos.x + sin(d-PI/2)*this.size*0.25
 				this.wakePos.y = this.pos.y + cos(d-PI/2)*this.size*0.25
-				NewWake(this.wakePos, d+PI+0.2+rand.nextSignedFloat(0.1), sp*0.33,
-					20+rand.nextInt(12), this.size*(7.0+rand.nextFloat(3)))
+				NewWake(this.wakePos, d+PI+0.2+nextSignedFloat(0.1), sp*0.33,
+					20+nextInt(12), this.size*(7.0+nextFloat(3)))
 			}
 		}
 	}
@@ -335,8 +335,8 @@ func (this *Fragment) set(p Vector, mx float32, my float32, mz float32, sz float
 	if this.size > 5 {
 		this.size = 5
 	}
-	d2 = rand.nextFloat(360)
-	md2 = rand.nextSignedFloat(20)
+	d2 = nextFloat(360)
+	md2 = nextSignedFloat(20)
 	this.exists = true
 }
 
@@ -428,9 +428,9 @@ func (this *SparkFragment) set(p Vector, mx float32, my float32, mz float32, sz 
 	if this.size > 5 {
 		this.size = 5
 	}
-	d2 = rand.nextFloat(360)
-	md2 = rand.nextSignedFloat(15)
-	if rand.nextInt(4) == 0 {
+	d2 = nextFloat(360)
+	md2 = nextSignedFloat(15)
+	if nextInt(4) == 0 {
 		this.hasSmoke = true
 	} else {
 		this.hasSmoke = false
@@ -461,13 +461,13 @@ func (this *SparkFragment) move() {
 	d2 += md2
 	this.cnt++
 	if this.hasSmoke && this.cnt%5 == 0 {
-		NewSmoke(this.pos, 0, 0, 0, Smoke.SmokeType.SMOKE, 90+rand.nextInt(60), this.size*0.5)
+		NewSmoke(this.pos, 0, 0, 0, Smoke.SmokeType.SMOKE, 90+nextInt(60), this.size*0.5)
 	}
 }
 
 func (this *SparkFragment) draw() {
 	gl.PushMatrix()
-	setScreenColor(1, rand.nextFloat(1), 0, 0.8)
+	setScreenColor(1, nextFloat(1), 0, 0.8)
 	Screen.gl.Translate(this.pos)
 	gl.Rotatef(d2, 1, 0, 0)
 	gl.Scalef(this.size, this.size, 1)
@@ -477,7 +477,7 @@ func (this *SparkFragment) draw() {
 
 func (this *SparkFragment) drawLuminous() {
 	gl.PushMatrix()
-	setScreenColor(1, rand.nextFloat(1), 0, 0.8)
+	setScreenColor(1, nextFloat(1), 0, 0.8)
 	Screen.gl.Translate(this.pos)
 	gl.Rotatef(d2, 1, 0, 0)
 	gl.Scalef(size, size, 1)

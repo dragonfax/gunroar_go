@@ -469,7 +469,7 @@ func (this *Boat) move() {
 		} else {
 			sp = 0.2
 		}
-		sp *= 1 + rand.nextSignedFloat(0.33)
+		sp *= 1 + nextSignedFloat(0.33)
 		sp *= SPEED_BASE
 		this.shape.addWake(this.pos, this.deg, sp)
 	}
@@ -655,7 +655,7 @@ func (this *Boat) fireNormal() {
 			}
 			NewShot(this.pos, fd, true)
 			for i := 0; i < 4; i++ {
-				sd := fd + rand.nextSignedFloat(1)
+				sd := fd + nextSignedFloat(1)
 				NewSmoke(this.pos,
 					Sin32(sd)*LANCE_SPEED*i*0.2,
 					Cos32(sd)*LANCE_SPEED*i*0.2,
@@ -853,9 +853,9 @@ func (this *Boat) destroyed() {
 
 func (this *Boat) destroyedBoatShield() {
 	for i := 0; i < 100; i++ {
-		NewSpark(pos, rand.nextSignedFloat(1), rand.nextSignedFloat(1),
-			0.5+rand.nextFloat(0.5), 0.5+rand.nextFloat(0.5), 0,
-			40+rand.nextInt(40))
+		NewSpark(pos, nextSignedFloat(1), nextSignedFloat(1),
+			0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0,
+			40+nextInt(40))
 	}
 	playSe("ship_shield_lost.wav")
 	setScreenShake(30, 0.02)
@@ -865,15 +865,15 @@ func (this *Boat) destroyedBoatShield() {
 
 func (this *Boat) destroyedBoat() {
 	for i := 0; i < 128; i++ {
-		NewSpark(pos, rand.nextSignedFloat(1), rand.nextSignedFloat(1),
-			0.5+rand.nextFloat(0.5), 0.5+rand.nextFloat(0.5), 0,
-			40+rand.nextInt(40))
+		NewSpark(pos, nextSignedFloat(1), nextSignedFloat(1),
+			0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0,
+			40+nextInt(40))
 	}
 	playSe("ship_destroyed.wav")
 	for i := 0; i < 64; i++ {
-		NewSmoke(pos, rand.nextSignedFloat(0.2), rand.nextSignedFloat(0.2),
-			rand.nextFloat(0.1),
-			SmokeTypeEXPLOSION, 50+rand.nextInt(30), 1)
+		NewSmoke(pos, nextSignedFloat(0.2), nextSignedFloat(0.2),
+			nextFloat(0.1),
+			SmokeTypeEXPLOSION, 50+nextInt(30), 1)
 	}
 	setScreenShake(60, 0.05)
 	this.restart()

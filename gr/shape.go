@@ -226,11 +226,11 @@ func (this *ComplexShape) addWake(wakes WakePool, pos Vector, deg float32, spd f
 	wakePos.x = pos.x + Sin32(deg+Pi32/2+0.7)*size*0.5*sr
 	wakePos.y = pos.y + Cos32(deg+Pi32/2+0.7)*size*0.5*sr
 	w := NewWake()
-	w.set(wakePos, deg+Pi32-0.2+rand.nextSignedFloat(0.1), sp, 40, sz*32*sr)
+	w.set(wakePos, deg+Pi32-0.2+nextSignedFloat(0.1), sp, 40, sz*32*sr)
 	wakePos.x = pos.x + Sin32(deg-Pi32/2-0.7)*size*0.5*sr
 	wakePos.y = pos.y + Cos32(deg-Pi32/2-0.7)*size*0.5*sr
 	w = NewWake()
-	w.set(wakePos, deg+Pi32+0.2+rand.nextSignedFloat(0.1), sp, 40, sz*32*sr)
+	w.set(wakePos, deg+Pi32+0.2+nextSignedFloat(0.1), sp, 40, sz*32*sr)
 }
 
 func (this *ComplexShape) checkShipCollision(x float32, y float32, deg float32, sr float32 /*= 1*/) bool {
