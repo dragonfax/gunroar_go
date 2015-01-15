@@ -9,7 +9,7 @@ package gr
  * Title screen.
  */
 
-const SCROLL_SPEED_BASE = 0.025
+const TITLE_SCROLL_SPEED_BASE = 0.025
 
 type TitleManager struct {
 	pad           Pad
@@ -23,7 +23,7 @@ type TitleManager struct {
 	gameMode      int
 }
 
-func NewTitleManager(Pad pad, Mouse mouse, Field field, GameManager gameManager) *TitleManager {
+func NewTitleManager(pad Pad, mouse Mouse, field Field, gameManager GameManager) *TitleManager {
 	tm := new(TitleManager)
 
 	tm.pad = pad
@@ -90,7 +90,7 @@ func (this *TitleManager) start() {
 
 func (this *TitleManager) move() {
 	this.field.move()
-	this.field.scroll(SCROLL_SPEED_BASE, true)
+	this.field.scroll(TITLE_SCROLL_SPEED_BASE, true)
 	input := this.pad.getState(false)
 	mouseInput := this.mouse.getState(false)
 	if this.btnPressedCnt <= 0 {

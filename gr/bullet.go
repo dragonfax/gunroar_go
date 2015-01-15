@@ -21,11 +21,11 @@ type Bullet struct {
 	enemyIdx         int
 }
 
-func NewBullet(g GameManager, f Field, s Ship, enemyIdx int,
+func NewBullet(g *GameManager, f *Field, s *Ship, enemyIdx int,
 	p Vector, deg float32,
 	speed float32, size float32, shapeType BulletShapeType, rng float32,
-	startSpeed float32 /*= 0*/, startDeg float32 /*= -99999 */, destructive booll /*= false*/) *Bullet {
-	b := &Bullet{}
+	startSpeed float32 /*= 0*/, startDeg float32 /*= -99999 */, destructive bool /*= false*/) *Bullet {
+	b := new(Bullet)
 	b.shape = NewBulletShape(shapeType)
 	b.speed = 1
 	b.trgSpeed = 1
@@ -35,7 +35,7 @@ func NewBullet(g GameManager, f Field, s Ship, enemyIdx int,
 	b.field = f
 	b.ship = s
 
-	if !field.checkInOuterFieldExceptTop(p) {
+	if !b.field.checkInOuterFieldExceptTop(p) {
 		return b
 	}
 	b.enemyIdx = enemyIdx
@@ -124,7 +124,7 @@ func (this *Bullet) draw() {
 	gl.PopMatrix()
 }
 
-func (this *Bullet) checkShotHit(p Vector, s Collidable, shot Shot) {
+func (this *Bullet) checkShotHit(p Vector, s Shape, shot Shot) {
 	ox := fabs32(this.pos.x - p.x)
 	oy := fabs32(this.pos.y - p.y)
 	if ox+oy < 0.5 {
@@ -152,7 +152,7 @@ func removeIndexedBullets(idx int) int {
 	return n
 }
 
-func checkAllBulletsShotHit(pos Vector, shape Collidable, shot Shot) {
+func checkAllBulletsShotHit(pos Vector, shape Shape, shot Shot) {
 	for a := range actors {
 		b, ok := a.(Bullet)
 		if ok && b.destructive {

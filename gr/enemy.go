@@ -34,7 +34,7 @@ func (this *Enemy) move() {
 	}
 }
 
-func (this *Enemy) checkShotHit(p Vector, shape Collidable, shot Shot) {
+func (this *Enemy) checkShotHit(p Vector, shape Shape, shot Shot) {
 	if this.state.destroyedCnt >= 0 {
 		return
 	}
@@ -111,22 +111,22 @@ type EnemyState struct {
 	deg, velDeg, speed, turnWay, trgDeg                   float32
 	turnCnt, state, cnt                                   int
 	vel                                                   Vector
-	turretGroup                                           [TURRET_GROUP_MAX]turretGroup
+	turretGroup                                           [TURRET_GROUP_MAX]TurretGroup
 	movingTurretGroup                                     [MOVING_TURRET_GROUP_MAX]MovingTurretGroup
 	damaged                                               bool
 	damagedCnt, destroyedCnt, explodeCnt, explodeItv, idx int
 	multiplier                                            float32
 	spec                                                  EnemySpec
 
-	field        Field
-	screen       Screen
-	ship         Ship
-	enemy        Enemy
-	stageManager StageManager
-	scoreReel    ScoreReel
+	field        *Field
+	screen       *Screen
+	ship         *Ship
+	enemy        *Enemy
+	stageManager *StageManager
+	scoreReel    *ScoreReel
 }
 
-func NewEnemyState(field Field, screen Screen, ship Ship, scoreReel ScoreReel) EnemyState {
+func NewEnemyState(field *Field, screen *Screen, ship *Ship, scoreReel *ScoreReel) *EnemyState {
 	this := new(EnemyState)
 	this.idx = idxCount
 	idxCount++
@@ -276,7 +276,7 @@ func (this *EnemyState) move() bool {
 	return true
 }
 
-func (this *EnemyState) checkCollision(x float32, y float32, c Collidable, shot Shot) bool {
+func (this *EnemyState) checkCollision(x float32, y float32, c Shape, shot Shot) bool {
 	ox := fabs32(this.pos.x - x)
 	oy := fabs32(this.pos.y - y)
 	if ox+oy > this.spec.size*2 {
@@ -526,7 +526,7 @@ func NewEnemySpec(field Field, ship Ship, enemyType EnemyType) *EnemySpec {
 		this.movingTurretGroupSpec[i] = NewMovingTurretGroupSpec()
 	}
 	this.shield = 1
-	this.size = 1
+	this.sizes(1)
 	this.enemyType = enemyType
 }
 
@@ -662,7 +662,7 @@ func (this *EnemySpec) addMovingTurret(rank float32, bossMode bool /*= false*/) 
 		if nextInt(4) == 0 {
 			tgs.setXReverse(-1)
 		}
-		tgs.turretSpec.setParam(sr, TurretTypeMOVING, 
+		tgs.turretSpec.setParam(sr, TurretTypeMOVING)
 		if this.bossMode {
 			tgs.turretSpec.setBossSpec()
 		}
@@ -671,7 +671,7 @@ func (this *EnemySpec) addMovingTurret(rank float32, bossMode bool /*= false*/) 
 	}
 }
 
-func (this *EnemySpec) checkCollision(es EnemyState, x float32, y float32, c Collidable, shot Shot) bool {
+func (this *EnemySpec) checkCollision(es EnemyState, x float32, y float32, c Shape, shot Shot) bool {
 	return es.checkCollision(x, y, c, shot)
 }
 
@@ -690,7 +690,7 @@ func (this *EnemySpec) draw(es EnemyState) {
 	es.draw()
 }
 
-func (this *EnemySpec) size(v float32) float32 {
+func (this *EnemySpec) sizes(v float32) float32 {
 	this.size = v
 	if this.shape {
 		this.shape.size = this.size
@@ -725,7 +725,7 @@ const (
 type MoveState int
 
 const (
-	MoveStateSTAYIN MoveState = iotaG
+	MoveStateSTAYIN MoveState = iota
 	MoveStateMOVING
 )
 
@@ -738,7 +738,7 @@ type SmallShipEnemySpec struct {
 	speed, turnDeg             float32
 }
 
-func NewSmallShipEnemySpec(Field field, Ship ship) *SmallShipEnemySpec {
+func NewSmallShipEnemySpec(field Field, ship Ship) *SmallShipEnemySpec {
 	this := SmallShipEnemySpec{NewEnemySpec(field, ship)}
 	this.moveDuration = 1
 	this.stayDuration = 1
@@ -1128,7 +1128,7 @@ func (this *ShipClass) setFirstState(es EnemyState, appType int) bool {
 	return true
 }
 
-func (this *ShipClass) move(EnemyState es) bool {
+func (this *ShipClass) move(es EnemyState) bool {
 	if es.destroyedCnt >= SINK_INTERVAL {
 		return false
 	}
@@ -1323,7 +1323,7 @@ func (this *PlatformEnemySpec) isBoss() bool {
  * functions that run across all enemies
  */
 
-func checkAllEnemiesShotHit(pos Vector, shape Collidable, shot Shot /*= null*/) {
+func checkAllEnemiesShotHit(pos Vector, shape Shape, shot Shot /*= null*/) {
 	for a, _ := range actor {
 		e, ok := a.(Enemy)
 		if ok {

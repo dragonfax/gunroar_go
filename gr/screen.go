@@ -10,7 +10,6 @@ import (
 	"github.com/go-gl/gl"
 	"github.com/go-gl/glu"
 	"github.com/veandco/go-sdl2/sdl"
-	"math/
 )
 
 /**

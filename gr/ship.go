@@ -14,17 +14,17 @@ const SCROLL_SPEED_MAX = 0.1
 const SCROLL_START_Y = 2.5
 
 type Ship struct {
-	field                                           Field
+	field                                           *Field
 	boat                                            [2]*Boat
 	gameMode                                        int
 	boatNum                                         int
 	gameState                                       InGameState
 	scrollSpeed, scrollSpeedBase                    float32
 	midstPos, higherPos, lowerPos, nearPos, nearVel Vector
-	bridgeShape                                     BaseShape
+	bridgeShape                                     ComplexShape
 }
 
-func NewShip(Pad pad /*TwinStick twinStick, */, Mouse mouse, MouseAndPad mouseAndPad, Field field, Screen screen) *Ship {
+func NewShip(pad Pad /*TwinStick twinStick, */, mouse Mouse, mouseAndPad MouseAndPad, field Field, screen Screen) *Ship {
 	this := new(Ship)
 	this.field = field
 	Boat.init()
@@ -34,7 +34,7 @@ func NewShip(Pad pad /*TwinStick twinStick, */, Mouse mouse, MouseAndPad mouseAn
 	this.boatNum = 1
 	this.scrollSpeed = SCROLL_SPEED_BASE
 	this.scrollSpeedBase = SCROLL_SPEED_BASE
-	this.bridgeShape = NewBaseShape(0.3, 0.2, 0.1, ShapeTypeBRIDGE, 0.3, 0.7, 0.7)
+	this.bridgeShape = NewComplexShape(0.3, 0.2, 0.1, ShapeTypeBRIDGE, 0.3, 0.7, 0.7)
 	actors[this] = true
 }
 
@@ -110,7 +110,7 @@ func (this *Ship) move() {
 	this.scrollSpeedBase += (SCROLL_SPEED_MAX - this.scrollSpeedBase) * 0.00001
 }
 
-func (this *Ship) checkBulletHit(Vector p, Vector pp) bool {
+func (this *Ship) checkBulletHit(pVector, pp Vector) bool {
 	for i := 0; i < this.boatNum; i++ {
 		if this.boat[i].checkBulletHit(p, pp) {
 			return true
@@ -160,10 +160,6 @@ func (this *Ship) drawShape() {
 	this.boat[0].drawShape()
 }
 
-func (this *Ship) scrollSpeedBase() float32 {
-	return this.scrollSpeedBase
-}
-
 func (this *Ship) midstPos() Vector {
 	this.midstPos.x = 0
 	this.midstPos.y = 0
@@ -197,7 +193,7 @@ func (this *Ship) lowerPos() Vector {
 	return this.lowerPos
 }
 
-func (this *Ship) nearPos(Vector p) Vector {
+func (this *Ship) nearPos(p Vector) Vector {
 	var dist float32 = 99999
 	for i := 0; i < this.boatNum; i++ {
 		if this.boat[i].pos.dist(p) < dist {
@@ -209,7 +205,7 @@ func (this *Ship) nearPos(Vector p) Vector {
 	return this.nearPos
 }
 
-func (this *Ship) nearVel(Vector p) Vector {
+func (this *Ship) nearVel(p Vector) Vector {
 	var dist float = 99999
 	for i := 0; i < this.boatNum; i++ {
 		if this.boat[i].pos.dist(p) < dist {
@@ -261,8 +257,8 @@ type Boat struct {
 	pos                       Vector
 	firePos                   Vector
 	deg, speed, turnRatio     float32
-	shape                     BaseShape
-	bridgeShape               BaseShape
+	shape                     ComplexShape
+	bridgeShape               ComplexShape
 	fireCnt, fireSprCnt       int
 	fireIntervalt, fireSprDeg float32
 	fireLanceCnt              int
@@ -298,12 +294,12 @@ func NewBoat(idx int, ship Ship, pad Pad /*TwinStick twinStick, */, mouse Mouse,
 	this.wakes = wakes
 	switch idx {
 	case 0:
-		this.shape = NewBaseShape(0.7, 0.6, 0.6, BaseShape.ShapeType.SHIP_ROUNDTAIL, 0.5, 0.7, 0.5)
-		this.bridgeShape = NewBaseShape(0.3, 0.6, 0.6, BaseShape.ShapeType.BRIDGE, 0.3, 0.7, 0.3)
+		this.shape = NewComplexShape(0.7, 0.6, 0.6, ComplexShape.ShapeType.SHIP_ROUNDTAIL, 0.5, 0.7, 0.5)
+		this.bridgeShape = NewComplexShape(0.3, 0.6, 0.6, ComplexShape.ShapeType.BRIDGE, 0.3, 0.7, 0.3)
 		break
 	case 1:
-		this.shape = NewBaseShape(0.7, 0.6, 0.6, BaseShape.ShapeType.SHIP_ROUNDTAIL, 0.4, 0.3, 0.8)
-		this.bridgeShape = NewBaseShape(0.3, 0.6, 0.6, BaseShape.ShapeType.BRIDGE, 0.2, 0.3, 0.6)
+		this.shape = NewComplexShape(0.7, 0.6, 0.6, ComplexShape.ShapeType.SHIP_ROUNDTAIL, 0.4, 0.3, 0.8)
+		this.bridgeShape = NewComplexShape(0.3, 0.6, 0.6, ComplexShape.ShapeType.BRIDGE, 0.2, 0.3, 0.6)
 		break
 	}
 	this.turnSpeed = 1
@@ -317,7 +313,7 @@ func (this *Boat) close() {
 	this.shieldShape.close()
 }
 
-func (this *Boat) start(int gameMode) {
+func (this *Boat) start(gameMode GameMode) {
 	this.gameMode = gameMode
 	if gameMode == InGameState.GameMode.DOUBLE_PLAY {
 		switch idx {
@@ -811,7 +807,7 @@ func (this *Boat) fireMouse() {
 	this.fireCnt--
 }
 
-func (this *Boat) checkBulletHit(Vector p, Vector pp) bool {
+func (this *Boat) checkBulletHit(p Vector, pp Vector) bool {
 	if this.cnt <= 0 {
 		return false
 	}
@@ -931,7 +927,7 @@ func (this *Boat) drawFront() {
 	}
 }
 
-func (this *Boat) drawSight(x float32, x float32, size float32) {
+func (this *Boat) drawSight(x float32, y float32, size float32) {
 	gl.Begin(gl.LINE_STRIP)
 	gl.Vertex2(x-size, y-size*0.5)
 	gl.Vertex2(x-size, y-size)

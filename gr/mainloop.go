@@ -5,6 +5,10 @@
  */
 package gr
 
+import (
+	"github.com/veandco/go-sdl2/sdl"
+)
+
 const INTERVAL_BASE = 16
 
 type MainLoop struct {
@@ -14,7 +18,7 @@ type MainLoop struct {
 	event        *sdl.Event
 
 	screen             *Screen
-	input              *Input
+	input              Input
 	gameManager        *GameManager
 	slowdownRatio      float32
 	interval           float32

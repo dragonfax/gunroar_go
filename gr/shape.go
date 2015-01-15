@@ -40,6 +40,8 @@ type ComplexShape struct {
 	pillarPos                   []Vector
 	pointPos                    []Vector
 	pointDeg                    []float32
+
+	collidable bool
 }
 
 func (this *ComplexShape) InitComplexShape(size float32, distRatio float32, spinyRatio float32, shapeType int, r float32, g float32, b float32, collidable bool /* = false */) {
@@ -51,6 +53,7 @@ func (this *ComplexShape) InitComplexShape(size float32, distRatio float32, spin
 	this.r = r
 	this.g = g
 	this.b = b
+	this.collidable = collidable
 	if collidable {
 		this.collision = Vector{size / 2, size / 2}
 	} else {
@@ -214,7 +217,7 @@ func (this *ComplexShape) createPillar(p Vector, s float32, z float32) {
 	}
 }
 
-func (this *ComplexShape) addWake(wakes WakePool, pos Vector, deg float32, spd float32, sr float32 /*= 1*/) {
+func (this *ComplexShape) addWake(pos Vector, deg float32, spd float32, sr float32 /*= 1*/) {
 	sp := spd
 	if sp > 0.1 {
 		sp = 0.1
@@ -252,7 +255,7 @@ func (this *ComplexShape) checkShipCollision(x float32, y float32, deg float32, 
 	}
 }
 
-func (this *ComplexShape) dist(float32 x, float32 y, float32 px, float32 py) float32 {
+func (this *ComplexShape) dist(x float32, y float32, px float32, py float32) float32 {
 	ax := fabs32(x - px)
 	ay := fabs32(y - py)
 	if ax > ay {
@@ -345,7 +348,7 @@ func NewEnemyShape(t EnemyShapeType) EnemyShape {
 	return e
 }
 
-func (this *EnemyShape) addWake(wakes WakePool, pos Vector, deg float32, sp float32) {
+func (this *EnemyShape) addWake(pos Vector, deg float32, sp float32) {
 	cs, ok := this.shape.(ComplexShape)
 	if ok {
 		cs.addWake(wakes, pos, deg, sp, this.size)

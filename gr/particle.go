@@ -9,8 +9,6 @@ package gr
  * Sparks.
  */
 type Spark struct {
-	*LuminousActor
-
 	pos, ppos Vector
 	vel       Vector
 	r, g, b   float32
@@ -18,7 +16,7 @@ type Spark struct {
 }
 
 func NewSpark(p Vector, vx float32, vy float32, r float32, g float32, b float32, c int) *Spark {
-	this := &Spark{NewLuminousActor()}
+	this := new(Spark)
 	this.pos.x = p.x
 	this.ppos.x = p.x
 	this.pos.y = p.y
@@ -93,11 +91,8 @@ const (
 )
 
 var windVel Vector3 = Vector3{0.04, 0.04, 0.02}
-var wakePos Vector = Vector{}
 
 type Smoke struct {
-	*LuminousActor
-
 	field            Field
 	pos, vel         Vector3
 	smokeType        SmokeType
@@ -106,7 +101,7 @@ type Smoke struct {
 }
 
 func NewSmoke(field Field) *Smoke {
-	this = &Smoke{NewLuminousActor()}
+	this = new(Smoke)
 	this.startCnt = 1
 	this.size = 1
 	this.field = field
@@ -241,13 +236,13 @@ func (this *Smoke) move() {
 			sp := sqrt(this.vel.x*this.vel.x + this.vel.y*this.vel.y)
 			if sp > 0.3 {
 				d := atan2(this.vel.x, this.vel.y)
-				this.wakePos.x = this.pos.x + sin(d+PI/2)*this.size*0.25
-				this.wakePos.y = this.pos.y + cos(d+PI/2)*this.size*0.25
-				NewWake(this.wakePos, d+PI-0.2+nextSignedFloat(0.1), sp*0.33,
+				wakePos.x = this.pos.x + sin(d+PI/2)*this.size*0.25
+				wakePos.y = this.pos.y + cos(d+PI/2)*this.size*0.25
+				NewWake(wakePos, d+PI-0.2+nextSignedFloat(0.1), sp*0.33,
 					20+nextInt(12), this.size*(7.0+nextFloat(3)))
-				this.wakePos.x = this.pos.x + sin(d-PI/2)*this.size*0.25
-				this.wakePos.y = this.pos.y + cos(d-PI/2)*this.size*0.25
-				NewWake(this.wakePos, d+PI+0.2+nextSignedFloat(0.1), sp*0.33,
+				wakePos.x = this.pos.x + sin(d-PI/2)*this.size*0.25
+				wakePos.y = this.pos.y + cos(d-PI/2)*this.size*0.25
+				NewWake(wakePos, d+PI+0.2+nextSignedFloat(0.1), sp*0.33,
 					20+nextInt(12), this.size*(7.0+nextFloat(3)))
 			}
 		}
@@ -381,8 +376,6 @@ func (this *Fragment) close() {
 var sparkFragmentdisplayList *DisplayList
 
 type SparkFragment struct {
-	*LuminousActor
-
 	field         Field
 	pos, vel      Vector3
 	size, d2, md2 float32
@@ -407,7 +400,7 @@ func CloseSparkFragments() {
 }
 
 func NewSparkFragment(field Field) *SparkFragment {
-	this := &SparkFragment{NewLuminousActor()}
+	this := new(SparkFragment)
 	this.size = 1
 	this.field = field
 	actors[this] = true

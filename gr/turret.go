@@ -9,7 +9,7 @@ package gr
  * Turret mounted on a deck of an enemy ship.
  */
 
-var damagedPos Vector
+var turretDamagedPos Vector
 
 type Turret struct {
 	field                         Field
@@ -136,9 +136,9 @@ func (this *Turret) draw() {
 	}
 	gl.PushMatrix()
 	if this.destroyedCnt < 0 && this.damagedCnt > 0 {
-		this.damagedPos.x = this.pos.x + nextSignedFloat(this.damagedCnt*0.015)
-		this.damagedPos.y = this.pos.y + nextSignedFloat(this.damagedCnt*0.015)
-		gl.Translate(this.damagedPos)
+		turretDamagedPos.x = this.pos.x + nextSignedFloat(this.damagedCnt*0.015)
+		turretDamagedPos.y = this.pos.y + nextSignedFloat(this.damagedCnt*0.015)
+		gl.Translate(turretDamagedPos)
 	} else {
 		gl.Translate(this.pos)
 	}
@@ -198,7 +198,7 @@ func (this *Turret) draw() {
 	}
 }
 
-func (this *Turret) checkCollision(x float32, y float32, c Collidable, shot Shot) bool {
+func (this *Turret) checkCollision(x float32, y float32, c Shape, shot Shot) bool {
 	if this.destroyedCnt >= 0 || this.spec.invisible {
 		return false
 	}
@@ -275,7 +275,7 @@ type TurretSpec struct {
 	turnSpeed, turnRange                float32
 	burstNum, burstInterval             int
 	burstTurnRatio                      float32
-	blind                               blool
+	blind                               bool
 	lookAheadRatio                      float32
 	nway                                int
 	nwayAngle                           float32
@@ -307,7 +307,7 @@ func NewTurretSpec() *TurretSpec {
 	return this
 }
 
-func (this *TurretSpect) setParam(ts TurretSpec) {
+func (this *TurretSpec) setParamTurretSpec(ts TurretSpec) {
 	this.turretType = ts.turretType
 	this.interval = ts.interval
 	this.speed = ts.speed
@@ -331,7 +331,7 @@ func (this *TurretSpect) setParam(ts TurretSpec) {
 	this.size = ts.size
 }
 
-func (this *TurretSpect) setParam(rank float32, turretType TurretType) {
+func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 	this.turretType = turretType
 	if turretType == TurretTypeDUMMY {
 		this.invisible = true
@@ -493,13 +493,13 @@ func (this *TurretSpect) setParam(rank float32, turretType TurretType) {
 	this.nwayAngle = (0.1 + nextFloat(0.33)) / (1 + this.nway*0.1)
 }
 
-func (this *TurretSpect) setBossSpec() {
+func (this *TurretSpec) setBossSpec() {
 	this.minRange = 0
 	this.maxRange *= 1.5
 	this.shield *= 2.1
 }
 
-func (this *TurretSpect) sizes(float32 v) float32 {
+func (this *TurretSpec) sizes(v float32) float32 {
 	this.size = v
 	this.destroyedShape.size = v
 	this.damagedShape.size = v
@@ -516,7 +516,7 @@ type TurretGroup struct {
 	ship      Ship
 	spec      TurretGroupSpec
 	centerPos Vector
-	turret    [TURRET_GROUPMAX_NUM]*Turret
+	turret    [TURRET_GROUP_MAX_NUM]*Turret
 	cnt       int
 }
 
@@ -588,7 +588,7 @@ func (this *TurretGroup) close() {
 	}
 }
 
-func (this *TurretGroup) checkCollision(x float32, y float32, c Collidable, shot Shot) bool {
+func (this *TurretGroup) checkCollision(x float32, y float32, c Shape, shot Shot) bool {
 	col := false
 	for i := 0; i < this.spec.num; i++ {
 		col |= this.turret[i].checkCollision(x, y, c, shot)
@@ -644,7 +644,7 @@ func NewMovingTurretGroup(field Field, ship Ship, parent Enemy, spec MovingTurre
 	return this
 }
 
-func (this *MovingTurretGroupt) move(p Vector, od float32) {
+func (this *MovingTurretGroup) move(p Vector, od float32) {
 	if this.spec.moveType == MovingTurretGroupSpec.MoveType.SWING_FIX {
 		this.swingFixDeg = ed
 	}
@@ -707,7 +707,7 @@ func (this *MovingTurretGroupt) move(p Vector, od float32) {
 	cnt++
 }
 
-func (this *MovingTurretGroupt) calcAlignDeg(d *float32, ad *float32, md *float32) {
+func (this *MovingTurretGroup) calcAlignDeg(d *float32, ad *float32, md *float32) {
 	this.alignAmpCnt += this.spec.alignAmpVel
 	ad = this.spec.alignDeg * (1 + Sin32(this.alignAmpCnt)*this.spec.alignAmp)
 	if this.spec.num > 1 {
@@ -722,13 +722,13 @@ func (this *MovingTurretGroupt) calcAlignDeg(d *float32, ad *float32, md *float3
 	d = this.deg - md - ad/2
 }
 
-func (this *MovingTurretGroupt) draw() {
+func (this *MovingTurretGroup) draw() {
 	for i := 0; i < this.spec.num; i++ {
 		this.turret[i].draw()
 	}
 }
 
-func (this *MovingTurretGroupt) close() {
+func (this *MovingTurretGroup) close() {
 	for i := 0; i < this.spec.num; i++ {
 		this.turret[i].close()
 	}
@@ -743,7 +743,7 @@ const (
 )
 
 type MovingTurretGroupSpec struct {
-	TurretSpec                                                                                                                                           turretSpec
+	turretSpec                                                                                                                                           TurretSpec
 	num                                                                                                                                                  int
 	moveType                                                                                                                                             TurretMoveType
 	alignDeg, alignAmp, alignAmpVel, radiusBase, radiusAmp, radiusAmpVel, rollDegVel, rollAmp, rollAmpVel, swingDegVel, swingAmpVel, distRatio, xReverse float32

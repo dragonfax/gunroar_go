@@ -11,7 +11,6 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_mixer"
 	"io/ioutil"
-	"math/
 	"path/filepath"
 )
 

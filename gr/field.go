@@ -44,16 +44,16 @@ var baseColorTime = [5][6][3]float32{
  * Game field.
  */
 type Field struct {
-	stageManager            StageManager
+	stageManager            *StageManager
 	ship                    Ship
 	size, outerSize         Vector
 	block                   [BLOCK_SIZE_Y][BLOCK_SIZE_X]int
-	panel                   [BLOCK_SIZE_Y][BLOCK_SIZE_X]panel
+	panel                   [BLOCK_SIZE_Y][BLOCK_SIZE_X]Panel
 	nextBlockY              int
 	screenY, blockCreateCnt float32
 	lastScrollY             float32
 	screenPos               Vector
-	platformPos             [SCREEN_BLOCK_SIZE_X * NEXT_BLOCK_AREA_SIZE]platformPos
+	platformPos             [SCREEN_BLOCK_SIZE_X * NEXT_BLOCK_AREA_SIZE]PlatformPos
 	platformPosNum          int
 	baseColor               [3][6]float32
 	time                    float32

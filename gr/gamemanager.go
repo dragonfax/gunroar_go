@@ -15,17 +15,17 @@ var shipReverseFire bool = false
 type GameManager struct {
 	pad Pad
 	// twinStick TwinStick
-	mouse        Mouse
-	mouseAndPad  MouseAndPad
-	screen       Screen
-	field        Field
-	ship         Ship
-	stageManager StageManager
-	titleManager TitleManager
-	scoreReel    ScoreReel
-	state        GameState
-	titleState   TitleState
-	inGameState  InGameState
+	mouse        *Mouse
+	mouseAndPad  *MouseAndPad
+	screen       *Screen
+	field        *Field
+	ship         *Ship
+	stageManager *StageManager
+	titleManager *TitleManager
+	scoreReel    *ScoreReel
+	state        *GameState
+	titleState   *TitleState
+	inGameState  *InGameState
 	escPressed   bool
 }
 
