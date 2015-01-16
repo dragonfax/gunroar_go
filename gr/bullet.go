@@ -32,11 +32,8 @@ func NewBullet(enemyIdx int,
 	b.trgSpeed = 1
 	b.size = 1
 	b.rng = 1
-	b.gameManager = g
-	b.field = f
-	b.ship = s
 
-	if !b.field.checkInOuterFieldExceptTop(p) {
+	if !field.checkInOuterFieldExceptTop(p) {
 		return b
 	}
 	b.enemyIdx = enemyIdx

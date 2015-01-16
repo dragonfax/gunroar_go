@@ -27,6 +27,8 @@ var state *GameState
 var titleState *TitleState
 var inGameState *InGameState
 
+var gameManager *GameManager
+
 type GameManager struct {
 	escPressed bool
 }

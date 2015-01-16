@@ -5,6 +5,10 @@
  */
 package gr
 
+import (
+	"github.com/go-gl/gl"
+)
+
 /**
  * Bonus crystals.
  */
@@ -15,7 +19,7 @@ const PULLIN_COUNT = COUNT * 0.8
 type Crystal struct {
 	shape CrystalShape
 	pos   Vector
-	vel   *Vector
+	vel   Vector
 	cnt   int
 }
 
@@ -24,7 +28,7 @@ func NewCrystal(p Vector) *Crystal {
 	c.shape = NewCrystalShape()
 	c.pos = p
 	c.cnt = COUNT
-	c.vel = &Vector{0, 0.1}
+	c.vel = Vector{0, 0.1}
 	actors[c] = true
 	return c
 }
@@ -49,20 +53,20 @@ func (c *Crystal) move() {
 		}
 	}
 	c.vel.MulAssign(0.95)
-	c.pos += c.vel
+	c.pos.AddAssign(c.vel)
 }
 
 func (c *Crystal) draw() {
-	r := 0.25
-	d := cnt * 0.1
+	var r float32 = 0.25
+	d := float32(c.cnt) * 0.1
 	if c.cnt > PULLIN_COUNT {
-		r *= (OUNT - c.cnt) / (COUNT - PULLIN_COUNT)
+		r *= (COUNT - c.cnt) / (COUNT - PULLIN_COUNT)
 	}
 	for i := 0; i < 4; i++ {
 		gl.PushMatrix()
-		gl.Translatef(c.pos.x+sin(d)*r, c.pos.y+cos(d)*r, 0)
-		c.shape.Draw()
+		gl.Translatef(c.pos.x+Sin32(d)*r, c.pos.y+Cos32(d)*r, 0)
+		c.shape.draw()
 		gl.PopMatrix()
-		d += math.Pi / 2
+		d += Pi32 / 2
 	}
 }
