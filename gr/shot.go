@@ -16,7 +16,6 @@ var shotShape ShotShape
 var lanceShape LanceShape
 
 type Shot struct {
-	field  Field
 	pos    Vector
 	cnt    int
 	hitCnt int
@@ -34,10 +33,9 @@ func closeShots() {
 	shotShape.close()
 }
 
-func NewShot(f Field, p Vector, d float32, lance bool /*= false*/, dmg int /*= -1*/) *Shot {
+func NewShot(p Vector, d float32, lance bool /*= false*/, dmg int /*= -1*/) *Shot {
 	s = new(Shot)
 	s.damage = 1
-	s.field = f
 	s.pos.x = p.x
 	s.pos.y = p.y
 	s.deg = d

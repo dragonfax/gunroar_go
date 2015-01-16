@@ -10,9 +10,6 @@ import (
 )
 
 type Bullet struct {
-	gameManager      *GameManager
-	field            *Field
-	ship             *Ship
 	pos              Vector
 	ppos             Vector
 	deg, speed       float32
@@ -25,7 +22,7 @@ type Bullet struct {
 	enemyIdx         int
 }
 
-func NewBullet(g *GameManager, f *Field, s *Ship, enemyIdx int,
+func NewBullet(enemyIdx int,
 	p Vector, deg float32,
 	speed float32, size float32, shapeType BulletShapeType, rng float32,
 	startSpeed float32 /*= 0*/, startDeg float32 /*= -99999 */, destructive bool /*= false*/) *Bullet {
@@ -77,14 +74,14 @@ func (this *Bullet) move() {
 		}
 	}
 	if field.checkInOuterFieldVector(this.pos) {
-		this.gameManager.addSlowdownRatio(this.speed * 0.24)
+		gameManager.addSlowdownRatio(this.speed * 0.24)
 	}
 	mx := Sin32(this.deg) * this.speed
 	my := Cos32(this.deg) * this.speed
 	this.pos.x += mx
 	this.pos.y += my
 	this.pos.y -= field.lastScrollY
-	if this.ship.checkBulletHit(this.pos, this.ppos) || !field.checkInOuterFieldExceptTop(this.pos) {
+	if ship.checkBulletHit(this.pos, this.ppos) || !field.checkInOuterFieldExceptTop(this.pos) {
 		this.close()
 		return
 	}

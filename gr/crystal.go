@@ -13,8 +13,6 @@ const COUNT = 60
 const PULLIN_COUNT = COUNT * 0.8
 
 type Crystal struct {
-	Actor
-
 	shape CrystalShape
 	pos   Vector
 	vel   *Vector

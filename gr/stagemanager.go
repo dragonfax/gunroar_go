@@ -13,8 +13,6 @@ const BLOCK_DENSITY_MIN = 0
 const BLOCK_DENSITY_MAX = 3
 
 type StageManager struct {
-	field                                     Field
-	ship                                      Ship
 	rank, baseRank, addRank, rankVel, rankInc float32
 	enemyApp                                  [3]*EnemyAppearance
 	blockDensity                              int
@@ -26,13 +24,12 @@ type StageManager struct {
 	bgmStartCnt                               int
 }
 
-func NewStateManager(field Field, ship Ship) {
-	field = field
+func NewStateManager() {
 	this.ship = ship
 	for i, _ := range this.enemyApp {
 		this.enemyApp[i] = NewEnemyAppearance()
 	}
-	this.platformEnemySpec = NewPlatformEnemySpec(field, ship)
+	this.platformEnemySpec = NewPlatformEnemySpec()
 	this.rank = 1
 	this.baseRank = 1
 	this.blockDensity = 2
@@ -105,7 +102,7 @@ func (this *StageManager) move() {
 	}
 	this.rank = this.baseRank + this.addRank
 	for _, ea := range this.enemyApp {
-		ea.move(field)
+		ea.move()
 	}
 }
 
@@ -122,7 +119,7 @@ func (this *StageManager) gotoNextBlockArea() {
 	if this.bossMode {
 		this.bossAppCnt--
 		if this.bossAppCnt == 0 {
-			ses := NewShipEnemySpec(field, this.ship)
+			ses := NewShipEnemySpec()
 			ses.setParam(rank, ShipEnemySpec.ShipClass.BOSS)
 			en := NewEnemy()
 			if ses.setFirstState(en.state, EnemyState.AppearanceType.CENTER) {
@@ -161,14 +158,14 @@ func (this *StageManager) gotoNextBlockArea() {
 			lr *= 1.5
 		}
 		tr -= lr
-		ses := NewShipEnemySpec(field, ship)
+		ses := NewShipEnemySpec()
 		ses.setParam(lr/largeShipNum, ShipEnemySpec.ShipClass.LARGE)
 		this.enemyApp[0].set(ses, largeShipNum, appType)
 	} else {
 		this.enemyApp[0].close()
 	}
 	if batteryNum > 0 {
-		this.platformEnemySpec = NewPlatformEnemySpec(field, ship, sparks, smokes, fragments, wakes)
+		this.platformEnemySpec = NewPlatformEnemySpec()
 		pr := tr * (0.3 + nextFloat(0.1))
 		this.platformEnemySpec.setParam(pr / batteryNum)
 	}
@@ -185,7 +182,7 @@ func (this *StageManager) gotoNextBlockArea() {
 			mr = tr * (0.33 + nextFloat(0.33))
 		}
 		tr -= mr
-		ses := NewShipEnemySpec(field, ship)
+		ses := NewShipEnemySpec()
 		ses.setParam(mr/middleShipNum, ShipEnemySpec.ShipClass.MIDDLE)
 		this.enemyApp[1].set(ses, middleShipNum, appType)
 	} else {
@@ -197,7 +194,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		if smallShipNum > 256 {
 			smallShipNum = 256
 		}
-		sses := NewSmallShipEnemySpec(field, ship, sparks, smokes, fragments, wakes)
+		sses := NewSmallShipEnemySpec()
 		sses.setParam(tr / smallShipNum)
 		enemyApp[2].set(sses, smallShipNum, appType)
 	} else {
@@ -266,7 +263,7 @@ func NewEnemyAppearance(s EnemySpec, num int, appType int) *EnemyAppearance {
 	return this
 }
 
-func (this *EnemyAppearance) move(field Field) {
+func (this *EnemyAppearance) move() {
 	if spec == nil {
 		return
 	}

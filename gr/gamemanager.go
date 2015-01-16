@@ -160,30 +160,10 @@ func (this *GameManager) draw() {
  * (e.g. title, in game, gameover, pause, ...)
  */
 type GameState struct {
-	gameManager GameManager
-	screen      Screen
-	pad         Pad
-	// TwinStick twinStick
-	mouse        Mouse
-	mouseAndPad  MouseAndPad
-	ship         Ship
-	stageManager StageManager
-	scoreReel    ScoreReel
 }
 
-func NewGameState(gameManager GameManager, screen Screen,
-	pad Pad /*twinStick twinStick,*/, mouse Mouse, mouseAndPad MouseAndPad,
-	ship Ship, stageManager StageManager, scoreReel ScoreReel) *GameState {
+func NewGameState() *GameState {
 	this := new(GameState)
-	this.gameManager = gameManager
-	this.screen = screen
-	this.pad = pad
-	this.twinStick = twinStick
-	this.mouse = mouse
-	this.mouseAndPad = mouseAndPad
-	this.ship = ship
-	this.stageManager = stageManager
-	this.scoreReel = scoreReel
 	return this
 }
 
@@ -215,11 +195,9 @@ type InGameState struct {
 	gameMode                GameMode
 }
 
-func NewInGameState(gameManager GameManager, screen Screen,
-	pad Pad /*TwinStick twinStick,*/, mouse Mouse, mouseAndPad MouseAndPad,
-	ship Ship, stageManager StageManager, scoreReel ScoreReel) *InGameState {
+func NewInGameState() *InGameState {
 
-	this := InGameState{NewGameState(gameManager, screen, pad /*twinStick, */, mouse, mouseAndPad, ship, stageManager, scoreReel)}
+	this := InGameState{NewGameState()}
 	this.scoreReelSize = SCORE_REEL_SIZE_DEFAULT
 	return this
 }

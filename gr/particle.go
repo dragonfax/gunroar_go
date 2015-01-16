@@ -93,7 +93,6 @@ const (
 var windVel Vector3 = Vector3{0.04, 0.04, 0.02}
 
 type Smoke struct {
-	field            Field
 	pos, vel         Vector3
 	smokeType        SmokeType
 	cnt, startCnt    int
@@ -104,7 +103,6 @@ func NewSmoke(x float32, y float32, z float32 /*=0*/, mx float32, my float32, mz
 	this := new(Smoke)
 	this.startCnt = 1
 	this.size = 1
-	field = field
 	actors[this] = true
 	if !field.checkInOuterField(x, y) {
 		return
@@ -266,7 +264,6 @@ func (this *Smoke) close() {
 var fragmentDisplayList *DisplayList
 
 type Fragment struct {
-	field         Field
 	pos, vel      Vector3
 	size, d2, md2 float32
 }
@@ -295,10 +292,9 @@ func CloseFragments() {
 	fragmentDisplayList.close()
 }
 
-func NewFragment(field Field) {
+func NewFragment() {
 	this := new(Fragment)
 	this.size = 1
-	field = field
 	actors[this] = true
 	return this
 }
@@ -363,7 +359,6 @@ func (this *Fragment) close() {
 var sparkFragmentdisplayList *DisplayList
 
 type SparkFragment struct {
-	field         Field
 	pos, vel      Vector3
 	size, d2, md2 float32
 	cnt           int
@@ -386,10 +381,9 @@ func CloseSparkFragments() {
 	sparkFragmentDisplayList.close()
 }
 
-func NewSparkFragment(field Field) *SparkFragment {
+func NewSparkFragment() *SparkFragment {
 	this := new(SparkFragment)
 	this.size = 1
-	field = field
 	actors[this] = true
 	return this
 }

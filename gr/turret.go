@@ -12,8 +12,6 @@ package gr
 var turretDamagedPos Vector
 
 type Turret struct {
-	field                         Field
-	ship                          Ship
 	spec                          TurretSpec
 	pos                           Vector
 	deg, baseDeg                  float32
@@ -25,10 +23,8 @@ type Turret struct {
 	parent                        *Enemy
 }
 
-func NewTurret(field Field, ship Ship, parent *Enemy, spec TurretSpec) *Turret {
+func NewTurret(parent *Enemy, spec TurretSpec) *Turret {
 	this := new(Turret)
-	field = field
-	this.ship = ship
 	this.parent = parent
 	this.bulletSpeed = 1
 	this.spec = spec
@@ -513,18 +509,17 @@ func (this *TurretSpec) sizes(v float32) float32 {
 const TURRET_GROUP_MAX_NUM = 16
 
 type TurretGroup struct {
-	ship      Ship
 	spec      TurretGroupSpec
 	centerPos Vector
 	turret    [TURRET_GROUP_MAX_NUM]*Turret
 	cnt       int
 }
 
-func NewTurretGroup(field Field, ship Ship, parent Enemy, spec TurretGroupSpec) *TurretGroup {
+func NewTurretGroup(parent Enemy, spec TurretGroupSpec) *TurretGroup {
 	this := new(TurretGroup)
 	this.ship = ship
 	for i, _ := range this.turret {
-		this.turret[i] = NewTurret(field, bullets, ship, sparks, smokes, fragments, parent)
+		this.turret[i] = NewTurret(parent)
 	}
 	this.spec = spec
 	return this
@@ -624,19 +619,20 @@ func NewTurretGroupSpec() *TurretGroupSpec {
 const MOVING_TURRET_MAX_NUM = 16
 
 type MovingTurretGroup struct {
-	ship                                                                                                           Ship
-	spec                                                                                                           MovingTurretGroupSpec
-	radius, radiusAmpCnt, deg, rollAmpCnt, swingAmpCnt, swingAmpDeg, swingFixDeg, alignAmpCnt, distDeg, distAmpCnt float32
-	cnt                                                                                                            int
-	centerPos                                                                                                      Vector
-	turret                                                                                                         [MOVING_TURRET_MAX_NUM]Turret
+	spec                                  MovingTurretGroupSpec
+	radius, radiusAmpCnt, deg, rollAmpCnt float32
+	swingAmpCnt, swingAmpDeg, swingFixDeg float32
+	alignAmpCnt, distDeg, distAmpCnt      float32
+	cnt                                   int
+	centerPos                             Vector
+	turret                                [MOVING_TURRET_MAX_NUM]Turret
 }
 
-func NewMovingTurretGroup(field Field, ship Ship, parent Enemy, spec MovingTurretGroupSpec) *MovingTurretGroup {
+func NewMovingTurretGroup(parent Enemy, spec MovingTurretGroupSpec) *MovingTurretGroup {
 	this := new(MovingTurretGroup)
 	this.ship = ship
 	for i, _ := range this.turret {
-		this.turret[i] = NewTurret(field, ship, parent)
+		this.turret[i] = NewTurret(parent)
 	}
 	this.spec = spec
 	this.radius = spec.radiusBase

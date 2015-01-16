@@ -14,7 +14,6 @@ const SCROLL_SPEED_MAX = 0.1
 const SCROLL_START_Y = 2.5
 
 type Ship struct {
-	field                                           *Field
 	boat                                            [2]*Boat
 	gameMode                                        int
 	boatNum                                         int
@@ -24,12 +23,11 @@ type Ship struct {
 	bridgeShape                                     ComplexShape
 }
 
-func NewShip(pad Pad /*TwinStick twinStick, */, mouse Mouse, mouseAndPad MouseAndPad, field Field, screen Screen) *Ship {
+func NewShip() *Ship {
 	this := new(Ship)
-	field = field
 	Boat.init()
 	for i, _ := range this.boat {
-		boat[i] = NewBoat(i, this, pad /*twinStick, */, mouse, mouseAndPad, field, screen, sparks, smokes, fragments, wakes)
+		boat[i] = NewBoat(i, this)
 	}
 	this.boatNum = 1
 	this.scrollSpeed = SCROLL_SPEED_BASE
@@ -43,12 +41,6 @@ func (this *Ship) close() {
 		b.close()
 	}
 	delete(actors, this)
-}
-
-func (this *Ship) setStageManager(stageManager StageManager) {
-	for _, b := range this.boat {
-		b.setStageManager(stageManager)
-	}
 }
 
 func (this *Ship) setGameState(gameState InGameState) {
@@ -246,14 +238,6 @@ var padState PadInput
 var mouseState MouseInput
 
 type Boat struct {
-	pad Pad
-	// TwinStick twinStick
-	mouse                     Mouse
-	mouseAndPad               MouseAndPad
-	field                     Field
-	screen                    Screen
-	stageManager              StageManager
-	gameState                 InGameState
 	pos                       Vector
 	firePos                   Vector
 	deg, speed, turnRatio     float32
@@ -275,23 +259,11 @@ type Boat struct {
 	gameMode                  GameMode
 	vx, vy                    float32
 	idx                       int
-	ship                      Ship
 }
 
-func NewBoat(idx int, ship Ship, pad Pad /*TwinStick twinStick, */, mouse Mouse, mouseAndPad MouseAndPad, field Field, screen Screen) {
+func NewBoat(idx int) {
 	this := new(Boat)
 	this.idx = idx
-	this.ship = ship
-	this.pad = pad
-	//this.twinStick = cast(TwinStick) twinStick
-	this.mouse = mouse
-	this.mouseAndPad = mouseAndPad
-	field = field
-	this.screen = screen
-	this.sparks = sparks
-	this.smokes = smokes
-	this.fragments = fragments
-	this.wakes = wakes
 	switch idx {
 	case 0:
 		this.shape = NewComplexShape(0.7, 0.6, 0.6, ComplexShape.ShapeType.SHIP_ROUNDTAIL, 0.5, 0.7, 0.5)

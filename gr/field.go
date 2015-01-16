@@ -44,8 +44,6 @@ var baseColorTime = [5][6][3]float32{
  * Game field.
  */
 type Field struct {
-	stageManager            *StageManager
-	ship                    Ship
 	size, outerSize         Vector
 	block                   [BLOCK_SIZE_Y][BLOCK_SIZE_X]int
 	panel                   [BLOCK_SIZE_Y][BLOCK_SIZE_X]Panel

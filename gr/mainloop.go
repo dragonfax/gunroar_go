@@ -17,9 +17,6 @@ type MainLoop struct {
 	maxSkipFrame int
 	event        *sdl.Event
 
-	screen             *Screen
-	input              Input
-	gameManager        *GameManager
 	slowdownRatio      float32
 	interval           float32
 	slowdownStartRatio float32
@@ -28,7 +25,7 @@ type MainLoop struct {
 	done bool
 }
 
-func NewMainLoop(screen *Screen, input *Input, gm *GameManager) {
+func NewMainLoop() {
 	this = MainLoop{}
 	this.maxSkipFrame = 5
 	this.slowdownStartRatio = 1
@@ -36,10 +33,6 @@ func NewMainLoop(screen *Screen, input *Input, gm *GameManager) {
 	this.screen = screen
 	this.input = input
 	this.interval = INTERVAL_BASE
-	gameManager.setMainLoop(*this)
-	gameManager.setUIs(screen, input)
-	gameManager.setPrefManager(prefManager)
-	this.gameManager = gameManager
 	return this
 }
 

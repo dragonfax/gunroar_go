@@ -12,10 +12,6 @@ package gr
 const TITLE_SCROLL_SPEED_BASE = 0.025
 
 type TitleManager struct {
-	pad           Pad
-	mouse         Mouse
-	field         Field
-	gameManager   GameManager
 	displayList   DisplayList
 	logo          Texture
 	cnt           int
@@ -23,13 +19,8 @@ type TitleManager struct {
 	gameMode      int
 }
 
-func NewTitleManager(pad Pad, mouse Mouse, field Field, gameManager GameManager) *TitleManager {
+func NewTitleManager() *TitleManager {
 	tm := new(TitleManager)
-
-	tm.pad = pad
-	tm.mouse = mouse
-	tm.field = field
-	tm.gameManager = gameManager
 
 	tm.logo = Texture.load("title.bmp")
 	tm.displayList = NewDisplayList(1)

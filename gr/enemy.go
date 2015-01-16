@@ -13,19 +13,12 @@ type Enemy struct {
 	state EnemyState
 }
 
-func NewEnemy(field Field, screen Screen, ship Ship, scoreReel ScoreReel) *Enemy {
+func NewEnemy(spec EnemySpec) *Enemy {
 	e := new(Enemy)
-	e.state = NewEnemyState(field, screen, ship, scoreReel)
+	e.state = NewEnemyState()
+	e.spec = spec
 	actors[this] = true
 	return e
-}
-
-func (this *Enemy) setStageManager(stageManager StageManager) {
-	this.state.setStageManager(stageManager)
-}
-
-func (this *Enemy) set(spec EnemySpec) {
-	this.spec = spec
 }
 
 func (this *Enemy) move() {
@@ -118,46 +111,28 @@ type EnemyState struct {
 	multiplier                                            float32
 	spec                                                  EnemySpec
 
-	field        *Field
-	screen       *Screen
-	ship         *Ship
 	enemy        *Enemy
-	stageManager *StageManager
-	scoreReel    *ScoreReel
 }
 
-func NewEnemyState(field *Field, screen *Screen, ship *Ship, scoreReel *ScoreReel) *EnemyState {
+func NewEnemyState(enemy Enemy) *EnemyState {
 	this := new(EnemyState)
 	this.idx = idxCount
-	idxCount++
-	field = field
-	this.screen = screen
-	this.bullets = bullets
-	this.ship = ship
-	this.sparks = sparks
-	this.smokes = smokes
-	this.fragments = fragments
-	this.sparkFragments = sparkFragments
-	this.numIndicators = numIndicators
-	this.scoreReel = scoreReel
-	turnWay = 1
-	explodeItv = 1
-	multiplier = 1
-}
-
-func (this *EnemyState) setEnemyAndPool(enemy Enemy) {
+	this.idxCount++
+	this.turnWay = 1
+	this.explodeItv = 1
+	this.multiplier = 1
 	this.enemy = enemy
-	this.enemies = enemies
+
 	for i, _ := range turretGroup {
 		this.turretGroup[i] = NewTurretGroup(field, bullets, ship, sparks, smokes, fragments, enemy)
 	}
 	for i, _ := range movingTurretGroup {
 		this.movingTurretGroup[i] = NewMovingTurretGroup(field, bullets, ship, sparks, smokes, fragments, enemy)
-	}
+	}	
+	actors[this] = true
+	return this
 }
 
-func (this *EnemyState) setStageManager(stageManager StageManager) {
-	this.stageManager = stageManager
 }
 
 func (this *EnemyState) setSpec(spec EnemySpec) {
@@ -498,8 +473,6 @@ const (
 )
 
 type EnemySpec struct {
-	field                                            Field
-	ship                                             Ship
 	shield                                           int
 	size                                             float32
 	distRatio                                        float32
@@ -511,14 +484,8 @@ type EnemySpec struct {
 	enemyType                                        EnemyType
 }
 
-func NewEnemySpec(field Field, ship Ship, enemyType EnemyType) *EnemySpec {
+func NewEnemySpec(enemyType EnemyType) *EnemySpec {
 	this := new(EnemySpec)
-	field = field
-	this.ship = ship
-	this.sparks = sparks
-	this.smokes = smokes
-	this.fragments = fragments
-	this.wakes = wakes
 	for i, _ := range this.turretGroupSpec {
 		this.turretGroupSpec[i] = NewTurretGroupSpec()
 	}
@@ -528,6 +495,7 @@ func NewEnemySpec(field Field, ship Ship, enemyType EnemyType) *EnemySpec {
 	this.shield = 1
 	this.sizes(1)
 	this.enemyType = enemyType
+	return this
 }
 
 func (this *EnemySpec) getTurretGroupSpec() *TurretGroupSpec {
@@ -738,8 +706,8 @@ type SmallShipEnemySpec struct {
 	speed, turnDeg             float32
 }
 
-func NewSmallShipEnemySpec(field Field, ship Ship) *SmallShipEnemySpec {
-	this := SmallShipEnemySpec{NewEnemySpec(field, ship)}
+func NewSmallShipEnemySpec() *SmallShipEnemySpec {
+	this := SmallShipEnemySpec{NewEnemySpec()}
 	this.moveDuration = 1
 	this.stayDuration = 1
 	return this
@@ -901,7 +869,7 @@ type ShipEnemySpec struct {
 	shipClass     int
 }
 
-func NewShipEnemySpec(field Field, ship Ship) *ShipEnemySpec {
+func NewShipEnemySpec() *ShipEnemySpec {
 	return ShipEnemySpec{NewEnemySpec(field.ship)}
 }
 
@@ -1109,7 +1077,7 @@ func (this *ShipClass) setParam(rank float32, cls int) {
 
 func (this *ShipClass) setFirstState(es EnemyState, appType int) bool {
 	es.setSpec(this)
-	if !es.setAppearancePos(field, this.ship, appType) {
+	if !es.setAppearancePos(appType) {
 		return false
 	}
 	es.speed = this.speed
@@ -1211,8 +1179,8 @@ type PlatformEnemySpec struct {
 	*EnemySpec
 }
 
-func NewPlatformEnemySpec(field Field, ship Ship) *PlatformEnemySpec {
-	return &PlatformEnemySpec{NewEnemySpec(field, ship)}
+func NewPlatformEnemySpec() *PlatformEnemySpec {
+	return &PlatformEnemySpec{NewEnemySpec()}
 }
 
 func (this *PlatformEnemySpec) setParam(rank float32) {
