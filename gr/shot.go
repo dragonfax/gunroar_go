@@ -9,7 +9,7 @@ package gr
  * Player's shot.
  */
 
-const SPEED = 0.6
+const SHOT_SPEED = 0.6
 const LANCE_SPEED = 0.5
 
 var shotShape ShotShape
@@ -63,7 +63,7 @@ func (s *Shot) move() {
 	}
 	var sp float32
 	if !slance {
-		sp = SPEED
+		sp = SHOT_SPEED
 	} else {
 		if s.cnt < 10 {
 			sp = LANCE_SPEED * s.cnt / 10
@@ -121,10 +121,10 @@ func (this *Shot) removeHit() {
 		}
 	} else {
 		d := this.deg + nextSignedFloat(0.5)
-		NewSpark(this.pos, Sin32(d)*SPEED, Cos32(d)*SPEED, 0.6+nextSignedFloat(0.4), 0.6+nextSignedFloat(0.4), 0.1, 20)
+		NewSpark(this.pos, Sin32(d)*SHOT_SPEED, Cos32(d)*SHOT_SPEED, 0.6+nextSignedFloat(0.4), 0.6+nextSignedFloat(0.4), 0.1, 20)
 
 		d = this.deg + nextSignedFloat(0.5)
-		NewSpark(this.pos, -Sin32(d)*SPEED, -Cos32(d)*SPEED, 0.6+nextSignedFloat(0.4), 0.6+nextSignedFloat(0.4), 0.1, 20)
+		NewSpark(this.pos, -Sin32(d)*SHOT_SPEED, -Cos32(d)*SHOT_SPEED, 0.6+nextSignedFloat(0.4), 0.6+nextSignedFloat(0.4), 0.1, 20)
 	}
 }
 

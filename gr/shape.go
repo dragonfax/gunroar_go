@@ -589,7 +589,7 @@ type SimpleShape struct {
 	collision   Vector
 }
 
-func (ss *SimpleShape) checkCollision(ax float32, ay float32, shape Shape /* = null */) {
+func (ss *SimpleShape) checkCollision(ax float32, ay float32, shape Shape /* = null */) bool {
 	return checkCollisionWithShapes(ax, ay, ss, shape)
 }
 
@@ -651,6 +651,6 @@ func checkCollisionWithShapes(ax float32, ay float32, shape1 Shape, shape2 Shape
 	return ax <= cx && ay <= cy
 }
 
-func (rd *ResizableShape) checkCollision(ax float32, ay float32, shape Shape /* = null */) {
+func (rd *ResizableShape) checkCollision(ax float32, ay float32, shape Shape /* = null */) bool {
 	return checkCollisionWithShapes(ax, ay, rd, shape)
 }

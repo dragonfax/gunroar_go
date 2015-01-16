@@ -75,7 +75,7 @@ func (sr *ScoreReel) accelerate() {
 	}
 }
 
-func (sr *ScoreReel) AddActualScore(as int) {
+func (sr *ScoreReel) addActualScore(as int) {
 	sr.actualScore += as
 }
 

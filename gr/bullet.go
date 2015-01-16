@@ -94,7 +94,7 @@ func (this *Bullet) move() {
 
 func (this *Bullet) startDisappear() {
 	if field.getBlockVector(this.pos) >= 0 {
-		NewSmoke(this.pos.x, this.pos.y, 0, Sin32(this.deg)*this.speed*0.2, Cos32(this.deg)*this.speed*0.2, 0, SAND, 30, this.size*0.5)
+		NewSmoke(this.pos.x, this.pos.y, 0, Sin32(this.deg)*this.speed*0.2, Cos32(this.deg)*this.speed*0.2, 0, SmokeTypeSAND, 30, this.size*0.5)
 	} else {
 		NewWake(this.pos, this.deg, this.speed, 60, this.size*3, true)
 	}
@@ -127,7 +127,7 @@ func (this *Bullet) checkShotHit(p Vector, s Shape, shot Shot) {
 	oy := fabs32(this.pos.y - p.y)
 	if ox+oy < 0.5 {
 		shot.removeHitToBullet()
-		NewSmoke(this.pos.x, this.pos.y, 0, Sin32(this.deg)*this.speed, Cos32(this.deg)*this.speed, 0, SPARK, 30, this.size*0.5)
+		NewSmoke(this.pos.x, this.pos.y, 0, Sin32(this.deg)*this.speed, Cos32(this.deg)*this.speed, 0, SmokeTypeSPARK, 30, this.size*0.5)
 		this.close()
 	}
 }
@@ -138,7 +138,7 @@ func (this *Bullet) close() {
 
 /* operations against the set of all bullets */
 
-func removeIndexedBullets(idx int) int {
+func removeAllIndexedBullets(idx int) int {
 	n := 0
 	for a := range actors {
 		b, ok := a.(*Bullet)

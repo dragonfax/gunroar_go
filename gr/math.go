@@ -38,3 +38,7 @@ func Cos32(d float32) float32 {
 func fabs32(d float32) float32 {
 	return float32(Abs(float64(d)))
 }
+
+func sqrt32(d float32) float32 {
+	return float32(math.Sqrt(float64(d)))
+}

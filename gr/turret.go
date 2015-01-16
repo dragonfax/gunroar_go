@@ -194,7 +194,7 @@ func (this *Turret) draw() {
 	}
 }
 
-func (this *Turret) checkCollision(x float32, y float32, c Shape, shot Shot) bool {
+func (this *Turret) checkCollision(x float32, y float32, c Shape, shot *Shot) bool {
 	if this.destroyedCnt >= 0 || this.spec.invisible {
 		return false
 	}
@@ -515,7 +515,7 @@ type TurretGroup struct {
 	cnt       int
 }
 
-func NewTurretGroup(parent Enemy, spec TurretGroupSpec) *TurretGroup {
+func NewTurretGroup(parent *Enemy, spec TurretGroupSpec) *TurretGroup {
 	this := new(TurretGroup)
 	this.ship = ship
 	for i, _ := range this.turret {
@@ -583,7 +583,7 @@ func (this *TurretGroup) close() {
 	}
 }
 
-func (this *TurretGroup) checkCollision(x float32, y float32, c Shape, shot Shot) bool {
+func (this *TurretGroup) checkCollision(x float32, y float32, c Shape, shot *Shot) bool {
 	col := false
 	for i := 0; i < this.spec.num; i++ {
 		col |= this.turret[i].checkCollision(x, y, c, shot)
@@ -628,7 +628,7 @@ type MovingTurretGroup struct {
 	turret                                [MOVING_TURRET_MAX_NUM]Turret
 }
 
-func NewMovingTurretGroup(parent Enemy, spec MovingTurretGroupSpec) *MovingTurretGroup {
+func NewMovingTurretGroup(parent *Enemy, spec MovingTurretGroupSpec) *MovingTurretGroup {
 	this := new(MovingTurretGroup)
 	this.ship = ship
 	for i, _ := range this.turret {

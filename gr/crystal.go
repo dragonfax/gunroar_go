@@ -60,7 +60,7 @@ func (c *Crystal) draw() {
 	var r float32 = 0.25
 	d := float32(c.cnt) * 0.1
 	if c.cnt > PULLIN_COUNT {
-		r *= (COUNT - c.cnt) / (COUNT - PULLIN_COUNT)
+		r *= (COUNT - float32(c.cnt)) / (COUNT - PULLIN_COUNT)
 	}
 	for i := 0; i < 4; i++ {
 		gl.PushMatrix()

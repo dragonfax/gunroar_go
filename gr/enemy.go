@@ -9,13 +9,13 @@ package gr
  * Enemy ships.
  */
 type Enemy struct {
-	spec  EnemySpec
+	spec  *EnemySpec
 	state *EnemyState
 }
 
-func NewEnemy(spec EnemySpec) *Enemy {
+func NewEnemy(spec *EnemySpec) *Enemy {
 	e := new(Enemy)
-	e.state = NewEnemyState(e)
+	e.state = NewEnemyState(e, spec)
 	e.spec = spec
 	actors[e] = true
 	return e
@@ -43,7 +43,7 @@ func (this *Enemy) checkHitShip(x float32, y float32, largeOnly bool /*= false*/
 }
 
 func (this *Enemy) addDamage(n int) {
-	this.state.addDamage(n)
+	this.state.addDamage(n, nil)
 }
 
 func (this *Enemy) increaseMultiplier(m float32) {
@@ -76,7 +76,7 @@ func (this *Enemy) ndex() int {
 }
 
 func (this *Enemy) isBoss() bool {
-	return this.spec.isBoss
+	return this.spec.isBoss()
 }
 
 /**
@@ -98,78 +98,66 @@ var edgePos, explodeVel, damagedPos Vector
 var idxCount int = 0
 
 type EnemyState struct {
-	appType                                               int
+	appType                                               AppearanceType
 	ppos, pos                                             Vector
 	shield                                                int
 	deg, velDeg, speed, turnWay, trgDeg                   float32
 	turnCnt, state, cnt                                   int
 	vel                                                   Vector
-	turretGroup                                           [TURRET_GROUP_MAX]TurretGroup
-	movingTurretGroup                                     [MOVING_TURRET_GROUP_MAX]MovingTurretGroup
+	turretGroup                                           [TURRET_GROUP_MAX]*TurretGroup
+	movingTurretGroup                                     [MOVING_TURRET_GROUP_MAX]*MovingTurretGroup
 	damaged                                               bool
 	damagedCnt, destroyedCnt, explodeCnt, explodeItv, idx int
 	multiplier                                            float32
-	spec                                                  EnemySpec
+	spec                                                  *EnemySpec
 
 	enemy *Enemy
 }
 
-func NewEnemyState(enemy *Enemy) *EnemyState {
+func NewEnemyState(enemy *Enemy, spec *EnemySpec) *EnemyState {
 	this := new(EnemyState)
 	this.idx = idxCount
-	this.idxCount++
+	idxCount++
 	this.turnWay = 1
 	this.explodeItv = 1
 	this.multiplier = 1
 	this.enemy = enemy
 
-	for i, _ := range turretGroup {
-		this.turretGroup[i] = NewTurretGroup(field, bullets, ship, sparks, smokes, fragments, enemy)
+	for i, _ := range this.turretGroup {
+		this.turretGroup[i] = NewTurretGroup(enemy, spec.turretGroupSpec[i])
 	}
-	for i, _ := range movingTurretGroup {
-		this.movingTurretGroup[i] = NewMovingTurretGroup(field, bullets, ship, sparks, smokes, fragments, enemy)
+	for i, _ := range this.movingTurretGroup {
+		this.movingTurretGroup[i] = NewMovingTurretGroup(enemy, spec.movingTurretGroupSpec[i])
 	}
-	actors[this] = true
+
+	this.spec = spec
+	this.shield = spec.shield
+	this.damaged = false
+	this.destroyedCnt = -1
+	this.explodeItv = 1
+	this.multiplier = 1
 	return this
 }
 
-func (this *EnemyState) setSpec(spec EnemySpec) {
-	this.spec = spec
-	this.shield = spec.shield
-	for i := 0; i < spec.turretGroupNum; i++ {
-		this.turretGroup[i].set(spec.turretGroupSpec[i])
-	}
-	for i := 0; i < spec.movingTurretGroupNum; i++ {
-		this.movingTurretGroup[i].set(spec.movingTurretGroupSpec[i])
-	}
-	this.cnt = 0
-	this.damaged = false
-	this.damagedCnt = 0
-	this.destroyedCnt = -1
-	this.explodeCnt = 0
-	this.explodeItv = 1
-	this.multiplier = 1
-}
-
-func (this *EnemyState) setAppearancePos(field Field, ship Ship, appType int /*= AppearanceType.TOP*/) bool {
+func (this *EnemyState) setAppearancePos(field Field, ship Ship, appType AppearanceType /*= AppearanceTypeTOP*/) bool {
 	this.appType = appType
 	for i := 0; i < 8; i++ {
 		switch appType {
-		case AppearanceType.TOP:
+		case AppearanceTypeTOP:
 			this.pos.x = nextSignedFloat(field.size.x)
 			this.pos.y = field.outerSize.y*0.99 + this.spec.size
 			if this.pos.x < 0 {
-				this.deg = Pi3232 - nextFloat(0.5)
+				this.deg = Pi32 - nextFloat(0.5)
 				this.velDeg = this.deg
 			} else {
-				this.deg = Pi3232 + nextFloat(0.5)
+				this.deg = Pi32 + nextFloat(0.5)
 				this.velDeg = this.deg
 			}
 			break
-		case AppearanceType.SIDE:
+		case AppearanceTypeSIDE:
 			if nextInt(2) == 0 {
 				this.pos.x = -field.outerSize.x * 0.99
-				this.deg = Pi3232/2 + nextFloat(0.66)
+				this.deg = Pi32/2 + nextFloat(0.66)
 				this.velDeg = this.deg
 			} else {
 				this.pos.x = field.outerSize.x * 0.99
@@ -178,7 +166,7 @@ func (this *EnemyState) setAppearancePos(field Field, ship Ship, appType int /*=
 			}
 			this.pos.y = field.size.y + nextFloat(field.size.y) + this.spec.size
 			break
-		case AppearanceType.CENTER:
+		case AppearanceTypeCENTER:
 			this.pos.x = 0
 			this.pos.y = field.outerSize.y*0.99 + this.spec.size
 			this.deg = 0
@@ -190,7 +178,7 @@ func (this *EnemyState) setAppearancePos(field Field, ship Ship, appType int /*=
 		this.vel.y = 0
 		this.vel.x = 0
 		this.speed = 0
-		if this.appType == AppearanceType.CENTER || this.checkFrontClear(true) {
+		if this.appType == AppearanceTypeCENTER || this.checkFrontClear(true) {
 			return true
 		}
 	}
@@ -199,16 +187,16 @@ func (this *EnemyState) setAppearancePos(field Field, ship Ship, appType int /*=
 
 func (this *EnemyState) checkFrontClear(checkCurrentPos bool /*= false*/) bool {
 	var si = 1
-	if this.checkCurrentPos() {
+	if checkCurrentPos {
 		si = 0
 	}
 	for i := si; i < 5; i++ {
-		cx := this.pos.x + Sin32(deg)*i*this.spec.size
-		cy := this.pos.y + Cos32(deg)*i*this.spec.size
+		cx := this.pos.x + Sin32(this.deg)*float32(i)*this.spec.size
+		cy := this.pos.y + Cos32(this.deg)*float32(i)*this.spec.size
 		if field.getBlock(cx, cy) >= 0 {
 			return false
 		}
-		if checkAllEnemiesHitShip(cx, cy, enemy, true) {
+		if checkAllEnemiesHitShip(cx, cy, this.enemy, true) != nil {
 			return false
 		}
 	}
@@ -227,9 +215,9 @@ func (this *EnemyState) move() bool {
 		this.explodeCnt--
 		if this.explodeCnt < 0 {
 			this.explodeItv += 2
-			this.explodeItv = this.explodeItv * (1.2 + nextFloat(1))
+			this.explodeItv = int(float32(this.explodeItv) * (1.2 + nextFloat(1)))
 			this.explodeCnt = this.explodeItv
-			this.destroyedEdge(sqrt(this.spec.size) * 27.0 / (this.explodeItv*0.1 + 1))
+			this.destroyedEdge(int(sqrt32(this.spec.size) * 27.0 / (float32(this.explodeItv)*0.1 + 1)))
 		}
 	}
 	this.damaged = false
@@ -238,13 +226,13 @@ func (this *EnemyState) move() bool {
 	}
 	alive := false
 	for i := 0; i < this.spec.turretGroupNum; i++ {
-		alive |= this.turretGroup[i].move(this.pos, this.deg)
+		alive = alive || this.turretGroup[i].move(this.pos, this.deg)
 	}
 	for i := 0; i < this.spec.movingTurretGroupNum; i++ {
 		this.movingTurretGroup[i].move(this.pos, this.deg)
 	}
 	if this.destroyedCnt < 0 && !alive {
-		return this.destroyed()
+		return this.destroyed(nil)
 	}
 	return true
 }
@@ -288,12 +276,12 @@ func (this *EnemyState) addDamage(n int, shot *Shot /*= null*/) {
 func (this *EnemyState) destroyed(shot *Shot /*= null*/) bool {
 	var vz float32
 	if shot != nil {
-		this.explodeVel.x = Shot.SPEED * Sin32(shot.deg) / 2
-		this.explodeVel.y = Shot.SPEED * Cos32(shot.deg) / 2
+		explodeVel.x = SHOT_SPEED * Sin32(shot.deg) / 2
+		explodeVel.y = SHOT_SPEED * Cos32(shot.deg) / 2
 		vz = 0
 	} else {
-		this.explodeVel.x = 0
-		this.explodeVel.y = 0
+		explodeVel.x = 0
+		explodeVel.y = 0
 		vz = 0.05
 	}
 	ss := this.spec.size * 1.5
@@ -304,78 +292,78 @@ func (this *EnemyState) destroyed(shot *Shot /*= null*/) bool {
 	if this.spec.size < 1 {
 		sn = this.spec.size
 	} else {
-		sn = sqrt32(spec.size)
+		sn = sqrt32(this.spec.size)
 	}
 	if sn > 3 {
 		sn = 3
 	}
-	for i := 0; i < sn*8; i++ {
-		NewSmoke(this.pos.x, this.pos.y, 0, nextSignedFloat(0.1)+this.explodeVel.x, nextSignedFloat(0.1)+this.explodeVel.y, nextFloat(vz), SmokeTypeEXPLOSION, 32+nextInt(30), ss)
+	for i := 0; i < int(sn)*8; i++ {
+		NewSmoke(this.pos.x, this.pos.y, 0, nextSignedFloat(0.1)+explodeVel.x, nextSignedFloat(0.1)+explodeVel.y, nextFloat(vz), SmokeTypeEXPLOSION, 32+nextInt(30), ss)
 	}
-	for i := 0; i < sn*36; i++ {
-		NewSpark(this.pos, nextSignedFloat(0.8)+this.explodeVel.x, nextSignedFloat(0.8)+this.explodeVel.y, 0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0, 30+nextInt(30))
+	for i := 0; i < int(sn)*36; i++ {
+		NewSpark(this.pos, nextSignedFloat(0.8)+explodeVel.x, nextSignedFloat(0.8)+explodeVel.y, 0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0, 30+nextInt(30))
 	}
-	for i := 0; i < sn*12; i++ {
-		NewFragment(this.pos, nextSignedFloat(0.33)+this.explodeVel.x, nextSignedFloat(0.33)+this.explodeVel.y, 0.05+nextFloat(0.1), 0.2+nextFloat(0.33))
+	for i := 0; i < int(sn)*12; i++ {
+		NewFragment(this.pos, nextSignedFloat(0.33)+explodeVel.x, nextSignedFloat(0.33)+explodeVel.y, 0.05+nextFloat(0.1), 0.2+nextFloat(0.33))
 	}
 	this.removeTurrets()
-	sc := this.spec.score
+	sc := this.spec.score()
 	var r bool
 	if this.spec.enemyType == EnemyTypeSMALL {
 		playSe("small_destroyed.wav")
 		r = false
 	} else {
 		playSe("destroyed.wav")
-		bn := removeAllBulletsIndexedBullets(idx)
+		bn := removeAllIndexedBullets(this.idx)
 		this.destroyedCnt = 0
 		this.explodeCnt = 1
 		this.explodeItv = 3
 		sc += bn * 10
 		r = true
-		if this.spec.isBoss {
-			setScreenShake(45, 0.04)
+		if this.spec.isBoss() {
+			screen.setScreenShake(45, 0.04)
 		}
 	}
-	this.setScoreIndicator(sc, multiplier)
+	this.setScoreIndicator(sc, this.multiplier)
 	return r
 }
 
 func (this *EnemyState) setScoreIndicator(sc int, mp float32) {
 	ty := getTargetY()
 	if mp > 1 {
-		ni := NewNumIndicator(sc, NumIndicator.IndicatorType.SCORE, 0.5, this.pos)
+		ni := NewNumIndicator(sc, IndicatorTypeSCORE, 0.5, this.pos.x, this.pos.y)
 		ni.addTarget(8, ty, FlyingToTypeRIGHT, 1, 0.5, sc, 40)
 		ni.addTarget(11, ty, FlyingToTypeRIGHT, 0.5, 0.75,
-			(sc * mp), 30)
+			(sc * int(mp)), 30)
 		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.25, 1,
-			(sc * mp * this.stageManager.rankMultiplier), 20)
+			(sc * int(mp) * int(stageManager.rank)), 20)
 		ni.addTarget(12, -8, FlyingToTypeBOTTOM, 0.5, 0.1,
-			(sc * mp * this.stageManager.rankMultiplier), 40)
+			(sc * int(mp) * int(stageManager.rank)), 40)
 		ni.gotoNextTarget()
 
 		mn := int(mp * 1000)
-		ni = NewNumIndicator(mn, IndicatorTypeMULTIPLIER, 0.7, this.pos)
+		ni = NewNumIndicator(mn, IndicatorTypeMULTIPLIER, 0.7, this.pos.x, this.pos.y)
 		ni.addTarget(10.5, ty, FlyingToTypeRIGHT, 0.5, 0.2, mn, 70)
 		ni.gotoNextTarget()
 
-		rn := int(this.stageManager.rankMultiplier * 1000)
+		rn := int(stageManager.rank * 1000)
 		ni = NewNumIndicator(rn, IndicatorTypeMULTIPLIER, 0.4, 11, 8)
 		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.5, 0.2, rn, 40)
 		ni.gotoNextTarget()
-		this.scoreReel.addActualScore(int(sc * mp * stageManager.rankMultiplier))
+		scoreReel.addActualScore(int(float32(sc) * mp * stageManager.rank))
 	} else {
-		ni := NewNumIndicator(sc, IndicatorTypeSCORE, 0.3, this.pos)
+		ni := NewNumIndicator(sc, IndicatorTypeSCORE, 0.3, this.pos.x, this.pos.y)
 		ni.addTarget(11, ty, FlyingToTypeRIGHT, 1.5, 0.2, sc, 40)
-		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.25, 0.25, int(sc*this.stageManager.rankMultiplier), 20)
-		ni.addTarget(12, -8, FlyingToTypeBOTTOM, 0.5, 0.1, int(sc*this.stageManager.rankMultiplier), 40)
+		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.25, 0.25, sc*int(stageManager.rank), 20)
+		ni.addTarget(12, -8, FlyingToTypeBOTTOM, 0.5, 0.1, sc*int(stageManager.rank), 40)
 		ni.gotoNextTarget()
 
-		rn := int(this.stageManager.rankMultiplier * 1000)
+		rn := int(stageManager.rank * 1000)
 		ni = NewNumIndicator(rn, IndicatorTypeMULTIPLIER, 0.4, 11, 8)
 		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.5, 0.2, rn, 40)
 		ni.gotoNextTarget()
 
-		this.scoreReel.addActualScore(int(sc * this.stageManager.rankMultiplier))
+		scoreReel.addActualScore(sc * int(stageManager.rank))
 	}
 }
 
@@ -470,6 +458,15 @@ const (
 	EnemyTypePLATFORM
 )
 
+type ShipClass int
+
+const (
+	ShipClassNONE ShipClass = iota
+	ShipClassMIDDLE
+	ShipClassLARGE
+	ShipClassBOSS
+)
+
 type EnemySpec struct {
 	shield                                           int
 	size                                             float32
@@ -480,6 +477,7 @@ type EnemySpec struct {
 	movingTurretGroupNum                             int
 	shape, damagedShape, destroyedShape, bridgeShape EnemyShape
 	enemyType                                        EnemyType
+	shipClass                                        ShipClass
 }
 
 func NewEnemySpec(enemyType EnemyType) *EnemySpec {
@@ -494,6 +492,14 @@ func NewEnemySpec(enemyType EnemyType) *EnemySpec {
 	this.sizes(1)
 	this.enemyType = enemyType
 	return this
+}
+
+func (this *EnemySpec) score() int {
+	return 0
+}
+
+func (this *EnemySpec) isBoss() bool {
+	return this.shipClass == ShipClassBOSS
 }
 
 func (this *EnemySpec) getTurretGroupSpec() *TurretGroupSpec {
@@ -743,7 +749,7 @@ func (this *SmallShipEnemySpec) setParam(rank float32) {
 	tgs.turretSpec.setParam(rank-sr*0.5, TurretTypeSMALL)
 }
 
-func (this *SmallShipEnemySpec) setFirstState(es *EnemyState, appType int) bool {
+func (this *SmallShipEnemySpec) setFirstState(es *EnemyState, appType AppearanceType) bool {
 	es.setSpec(this)
 	if !es.setAppearancePos(field, this.ship, this.appType) {
 		return false
@@ -850,13 +856,6 @@ func (this *SmallShipEnemySpec) isBoss() bool {
 /**
  * Specification for a large/middle class ship.
  */
-type ShipClass int
-
-const (
-	ShipClassMIDDLE ShipClass = iota
-	LARGE
-	BOSS
-)
 
 const SINK_INTERVAL = 120
 
@@ -864,14 +863,13 @@ type ShipEnemySpec struct {
 	*EnemySpec
 
 	speed, degVel float32
-	shipClass     int
 }
 
 func NewShipEnemySpec() *ShipEnemySpec {
 	return ShipEnemySpec{NewEnemySpec(field.ship)}
 }
 
-func (this *ShipClass) setParam(rank float32, cls int) {
+func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 	this.shipClass = cls
 	this.set(EnemyTypeLARGE)
 	this.shape = NewEnemyShape(EnemyShapeTypeMIDDLE)
@@ -1073,7 +1071,7 @@ func (this *ShipClass) setParam(rank float32, cls int) {
 	}
 }
 
-func (this *ShipClass) setFirstState(es *EnemyState, appType int) bool {
+func (this *ShipEnemySpec) setFirstState(es *EnemyState, appType AppearanceType) bool {
 	es.setSpec(this)
 	if !es.setAppearancePos(appType) {
 		return false
@@ -1094,7 +1092,7 @@ func (this *ShipClass) setFirstState(es *EnemyState, appType int) bool {
 	return true
 }
 
-func (this *ShipClass) move(es *EnemyState) bool {
+func (this *ShipEnemySpec) move(es *EnemyState) bool {
 	if es.destroyedCnt >= SINK_INTERVAL {
 		return false
 	}
@@ -1145,7 +1143,7 @@ func (this *ShipClass) move(es *EnemyState) bool {
 	return true
 }
 
-func (this *ShipClass) draw(es *EnemyState) {
+func (this *ShipEnemySpec) draw(es *EnemyState) {
 	if es.destroyedCnt >= 0 {
 		setScreenColor(
 			EnemyShapeMIDDLE_COLOR_R*(1-float32(es.destroyedCnt)/SINK_INTERVAL)*0.5,
@@ -1155,7 +1153,7 @@ func (this *ShipClass) draw(es *EnemyState) {
 	super.draw(es)
 }
 
-func (this *ShipClass) score() int {
+func (this *ShipEnemySpec) score() int {
 	switch this.shipClass {
 	case ShipClassMIDDLE:
 		return 100
@@ -1164,10 +1162,6 @@ func (this *ShipClass) score() int {
 	case ShipClassBOSS:
 		return 1000
 	}
-}
-
-func (this *ShipClass) isBoss() bool {
-	return this.shipClass == ShipClassBOSS
 }
 
 /**
@@ -1298,7 +1292,7 @@ func checkAllEnemiesShotHit(pos Vector, shape Shape, shot *Shot /*= null*/) {
 	}
 }
 
-func checkAllEnemiesHitShip(x float32, y float32, deselection Enemy /*= null*/, largeOnly bool /*= false*/) *Enemy {
+func checkAllEnemiesHitShip(x float32, y float32, deselection *Enemy /*= null*/, largeOnly bool /*= false*/) *Enemy {
 	for a, _ := range actor {
 		e, ok := a.(Enemy)
 		if ok && e != deselection {

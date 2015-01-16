@@ -81,13 +81,13 @@ func (this *Spark) drawLuminous() {
 type SmokeType int
 
 const (
-	FIRE SmokeType = iota
-	EXPLOSION
-	SAND
-	SPARK
-	WAKE
-	SMOKE
-	LANCE_SPARK
+	SmokeTypeFIRE SmokeType = iota
+	SmokeTypeEXPLOSION
+	SmokeTypeSAND
+	SmokeTypeSPARK
+	SmokeTypeWAKE
+	SmokeTypeSMOKE
+	SmokeTypeLANCE_SPARK
 )
 
 var windVel Vector3 = Vector3{0.04, 0.04, 0.02}
@@ -292,14 +292,10 @@ func CloseFragments() {
 	fragmentDisplayList.close()
 }
 
-func NewFragment() {
+func NewFragment(p Vector, mx float32, my float32, mz float32, sz float32 /* = 1*/) {
 	this := new(Fragment)
 	this.size = 1
-	actors[this] = true
-	return this
-}
 
-func (this *Fragment) set(p Vector, mx float32, my float32, mz float32, sz float32 /* = 1*/) {
 	if !field.checkInOuterField(p.x, p.y) {
 		return
 	}
@@ -315,7 +311,9 @@ func (this *Fragment) set(p Vector, mx float32, my float32, mz float32, sz float
 	}
 	d2 = nextFloat(360)
 	md2 = nextSignedFloat(20)
-	this.exists = true
+
+	actors[this] = true
+	return this
 }
 
 func (this *Fragment) move() {
