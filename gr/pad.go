@@ -22,6 +22,10 @@ type Pad struct {
 	state PadState
 }
 
+func NewPad() *Pad {
+	return new(Pad)
+}
+
 func (pad *Pad) openJoystick(st *sdl.Joystick /* = null */) *sdl.Joystick {
 	if st == nil {
 		if sdl.InitSubSystem(sdl.INIT_JOYSTICK) < 0 {

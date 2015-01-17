@@ -33,6 +33,10 @@ type GameManager struct {
 	escPressed bool
 }
 
+func NewGameManager() *GameManager {
+	return new(GameManager)
+}
+
 func (this *GameManager) init() {
 	InitLetter()
 	InitShot.init()

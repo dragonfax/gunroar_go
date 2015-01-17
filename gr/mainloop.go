@@ -11,6 +11,26 @@ import (
 
 const INTERVAL_BASE = 16
 
+var screen *Screen
+var input *MouseAndPad
+var pad *Pad
+
+// twinStick TwinStick
+var mouse *Mouse
+var gameManager *GameManager
+var mainLoop *MainLoop
+
+func main() {
+	screen = NewScreen()
+	pad = NewPad()
+	// twinStick = new RecordableTwinStick
+	mouse = NewMouse()
+	input = NewMouseAndPad(mouse, pad)
+	gameManager = NewGameManager()
+	mainLoop = NewMainLoop()
+	mainLoop.loop()
+}
+
 type MainLoop struct {
 	nowait       bool
 	accframe     bool
@@ -57,7 +77,7 @@ func (m *MainLoop) loop() {
 	var i int
 	var nowTick long
 	var frame int
-	m.screen.initSDL()
+	screen.initSDL()
 	m.initFirst()
 	m.gameManager.start()
 	for !done {

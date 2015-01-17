@@ -7,6 +7,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/go-gl/gl"
 	"github.com/go-gl/glu"
 	"github.com/veandco/go-sdl2/sdl"
@@ -36,6 +37,11 @@ type Screen struct {
 	context            sdl.GLContext
 }
 
+func NewScreen() *Screen {
+	return new(Screen)
+}
+
+// called by InitSDL()
 func (s *Screen) Init() {
 	s.setCaption(CAPTION)
 	gl.LineWidth(1)
