@@ -44,8 +44,9 @@ type ComplexShape struct {
 	collidable bool
 }
 
-func (this *ComplexShape) InitComplexShape(size float32, distRatio float32, spinyRatio float32, shapeType int, r float32, g float32, b float32, collidable bool /* = false */) {
+func NewComplexShape(size float32, distRatio float32, spinyRatio float32, shapeType int, r float32, g float32, b float32, collidable bool /* = false */) *ComplexShape {
 
+	this := new(ComplexShape)
 	this.size = size
 	this.distRatio = distRatio
 	this.spinyRatio = spinyRatio
@@ -61,6 +62,7 @@ func (this *ComplexShape) InitComplexShape(size float32, distRatio float32, spin
 	}
 	this.InitSimpleShape()
 	this.createDisplayList()
+	return this
 }
 
 func (this *ComplexShape) createDisplayList() {

@@ -17,10 +17,10 @@ type Ship struct {
 	boat                                                 [2]*Boat
 	gameMode                                             int
 	boatNum                                              int
-	gameState                                            InGameState
+	gameState                                            *InGameState
 	scrollSpeed, scrollSpeedBase                         float32
 	_midstPos, _higherPos, _lowerPos, _nearPos, _nearVel Vector
-	bridgeShape                                          ComplexShape
+	bridgeShape                                          *ComplexShape
 }
 
 func NewShip() *Ship {
@@ -43,7 +43,7 @@ func (this *Ship) close() {
 	delete(actors, this)
 }
 
-func (this *Ship) setGameState(gameState InGameState) {
+func (this *Ship) setGameState(gameState *InGameState) {
 	this.gameState = gameState
 	for _, b := range this.boat {
 		b.setGameState(gameState)

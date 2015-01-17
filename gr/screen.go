@@ -175,7 +175,7 @@ func setScreenColorForced(r float32, g float32, b float32, a float32 /* = 1 */) 
 	gl.Color4f(r, g, b, a)
 }
 
-func (s *Screen) InitSDL() {
+func (s *Screen) initSDL() {
 	s.farPlane = 1000
 	s.nearPlane = 0.1
 	s.width = 640
@@ -209,7 +209,7 @@ func (s *Screen) closeSDL() {
 	sdl.ShowCursor(sdl.ENABLE)
 }
 
-func (s *Screen) Flip() {
+func (s *Screen) flip() {
 	// s.handleError()
 	sdl.GL_SwapWindow(s.window)
 }

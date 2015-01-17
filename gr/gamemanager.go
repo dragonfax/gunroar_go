@@ -5,6 +5,11 @@
  */
 package main
 
+import (
+	"github.com/go-gl/gl"
+	"github.com/veandco/go-sdl2/sdl"
+)
+
 /**
  * Manage the game state
  */
@@ -23,7 +28,7 @@ var ship *Ship
 var stageManager *StageManager
 var titleManager *TitleManager
 var scoreReel *ScoreReel
-var state *GameState
+var state GameState
 var titleState *TitleState
 var inGameState *InGameState
 
@@ -39,66 +44,58 @@ func NewGameManager() *GameManager {
 
 func (this *GameManager) init() {
 	InitLetter()
-	InitShot.init()
-	InitBulletShape.init()
-	InitEnemyShape.init()
-	InitTurret.init()
-	InitTurretShape.init()
-	InitFragment.init()
-	InitSparkFragment.init()
-	InitCrystal.init()
-	pad = input.inputs[0]
+	initShots()
+	InitBulletShapes()
+	InitEnemyShapes()
+	// InitTurret.init()
+	InitTurretShapes()
+	InitFragments()
+	InitSparkFragments()
+	// InitCrystal.init()
+	pad = input.pad
 	// twinStick = cast(TwinStick) (cast(MultipleInputDevice) input).inputs[1]
 	// twinStick.openJoystick(pad.openJoystick())
-	mouse = input.inputs[2]
-	mouse.init(screen)
-	mouseAndPad = NewMouseAndPad(mouse, pad)
+	mouse = input.mouse
 	field = NewField()
-	ship = NewShip(pad, twinStick, mouse, mouseAndPad, screen)
+	ship = NewShip()
 	scoreReel = NewScoreReel()
-	stageManager = NewStageManager(enemies, ship)
-	ship.setStageManager(stageManager)
-	field.setStageManager(stageManager)
-	field.setShip(ship)
+	stageManager = NewStageManager()
 	loadSounds()
-	titleManager = NewTitleManager(pad, mouse, this)
-	inGameState = NewInGameState(this, screen, pad /*twinStick, */, mouse, mouseAndPad,
-		ship, stageManager, scoreReel)
-	titleState = NewTitleState(this, screen, pad /*twinStick, */, mouse, mouseAndPad,
-		ship, stageManager, scoreReel,
-		titleManager, inGameState)
-	ship.setGameState(this.inGameState)
+	titleManager = NewTitleManager()
+	inGameState = NewInGameState()
+	titleState = NewTitleState()
+	ship.setGameState(inGameState)
 }
 
 func (this *GameManager) close() {
 	ship.close()
-	CloseBulletShape()
-	CloseEnemyShape()
-	CloseTurretShape()
-	CloseFragment()
-	CloseSparkFragment()
-	CloseCrystal()
-	titleState()
+	closeBulletShapes()
+	closeEnemyShapes()
+	closeTurretShapes()
+	CloseFragments()
+	CloseSparkFragments()
+	// CloseCrystal()
+	titleState.close()
 	CloseLetter()
 }
 
 func (this *GameManager) start() {
-	this.startTitle()
+	this.startTitle(false)
 }
 
 func (this *GameManager) startTitle(fromGameover bool /*= false*/) {
-	this.state = titleState
+	state = titleState
 	this.startState()
 }
 
 func (this *GameManager) startInGame(gameMode GameMode) {
-	this.state = inGameState
+	state = inGameState
 	inGameState.gameMode = gameMode
 	this.startState()
 }
 
 func (this *GameManager) startState() {
-	this.state.start()
+	state.start()
 }
 
 func (this *GameManager) initInterval() {
@@ -110,11 +107,11 @@ func (this *GameManager) addSlowdownRatio(sr float32) {
 }
 
 func (this *GameManager) move() {
-	if this.pad.keys[SDL.K_ESCAPE] == sdl.PRESSED {
-		if !escPressed {
+	if pad.keys[sdl.K_ESCAPE] == sdl.PRESSED {
+		if !this.escPressed {
 			this.escPressed = true
-			if this.state == this.inGameState {
-				this.startTitle()
+			if state == inGameState {
+				this.startTitle(false)
 			} else {
 				mainLoop.breakLoop()
 			}
@@ -123,7 +120,7 @@ func (this *GameManager) move() {
 	} else {
 		this.escPressed = false
 	}
-	this.state.move()
+	state.move()
 }
 
 func (this *GameManager) draw() {
@@ -138,39 +135,40 @@ func (this *GameManager) draw() {
 			}
 		 }
 	*/
-	if this.screen.startRenderToLuminousScreen() {
-		glPushMatrix()
-		this.screen.setEyepos()
-		this.state.drawLuminous()
-		glPopMatrix()
-		this.screen.endRenderToLuminousScreen()
+	if screen.startRenderToLuminousScreen() {
+		gl.PushMatrix()
+		screen.setEyepos()
+		state.drawLuminous()
+		gl.PopMatrix()
+		screen.endRenderToLuminousScreen()
 	}
-	this.screen.clear()
-	glPushMatrix()
-	this.screen.setEyepos()
-	this.state.draw()
-	glPopMatrix()
-	this.screen.drawLuminous()
-	glPushMatrix()
-	this.screen.setEyepos()
+	screen.clear()
+	gl.PushMatrix()
+	screen.setEyepos()
+	state.draw()
+	gl.PopMatrix()
+	screen.drawLuminous()
+	gl.PushMatrix()
+	screen.setEyepos()
 	field.drawSideWalls()
-	this.state.drawFront()
-	glPopMatrix()
-	this.screen.viewOrthoFixed()
-	this.state.drawOrtho()
-	this.screen.viewPerspective()
+	state.drawFront()
+	gl.PopMatrix()
+	viewOrthoFixed()
+	state.drawOrtho()
+	viewPerspective()
 }
 
 /**
  * Manage the game state.
  * (e.g. title, in game, gameover, pause, ...)
  */
-type GameState struct {
-}
-
-func NewGameState() *GameState {
-	this := new(GameState)
-	return this
+type GameState interface {
+	start()
+	move()
+	draw()
+	drawFront()
+	drawOrtho()
+	drawLuminous()
 }
 
 type GameMode int
@@ -191,8 +189,6 @@ const SCORE_REEL_SIZE_DEFAULT = 0.5
 const SCORE_REEL_SIZE_SMALL = 0.01
 
 type InGameState struct {
-	*GameState
-
 	left, time, gameOverCnt int
 	btnPressed              bool
 	pauseCnt                int
@@ -203,7 +199,7 @@ type InGameState struct {
 
 func NewInGameState() *InGameState {
 
-	this := InGameState{NewGameState()}
+	this := new(InGameState)
 	this.scoreReelSize = SCORE_REEL_SIZE_DEFAULT
 	return this
 }
@@ -215,30 +211,29 @@ func (this *InGameState) start() {
 }
 
 func (this *InGameState) startInGame() {
-	this.clearAll()
-	this.stageManager.start(1)
+	stageManager.start(1)
 	field.start()
-	this.ship.start(this.gameMode)
+	ship.start(this.gameMode)
 	this.initGameState()
-	this.screen.setScreenShake(0, 0)
+	screen.setScreenShake(0, 0)
 	this.gameOverCnt = 0
 	this.pauseCnt = 0
 	this.scoreReelSize = SCORE_REEL_SIZE_DEFAULT
-	this.isGameOver = false
+	isGameOver = false
 	playBgm()
 }
 
 func (this *InGameState) initGameState() {
 	this.time = 0
 	this.left = 2
-	this.scoreReel.clear(9)
-	initTargetY()
+	scoreReel.clear(9)
+	// initTargetY()
 }
 
 func (this *InGameState) move() {
-	if this.pad.keys[SDL.K_p] == sdl.PRESSED {
+	if pad.keys[sdl.K_p] == sdl.PRESSED {
 		if !this.pausePressed {
-			if this.pauseCnt <= 0 && !this.isGameOver {
+			if this.pauseCnt <= 0 && !isGameOver {
 				this.pauseCnt = 1
 			} else {
 				this.pauseCnt = 0
@@ -255,11 +250,11 @@ func (this *InGameState) move() {
 	this.moveInGame()
 	if isGameOver {
 		this.gameOverCnt++
-		input := pad.getState(false)
-		mouseInput := mouse.getState(false)
-		if (input.button & PadState.Button.A) || (gameMode == InGameState.GameMode.MOUSE && (mouseInput.button & MouseState.Button.LEFT)) {
+		input := pad.getState()
+		mouseInput := mouse.getState()
+		if (input.button&PadButtonA) != 0 || (this.gameMode == GameModeMOUSE && (mouseInput.button&MouseButtonLEFT) != 0) {
 			if this.gameOverCnt > 60 && !this.btnPressed {
-				this.gameManager.startTitle(true)
+				gameManager.startTitle(true)
 			}
 			this.btnPressed = true
 		} else {
@@ -270,15 +265,15 @@ func (this *InGameState) move() {
 			disableBgm()
 		}
 		if this.gameOverCnt > 1200 {
-			this.gameManager.startTitle(true)
+			gameManager.startTitle(true)
 		}
 	}
 }
 
 func (this *InGameState) moveInGame() {
 	field.move()
-	this.ship.move()
-	this.stageManager.move()
+	ship.move()
+	stageManager.move()
 	enemiesMove()
 	shotsMove()
 	bulletsMove()
@@ -289,59 +284,239 @@ func (this *InGameState) moveInGame() {
 	fragmentsMove()
 	sparkFragmentsMove()
 	wakesMove()
-	this.screen.move()
+	screen.move()
 	this.scoreReelSize += (SCORE_REEL_SIZE_DEFAULT - this.scoreReelSize) * 0.05
-	this.scoreReel.move()
-	if !this.isGameOver {
+	scoreReel.move()
+	if !isGameOver {
 		this.time += 17
 	}
 	playMarkedSe()
 }
 
+func enemiesMove() {
+	for a, _ := range actors {
+		e, ok := a.(*Enemy)
+		if ok {
+			e.move()
+		}
+	}
+}
+
+func shotsMove() {
+	for a, _ := range actors {
+		s, ok := a.(*Shot)
+		if ok {
+			s.move()
+		}
+	}
+}
+
+func bulletsMove() {
+	for a, _ := range actors {
+		b, ok := a.(*Bullet)
+		if ok {
+			b.move()
+		}
+	}
+}
+
+func crystalsMove() {
+	for a, _ := range actors {
+		b, ok := a.(*Crystal)
+		if ok {
+			b.move()
+		}
+	}
+}
+
+func numIndicatorsMove() {
+	for a, _ := range actors {
+		b, ok := a.(*NumIndicator)
+		if ok {
+			b.move()
+		}
+	}
+}
+
+func sparksMove() {
+	for a, _ := range actors {
+		b, ok := a.(*Spark)
+		if ok {
+			b.move()
+		}
+	}
+}
+
+func smokesMove() {
+	for a, _ := range actors {
+		b, ok := a.(*Smoke)
+		if ok {
+			b.move()
+		}
+	}
+}
+
+func fragmentsMove() {
+	for a, _ := range actors {
+		b, ok := a.(*Fragment)
+		if ok {
+			b.move()
+		}
+	}
+}
+
+func sparkFragmentsMove() {
+	for a, _ := range actors {
+		b, ok := a.(*SparkFragment)
+		if ok {
+			b.move()
+		}
+	}
+}
+
+func wakesMove() {
+	for a, _ := range actors {
+		b, ok := a.(*Wake)
+		if ok {
+			b.move()
+		}
+	}
+}
+
 func (this *InGameState) draw() {
 	field.draw()
-	glBegin(GL_TRIANGLES)
+	gl.Begin(gl.TRIANGLES)
 	wakesDraw()
 	sparksDraw()
-	glEnd()
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-	glBegin(GL_QUADS)
+	gl.End()
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	gl.Begin(gl.QUADS)
 	smokesDraw()
-	glEnd()
+	gl.End()
 	fragmentsDraw()
 	sparkFragmentsDraw()
 	crystalsDraw()
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE)
 	enemiesDraw()
 	shotsDraw()
-	shipDraw()
+	ship.draw()
 	bulletsDraw()
 }
 
+func wakesDraw() {
+	for a, _ := range actors {
+		b, ok := a.(*Wake)
+		if ok {
+			b.draw()
+		}
+	}
+}
+
+func sparksDraw() {
+	for a, _ := range actors {
+		b, ok := a.(*Spark)
+		if ok {
+			b.draw()
+		}
+	}
+}
+
+func smokesDraw() {
+	for a, _ := range actors {
+		b, ok := a.(*Smoke)
+		if ok {
+			b.draw()
+		}
+	}
+}
+
+func sparkFragmentsDraw() {
+	for a, _ := range actors {
+		b, ok := a.(*SparkFragment)
+		if ok {
+			b.draw()
+		}
+	}
+}
+
+func fragmentsDraw() {
+	for a, _ := range actors {
+		b, ok := a.(*Fragment)
+		if ok {
+			b.draw()
+		}
+	}
+}
+
+func crystalsDraw() {
+	for a, _ := range actors {
+		b, ok := a.(*Crystal)
+		if ok {
+			b.draw()
+		}
+	}
+}
+
+func enemiesDraw() {
+	for a, _ := range actors {
+		b, ok := a.(*Enemy)
+		if ok {
+			b.draw()
+		}
+	}
+}
+
+func shotsDraw() {
+	for a, _ := range actors {
+		b, ok := a.(*Shot)
+		if ok {
+			b.draw()
+		}
+	}
+}
+
+func bulletsDraw() {
+	for a, _ := range actors {
+		b, ok := a.(*Bullet)
+		if ok {
+			b.draw()
+		}
+	}
+}
+
+func numIndicatorsDraw() {
+	for a, _ := range actors {
+		b, ok := a.(*NumIndicator)
+		if ok {
+			b.draw()
+		}
+	}
+}
+
 func (this *InGameState) drawFront() {
-	this.ship.drawFront()
-	this.scoreReel.draw(11.5+(SCORE_REEL_SIZE_DEFAULT-this.scoreReelSize)*3,
+	ship.drawFront()
+	scoreReel.draw(11.5+(SCORE_REEL_SIZE_DEFAULT-this.scoreReelSize)*3,
 		-8.2-(SCORE_REEL_SIZE_DEFAULT-this.scoreReelSize)*3,
 		this.scoreReelSize)
 	var x float32 = -12
-	for i = 0; i < this.left; i++ {
-		glPushMatrix()
-		glTranslatef(x, -9, 0)
-		glScalef(0.7, 0.7, 0.7)
-		this.ship.drawShape()
-		glPopMatrix()
+	for i := 0; i < this.left; i++ {
+		gl.PushMatrix()
+		gl.Translatef(x, -9, 0)
+		gl.Scalef(0.7, 0.7, 0.7)
+		ship.drawShape()
+		gl.PopMatrix()
 		x += 0.7
 	}
 	numIndicatorsDraw()
 }
 
 func (this *InGameState) drawGameParams() {
-	this.stageManager.draw()
+	stageManager.draw()
 }
 
 func (this *InGameState) drawOrtho() {
 	this.drawGameParams()
-	if this.isGameOver {
+	if isGameOver {
 		drawString("GAME OVER", 190, 180, 15)
 	}
 	if this.pauseCnt > 0 && (this.pauseCnt%64) < 32 {
@@ -350,25 +525,61 @@ func (this *InGameState) drawOrtho() {
 }
 
 func (this *InGameState) drawLuminous() {
-	glBegin(GL_TRIANGLES)
+	gl.Begin(gl.TRIANGLES)
 	sparksDrawLuminous()
-	glEnd()
+	gl.End()
 	sparkFragmentsDrawLuminous()
-	glBegin(GL_QUADS)
+	gl.Begin(gl.QUADS)
 	smokesDrawLuminous()
-	glEnd()
+	gl.End()
+}
+
+func sparksDrawLuminous() {
+	for a, _ := range actors {
+		b, ok := a.(*Spark)
+		if ok {
+			b.drawLuminous()
+		}
+	}
+}
+
+func smokesDrawLuminous() {
+	for a, _ := range actors {
+		b, ok := a.(*Smoke)
+		if ok {
+			b.drawLuminous()
+		}
+	}
+}
+
+func sparkFragmentsDrawLuminous() {
+	for a, _ := range actors {
+		b, ok := a.(*SparkFragment)
+		if ok {
+			b.drawLuminous()
+		}
+	}
 }
 
 func (this *InGameState) shipDestroyed() {
 	clearBullets()
-	this.stageManager.shipDestroyed()
-	this.gameManager.initInterval()
+	stageManager.shipDestroyed()
+	gameManager.initInterval()
 	this.left--
 	if this.left < 0 {
-		this.isGameOver = true
+		isGameOver = true
 		this.btnPressed = true
 		fadeBgm()
-		this.scoreReel.accelerate()
+		scoreReel.accelerate()
+	}
+}
+
+func clearBullets() {
+	for a, _ := range actors {
+		b, ok := a.(*SparkFragment)
+		if ok {
+			b.close()
+		}
 	}
 }
 
@@ -377,39 +588,27 @@ func (this *InGameState) shrinkScoreReel() {
 }
 
 type TitleState struct {
-	*GameState
-
-	titleManager TitleManager
-	inGameState  InGameState
-	gameOverCnt  int
+	gameOverCnt int
 }
 
-func NewTitleState(gameManager GameManager, screen Screen,
-	pad Pad /*TwinStick twinStick, */, mouse Mouse, mouseAndPad MouseAndPad,
-	ship Ship, stageManager StageManager, scoreReel ScoreReel,
-	titleManager TitleManager, inGameState InGameState) *TitleState {
-
-	this := TitleState{NewGameState(gameManager, screen, pad /*twinStick, */, mouse, mouseAndPad, ship, stageManager, scoreReel)}
-
-	this.titleManager = titleManager
-	this.inGameState = inGameState
-
+func NewTitleState() *TitleState {
+	this := new(TitleState)
 	return this
 }
 
 func (this *TitleState) close() {
-	this.titleManager.close()
+	titleManager.close()
 }
 
 func (this *TitleState) start() {
 	haltBgm()
 	disableBgm()
 	disableSe()
-	this.titleManager.start()
+	titleManager.start()
 }
 
 func (this *TitleState) move() {
-	this.titleManager.move()
+	titleManager.move()
 }
 
 func (this *TitleState) draw() {
@@ -420,9 +619,9 @@ func (this *TitleState) drawFront() {
 }
 
 func (this *TitleState) drawOrtho() {
-	this.titleManager.draw()
+	titleManager.draw()
 }
 
 func (this *TitleState) drawLuminous() {
-	this.inGameState.drawLuminous()
+	inGameState.drawLuminous()
 }

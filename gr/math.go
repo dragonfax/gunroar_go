@@ -36,7 +36,7 @@ func Cos32(d float32) float32 {
 }
 
 func fabs32(d float32) float32 {
-	return float32(Abs(float64(d)))
+	return float32(math.Abs(float64(d)))
 }
 
 func sqrt32(d float32) float32 {
@@ -44,5 +44,5 @@ func sqrt32(d float32) float32 {
 }
 
 func atan232(x float32, y float32) float32 {
-	return float32(atan2(float64(x), float64(y)))
+	return float32(math.Atan2(float64(x), float64(y)))
 }

@@ -33,12 +33,12 @@ func (m *Mouse) getState() MouseState {
 	mx, my, btn := sdl.GetMouseState()
 	m.state.x = float32(mx)
 	m.state.y = float32(my)
-	m.state.Button = MouseButtonNONE
+	m.state.button = MouseButtonNONE
 	if btn&sdl.Button(MouseButtonLEFT) != 0 {
-		m.state.Button |= MouseButtonLEFT
+		m.state.button |= MouseButtonLEFT
 	}
 	if btn&sdl.Button(MouseButtonRIGHT) != 0 {
-		m.state.Button |= MouseButtonRIGHT
+		m.state.button |= MouseButtonRIGHT
 	}
 	m.adjustPos(&m.state)
 	return m.state
@@ -54,5 +54,5 @@ const (
 
 type MouseState struct {
 	x, y   float32
-	Button MouseButton
+	button MouseButton
 }

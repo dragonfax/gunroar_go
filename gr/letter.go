@@ -6,8 +6,9 @@
 package main
 
 import (
-	"github.com/go-gl/gl"
 	"math"
+
+	"github.com/go-gl/gl"
 )
 
 const LETTER_WIDTH = 2.1
@@ -102,11 +103,11 @@ func convertCharToInt(c rune) int {
 	return idx
 }
 
-func DrawString(str string, lx float32, y float32, s float32) {
-	DrawStringOption(str, lx, y, s, TO_RIGHT, 0, false, 0)
+func drawString(str string, lx float32, y float32, s float32) {
+	drawStringOption(str, lx, y, s, TO_RIGHT, 0, false, 0)
 }
 
-func DrawStringOption(str string, lx float32, y float32, s float32, d Direction, cl int, rev bool, od float32) {
+func drawStringOption(str string, lx float32, y float32, s float32, d Direction, cl int, rev bool, od float32) {
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
 	x := lx
@@ -158,11 +159,11 @@ func DrawStringOption(str string, lx float32, y float32, s float32, d Direction,
 	}
 }
 
-func DrawNum(num int, lx float32, y float32, s float32) {
-	DrawNumOption(num, lx, y, s, 0, 0, -1, -1)
+func drawNum(num int, lx float32, y float32, s float32) {
+	drawNumOption(num, lx, y, s, 0, 0, -1, -1)
 }
 
-func DrawNumOption(num int, lx float32, y float32, s float32, cl int, dg int, headChar int, floatDigit int) {
+func drawNumOption(num int, lx float32, y float32, s float32, cl int, dg int, headChar int, floatDigit int) {
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
 	n := num

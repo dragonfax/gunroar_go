@@ -11,13 +11,9 @@ import (
 
 const INTERVAL_BASE = 16
 
-var screen *Screen
 var input *MouseAndPad
-var pad *Pad
 
 // twinStick TwinStick
-var mouse *Mouse
-var gameManager *GameManager
 var mainLoop *MainLoop
 
 func main() {
@@ -45,8 +41,8 @@ type MainLoop struct {
 	done bool
 }
 
-func NewMainLoop() {
-	this = MainLoop{}
+func NewMainLoop() *MainLoop {
+	this := new(MainLoop)
 	this.maxSkipFrame = 5
 	this.slowdownStartRatio = 1
 	this.slowdownMaxRatio = 1.75
@@ -54,15 +50,15 @@ func NewMainLoop() {
 	return this
 }
 
-func (m *MainLoop) initFirst() {
-	SoundManager.init()
+func (this *MainLoop) initFirst() {
+	InitSoundManager()
 	gameManager.init()
-	initInterval()
+	this.initInterval()
 }
 
 func (m *MainLoop) quitLast() {
 	gameManager.close()
-	SoundManager.close()
+	CloseSoundManager()
 	screen.closeSDL()
 	sdl.Quit()
 }
@@ -73,47 +69,48 @@ func (m *MainLoop) breakLoop() {
 
 func (m *MainLoop) loop() {
 	m.done = false
-	var prvTickCount long = 0
+	var prvTickCount int32 = 0
 	var i int
-	var nowTick long
+	var nowTick int32
 	var frame int
 	screen.initSDL()
 	m.initFirst()
-	m.gameManager.start()
-	for !done {
+	gameManager.start()
+	for !m.done {
 		event := sdl.PollEvent()
-		if event != nil {
+		/*if event != nil {
 			event.Type = sdl.USEREVENT
 		}
-		m.input.handleEvent(event)
-		if event.Type == sdl.QUIT {
-			breakLoop()
+		*/
+		input.handleEvent(event)
+		if event == sdl.QUIT {
+			m.breakLoop()
 		}
 		nowTick := sdl.GetTicks()
-		var itv int = int(interval)
-		var frame int = int((nowTick - prvTickCount) / itv)
+		var itv int = int(m.interval)
+		var frame int = int((nowTick - uint32(prvTickCount)) / itv)
 		if frame <= 0 {
 			frame = 1
 			sdl.Delay(prvTickCount + itv - nowTick)
-			if accframe {
+			if m.accframe {
 				prvTickCount = sdl.GetTicks()
 			} else {
-				prvTickCount += interval
+				prvTickCount += m.interval
 			}
-		} else if frame > maxSkipFrame {
-			frame = maxSkipFrame
+		} else if frame > m.maxSkipFrame {
+			frame = m.maxSkipFrame
 			prvTickCount = nowTick
 		} else {
 			prvTickCount = nowTick
 		}
 		m.slowdownRatio = 0
 		for i := 0; i < frame; i++ {
-			m.gameManager.move()
+			gameManager.move()
 		}
 		m.slowdownRatio /= frame
-		m.screen.clear()
-		m.gameManager.draw()
-		m.screen.flip()
+		screen.clear()
+		gameManager.draw()
+		screen.flip()
 		if !m.nowait {
 			m.calcInterval()
 		}

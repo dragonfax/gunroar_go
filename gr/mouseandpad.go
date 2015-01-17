@@ -30,7 +30,7 @@ func (this *MouseAndPad) getState() MouseAndPadState {
 	return this.state
 }
 
-func (this *MouseAndPad) handleEvent(event *sdl.Event) {
+func (this *MouseAndPad) handleEvent(event sdl.Event) {
 	this.mouse.handleEvent(event)
 	this.pad.handleEvent(event)
 }

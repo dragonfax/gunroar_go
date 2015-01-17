@@ -48,7 +48,7 @@ func (sr *ScoreReel) move() {
 	}
 }
 
-func (sr *ScoreReel) Draw(x float32, y float32, s float32) {
+func (sr *ScoreReel) draw(x float32, y float32, s float32) {
 	lx := x
 	ly := y
 	for i := 0; i < sr.digit; i++ {

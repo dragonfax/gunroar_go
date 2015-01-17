@@ -24,7 +24,7 @@ type StageManager struct {
 	bgmStartCnt                               int
 }
 
-func NewStateManager() {
+func NewStageManager() *StageManager {
 	this.ship = ship
 	for i, _ := range this.enemyApp {
 		this.enemyApp[i] = NewEnemyAppearance()
