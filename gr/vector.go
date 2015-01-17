@@ -189,7 +189,7 @@ func (this Vector) distVector(v Vector) float32 {
 	return dist(v.x, v.y)
 }
 
-func (this Vector) distFloat(px float32 /* = 0 */, py float32 /* = 0 */) float32 {
+func (this Vector) dist(px float32 /* = 0 */, py float32 /* = 0 */) float32 {
 	ax := fabs32(this.x - px)
 	ay := fabs32(this.y - py)
 	if ax > ay {

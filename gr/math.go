@@ -42,3 +42,7 @@ func fabs32(d float32) float32 {
 func sqrt32(d float32) float32 {
 	return float32(math.Sqrt(float64(d)))
 }
+
+func atan232(x float32, y float32) float32 {
+	return float32(atan2(float64(x), float64(y)))
+}

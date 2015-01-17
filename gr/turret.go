@@ -515,7 +515,7 @@ type TurretGroup struct {
 	cnt       int
 }
 
-func NewTurretGroup(parent *Enemy, spec TurretGroupSpec) *TurretGroup {
+func NewTurretGroup(parent *Enemy, spec *TurretGroupSpec) *TurretGroup {
 	this := new(TurretGroup)
 	this.ship = ship
 	for i, _ := range this.turret {
@@ -628,7 +628,7 @@ type MovingTurretGroup struct {
 	turret                                [MOVING_TURRET_MAX_NUM]Turret
 }
 
-func NewMovingTurretGroup(parent *Enemy, spec MovingTurretGroupSpec) *MovingTurretGroup {
+func NewMovingTurretGroup(parent *Enemy, spec *MovingTurretGroupSpec) *MovingTurretGroup {
 	this := new(MovingTurretGroup)
 	this.ship = ship
 	for i, _ := range this.turret {
@@ -733,7 +733,7 @@ func (this *MovingTurretGroup) close() {
 type TurretMoveType int
 
 const (
-	TurretMoveTypeROLL MoveType = iota
+	TurretMoveTypeROLL TurretMoveType = iota
 	TurretMoveTypeSWING_FIX
 	TurretMoveTypeSWING_AIM
 )

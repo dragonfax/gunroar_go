@@ -342,8 +342,8 @@ func closeEnemyShapes() {
 	}
 }
 
-func NewEnemyShape(t EnemyShapeType) EnemyShape {
-	e = EnemyShape{}
+func NewEnemyShape(t EnemyShapeType) *EnemyShape {
+	e = &EnemyShape{}
 	e.shape = enemyShapes[t]
 	return e
 }

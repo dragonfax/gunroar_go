@@ -379,14 +379,10 @@ func CloseSparkFragments() {
 	sparkFragmentDisplayList.close()
 }
 
-func NewSparkFragment() *SparkFragment {
+func NewSparkFragment(p Vector, mx float32, my float32, mz float32, sz float32 /*= 1*/) *SparkFragment {
 	this := new(SparkFragment)
 	this.size = 1
-	actors[this] = true
-	return this
-}
 
-func (this *SparkFragment) set(p Vector, mx float32, my float32, mz float32, sz float32 /*= 1*/) {
 	if !field.checkInOuterField(p.x, p.y) {
 		return
 	}
@@ -408,7 +404,9 @@ func (this *SparkFragment) set(p Vector, mx float32, my float32, mz float32, sz 
 		this.hasSmoke = false
 	}
 	this.cnt = 0
-	this.exists = true
+
+	actors[this] = true
+	return this
 }
 
 func (this *SparkFragment) move() {
