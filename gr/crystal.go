@@ -40,13 +40,14 @@ func (c *Crystal) close() {
 
 func (c *Crystal) move() {
 	c.cnt--
-	dist := c.pos.distVector(ship.midstPos)
+	dist := c.pos.distVector(ship.midstPos())
 	if dist < 0.1 {
 		dist = 0.1
 	}
 	if c.cnt < PULLIN_COUNT {
-		c.vel.x += (ship.midstPos.x - c.pos.x) / dist * 0.07
-		c.vel.y += (ship.midstPos.y - c.pos.y) / dist * 0.07
+		midstPos := ship.midstPos()
+		c.vel.x += (midstPos.x - c.pos.x) / dist * 0.07
+		c.vel.y += (midstPos.y - c.pos.y) / dist * 0.07
 		if c.cnt < 0 || dist < 2 {
 			c.close()
 			return

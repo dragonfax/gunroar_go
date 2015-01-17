@@ -14,13 +14,13 @@ const SCROLL_SPEED_MAX = 0.1
 const SCROLL_START_Y = 2.5
 
 type Ship struct {
-	boat                                            [2]*Boat
-	gameMode                                        int
-	boatNum                                         int
-	gameState                                       InGameState
-	scrollSpeed, scrollSpeedBase                    float32
-	midstPos, higherPos, lowerPos, nearPos, nearVel Vector
-	bridgeShape                                     ComplexShape
+	boat                                                 [2]*Boat
+	gameMode                                             int
+	boatNum                                              int
+	gameState                                            InGameState
+	scrollSpeed, scrollSpeedBase                         float32
+	_midstPos, _higherPos, _lowerPos, _nearPos, _nearVel Vector
+	bridgeShape                                          ComplexShape
 }
 
 func NewShip() *Ship {
@@ -61,16 +61,16 @@ func (this *Ship) start(gameMode GameMode) {
 	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].start(this.gameMode)
 	}
-	this.midstPos.y = 0
-	this.midstPos.x = 0
-	this.higherPos.x = 0
-	this.higherPos.y = 0
-	this.lowerPos.x = 0
-	this.lowerPos.y = 0
-	this.nearPos.y = 0
-	this.nearPos.x = 0
-	this.nearVel.y = 0
-	this.nearVel.x = 0
+	this._midstPos.y = 0
+	this._midstPos.x = 0
+	this._higherPos.x = 0
+	this._higherPos.y = 0
+	this._lowerPos.x = 0
+	this._lowerPos.y = 0
+	this._nearPos.y = 0
+	this._nearPos.x = 0
+	this._nearVel.y = 0
+	this._nearVel.x = 0
 	this.restart()
 }
 
@@ -153,36 +153,36 @@ func (this *Ship) drawShape() {
 }
 
 func (this *Ship) midstPos() Vector {
-	this.midstPos.x = 0
-	this.midstPos.y = 0
+	this._midstPos.x = 0
+	this._midstPos.y = 0
 	for i := 0; i < this.boatNum; i++ {
-		this.midstPos.x += this.boat[i].pos.x
-		this.midstPos.y += this.boat[i].pos.y
+		this._midstPos.x += this.boat[i].pos.x
+		this._midstPos.y += this.boat[i].pos.y
 	}
-	this.midstPos /= this.boatNum
-	return this.midstPos
+	this._midstPos /= this.boatNum
+	return this._midstPos
 }
 
 func (this *Ship) higherPos() Vector {
-	this.higherPos.y = -99999
+	this._higherPos.y = -99999
 	for i := 0; i < this.boatNum; i++ {
-		if this.boat[i].pos.y > this.higherPos.y {
-			this.higherPos.x = this.boat[i].pos.x
-			this.higherPos.y = this.boat[i].pos.y
+		if this.boat[i].pos.y > this._higherPos.y {
+			this._higherPos.x = this.boat[i].pos.x
+			this._higherPos.y = this.boat[i].pos.y
 		}
 	}
-	return this.higherPos
+	return this._higherPos
 }
 
 func (this *Ship) lowerPos() Vector {
-	this.lowerPos.y = 99999
+	this._lowerPos.y = 99999
 	for i := 0; i < this.boatNum; i++ {
-		if this.boat[i].pos.y < this.lowerPos.y {
-			this.lowerPos.x = this.boat[i].pos.x
-			this.lowerPos.y = this.boat[i].pos.y
+		if this.boat[i].pos.y < this._lowerPos.y {
+			this._lowerPos.x = this.boat[i].pos.x
+			this._lowerPos.y = this.boat[i].pos.y
 		}
 	}
-	return this.lowerPos
+	return this._lowerPos
 }
 
 func (this *Ship) nearPos(p Vector) Vector {
@@ -190,8 +190,8 @@ func (this *Ship) nearPos(p Vector) Vector {
 	for i := 0; i < this.boatNum; i++ {
 		if this.boat[i].pos.dist(p) < dist {
 			dist = this.boat[i].pos.dist(p)
-			this.nearPos.x = this.boat[i].pos.x
-			this.nearPos.y = this.boat[i].pos.y
+			this._nearPos.x = this.boat[i].pos.x
+			this._nearPos.y = this.boat[i].pos.y
 		}
 	}
 	return this.nearPos
@@ -202,8 +202,8 @@ func (this *Ship) nearVel(p Vector) Vector {
 	for i := 0; i < this.boatNum; i++ {
 		if this.boat[i].pos.dist(p) < dist {
 			dist = this.boat[i].pos.dist(p)
-			this.nearVel.x = this.boat[i].vel.x
-			this.nearVel.y = this.boat[i].vel.y
+			this._nearVel.x = this.boat[i].vel.x
+			this._nearVel.y = this.boat[i].vel.y
 		}
 	}
 	return this.nearVel
