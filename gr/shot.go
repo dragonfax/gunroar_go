@@ -5,6 +5,10 @@
  */
 package main
 
+import (
+	"github.com/go-gl/gl"
+)
+
 /**
  * Player's shot.
  */
@@ -12,8 +16,8 @@ package main
 const SHOT_SPEED = 0.6
 const LANCE_SPEED = 0.5
 
-var shotShape ShotShape
-var lanceShape LanceShape
+var shotShape *ShotShape
+var lanceShape *LanceShape
 
 type Shot struct {
 	pos    Vector
@@ -34,7 +38,7 @@ func closeShots() {
 }
 
 func NewShot(p Vector, d float32, lance bool /*= false*/, dmg int /*= -1*/) *Shot {
-	s = new(Shot)
+	s := new(Shot)
 	s.damage = 1
 	s.pos.x = p.x
 	s.pos.y = p.y
@@ -62,27 +66,27 @@ func (s *Shot) move() {
 		return
 	}
 	var sp float32
-	if !slance {
+	if !s.lance {
 		sp = SHOT_SPEED
 	} else {
 		if s.cnt < 10 {
-			sp = LANCE_SPEED * s.cnt / 10
+			sp = LANCE_SPEED * float32(s.cnt) / 10
 		} else {
 			sp = LANCE_SPEED
 		}
 	}
 	s.pos.x += Sin32(s.deg) * sp
 	s.pos.y += Cos32(s.deg) * sp
-	s.pos.y -= s.field.lastScrollY
-	if s.field.getBlock(s.pos) >= ON_BLOCK_THRESHOLD ||
-		!s.field.checkInOuterField(s.pos) || s.pos.y > s.field.size.y {
+	s.pos.y -= field.lastScrollY
+	if field.getBlockVector(s.pos) >= ON_BLOCK_THRESHOLD ||
+		!field.checkInOuterFieldVector(s.pos) || s.pos.y > field.size.y {
 		s.close()
 	}
 	if s.lance {
-		checkAllEnemiesShotHit(s.pos, s.lanceShape, s)
+		checkAllEnemiesShotHit(s.pos, lanceShape, s)
 	} else {
-		checkAllBulletsShotHit(s.pos, s.shape, s)
-		checkAllEnemitesShotHit(s.pos, s.shape, s)
+		checkAllBulletsShotHit(s.pos, shotShape, s)
+		checkAllEnemiesShotHit(s.pos, shotShape, s)
 	}
 }
 
@@ -112,12 +116,12 @@ func (this *Shot) removeHit() {
 	if this.lance {
 		for i := 0; i < 10; i++ {
 			d := this.deg + nextSignedFloat(0.1)
-			sp = nextSignedFloat(LANCE_SPEED)
-			NewSmoke(this.pos.x, this.pos.y, 0, Sin32(d)*sp, Cos32(d)*sp, 0, SmokeType.LANCE_SPARK, 30+Int(30), 1)
+			sp := nextSignedFloat(LANCE_SPEED)
+			NewSmoke(this.pos.x, this.pos.y, 0, Sin32(d)*sp, Cos32(d)*sp, 0, SmokeTypeLANCE_SPARK, 30+int(30), 1)
 
 			d = this.deg + nextSignedFloat(0.1)
 			sp = nextFloat(LANCE_SPEED)
-			NewSmoke(this.pos.x, this.pos.y, 0, -Sin32(d)*sp, -Cos32(d)*sp, 0, SmokeType.LANCE_SPARK, 30+Int(30), 1)
+			NewSmoke(this.pos.x, this.pos.y, 0, -Sin32(d)*sp, -Cos32(d)*sp, 0, SmokeTypeLANCE_SPARK, 30+int(30), 1)
 		}
 	} else {
 		d := this.deg + nextSignedFloat(0.5)
@@ -132,8 +136,8 @@ func (this *Shot) draw() {
 	if this.lance {
 		x := this.pos.x
 		y := this.pos.y
-		size := 0.25
-		a := 0.6
+		var size float32 = 0.25
+		var a float32 = 0.6
 		hc := this.hitCnt
 		for i := 0; i < this.cnt/4+1; i++ {
 			size *= 0.9
@@ -146,8 +150,8 @@ func (this *Shot) draw() {
 			for j := 0; j < 6; j++ {
 				gl.PushMatrix()
 				gl.Translatef(x, y, 0)
-				gl.Rotatef(-this.deg*180/PI, 0, 0, 1)
-				gl.Rotatef(d, 0, 1, 0)
+				gl.Rotatef(-this.deg*180/Pi32, 0, 0, 1)
+				gl.Rotatef(float32(d), 0, 1, 0)
 				setScreenColor(0.4, 0.8, 0.8, a)
 				gl.Begin(gl.LINE_LOOP)
 				gl.Vertex3f(-size, LANCE_SPEED, size/2)
@@ -171,9 +175,9 @@ func (this *Shot) draw() {
 	} else {
 		gl.PushMatrix()
 		glTranslate(this.pos)
-		gl.Rotatef(-this.deg*180/PI, 0, 0, 1)
-		gl.Rotatef(this.cnt*31, 0, 1, 0)
-		this.shape.draw()
+		gl.Rotatef(-this.deg*180/Pi32, 0, 0, 1)
+		gl.Rotatef(float32(this.cnt)*31, 0, 1, 0)
+		shotShape.draw()
 		gl.PopMatrix()
 	}
 }
@@ -199,7 +203,7 @@ type ShotShape struct {
 func NewShotShape() *ShotShape {
 	ss := new(ShotShape)
 	ss.startDisplayList()
-	setScreenColor(0.1, 0.33, 0.1)
+	setScreenColor(0.1, 0.33, 0.1, 1)
 	gl.Begin(gl.QUADS)
 	gl.Vertex3f(0, 0.3, 0.1)
 	gl.Vertex3f(0.066, 0.3, -0.033)
@@ -215,7 +219,7 @@ func NewShotShape() *ShotShape {
 	gl.Vertex3f(-0.1, -0.3, -0.05)
 	gl.End()
 	ss.endDisplayList()
-	ss.collision = Vector{0.33, 0.33}
+	ss.collision = &Vector{0.33, 0.33}
 	return ss
 }
 
@@ -228,6 +232,6 @@ func NewLanceShape() *LanceShape {
 	ls.startDisplayList()
 	// no display for this shape.
 	ls.endDisplayList()
-	ls.collision = Vector{0.66, 0.66}
+	ls.collision = &Vector{0.66, 0.66}
 	return ls
 }

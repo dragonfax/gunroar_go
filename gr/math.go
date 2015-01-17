@@ -46,3 +46,7 @@ func sqrt32(d float32) float32 {
 func atan232(x float32, y float32) float32 {
 	return float32(math.Atan2(float64(x), float64(y)))
 }
+
+func tan32(x float32) float32 {
+	return float32(math.Tan(float64(x)))
+}

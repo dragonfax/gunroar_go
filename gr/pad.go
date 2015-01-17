@@ -42,6 +42,10 @@ func (pad *Pad) handleEvent(event sdl.Event) {
 	pad.keys = sdl.GetKeyboardState()
 }
 
+func (pad *Pad) getNullState() PadState {
+	return PadState{}
+}
+
 func (pad *Pad) getState() PadState {
 	var x, y int16
 	pad.state.dir = 0

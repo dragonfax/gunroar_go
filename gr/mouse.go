@@ -29,6 +29,10 @@ func NewMouse() *Mouse {
 	return new(Mouse)
 }
 
+func (m *Mouse) getNullState() MouseState {
+	return MouseState{}
+}
+
 func (m *Mouse) getState() MouseState {
 	mx, my, btn := sdl.GetMouseState()
 	m.state.x = float32(mx)

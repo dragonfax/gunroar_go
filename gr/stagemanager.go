@@ -17,7 +17,7 @@ type StageManager struct {
 	enemyApp                                  [3]*EnemyAppearance
 	blockDensity                              int
 	batteryNum                                int
-	platformEnemySpec                         PlatformEnemySpec
+	platformEnemySpec                         *PlatformEnemySpec
 	bossMode                                  bool
 	bossAppCnt                                int
 	bossAppTime, bossAppTimeBase              int
@@ -25,14 +25,15 @@ type StageManager struct {
 }
 
 func NewStageManager() *StageManager {
-	this.ship = ship
-	for i, _ := range this.enemyApp {
+	this := new(StageManager)
+	/*for i, _ := range this.enemyApp {
 		this.enemyApp[i] = NewEnemyAppearance()
-	}
+	} */
 	this.platformEnemySpec = NewPlatformEnemySpec()
 	this.rank = 1
 	this.baseRank = 1
 	this.blockDensity = 2
+	return this
 }
 
 func (this *StageManager) start(rankIncRatio float32) {
@@ -40,8 +41,8 @@ func (this *StageManager) start(rankIncRatio float32) {
 	this.baseRank = 1
 	this.addRank = 0
 	this.rankVel = 0
-	this.rankInc = RANK_INC_BASE * this.rankIncRatio
-	this.blockDensity = Int(BLOCK_DENSITY_MAX-BLOCK_DENSITY_MIN+1) + BLOCK_DENSITY_MIN
+	this.rankInc = RANK_INC_BASE * rankIncRatio
+	this.blockDensity = nextInt(BLOCK_DENSITY_MAX-BLOCK_DENSITY_MIN+1) + BLOCK_DENSITY_MIN
 	this.bossMode = false
 	this.bossAppTimeBase = 60 * 1000
 	this.resetBossMode()
@@ -71,18 +72,18 @@ func (this *StageManager) move() {
 	this.bgmStartCnt--
 	if this.bgmStartCnt == 0 {
 		if this.bossMode {
-			playBgm("gr0.ogg")
+			playBgmByName("gr0.ogg")
 		} else {
 			nextBgm()
 		}
 	}
-	if _bossMode {
+	if this.bossMode {
 		this.addRank *= 0.999
-		if !enemies.hasBoss() && this.bossAppCnt <= 0 {
+		if !hasBoss() && this.bossAppCnt <= 0 {
 			this.resetBossMode()
 		}
 	} else {
-		rv := field.lastScrollY/this.ship.scrollSpeedBase - 2
+		rv := field.lastScrollY/ship.scrollSpeedBase - 2
 		this.bossAppTime -= 17
 		if this.bossAppTime <= 0 {
 			this.bossAppTime = 0
@@ -120,38 +121,39 @@ func (this *StageManager) gotoNextBlockArea() {
 		this.bossAppCnt--
 		if this.bossAppCnt == 0 {
 			ses := NewShipEnemySpec()
-			ses.setParam(rank, ShipEnemySpec.ShipClass.BOSS)
-			en := NewEnemy()
-			if ses.setFirstState(en.state, EnemyState.AppearanceType.CENTER) {
-				en.set(ses)
+			ses.setParam(this.rank, ShipClassBOSS)
+			en := NewEnemy(ses)
+			if !ses.setFirstState(en.state, AppearanceTypeCENTER) {
+				en.close()
 			}
 		}
-		for _, ea := range this.enemyApp {
-			ea.close()
+		for i, _ := range this.enemyApp {
+			// ea.close()
+			this.enemyApp[i] = nil
 		}
 		return
 	}
 	var noSmallShip bool
-	if this.blockDensity < BLOCK_DENSITY_MAX && Int(2) == 0 {
+	if this.blockDensity < BLOCK_DENSITY_MAX && nextInt(2) == 0 {
 		noSmallShip = true
 	} else {
 		noSmallShip = false
 	}
-	this.blockDensity += SignedInt(1)
+	this.blockDensity += nextSignedInt(1)
 	if this.blockDensity < BLOCK_DENSITY_MIN {
 		this.blockDensity = BLOCK_DENSITY_MIN
 	} else if this.blockDensity > BLOCK_DENSITY_MAX {
 		this.blockDensity = BLOCK_DENSITY_MAX
 	}
-	this.batteryNum = (this.blockDensity + SignedFloat(1)) * 0.75
+	this.batteryNum = (float32(this.blockDensity) + nextSignedFloat(1)) * 0.75
 	tr := this.rank
-	largeShipNum := (2 - this.blockDensity + SignedFloat(1)) * 0.5
+	largeShipNum := (2 - float32(this.blockDensity) + nextSignedFloat(1)) * 0.5
 	if noSmallShip {
 		largeShipNum *= 1.5
 	} else {
 		largeShipNum *= 0.5
 	}
-	appType := Int(2)
+	appType := nextInt(2)
 	if largeShipNum > 0 {
 		lr := tr * (0.25 + nextFloat(0.15))
 		if noSmallShip {
@@ -159,18 +161,18 @@ func (this *StageManager) gotoNextBlockArea() {
 		}
 		tr -= lr
 		ses := NewShipEnemySpec()
-		ses.setParam(lr/largeShipNum, ShipEnemySpec.ShipClass.LARGE)
-		this.enemyApp[0].set(ses, largeShipNum, appType)
+		ses.setParam(lr/largeShipNum, ShipClassLARGE)
+		this.enemyApp[0] = NewEnemyAppearance(ses, largeShipNum, appType)
 	} else {
-		this.enemyApp[0].close()
+		this.enemyApp[0] = nil
 	}
-	if batteryNum > 0 {
+	if this.batteryNum > 0 {
 		this.platformEnemySpec = NewPlatformEnemySpec()
 		pr := tr * (0.3 + nextFloat(0.1))
-		this.platformEnemySpec.setParam(pr / batteryNum)
+		this.platformEnemySpec.setParam(pr / this.batteryNum)
 	}
 	appType = (appType + 1) % 2
-	middleShipNum := (4 - _blockDensity + nextSignedFloat(1)) * 0.66
+	middleShipNum := (4 - this.blockDensity + nextSignedFloat(1)) * 0.66
 	if noSmallShip {
 		middleShipNum *= 2
 	}
@@ -183,22 +185,22 @@ func (this *StageManager) gotoNextBlockArea() {
 		}
 		tr -= mr
 		ses := NewShipEnemySpec()
-		ses.setParam(mr/middleShipNum, ShipEnemySpec.ShipClass.MIDDLE)
-		this.enemyApp[1].set(ses, middleShipNum, appType)
+		ses.setParam(mr/middleShipNum, ShipClassMIDDLE)
+		this.enemyApp[1] = NewEnemyAppearance(ses, middleShipNum, appType)
 	} else {
-		this.enemyApp[1].close()
+		this.enemyApp[1] = nil
 	}
 	if !noSmallShip {
-		appType = EnemyState.AppearanceType.TOP
-		smallShipNum := (sqrt(3+tr) * (1 + nextSignedFloat(0.5)) * 2) + 1
+		appType = AppearanceTypeTOP
+		smallShipNum := (sqrt32(3+tr) * (1 + nextSignedFloat(0.5)) * 2) + 1
 		if smallShipNum > 256 {
 			smallShipNum = 256
 		}
 		sses := NewSmallShipEnemySpec()
 		sses.setParam(tr / smallShipNum)
-		enemyApp[2].set(sses, smallShipNum, appType)
+		enemyApp[2] = NewEnemyAppearance(sses, smallShipNum, appType)
 	} else {
-		enemyApp[2].unset()
+		enemyApp[2] = nil
 	}
 }
 
@@ -209,7 +211,7 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 		if ppn <= 0 || bn <= 0 {
 			break
 		}
-		ppi := Int(platformPosNum)
+		ppi := nextInt(platformPosNum)
 		for j := 0; j < platformPosNum; j++ {
 			if !platformPos[ppi].used {
 				break
@@ -222,11 +224,12 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 		if platformPos[ppi].used {
 			break
 		}
-		en := NewEnemy()
+		en := NewEnemy(platformEnemySpec)
 		platformPos[ppi].used = true
 		ppn--
 		p := field.convertToScreenPos(platformPos[ppi].pos.x, platformPos[ppi].pos.y)
 		if !platformEnemySpec.setFirstState(en.state, p.x, p.y, platformPos[ppi].deg) {
+			en.close()
 			continue
 		}
 		for i := 0; i < platformPosNum; i++ {

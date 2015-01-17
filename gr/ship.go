@@ -5,6 +5,10 @@
  */
 package main
 
+import (
+	"github.com/go-gl/gl"
+)
+
 /**
  * Player's ship.
  */
@@ -15,9 +19,8 @@ const SCROLL_START_Y = 2.5
 
 type Ship struct {
 	boat                                                 [2]*Boat
-	gameMode                                             int
+	gameMode                                             GameMode
 	boatNum                                              int
-	gameState                                            *InGameState
 	scrollSpeed, scrollSpeedBase                         float32
 	_midstPos, _higherPos, _lowerPos, _nearPos, _nearVel Vector
 	bridgeShape                                          *ComplexShape
@@ -25,15 +28,15 @@ type Ship struct {
 
 func NewShip() *Ship {
 	this := new(Ship)
-	Boat.init()
 	for i, _ := range this.boat {
-		boat[i] = NewBoat(i, this)
+		this.boat[i] = NewBoat(i)
 	}
 	this.boatNum = 1
 	this.scrollSpeed = SCROLL_SPEED_BASE
 	this.scrollSpeedBase = SCROLL_SPEED_BASE
-	this.bridgeShape = NewComplexShape(0.3, 0.2, 0.1, ShapeTypeBRIDGE, 0.3, 0.7, 0.7)
+	this.bridgeShape = NewComplexShape(0.3, 0.2, 0.1, BRIDGE, 0.3, 0.7, 0.7, false)
 	actors[this] = true
+	return this
 }
 
 func (this *Ship) close() {
@@ -43,16 +46,9 @@ func (this *Ship) close() {
 	delete(actors, this)
 }
 
-func (this *Ship) setGameState(gameState *InGameState) {
-	this.gameState = gameState
-	for _, b := range this.boat {
-		b.setGameState(gameState)
-	}
-}
-
 func (this *Ship) start(gameMode GameMode) {
 	this.gameMode = gameMode
-	if gameMode == InGameState.GameMode.DOUBLE_PLAY {
+	if gameMode == GameModeDOUBLE_PLAY {
 		this.boatNum = 2
 	} else {
 		this.boatNum = 1
@@ -82,19 +78,19 @@ func (this *Ship) restart() {
 }
 
 func (this *Ship) move() {
-	field.scroll(scrollSpeed)
+	field.scroll(this.scrollSpeed, false)
 	sf := false
-	for i := 0; i < boatNum; i++ {
+	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].move()
-		if this.boat[i].hasCollision &&
+		if this.boat[i].hasCollision() &&
 			this.boat[i].pos.x > field.size.x/3 && this.boat[i].pos.y < -field.size.y/4*3 {
 			sf = true
 		}
 	}
 	if sf {
-		this.gameState.shrinkScoreReel()
+		inGameState.shrinkScoreReel()
 	}
-	if this.higherPos.y >= SCROLL_START_Y {
+	if this.higherPos().y >= SCROLL_START_Y {
 		this.scrollSpeed += (SCROLL_SPEED_MAX - this.scrollSpeed) * 0.1
 	} else {
 		this.scrollSpeed += (this.scrollSpeedBase - this.scrollSpeed) * 0.1
@@ -102,7 +98,7 @@ func (this *Ship) move() {
 	this.scrollSpeedBase += (SCROLL_SPEED_MAX - this.scrollSpeedBase) * 0.00001
 }
 
-func (this *Ship) checkBulletHit(pVector, pp Vector) bool {
+func (this *Ship) checkBulletHit(p Vector, pp Vector) bool {
 	for i := 0; i < this.boatNum; i++ {
 		if this.boat[i].checkBulletHit(p, pp) {
 			return true
@@ -112,7 +108,7 @@ func (this *Ship) checkBulletHit(pVector, pp Vector) bool {
 }
 
 func (this *Ship) clearBullets() {
-	this.gameState.clearBullets()
+	clearBullets()
 }
 
 func (this *Ship) destroyed() {
@@ -125,25 +121,25 @@ func (this *Ship) draw() {
 	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].draw()
 	}
-	if this.gameMode == InGameState.GameMode.DOUBLE_PLAY && this.boat[0].hasCollision() {
+	if this.gameMode == GameModeDOUBLE_PLAY && this.boat[0].hasCollision() {
 		setScreenColor(0.5, 0.5, 0.9, 0.8)
 		gl.Begin(gl.LINE_STRIP)
-		gl.Vertex2(this.boat[0].pos.x, this.boat[0].pos.y)
+		gl.Vertex2f(this.boat[0].pos.x, this.boat[0].pos.y)
 		setScreenColor(0.5, 0.5, 0.9, 0.3)
-		gl.Vertex2(this.midstPos.x, this.midstPos.y)
+		gl.Vertex2f(this.midstPos().x, this.midstPos().y)
 		setScreenColor(0.5, 0.5, 0.9, 0.8)
-		gl.Vertex2(this.boat[1].pos.x, this.boat[1].pos.y)
+		gl.Vertex2f(this.boat[1].pos.x, this.boat[1].pos.y)
 		gl.End()
 		gl.PushMatrix()
-		glTranslate(this.midstPos)
-		gl.Rotatef(-degAmongBoats*180/Pi32, 0, 0, 1)
+		glTranslate(this.midstPos())
+		gl.Rotatef(-this.degAmongBoats()*180/Pi32, 0, 0, 1)
 		this.bridgeShape.draw()
 		gl.PopMatrix()
 	}
 }
 
 func (this *Ship) drawFront() {
-	for i := 0; i < boatNum; i++ {
+	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].drawFront()
 	}
 }
@@ -159,7 +155,7 @@ func (this *Ship) midstPos() Vector {
 		this._midstPos.x += this.boat[i].pos.x
 		this._midstPos.y += this.boat[i].pos.y
 	}
-	this._midstPos /= this.boatNum
+	this._midstPos.DivAssign(float32(this.boatNum))
 	return this._midstPos
 }
 
@@ -188,36 +184,36 @@ func (this *Ship) lowerPos() Vector {
 func (this *Ship) nearPos(p Vector) Vector {
 	var dist float32 = 99999
 	for i := 0; i < this.boatNum; i++ {
-		if this.boat[i].pos.dist(p) < dist {
-			dist = this.boat[i].pos.dist(p)
+		if this.boat[i].pos.distVector(p) < dist {
+			dist = this.boat[i].pos.distVector(p)
 			this._nearPos.x = this.boat[i].pos.x
 			this._nearPos.y = this.boat[i].pos.y
 		}
 	}
-	return this.nearPos
+	return this._nearPos
 }
 
 func (this *Ship) nearVel(p Vector) Vector {
-	var dist float = 99999
+	var dist float32 = 99999
 	for i := 0; i < this.boatNum; i++ {
-		if this.boat[i].pos.dist(p) < dist {
-			dist = this.boat[i].pos.dist(p)
+		if this.boat[i].pos.distVector(p) < dist {
+			dist = this.boat[i].pos.distVector(p)
 			this._nearVel.x = this.boat[i].vel.x
 			this._nearVel.y = this.boat[i].vel.y
 		}
 	}
-	return this.nearVel
+	return this._nearVel
 }
 
 func (this *Ship) distAmongBoats() float32 {
-	return this.boat[0].pos.dist(this.boat[1].pos)
+	return this.boat[0].pos.distVector(this.boat[1].pos)
 }
 
 func (this *Ship) degAmongBoats() float32 {
-	if this.distAmongBoats < 0.1 {
+	if this.distAmongBoats() < 0.1 {
 		return 0
 	} else {
-		return atan2(this.boat[0].pos.x-this.boat[1].pos.x, this.boat[0].pos.y-this.boat[1].pos.y)
+		return atan232(this.boat[0].pos.x-this.boat[1].pos.x, this.boat[0].pos.y-this.boat[1].pos.y)
 	}
 }
 
@@ -232,51 +228,53 @@ const TURN_RATIO_BASE = 0.2
 const SLOW_TURN_RATIO = 0
 const TURN_CHANGE_RATIO = 0.5
 
-var padState PadInput
+var padInput PadState
+var mouseInput MouseState
 
 // static TwinStickState stickInput
 var mouseState MouseInput
 
 type Boat struct {
-	pos                       Vector
-	firePos                   Vector
-	deg, speed, turnRatio     float32
-	shape                     ComplexShape
-	bridgeShape               ComplexShape
-	fireCnt, fireSprCnt       int
-	fireIntervalt, fireSprDeg float32
-	fireLanceCnt              int
-	fireDeg                   float32
-	aPressed, bPressed        bool
-	cnt                       int
-	onBlock                   bool
-	vel                       Vector
-	refVel                    Vector
-	shieldCnt                 int
-	shieldShape               ShieldShape
-	turnSpeed                 float32
-	reverseFire               bool
-	gameMode                  GameMode
-	vx, vy                    float32
-	idx                       int
+	pos                      Vector
+	firePos                  Vector
+	deg, speed, turnRatio    float32
+	shape                    *ComplexShape
+	bridgeShape              *ComplexShape
+	fireCnt, fireSprCnt      int
+	fireInterval, fireSprDeg float32
+	fireLanceCnt             int
+	fireDeg                  float32
+	aPressed, bPressed       bool
+	cnt                      int
+	onBlock                  bool
+	vel                      Vector
+	refVel                   Vector
+	shieldCnt                int
+	shieldShape              *ShieldShape
+	turnSpeed                float32
+	reverseFire              bool
+	gameMode                 GameMode
+	vx, vy                   float32
+	idx                      int
 }
 
-func NewBoat(idx int) {
+func NewBoat(idx int) *Boat {
 	this := new(Boat)
 	this.idx = idx
 	switch idx {
 	case 0:
-		this.shape = NewComplexShape(0.7, 0.6, 0.6, ComplexShape.ShapeType.SHIP_ROUNDTAIL, 0.5, 0.7, 0.5)
-		this.bridgeShape = NewComplexShape(0.3, 0.6, 0.6, ComplexShape.ShapeType.BRIDGE, 0.3, 0.7, 0.3)
+		this.shape = NewComplexShape(0.7, 0.6, 0.6, SHIP_ROUNDTAIL, 0.5, 0.7, 0.5, false)
+		this.bridgeShape = NewComplexShape(0.3, 0.6, 0.6, BRIDGE, 0.3, 0.7, 0.3, false)
 		break
 	case 1:
-		this.shape = NewComplexShape(0.7, 0.6, 0.6, ComplexShape.ShapeType.SHIP_ROUNDTAIL, 0.4, 0.3, 0.8)
-		this.bridgeShape = NewComplexShape(0.3, 0.6, 0.6, ComplexShape.ShapeType.BRIDGE, 0.2, 0.3, 0.6)
+		this.shape = NewComplexShape(0.7, 0.6, 0.6, SHIP_ROUNDTAIL, 0.4, 0.3, 0.8, false)
+		this.bridgeShape = NewComplexShape(0.3, 0.6, 0.6, BRIDGE, 0.2, 0.3, 0.6, false)
 		break
 	}
 	this.turnSpeed = 1
 	this.fireInterval = FIRE_INTERVAL
 	this.shieldShape = NewShieldShape()
+	return this
 }
 
 func (this *Boat) close() {
@@ -287,8 +285,8 @@ func (this *Boat) close() {
 
 func (this *Boat) start(gameMode GameMode) {
 	this.gameMode = gameMode
-	if gameMode == InGameState.GameMode.DOUBLE_PLAY {
-		switch idx {
+	if gameMode == GameModeDOUBLE_PLAY {
+		switch this.idx {
 		case 0:
 			this.pos.x = -field.size.x * 0.5
 			break
@@ -310,14 +308,14 @@ func (this *Boat) start(gameMode GameMode) {
 	this.cnt = -INVINCIBLE_CNT
 	this.aPressed = true
 	this.bPressed = true
-	this.padInput = pad.getNullState()
+	padInput = pad.getNullState()
 	//stickInput = twinStick.getNullState()
-	this.mouseInput = mouse.getNullState()
+	mouseInput = mouse.getNullState()
 }
 
 func (this *Boat) restart() {
 	switch this.gameMode {
-	case InGameState.GameMode.NORMAL:
+	case GameModeNORMAL:
 		this.fireCnt = 99999
 		this.fireInterval = 99999
 		break
@@ -325,7 +323,7 @@ func (this *Boat) restart() {
 			case InGameState.GameMode.TWIN_STICK:
 			case InGameState.GameMode.DOUBLE_PLAY:
 		*/
-	case InGameState.GameMode.MOUSE:
+	case GameModeMOUSE:
 		this.fireCnt = 0
 		this.fireInterval = FIRE_INTERVAL
 		break
@@ -333,7 +331,7 @@ func (this *Boat) restart() {
 	this.fireSprCnt = 0
 	this.fireSprDeg = 0.5
 	this.fireLanceCnt = 0
-	if field.getBlock(this.pos) >= 0 {
+	if field.getBlockVector(this.pos) >= 0 {
 		this.onBlock = true
 	} else {
 		this.onBlock = false
@@ -350,7 +348,7 @@ func (this *Boat) move() {
 	this.vx = 0
 	this.vy = 0
 	switch this.gameMode {
-	case InGameState.GameMode.NORMAL:
+	case GameModeNORMAL:
 		this.moveNormal()
 		break
 		/*
@@ -361,11 +359,11 @@ func (this *Boat) move() {
 				moveDoublePlay()
 				break
 		*/
-	case InGameState.GameMode.MOUSE:
+	case GameModeMOUSE:
 		this.moveMouse()
 		break
 	}
-	if this.gameState.isGameOver {
+	if isGameOver {
 		this.clearBullets()
 		if this.cnt < -INVINCIBLE_CNT {
 			this.cnt = -RESTART_CNT
@@ -377,7 +375,7 @@ func (this *Boat) move() {
 	this.vy *= this.speed
 	this.vx += this.refVel.x
 	this.vy += this.refVel.y
-	this.refVel *= 0.9
+	this.refVel.MulAssign(0.9)
 	if field.checkInField(this.pos.x, this.pos.y-field.lastScrollY) {
 		this.pos.y -= field.lastScrollY
 	}
@@ -390,7 +388,7 @@ func (this *Boat) move() {
 		this.refVel.x = 0
 	}
 	srf := false
-	if (this.onBlock || field.getBlock(this.px, this.pos.y+this.vy) < 0) &&
+	if (this.onBlock || field.getBlock(px, this.pos.y+this.vy) < 0) &&
 		field.checkInField(this.pos.x, this.pos.y+this.vy) {
 		this.pos.y += this.vy
 		this.vel.y = this.vy
@@ -404,8 +402,8 @@ func (this *Boat) move() {
 				this.onBlock = true
 			} else {
 				if field.checkInField(this.pos.x, this.pos.y-field.lastScrollY) {
-					this.pos.x = this.px
-					this.pos.y = this.py
+					this.pos.x = px
+					this.pos.y = py
 				} else {
 					this.destroyed()
 				}
@@ -415,7 +413,7 @@ func (this *Boat) move() {
 		this.onBlock = false
 	}
 	switch this.gameMode {
-	case InGameState.GameMode.NORMAL:
+	case GameModeNORMAL:
 		this.fireNormal()
 		break
 		/*
@@ -426,7 +424,7 @@ func (this *Boat) move() {
 				fireDobulePlay()
 				break
 		*/
-	case InGameState.GameMode.MOUSE:
+	case GameModeMOUSE:
 		this.fireMouse()
 		break
 	}
@@ -439,19 +437,19 @@ func (this *Boat) move() {
 		}
 		sp *= 1 + nextSignedFloat(0.33)
 		sp *= SPEED_BASE
-		this.shape.addWake(this.pos, this.deg, sp)
+		this.shape.addWake(this.pos, this.deg, sp, 1)
 	}
-	he := checkAllEnemiesHitShip(this.pos.x, this.pos.y)
+	he := checkAllEnemiesHitShip(this.pos.x, this.pos.y, nil, false)
 	var rd float32
-	if this.pos.dist(he.pos) < 0.1 {
+	if this.pos.distVector(he.pos()) < 0.1 {
 		rd = 0
 	} else {
-		rd = atan2(this.pos.x-he.pos.x, this.pos.y-he.pos.y)
+		rd = atan232(this.pos.x-he.pos().x, this.pos.y-he.pos().y)
 	}
-	sz := he.size
+	sz := he.size()
 	this.refVel.x = Sin32(rd) * sz * 0.1
 	this.refVel.y = Cos32(rd) * sz * 0.1
-	rs := this.refVel.vctSize
+	rs := this.refVel.vctSize()
 	if rs > 1 {
 		this.refVel.x /= rs
 		this.refVel.y /= rs
@@ -462,20 +460,20 @@ func (this *Boat) move() {
 }
 
 func (this *Boat) moveNormal() {
-	this.padInput = this.pad.getState()
-	if this.gameState.isGameOver || this.cnt < -INVINCIBLE_CNT {
-		this.padInput.clear()
+	padInput = pad.getState()
+	if isGameOver || this.cnt < -INVINCIBLE_CNT {
+		padInput = pad.getNullState()
 	}
-	if this.padInput.dir & PadStateDirUP {
+	if padInput.dir&PadDirUP != 0 {
 		this.vy = 1
 	}
-	if this.padInput.dir & PadStateDirDOWN {
+	if padInput.dir&PadDirDOWN != 0 {
 		this.vy = -1
 	}
-	if this.padInput.dir & PadStateDirRIGHT {
+	if padInput.dir&PadDirRIGHT != 0 {
 		this.vx = 1
 	}
-	if this.padInput.dir & PadStateDirLEFT {
+	if padInput.dir&PadDirLEFT != 0 {
 		this.vx = -1
 	}
 	if this.vx != 0 && this.vy != 0 {
@@ -483,7 +481,7 @@ func (this *Boat) moveNormal() {
 		this.vy *= 0.7
 	}
 	if this.vx != 0 || this.vy != 0 {
-		ad := atan2(this.vx, this.vy)
+		ad := atan232(this.vx, this.vy)
 		normalizeDeg(ad)
 		ad -= this.deg
 		normalizeDeg(ad)
@@ -538,22 +536,22 @@ moveDoublePlay() {
 
 func (this *Boat) moveMouse() {
 	mps := mouseAndPad.getState()
-	this.padInput = mps.padState
-	this.mouseInput = mps.mouseState
-	if this.gameState.isGameOver || this.cnt < -INVINCIBLE_CNT {
-		this.padInput.clear()
-		this.mouseInput.clear()
+	padInput = mps.padState
+	mouseInput = mps.mouseState
+	if isGameOver || this.cnt < -INVINCIBLE_CNT {
+		padInput = pad.getNullState()
+		mouseInput = mouse.getNullState()
 	}
-	if this.padInput.dir & PadStateDirUP {
+	if padInput.dir&PadDirUP != 0 {
 		this.vy = 1
 	}
-	if this.padInput.dir & PadStateDirDOWN {
+	if padInput.dir&PadDirDOWN != 0 {
 		this.vy = -1
 	}
-	if this.padInput.dir & PadStateDirRIGHT {
+	if padInput.dir&PadDirRIGHT != 0 {
 		this.vx = 1
 	}
-	if this.padInput.dir & PadStateDirLEFT {
+	if padInput.dir&PadDirLEFT != 0 {
 		this.vx = -1
 	}
 	if this.vx != 0 && this.vy != 0 {
@@ -561,7 +559,7 @@ func (this *Boat) moveMouse() {
 		this.vy *= 0.7
 	}
 	if this.vx != 0 || this.vy != 0 {
-		ad := atan2(this.vx, this.vy)
+		ad := atan232(this.vx, this.vy)
 		normalizeDeg(ad)
 		ad -= this.deg
 		normalizeDeg(ad)
@@ -571,7 +569,7 @@ func (this *Boat) moveMouse() {
 }
 
 func (this *Boat) fireNormal() {
-	if this.padInput.button & PadStateButtonA {
+	if padInput.button&PadButtonA != 0 {
 		this.turnRatio += (SLOW_TURN_RATIO - this.turnRatio) * TURN_CHANGE_RATIO
 		this.fireInterval = FIRE_INTERVAL
 		if !this.aPressed {
@@ -593,40 +591,40 @@ func (this *Boat) fireNormal() {
 	if this.fireCnt <= 0 {
 		playSe("shot.wav")
 		foc := (this.fireSprCnt%2)*2 - 1
-		this.firePos.x = this.pos.x + Cos32(this.fireDeg+Pi32)*0.2*this.foc
-		this.firePos.y = this.pos.y - Sin32(this.fireDeg+Pi32)*0.2*this.foc
-		NewShot(this.firePos, this.fireDeg)
+		this.firePos.x = this.pos.x + Cos32(this.fireDeg+Pi32)*0.2*float32(foc)
+		this.firePos.y = this.pos.y - Sin32(this.fireDeg+Pi32)*0.2*float32(foc)
+		NewShot(this.firePos, this.fireDeg, false, -1)
 
 		this.fireCnt = int(this.fireInterval)
 		var td float32
-		switch this.foc {
+		switch foc {
 		case -1:
-			td = this.fireSprDeg * (this.fireSprCnt/2%4 + 1) * 0.2
+			td = this.fireSprDeg * float32(this.fireSprCnt/2%4+1) * 0.2
 			break
 		case 1:
-			td = -this.fireSprDeg * (this.fireSprCnt/2%4 + 1) * 0.2
+			td = -this.fireSprDeg * float32(this.fireSprCnt/2%4+1) * 0.2
 			break
 		}
 		this.fireSprCnt++
-		NewShot(this.firePos, this.fireDeg+td)
+		NewShot(this.firePos, this.fireDeg+td, false, -1)
 
 		sd := this.fireDeg + td/2
-		NewSmoke(this.firePos.x, this.firePos.y, 0, Sin32(sd)*SPEED*0.33, Cos32(sd)*SPEED*0.33, 0, SmokeTypeSPARK, 10, 0.33)
+		NewSmoke(this.firePos.x, this.firePos.y, 0, Sin32(sd)*SHOT_SPEED*0.33, Cos32(sd)*SHOT_SPEED*0.33, 0, SmokeTypeSPARK, 10, 0.33)
 	}
 	this.fireCnt--
-	if this.padInput.button & PadStateButtonB {
+	if padInput.button&PadButtonB != 0 {
 		if !this.bPressed && this.fireLanceCnt <= 0 && !existsLance() {
 			playSe("lance.wav")
 			fd := this.deg
 			if this.reverseFire {
 				fd += Pi32
 			}
-			NewShot(this.pos, fd, true)
+			NewShot(this.pos, fd, true, -1)
 			for i := 0; i < 4; i++ {
 				sd := fd + nextSignedFloat(1)
 				NewSmoke(this.pos.x, this.pos.y, 0,
-					Sin32(sd)*LANCE_SPEED*i*0.2,
-					Cos32(sd)*LANCE_SPEED*i*0.2,
+					Sin32(sd)*LANCE_SPEED*float32(i)*0.2,
+					Cos32(sd)*LANCE_SPEED*float32(i)*0.2,
 					0, SmokeTypeSPARK, 15, 0.5)
 			}
 			this.fireLanceCnt = FIRE_LANCE_INTERVAL
@@ -737,42 +735,42 @@ fireDobulePlay() {
 */
 
 func (this *Boat) fireMouse() {
-	fox := this.mouseInput.x - this.pos.x
-	foy := this.mouseInput.y - this.pos.y
+	fox := mouseInput.x - this.pos.x
+	foy := mouseInput.y - this.pos.y
 	if fabs32(fox) < 0.01 {
 		fox = 0.01
 	}
 	if fabs32(foy) < 0.01 {
 		foy = 0.01
 	}
-	this.fireDeg = atan2(fox, foy)
-	if this.mouseInput.button & (MouseStateButtonLEFT | MouseStateButtonRIGHT) {
+	this.fireDeg = atan232(fox, foy)
+	if mouseInput.button&(MouseButtonLEFT|MouseButtonRIGHT) != 0 {
 		if this.fireCnt <= 0 {
 			playSe("shot.wav")
 			foc := (this.fireSprCnt%2)*2 - 1
 			//rsd := this.stickInput.right.vctSize
-			fstd := 0.05
-			if this.mouseInput.button & MouseStateButtonRIGHT {
+			var fstd float32 = 0.05
+			if mouseInput.button&MouseButtonRIGHT != 0 {
 				fstd += 0.5
 			}
 			this.fireSprDeg += (fstd - this.fireSprDeg) * 0.16
-			this.firePos.x = this.pos.x + Cos32(this.fireDeg+Pi32)*0.2*foc
-			this.firePos.y = this.pos.y - Sin32(this.fireDeg+Pi32)*0.2*foc
+			this.firePos.x = this.pos.x + Cos32(this.fireDeg+Pi32)*0.2*float32(foc)
+			this.firePos.y = this.pos.y - Sin32(this.fireDeg+Pi32)*0.2*float32(foc)
 			this.fireCnt = int(this.fireInterval)
 			var td float32
 			switch foc {
 			case -1:
-				td = this.fireSprDeg * (this.fireSprCnt/2%4 + 1) * 0.2
+				td = this.fireSprDeg * float32(this.fireSprCnt/2%4+1) * 0.2
 				break
 			case 1:
-				td = -this.fireSprDeg * (this.fireSprCnt/2%4 + 1) * 0.2
+				td = -this.fireSprDeg * float32(this.fireSprCnt/2%4+1) * 0.2
 				break
 			}
 			this.fireSprCnt++
 			NewShot(this.firePos, this.fireDeg+td/2, false, 2)
 			NewShot(this.firePos, this.fireDeg+td, false, 2)
 			sd := this.fireDeg + td/2
-			NewSmoke(this.firePos.x, this.firePos.y, 0, Sin32(sd)*SPEED*0.33, Cos32(sd)*SPEED*0.33, 0,
+			NewSmoke(this.firePos.x, this.firePos.y, 0, Sin32(sd)*SHOT_SPEED*0.33, Cos32(sd)*SHOT_SPEED*0.33, 0,
 				SmokeTypeSPARK, 10, 0.33)
 		}
 	}
@@ -815,35 +813,35 @@ func (this *Boat) destroyed() {
 		this.destroyedBoatShield()
 		return
 	}
-	this.ship.destroyed()
-	this.gameState.shipDestroyed()
+	ship.destroyed()
+	inGameState.shipDestroyed()
 }
 
 func (this *Boat) destroyedBoatShield() {
 	for i := 0; i < 100; i++ {
-		NewSpark(pos, nextSignedFloat(1), nextSignedFloat(1),
+		NewSpark(this.pos, nextSignedFloat(1), nextSignedFloat(1),
 			0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0,
 			40+nextInt(40))
 	}
 	playSe("ship_shield_lost.wav")
-	setScreenShake(30, 0.02)
+	screen.setScreenShake(30, 0.02)
 	this.shieldCnt = 0
 	this.cnt = -INVINCIBLE_CNT / 2
 }
 
 func (this *Boat) destroyedBoat() {
 	for i := 0; i < 128; i++ {
-		NewSpark(pos, nextSignedFloat(1), nextSignedFloat(1),
+		NewSpark(this.pos, nextSignedFloat(1), nextSignedFloat(1),
 			0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0,
 			40+nextInt(40))
 	}
 	playSe("ship_destroyed.wav")
 	for i := 0; i < 64; i++ {
-		NewSmoke(pos.x, pos.y, 0, nextSignedFloat(0.2), nextSignedFloat(0.2),
+		NewSmoke(this.pos.x, this.pos.y, 0, nextSignedFloat(0.2), nextSignedFloat(0.2),
 			nextFloat(0.1),
 			SmokeTypeEXPLOSION, 50+nextInt(30), 1)
 	}
-	setScreenShake(60, 0.05)
+	screen.setScreenShake(60, 0.05)
 	this.restart()
 	this.cnt = -RESTART_CNT
 }
@@ -859,9 +857,9 @@ func (this *Boat) draw() {
 	if this.fireDeg < 99999 {
 		setScreenColor(0.5, 0.9, 0.7, 0.4)
 		gl.Begin(gl.LINE_STRIP)
-		gl.Vertex2(this.pos.x, this.pos.y)
+		gl.Vertex2f(this.pos.x, this.pos.y)
 		setScreenColor(0.5, 0.9, 0.7, 0.8)
-		gl.Vertex2(this.pos.x+Sin32(this.fireDeg)*20, this.pos.y+Cos32(this.fireDeg)*20)
+		gl.Vertex2f(this.pos.x+Sin32(this.fireDeg)*20, this.pos.y+Cos32(this.fireDeg)*20)
 		gl.End()
 	}
 	if this.cnt < 0 && (-this.cnt%32) < 16 {
@@ -873,12 +871,12 @@ func (this *Boat) draw() {
 	this.shape.draw()
 	this.bridgeShape.draw()
 	if this.shieldCnt > 0 {
-		ss := 0.66
+		var ss float32 = 0.66
 		if this.shieldCnt < 120 {
 			ss *= float32(this.shieldCnt) / 120
 		}
 		gl.Scalef(ss, ss, ss)
-		gl.Rotatef(this.shieldCnt*5, 0, 0, 1)
+		gl.Rotatef(float32(this.shieldCnt)*5, 0, 0, 1)
 		this.shieldShape.draw()
 	}
 	gl.PopMatrix()
@@ -891,34 +889,34 @@ func (this *Boat) drawFront() {
 	if this.gameMode == GameModeMOUSE {
 		setScreenColor(0.7, 0.9, 0.8, 1.0)
 		lineWidth(2)
-		this.drawSight(this.mouseInput.x, this.mouseInput.y, 0.3)
-		ss := 0.9 - 0.8*((this.cnt+1024)%32)/32
+		this.drawSight(mouseInput.x, mouseInput.y, 0.3)
+		ss := 0.9 - 0.8*float32((this.cnt+1024)%32)/32
 		setScreenColor(0.5, 0.9, 0.7, 0.8)
-		this.drawSight(this.mouseInput.x, this.mouseInput.y, ss)
+		this.drawSight(mouseInput.x, mouseInput.y, ss)
 		lineWidth(1)
 	}
 }
 
 func (this *Boat) drawSight(x float32, y float32, size float32) {
 	gl.Begin(gl.LINE_STRIP)
-	gl.Vertex2(x-size, y-size*0.5)
-	gl.Vertex2(x-size, y-size)
-	gl.Vertex2(x-size*0.5, y-size)
+	gl.Vertex2f(x-size, y-size*0.5)
+	gl.Vertex2f(x-size, y-size)
+	gl.Vertex2f(x-size*0.5, y-size)
 	gl.End()
 	gl.Begin(gl.LINE_STRIP)
-	gl.Vertex2(x+size, y-size*0.5)
-	gl.Vertex2(x+size, y-size)
-	gl.Vertex2(x+size*0.5, y-size)
+	gl.Vertex2f(x+size, y-size*0.5)
+	gl.Vertex2f(x+size, y-size)
+	gl.Vertex2f(x+size*0.5, y-size)
 	gl.End()
 	gl.Begin(gl.LINE_STRIP)
-	gl.Vertex2(x+size, y+size*0.5)
-	gl.Vertex2(x+size, y+size)
-	gl.Vertex2(x+size*0.5, y+size)
+	gl.Vertex2f(x+size, y+size*0.5)
+	gl.Vertex2f(x+size, y+size)
+	gl.Vertex2f(x+size*0.5, y+size)
 	gl.End()
 	gl.Begin(gl.LINE_STRIP)
-	gl.Vertex2(x-size, y+size*0.5)
-	gl.Vertex2(x-size, y+size)
-	gl.Vertex2(x-size*0.5, y+size)
+	gl.Vertex2f(x-size, y+size*0.5)
+	gl.Vertex2f(x-size, y+size)
+	gl.Vertex2f(x-size*0.5, y+size)
 	gl.End()
 }
 
@@ -928,5 +926,5 @@ func (this *Boat) drawShape() {
 }
 
 func (this *Boat) clearBullets() {
-	this.gameState.clearBullets()
+	clearBullets()
 }

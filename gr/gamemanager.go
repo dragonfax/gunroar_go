@@ -64,7 +64,6 @@ func (this *GameManager) init() {
 	titleManager = NewTitleManager()
 	inGameState = NewInGameState()
 	titleState = NewTitleState()
-	ship.setGameState(inGameState)
 }
 
 func (this *GameManager) close() {

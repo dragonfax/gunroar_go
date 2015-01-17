@@ -18,7 +18,7 @@ type Bullet struct {
 	cnt              int
 	rng              float32
 	destructive      bool
-	shape            BulletShape
+	shape            *BulletShape
 	enemyIdx         int
 }
 
@@ -122,7 +122,7 @@ func (this *Bullet) draw() {
 	gl.PopMatrix()
 }
 
-func (this *Bullet) checkShotHit(p Vector, s Shape, shot Shot) {
+func (this *Bullet) checkShotHit(p Vector, s Shape, shot *Shot) {
 	ox := fabs32(this.pos.x - p.x)
 	oy := fabs32(this.pos.y - p.y)
 	if ox+oy < 0.5 {
@@ -150,7 +150,7 @@ func removeAllIndexedBullets(idx int) int {
 	return n
 }
 
-func checkAllBulletsShotHit(pos Vector, shape Shape, shot Shot) {
+func checkAllBulletsShotHit(pos Vector, shape Shape, shot *Shot) {
 	for a := range actors {
 		b, ok := a.(*Bullet)
 		if ok && b.destructive {

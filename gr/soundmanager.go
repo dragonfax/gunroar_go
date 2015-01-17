@@ -8,10 +8,12 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"math/rand"
+	"path/filepath"
+
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_mixer"
-	"io/ioutil"
-	"path/filepath"
 )
 
 var noSound bool
@@ -78,8 +80,8 @@ func playBgmByName(name string) {
 }
 
 func playBgm() {
-	bgmIdx := Intn(len(bgm)-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
-	nextIdxMv = Intn(2)*2 - 1
+	bgmIdx := rand.Intn(len(bgm)-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
+	nextIdxMv = rand.Intn(2)*2 - 1
 	prevBgmIdx = bgmIdx
 	playBgmByName(bgmFileName[bgmIdx])
 }
