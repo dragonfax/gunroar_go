@@ -3,7 +3,7 @@
  *
  * Copyright 2004 Kenta Cho. Some rights reserved.
  */
-package gr
+package main
 
 /**
  * Actor in the game that has the interface to move and draw.

@@ -1,4 +1,4 @@
-package gr
+package main
 
 import (
 	builtin "math/rand"

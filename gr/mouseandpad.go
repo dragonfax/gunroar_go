@@ -3,7 +3,7 @@
  *
  * Copyright 2005 Kenta Cho. Some rights reserved.
  */
-package gr
+package main
 
 import (
 	"github.com/veandco/go-sdl2/sdl"

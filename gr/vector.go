@@ -3,7 +3,7 @@
  *
  * Copyright 2004 Kenta Cho. Some rights reserved.
  */
-package gr
+package main
 
 type Vector struct {
 	x, y float32
