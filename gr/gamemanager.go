@@ -34,7 +34,7 @@ type GameManager struct {
 }
 
 func (this *GameManager) init() {
-	InitLetter.init()
+	InitLetter()
 	InitShot.init()
 	InitBulletShape.init()
 	InitEnemyShape.init()

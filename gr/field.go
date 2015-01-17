@@ -5,6 +5,10 @@
  */
 package gr
 
+import (
+	"github.com/go-gl/gl"
+)
+
 type PlatformPos struct {
 	pos  Vector
 	deg  float32
@@ -45,25 +49,32 @@ var baseColorTime = [5][6][3]float32{
  */
 type Field struct {
 	size, outerSize         Vector
-	block                   [BLOCK_SIZE_Y][BLOCK_SIZE_X]int
-	panel                   [BLOCK_SIZE_Y][BLOCK_SIZE_X]Panel
+	block                   [][]int   /* BLOCK_SIZE_Y x BLOCK_SIZE_X */
+	panel                   [][]Panel /* BLOCK_SIZE_Y x BLOCK_SIZE_X */
 	nextBlockY              int
 	screenY, blockCreateCnt float32
 	lastScrollY             float32
 	screenPos               Vector
-	platformPos             [SCREEN_BLOCK_SIZE_X * NEXT_BLOCK_AREA_SIZE]PlatformPos
+	platformPos             []PlatformPos /* SCREEN_BLOCK_SIZE_X * NEXT_BLOCK_AREA_SIZE */
 	platformPosNum          int
 	baseColor               [3][6]float32
 	time                    float32
 }
 
 func NewField() *Field {
-	this = new(Field)
+	this := new(Field)
 	this.size = Vector{SCREEN_BLOCK_SIZE_X / 2 * 0.9, SCREEN_BLOCK_SIZE_Y / 2 * 0.8}
 	this.outerSize = Vector{SCREEN_BLOCK_SIZE_X / 2, SCREEN_BLOCK_SIZE_Y / 2}
-	for i, _ := range this.platformPos {
-		this.pp.pos = Vector{}
+	this.block = make([][]int, BLOCK_SIZE_Y, BLOCK_SIZE_Y)
+	this.panel = make([][]Panel, BLOCK_SIZE_Y, BLOCK_SIZE_Y)
+	for i, _ := range this.block {
+		this.block[i] = make([]int, BLOCK_SIZE_X, BLOCK_SIZE_X)
+		this.panel[i] = make([]Panel, BLOCK_SIZE_X, BLOCK_SIZE_X)
 	}
+	this.platformPos = make([]PlatformPos, SCREEN_BLOCK_SIZE_X*NEXT_BLOCK_AREA_SIZE, SCREEN_BLOCK_SIZE_X*NEXT_BLOCK_AREA_SIZE)
+	/* for i, _ := range this.platformPos {
+		this.platformPos[i].pos = Vector{}
+	} */
 	return this
 }
 
@@ -82,10 +93,10 @@ func (this *Field) start() {
 }
 
 func (this *Field) createPanel(x int, y int) {
-	Panel * p = &(this.panel[x][y])
+	p := &(this.panel[x][y])
 	p.x = nextFloat(1) - 0.75
 	p.y = nextFloat(1) - 0.75
-	p.z = this.block[x][y]*PANEL_HEIGHT_BASE + nextFloat(PANEL_HEIGHT_BASE)
+	p.z = float32(this.block[x][y])*PANEL_HEIGHT_BASE + nextFloat(PANEL_HEIGHT_BASE)
 	p.ci = this.block[x][y] + 3
 	p.or = 1 + nextSignedFloat(0.1)
 	p.og = 1 + nextSignedFloat(0.1)
@@ -103,16 +114,16 @@ func (this *Field) scroll(my float32, isDemo bool /*= false*/) {
 	}
 	this.blockCreateCnt -= my
 	if this.blockCreateCnt < 0 {
-		this.stageManager.gotoNextBlockArea()
+		stageManager.gotoNextBlockArea()
 		var bd int
-		if this.stageManager.bossMode {
+		if stageManager.bossMode {
 			bd = 0
 		} else {
-			bd = this.stageManager.blockDensity
+			bd = stageManager.blockDensity
 		}
 		this.createBlocks(bd)
-		if !this.isDemo {
-			this.stageManager.addBatteries(this.platformPos, this.platformPosNum)
+		if !isDemo {
+			stageManager.addBatteries(this.platformPos, this.platformPosNum)
 		}
 		this.gotoNextBlockArea()
 	}
@@ -127,12 +138,12 @@ func (this *Field) createBlocks(groundDensity int) {
 	}
 	this.platformPosNum = 0
 	groundType := nextInt(3)
-	for i := 0; i < this.groundDensity; i++ {
+	for i := 0; i < groundDensity; i++ {
 		this.addGround(groundType)
 	}
 	for y := this.nextBlockY; y < this.nextBlockY+NEXT_BLOCK_AREA_SIZE; y++ {
 		by := y % BLOCK_SIZE_Y
-		for bx = 0; bx < BLOCK_SIZE_X; bx++ {
+		for bx := 0; bx < BLOCK_SIZE_X; bx++ {
 			if y == this.nextBlockY || y == this.nextBlockY+NEXT_BLOCK_AREA_SIZE-1 {
 				this.block[bx][by] = -3
 			}
@@ -142,22 +153,22 @@ func (this *Field) createBlocks(groundDensity int) {
 		by := y % BLOCK_SIZE_Y
 		for bx := 0; bx < BLOCK_SIZE_X-1; bx++ {
 			if this.block[bx][by] == 0 {
-				if this.countAroundBlock(bx, by) <= 1 {
+				if this.countAroundBlock(bx, by, 0) <= 1 {
 					this.block[bx][by] = -2
 				}
 			}
 		}
 		for bx := BLOCK_SIZE_X - 1; bx >= 0; bx-- {
 			if this.block[bx][by] == 0 {
-				if this.countAroundBlock(bx, by) <= 1 {
+				if this.countAroundBlock(bx, by, 0) <= 1 {
 					this.block[bx][by] = -2
 				}
 			}
 		}
-		for bx = 0; bx < BLOCK_SIZE_X; bx++ {
+		for bx := 0; bx < BLOCK_SIZE_X; bx++ {
 			var b int
-			c := this.countAroundBlock(bx, by)
-			if block[bx][by] >= 0 {
+			c := this.countAroundBlock(bx, by, 0)
+			if this.block[bx][by] >= 0 {
 				switch c {
 				case 0:
 					b = -2
@@ -182,19 +193,19 @@ func (this *Field) createBlocks(groundDensity int) {
 			this.block[bx][by] = b
 			if b == -1 && bx >= 2 && bx < BLOCK_SIZE_X-2 {
 				pd := this.calcPlatformDeg(bx, by)
-				if pd >= -PI*2 {
-					this.platformPos[platformPosNum].pos.x = bx
-					this.platformPos[platformPosNum].pos.y = by
-					this.platformPos[platformPosNum].deg = pd
-					this.platformPos[platformPosNum].used = false
+				if pd >= -Pi32*2 {
+					this.platformPos[this.platformPosNum].pos.x = float32(bx)
+					this.platformPos[this.platformPosNum].pos.y = float32(by)
+					this.platformPos[this.platformPosNum].deg = pd
+					this.platformPos[this.platformPosNum].used = false
 					this.platformPosNum++
 				}
 			}
 		}
 	}
-	for y = this.nextBlockY; y < this.nextBlockY+NEXT_BLOCK_AREA_SIZE; y++ {
+	for y := this.nextBlockY; y < this.nextBlockY+NEXT_BLOCK_AREA_SIZE; y++ {
 		by := y % BLOCK_SIZE_Y
-		for bx = 0; bx < BLOCK_SIZE_X; bx++ {
+		for bx := 0; bx < BLOCK_SIZE_X; bx++ {
 			if this.block[bx][by] == -3 {
 				if this.countAroundBlock(bx, by, -1) > 0 {
 					this.block[bx][by] = -2
@@ -209,7 +220,7 @@ func (this *Field) createBlocks(groundDensity int) {
 	}
 }
 
-func (this *Field) addGround(grountType int) {
+func (this *Field) addGround(groundType int) {
 	var cx int
 	switch groundType {
 	case 0:
@@ -226,10 +237,21 @@ func (this *Field) addGround(grountType int) {
 		}
 		break
 	}
-	cy := nextInt(int(NEXT_BLOCK_AREA_SIZE*0.6)) + int(NEXT_BLOCK_AREA_SIZE*0.2)
+	/* this crazy bit is required to get dlang to do what I want
+	 * otherwise type and constant conversion and truncation errors, ahoy.
+	 */
+	cx1 := float32(NEXT_BLOCK_AREA_SIZE) * 0.6
+	cx1r := nextInt(int(cx1))
+	cx2 := float32(NEXT_BLOCK_AREA_SIZE) * 0.2
+	cy := cx1r + int(cx2)
 	cy += this.nextBlockY
-	w := nextInt(int(BLOCK_SIZE_X*0.33)) + int(BLOCK_SIZE_X*0.33)
-	h := nextInt(int(NEXT_BLOCK_AREA_SIZE*0.24)) + int(NEXT_BLOCK_AREA_SIZE*0.33)
+	w1 := float32(BLOCK_SIZE_X) * 0.33
+	w1r := nextInt(int(w1))
+	w := w1r + int(w1)
+	h1 := float32(NEXT_BLOCK_AREA_SIZE) * 0.24
+	h1r := nextInt(int(h1))
+	h2 := float32(NEXT_BLOCK_AREA_SIZE) * 0.33
+	h := h1r + int(h2)
 	cx -= w / 2
 	cy -= h / 2
 	var wr, hr float32
@@ -240,22 +262,22 @@ func (this *Field) addGround(grountType int) {
 				var o, to float32
 				wr = nextFloat(0.2) + 0.2
 				hr = nextFloat(0.3) + 0.4
-				o = (bx-cx)*wr + (y-cy)*hr
+				o = float32(bx-cx)*wr + float32(y-cy)*hr
 				wr = nextFloat(0.2) + 0.2
 				hr = nextFloat(0.3) + 0.4
-				to = (cx+w-1-bx)*wr + (y-cy)*hr
+				to = float32(cx+w-1-bx)*wr + float32(y-cy)*hr
 				if to < o {
 					o = to
 				}
 				wr = nextFloat(0.2) + 0.2
 				hr = nextFloat(0.3) + 0.4
-				to = (bx-cx)*wr + (cy+h-1-y)*hr
+				to = float32(bx-cx)*wr + float32(cy+h-1-y)*hr
 				if to < o {
 					o = to
 				}
 				wr = nextFloat(0.2) + 0.2
 				hr = nextFloat(0.3) + 0.4
-				to = (cx+w-1-bx)*wr + (cy+h-1-y)*hr
+				to = float32(cx+w-1-bx)*wr + float32(cy+h-1-y)*hr
 				if to < o {
 					o = to
 				}
@@ -283,7 +305,7 @@ func (this *Field) getBlock(x float32, y float32) int {
 	y -= this.screenY - this.screenY
 	var bx, by int
 	bx = int((x + BLOCK_WIDTH*SCREEN_BLOCK_SIZE_X/2) / BLOCK_WIDTH)
-	by = this.screenY + int((-y+BLOCK_WIDTH*SCREEN_BLOCK_SIZE_Y/2)/BLOCK_WIDTH)
+	by = int(this.screenY) + int((-y+BLOCK_WIDTH*SCREEN_BLOCK_SIZE_Y/2)/BLOCK_WIDTH)
 	if bx < 0 || bx >= BLOCK_SIZE_X {
 		return -1
 	}
@@ -297,15 +319,15 @@ func (this *Field) getBlock(x float32, y float32) int {
 
 func (this *Field) convertToScreenPos(bx int, y int) Vector {
 	oy := this.screenY - this.screenY
-	by := y - this.screenY
+	by := y - int(this.screenY)
 	if by <= -BLOCK_SIZE_Y {
 		by += BLOCK_SIZE_Y
 	}
 	if by > 0 {
 		by -= BLOCK_SIZE_Y
 	}
-	this.screenPos.x = bx*BLOCK_WIDTH - BLOCK_WIDTH*SCREEN_BLOCK_SIZE_X/2 + BLOCK_WIDTH/2
-	this.screenPos.y = by*-BLOCK_WIDTH + BLOCK_WIDTH*SCREEN_BLOCK_SIZE_Y/2 + oy - BLOCK_WIDTH/2
+	this.screenPos.x = float32(bx*BLOCK_WIDTH - BLOCK_WIDTH*SCREEN_BLOCK_SIZE_X/2 + BLOCK_WIDTH/2)
+	this.screenPos.y = float32(by*-BLOCK_WIDTH + BLOCK_WIDTH*SCREEN_BLOCK_SIZE_Y/2 + int(oy) - BLOCK_WIDTH/2)
 	return this.screenPos
 }
 
@@ -324,16 +346,16 @@ func (this *Field) drawSideWalls() {
 	gl.Disable(gl.BLEND)
 	setScreenColor(0, 0, 0, 1)
 	gl.Begin(gl.TRIANGLE_FAN)
-	gl.Vertex3(SIDEWALL_X1, SIDEWALL_Y, 0)
-	gl.Vertex3(SIDEWALL_X2, SIDEWALL_Y, 0)
-	gl.Vertex3(SIDEWALL_X2, -SIDEWALL_Y, 0)
-	gl.Vertex3(SIDEWALL_X1, -SIDEWALL_Y, 0)
+	gl.Vertex3f(SIDEWALL_X1, SIDEWALL_Y, 0)
+	gl.Vertex3f(SIDEWALL_X2, SIDEWALL_Y, 0)
+	gl.Vertex3f(SIDEWALL_X2, -SIDEWALL_Y, 0)
+	gl.Vertex3f(SIDEWALL_X1, -SIDEWALL_Y, 0)
 	gl.End()
 	gl.Begin(gl.TRIANGLE_FAN)
-	gl.Vertex3(-SIDEWALL_X1, SIDEWALL_Y, 0)
-	gl.Vertex3(-SIDEWALL_X2, SIDEWALL_Y, 0)
-	gl.Vertex3(-SIDEWALL_X2, -SIDEWALL_Y, 0)
-	gl.Vertex3(-SIDEWALL_X1, -SIDEWALL_Y, 0)
+	gl.Vertex3f(-SIDEWALL_X1, SIDEWALL_Y, 0)
+	gl.Vertex3f(-SIDEWALL_X2, SIDEWALL_Y, 0)
+	gl.Vertex3f(-SIDEWALL_X2, -SIDEWALL_Y, 0)
+	gl.Vertex3f(-SIDEWALL_X1, -SIDEWALL_Y, 0)
 	gl.End()
 	gl.Enable(gl.BLEND)
 }
@@ -347,7 +369,7 @@ func (this *Field) drawPanel() {
 	co := this.time - ci
 	for i := 0; i < 6; i++ {
 		for j := 0; j < 3; j++ {
-			this.baseColor[i][j] = baseColorTime[ci][i][j]*(1-co) + baseColorTime[nci][i][j]*co
+			this.baseColor[i][j] = baseColorTime[int(ci)][i][j]*(1-co) + baseColorTime[int(nci)][i][j]*co
 		}
 	}
 	by := this.screenY
@@ -366,21 +388,21 @@ func (this *Field) drawPanel() {
 		}
 		sx = -BLOCK_WIDTH * SCREEN_BLOCK_SIZE_X / 2
 		for bx := 0; bx < SCREEN_BLOCK_SIZE_X; bx++ {
-			Panel * p = &(this.panel[bx][by])
+			p := &(this.panel[bx][int(by)])
 			setScreenColor(this.baseColor[p.ci][0]*p.or*0.66,
 				this.baseColor[p.ci][1]*p.og*0.66,
-				this.baseColor[p.ci][2]*p.ob*0.66)
-			gl.Vertex3(sx+p.x, sy-p.y, p.z)
-			gl.Vertex3(sx+p.x+PANEL_WIDTH, sy-p.y, p.z)
-			gl.Vertex3(sx+p.x+PANEL_WIDTH, sy-p.y-PANEL_WIDTH, p.z)
-			gl.Vertex3(sx+p.x, sy-p.y-PANEL_WIDTH, p.z)
+				this.baseColor[p.ci][2]*p.ob*0.66, 1)
+			gl.Vertex3f(sx+p.x, sy-p.y, p.z)
+			gl.Vertex3f(sx+p.x+PANEL_WIDTH, sy-p.y, p.z)
+			gl.Vertex3f(sx+p.x+PANEL_WIDTH, sy-p.y-PANEL_WIDTH, p.z)
+			gl.Vertex3f(sx+p.x, sy-p.y-PANEL_WIDTH, p.z)
 			setScreenColor(this.baseColor[p.ci][0]*0.33,
 				this.baseColor[p.ci][1]*0.33,
-				this.baseColor[p.ci][2]*0.33)
-			gl.Vertex2(sx, sy)
-			gl.Vertex2(sx+BLOCK_WIDTH, sy)
-			gl.Vertex2(sx+BLOCK_WIDTH, sy-BLOCK_WIDTH)
-			gl.Vertex2(sx, sy-BLOCK_WIDTH)
+				this.baseColor[p.ci][2]*0.33, 1)
+			gl.Vertex2f(sx, sy)
+			gl.Vertex2f(sx+BLOCK_WIDTH, sy)
+			gl.Vertex2f(sx+BLOCK_WIDTH, sy-BLOCK_WIDTH)
+			gl.Vertex2f(sx, sy-BLOCK_WIDTH)
 			sx += BLOCK_WIDTH
 		}
 		sy -= BLOCK_WIDTH
@@ -395,7 +417,7 @@ func (this *Field) calcPlatformDeg(x int, y int) float32 {
 	d := nextInt(4)
 	for i := 0; i < 4; i++ {
 		if !this.checkBlock(x+degBlockOfs[d][0], y+degBlockOfs[d][1], -1, true) {
-			pd := d * PI / 2
+			pd := float32(d) * Pi32 / 2
 			ox := x + degBlockOfs[d][0]
 			oy := y + degBlockOfs[d][1]
 			td := d
@@ -411,10 +433,10 @@ func (this *Field) calcPlatformDeg(x int, y int) float32 {
 			}
 			b2 := this.checkBlock(ox+degBlockOfs[td][0], oy+degBlockOfs[td][1], -1, true)
 			if !b1 && b2 {
-				pd -= PI / 4
+				pd -= Pi32 / 4
 			}
 			if b1 && !b2 {
-				pd += PI / 4
+				pd += Pi32 / 4
 			}
 			normalizeDeg(pd)
 			return pd
@@ -429,16 +451,16 @@ func (this *Field) calcPlatformDeg(x int, y int) float32 {
 
 func (this *Field) countAroundBlock(x int, y int, th int /*= 0*/) int {
 	c := 0
-	if this.checkBlock(x, y-1, th) {
+	if this.checkBlock(x, y-1, th, false) {
 		c++
 	}
-	if this.checkBlock(x+1, y, th) {
+	if this.checkBlock(x+1, y, th, false) {
 		c++
 	}
-	if this.checkBlock(x, y+1, th) {
+	if this.checkBlock(x, y+1, th, false) {
 		c++
 	}
-	if this.checkBlock(x-1, y, th) {
+	if this.checkBlock(x-1, y, th, false) {
 		c++
 	}
 	return c
@@ -446,33 +468,32 @@ func (this *Field) countAroundBlock(x int, y int, th int /*= 0*/) int {
 
 func (this *Field) checkBlock(x int, y int, th int /*= 0*/, outScreen bool /*= false*/) bool {
 	if x < 0 || x >= BLOCK_SIZE_X {
-		return this.outScreen
+		return outScreen
 	}
 	by := y
 	if by < 0 {
 		by += BLOCK_SIZE_Y
 	}
 	if by >= BLOCK_SIZE_Y {
-		j
 		by -= BLOCK_SIZE_Y
 	}
 	return (this.block[x][by] >= th)
 }
 
 func (this *Field) checkInFieldVector(p Vector) bool {
-	return this.size.contains(p)
+	return this.size.containsVector(p, 1)
 }
 
 func (this *Field) checkInField(x float32, y float32) bool {
-	return this.size.contains(x, y)
+	return this.size.contains(x, y, 1)
 }
 
 func (this *Field) checkInOuterFieldVector(p Vector) bool {
-	return this.outerSize.contains(p)
+	return this.outerSize.containsVector(p, 1)
 }
 
 func (this *Field) checkInOuterField(x float32, y float32) bool {
-	return this.outerSize.contains(x, y)
+	return this.outerSize.contains(x, y, 1)
 }
 
 func (this *Field) checkInOuterHeightField(p Vector) bool {

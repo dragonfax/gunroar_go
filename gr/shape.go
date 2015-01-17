@@ -190,6 +190,14 @@ func (this *ComplexShape) createLoop(s float32, z float32, backToFirst bool /*= 
 	}
 }
 
+func (this *ComplexShape) getPointPos() []Vector {
+	return this.pointPos
+}
+
+func (this *ComplexShape) getPointDeg() []float32 {
+	return this.pointDeg
+}
+
 func (this *ComplexShape) createSquareLoop(s float32, z float32, backToFirst bool /*= false*/, yRatio float32 /*= 1*/) {
 	var d float32
 	var pn int
@@ -580,6 +588,9 @@ type Shape interface {
 	draw()
 	collision() Vector
 	checkCollision(ax float32, ay float32, shape Shape /*= null */) bool
+
+	getPointPos() []Vector
+	getPointDeg() []float32
 }
 
 /* just a displaylist
@@ -587,6 +598,14 @@ type Shape interface {
 type SimpleShape struct {
 	displayList DisplayList
 	collision   Vector
+}
+
+func getPointPos() []Vector {
+	return nil
+}
+
+func getPointDeg() []float32 {
+	return nil
 }
 
 func (ss *SimpleShape) checkCollision(ax float32, ay float32, shape Shape /* = null */) bool {

@@ -378,9 +378,9 @@ func (this *EnemyState) destroyedEdge(n int) {
 	if sn > 48 {
 		sn = 48
 	}
-	spp := this.spec.shape.shape.pointPos
-	spd := this.spec.shape.shape.pointDeg
-	si := nextInt(spp.length)
+	spp := this.spec.shape.shape.getPointPos()
+	spd := this.spec.shape.shape.getPointDeg()
+	si := nextInt(len(spp))
 	edgePos.x = spp[si].x*this.spec.size + this.pos.x
 	edgePos.y = spp[si].y*this.spec.size + this.pos.y
 	ss := this.spec.size * 0.5
@@ -1082,7 +1082,7 @@ func (this *ShipEnemySpec) setFirstState(es *EnemyState, appType AppearanceType)
 	} else {
 		es.turnWay = 1
 	}
-	if isBoss {
+	if this.isBoss() {
 		es.trgDeg = nextFloat(0.1) + 0.1
 		if nextInt(2) == 0 {
 			es.trgDeg *= -1
@@ -1109,7 +1109,7 @@ func (this *ShipEnemySpec) move(es *EnemyState) bool {
 	if es.pos.y > field.outerSize.y*2.2+this.size {
 		es.pos.y = field.outerSize.y*2.2 + this.size
 	}
-	if isBoss {
+	if this.isBoss() {
 		es.turnCnt--
 		if es.turnCnt <= 0 {
 			es.turnCnt = 250 + nextInt(150)
@@ -1207,11 +1207,11 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 	}
 	this.shield = int(this.size * 20)
 	subTurretNum := frontTurretNum + sideTurretNum
-	subTurretRank := rk / (mainTurretNum*3 + subTurretNum)
-	mainTurretRank := subTurretRank * 2.5
+	subTurretRank := int(rk) / (mainTurretNum*3 + subTurretNum)
+	mainTurretRank := int(float32(subTurretRank) * 2.5)
 	if mainTurretNum > 0 {
 		tgs := this.getTurretGroupSpec()
-		tgs.turretSpec.setParam(mainTurretRank, TurretTypeMAIN)
+		tgs.turretSpec.setParam(float32(mainTurretRank), TurretTypeMAIN)
 		tgs.num = mainTurretNum
 		tgs.alignType = AlignTypeROUND
 		tgs.alignDeg = 0
@@ -1221,7 +1221,7 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 	}
 	if frontTurretNum > 0 {
 		tgs := this.getTurretGroupSpec()
-		tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
+		tgs.turretSpec.setParam(float32(subTurretRank), TurretTypeSUB)
 		tgs.num = frontTurretNum
 		tgs.alignType = AlignTypeROUND
 		tgs.alignDeg = 0
@@ -1235,14 +1235,14 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 		for i := 0; i < 2; i++ {
 			tgs := this.getTurretGroupSpec()
 			if i == 0 {
-				tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
+				tgs.turretSpec.setParam(float32(subTurretRank), TurretTypeSUB)
 				pts = tgs.turretSpec
 			} else {
-				tgs.turretSpec.setParam(pts)
+				tgs.turretSpec.setParamTurretSpec(pts)
 			}
 			tgs.num = sideTurretNum
 			tgs.alignType = AlignTypeROUND
-			tgs.alignDeg = Pi32/2 - Pi32*i
+			tgs.alignDeg = Pi32/2 - Pi32*float32(i)
 			tgs.alignWidth = Pi32/5 + nextFloat(Pi32/6)
 			tgs.radius = this.size * 0.75
 			tgs.distRatio = this.distRatio
@@ -1262,7 +1262,7 @@ func (this *PlatformEnemySpec) setFirstState(es *EnemyState, x float32, y float3
 }
 
 func (this *PlatformEnemySpec) move(es *EnemyState) bool {
-	if !super.move(es) {
+	if !this.EnemySpec.move(es) {
 		return false
 	}
 	es.pos.y -= field.lastScrollY
@@ -1283,8 +1283,8 @@ func (this *PlatformEnemySpec) isBoss() bool {
  */
 
 func checkAllEnemiesShotHit(pos Vector, shape Shape, shot *Shot /*= null*/) {
-	for a, _ := range actor {
-		e, ok := a.(Enemy)
+	for a, _ := range actors {
+		e, ok := a.(*Enemy)
 		if ok {
 			e.checkShotHit(pos, shape, shot)
 		}
@@ -1292,20 +1292,20 @@ func checkAllEnemiesShotHit(pos Vector, shape Shape, shot *Shot /*= null*/) {
 }
 
 func checkAllEnemiesHitShip(x float32, y float32, deselection *Enemy /*= null*/, largeOnly bool /*= false*/) *Enemy {
-	for a, _ := range actor {
-		e, ok := a.(Enemy)
+	for a, _ := range actors {
+		e, ok := a.(*Enemy)
 		if ok && e != deselection {
 			if e.checkHitShip(x, y, largeOnly) {
 				return e
 			}
 		}
 	}
-	return null
+	return nil
 }
 
 func hasBoss() bool {
-	for a, _ := range actor {
-		e, ok := a.(Enemy)
+	for a, _ := range actors {
+		e, ok := a.(*Enemy)
 		if ok && e.isBoss() {
 			return true
 		}

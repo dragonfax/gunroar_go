@@ -203,7 +203,7 @@ func (this Vector) containsVector(p Vector, r float32 /* = 1 */) bool {
 	return contains(p.x, p.y, r)
 }
 
-func (this Vector) containsFloat(px float32, py float32, r float32 /*= 1*/) bool {
+func (this Vector) contains(px float32, py float32, r float32 /*= 1*/) bool {
 	return px >= -this.x*r && px <= this.x*r && py >= -this.y*r && py <= this.y*r
 }
 
