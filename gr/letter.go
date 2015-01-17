@@ -37,7 +37,7 @@ func InitLetter() {
 }
 
 func CloseLetter() {
-	displayList.Close()
+	displayList.close()
 }
 
 func getLetterWidth(n int, s float32) float32 {
@@ -49,7 +49,7 @@ func getLetterHeight(s float32) float32 {
 }
 
 func drawLetter(n int, c int) {
-	displayList.Call(uint(n + c*LETTER_NUM))
+	displayList.call(uint(n + c*LETTER_NUM))
 }
 
 func drawLetterOption(n int, x float32, y float32, s float32, d float32, c int) {
@@ -57,7 +57,7 @@ func drawLetterOption(n int, x float32, y float32, s float32, d float32, c int) 
 	gl.Translatef(x, y, 0)
 	gl.Scalef(s, s, s)
 	gl.Rotatef(float32(d), 0, 0, 1)
-	displayList.Call(uint(n + c*LETTER_NUM))
+	displayList.call(uint(n + c*LETTER_NUM))
 	gl.PopMatrix()
 }
 
@@ -66,7 +66,7 @@ func drawLetterRev(n int, x float32, y float32, s float32, d float32, c int) {
 	gl.Translatef(x, y, 0)
 	gl.Scalef(s, -s, s)
 	gl.Rotatef(float32(d), 0, 0, 1)
-	displayList.Call(uint(n + c*LETTER_NUM))
+	displayList.call(uint(n + c*LETTER_NUM))
 	gl.PopMatrix()
 }
 

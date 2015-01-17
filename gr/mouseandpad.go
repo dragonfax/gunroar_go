@@ -31,6 +31,6 @@ func (this *MouseAndPad) getState() MouseAndPadState {
 }
 
 func (this *MouseAndPad) handleEvent(event sdl.Event) {
-	this.mouse.handleEvent(event)
+	// this.mouse.handleEvent(event)
 	this.pad.handleEvent(event)
 }

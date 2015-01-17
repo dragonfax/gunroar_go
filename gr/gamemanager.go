@@ -227,7 +227,7 @@ func (this *InGameState) initGameState() {
 	this.time = 0
 	this.left = 2
 	scoreReel.clear(9)
-	// initTargetY()
+	InitTargetY()
 }
 
 func (this *InGameState) move() {
@@ -495,7 +495,7 @@ func numIndicatorsDraw() {
 
 func (this *InGameState) drawFront() {
 	ship.drawFront()
-	scoreReel.draw(11.5+(SCORE_REEL_SIZE_DEFAULT-this.scoreReelSize)*3,
+	scoreReel.drawAtPos(11.5+(SCORE_REEL_SIZE_DEFAULT-this.scoreReelSize)*3,
 		-8.2-(SCORE_REEL_SIZE_DEFAULT-this.scoreReelSize)*3,
 		this.scoreReelSize)
 	var x float32 = -12

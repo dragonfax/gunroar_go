@@ -30,11 +30,11 @@ func main() {
 type MainLoop struct {
 	nowait       bool
 	accframe     bool
-	maxSkipFrame int
+	maxSkipFrame uint32
 	event        *sdl.Event
 
 	slowdownRatio      float32
-	interval           float32
+	interval           uint32
 	slowdownStartRatio float32
 	slowdownMaxRatio   float32
 
@@ -69,7 +69,7 @@ func (m *MainLoop) breakLoop() {
 
 func (m *MainLoop) loop() {
 	m.done = false
-	var prvTickCount int32 = 0
+	var prvTickCount uint32 = 0
 	var i int
 	var nowTick int32
 	var frame int
@@ -87,8 +87,8 @@ func (m *MainLoop) loop() {
 			m.breakLoop()
 		}
 		nowTick := sdl.GetTicks()
-		var itv int = int(m.interval)
-		var frame int = int((nowTick - uint32(prvTickCount)) / itv)
+		var itv uint32 = m.interval
+		var frame = (nowTick - prvTickCount) / itv
 		if frame <= 0 {
 			frame = 1
 			sdl.Delay(prvTickCount + itv - nowTick)
@@ -104,10 +104,10 @@ func (m *MainLoop) loop() {
 			prvTickCount = nowTick
 		}
 		m.slowdownRatio = 0
-		for i := 0; i < frame; i++ {
+		for i := uint32(0); i < frame; i++ {
 			gameManager.move()
 		}
-		m.slowdownRatio /= frame
+		m.slowdownRatio = m.slowdownRatio / float32(frame)
 		screen.clear()
 		gameManager.draw()
 		screen.flip()
@@ -134,8 +134,8 @@ func (m *MainLoop) calcInterval() {
 		if sr > m.slowdownMaxRatio {
 			sr = m.slowdownMaxRatio
 		}
-		m.interval += (sr*INTERVAL_BASE - m.interval) * 0.1
+		m.interval += uint32((sr*INTERVAL_BASE - float32(m.interval)) * 0.1)
 	} else {
-		m.interval += (INTERVAL_BASE - m.interval) * 0.08
+		m.interval += uint32((INTERVAL_BASE - float32(m.interval)) * 0.08)
 	}
 }

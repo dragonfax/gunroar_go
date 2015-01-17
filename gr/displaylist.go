@@ -7,6 +7,7 @@ package main
 
 import (
 	"errors"
+
 	"github.com/go-gl/gl"
 )
 
@@ -24,12 +25,12 @@ func NewDisplayList(num uint) *DisplayList {
 	return dl
 }
 
-func (dp *DisplayList) BeginNewList() {
+func (dp *DisplayList) beginNewList() {
 	dp.ResetList()
 	dp.NewList()
 }
 
-func (dp *DisplayList) NextNewList() error {
+func (dp *DisplayList) nextNewList() error {
 	gl.EndList()
 	dp.enumIdx++
 	if dp.enumIdx >= dp.idx+dp.num || dp.enumIdx < dp.idx {
@@ -39,7 +40,7 @@ func (dp *DisplayList) NextNewList() error {
 	return nil
 }
 
-func (dp *DisplayList) EndNewList() {
+func (dp *DisplayList) endNewList() {
 	gl.EndList()
 	dp.registered = true
 }
@@ -58,11 +59,11 @@ func (dp *DisplayList) EndList() {
 	dp.registered = true
 }
 
-func (dp *DisplayList) Call(i uint) { // default value should be 0
+func (dp *DisplayList) call(i uint) { // default value should be 0
 	gl.CallList(dp.idx + i)
 }
 
-func (dp *DisplayList) Close() {
+func (dp *DisplayList) close() {
 	if !dp.registered {
 		return
 	}

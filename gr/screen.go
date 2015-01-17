@@ -150,8 +150,8 @@ func (s *Screen) setEyepos() {
 	var lx, ly, lz float32
 	ez = 13.0
 	if s.screenShakeCnt > 0 {
-		mx := nextSignedFloat() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
-		my := nextSignedFloat() * (s.screenShakeIntense * float32(s.screenShakeCnt+4))
+		mx := nextSignedFloat(s.screenShakeIntense * float32(s.screenShakeCnt+4))
+		my := nextSignedFloat(s.screenShakeIntense * float32(s.screenShakeCnt+4))
 		ex += mx
 		ey += my
 		lx += mx
@@ -232,19 +232,19 @@ func (s *Screen) setCaption(name string) {
 }
 
 func glVertex(v Vector) {
-	gl.Vertex3f(v.X(), v.Y(), 0)
+	gl.Vertex3f(v.x, v.y, 0)
 }
 
 func glVertex3(v Vector3) {
-	gl.Vertex3f(v.X(), v.Y(), v.Z())
+	gl.Vertex3f(v.x, v.y, v.z)
 }
 
 func glTranslate(v Vector) {
-	gl.Translatef(v.X(), v.Y(), 0)
+	gl.Translatef(v.x, v.y, 0)
 }
 
 func glTranslate3(v Vector3) {
-	gl.Translatef(v.X(), v.Y(), v.Z())
+	gl.Translatef(v.x, v.y, v.z)
 }
 
 func setScreenColor(r float32, g float32, b float32, a float32 /* = 1 */) {

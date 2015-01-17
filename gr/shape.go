@@ -5,6 +5,10 @@
  */
 package main
 
+import (
+	"github.com/go-gl/gl"
+)
+
 /**
  * Shape of a ship/platform/turret/bridge.
  */
@@ -44,9 +48,9 @@ type ComplexShape struct {
 	collidable bool
 }
 
-func NewComplexShape(size float32, distRatio float32, spinyRatio float32, shapeType int, r float32, g float32, b float32, collidable bool /* = false */) *ComplexShape {
+func NewComplexShape(size float32, distRatio float32, spinyRatio float32, shapeType ShapeType, r float32, g float32, b float32, collidable bool /* = false */) *ComplexShape {
 
-	this := new(ComplexShape)
+	this := &ComplexShape{SimpleShape: NewSimpleShape()}
 	this.size = size
 	this.distRatio = distRatio
 	this.spinyRatio = spinyRatio
@@ -56,11 +60,10 @@ func NewComplexShape(size float32, distRatio float32, spinyRatio float32, shapeT
 	this.b = b
 	this.collidable = collidable
 	if collidable {
-		this.collision = Vector{size / 2, size / 2}
+		this.collision = &Vector{size / 2, size / 2}
 	} else {
 		this.collision = nil
 	}
-	this.InitSimpleShape()
 	this.createDisplayList()
 	return this
 }
@@ -73,18 +76,18 @@ func (this *ComplexShape) createDisplayList() {
 		z += height
 	}
 	if this.shapeType != SHIP_DESTROYED {
-		setScreenColor(r, g, b, 1)
+		setScreenColor(this.r, this.g, this.b, 1)
 	}
 	gl.Begin(gl.LINE_LOOP)
 	if this.shapeType != BRIDGE {
 		this.createLoop(sz, z, false, true)
 	} else {
-		this.createSquareLoop(sz, z, false, true)
+		this.createSquareLoop(sz, z, false, 1)
 	}
 	gl.End()
 	if this.shapeType != SHIP_SHADOW && this.shapeType != SHIP_DESTROYED &&
 		this.shapeType != PLATFORM_DESTROYED && this.shapeType != TURRET_DESTROYED {
-		setScreenColor(r*0.4, g*0.4, b*0.4, 1)
+		setScreenColor(this.r*0.4, this.g*0.4, this.b*0.4, 1)
 		gl.Begin(gl.TRIANGLE_FAN)
 		this.createLoop(sz, z, true)
 		gl.End()
@@ -598,8 +601,14 @@ type Shape interface {
 /* just a displaylist
    and a simple static collision, if collidable */
 type SimpleShape struct {
-	displayList DisplayList
-	collision   Vector
+	displayList *DisplayList
+	collision   *Vector
+}
+
+func NewSimpleShape() *SimpleShape {
+	this := new(SimpleShape)
+	this.collision = &Vector{}
+	return this
 }
 
 func (this *SimpleShape) getPointPos() []Vector {
