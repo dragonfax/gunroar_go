@@ -70,9 +70,6 @@ func (m *MainLoop) breakLoop() {
 func (m *MainLoop) loop() {
 	m.done = false
 	var prvTickCount uint32 = 0
-	var i int
-	var nowTick int32
-	var frame int
 	screen.initSDL()
 	m.initFirst()
 	gameManager.start()

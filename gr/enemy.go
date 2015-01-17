@@ -25,6 +25,10 @@ func NewEnemy(spec EnemySpec) *Enemy {
 	return e
 }
 
+func (this *Enemy) index() int {
+	return this.state.idx
+}
+
 func (this *Enemy) move() {
 	if !this.spec.move(this.state) {
 		this.close()
@@ -390,7 +394,7 @@ func (this *EnemyState) destroyedEdge(n int) {
 	for i := 0; i < sn; i++ {
 		sr := nextFloat(0.5)
 		sd := spd[si] + nextSignedFloat(0.2)
-		s := NewSmoke(edgePos.x, edgePos.y, 0, Sin32(sd)*sr, Cos32(sd)*sr, -0.004, SmokeTypeEXPLOSION, 75+nextInt(25), ss)
+		NewSmoke(edgePos.x, edgePos.y, 0, Sin32(sd)*sr, Cos32(sd)*sr, -0.004, SmokeTypeEXPLOSION, 75+nextInt(25), ss)
 		for j := 0; j < 2; j++ {
 			NewSpark(edgePos, Sin32(sd)*sr*2, Cos32(sd)*sr*2, 0.5+nextFloat(0.5), 0.5+nextFloat(0.5), 0, 30+nextInt(30))
 		}
@@ -491,6 +495,7 @@ type EnemySpec interface {
 	bridgeShape() *EnemyShape
 	destroyedShape() *EnemyShape
 	damagedShape() *EnemyShape
+	setFirstState(es *EnemyState, appType AppearanceType, x float32, y float32, d float32) bool
 }
 
 type EnemySpecBase struct {
@@ -820,7 +825,7 @@ func (this *SmallShipEnemySpec) setParam(rank float32) {
 	tgs.turretSpec.setParam(rank-sr*0.5, TurretTypeSMALL)
 }
 
-func (this *SmallShipEnemySpec) setFirstState(es *EnemyState, appType AppearanceType) bool {
+func (this *SmallShipEnemySpec) setFirstState(es *EnemyState, appType AppearanceType, x float32, y float32, d float32) bool {
 	if !es.setAppearancePos(appType) {
 		return false
 	}
@@ -1145,7 +1150,7 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 	}
 }
 
-func (this *ShipEnemySpec) setFirstState(es *EnemyState, appType AppearanceType) bool {
+func (this *ShipEnemySpec) setFirstState(es *EnemyState, appType AppearanceType, x float32, y float32, d float32) bool {
 	if !es.setAppearancePos(appType) {
 		return false
 	}
@@ -1249,6 +1254,10 @@ func NewPlatformEnemySpec() *PlatformEnemySpec {
 	return &PlatformEnemySpec{EnemySpecBase: NewEnemySpecBase(EnemyTypePLATFORM)}
 }
 
+func (this *PlatformEnemySpec) bridgeShape() *EnemyShape {
+	return nil
+}
+
 func (this *PlatformEnemySpec) setParam(rank float32) {
 	this._shape = NewEnemyShape(EnemyShapeTypePLATFORM)
 	this._damagedShape = NewEnemyShape(EnemyShapeTypePLATFORM_DAMAGED)
@@ -1326,7 +1335,7 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 	}
 }
 
-func (this *PlatformEnemySpec) setFirstState(es *EnemyState, x float32, y float32, d float32) bool {
+func (this *PlatformEnemySpec) setFirstState(es *EnemyState, appType AppearanceType, x float32, y float32, d float32) bool {
 	es.pos.x = x
 	es.pos.y = y
 	es.deg = d

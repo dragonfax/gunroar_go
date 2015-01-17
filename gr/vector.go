@@ -48,7 +48,7 @@ func (this *Vector) DivAssign(a float32) {
 	this.y /= a
 }
 
-func (this Vector) checkSide(pos1 Vector, pos2 Vector) {
+func (this Vector) checkSide(pos1 Vector, pos2 Vector) float32 {
 	xo := pos2.x - pos1.x
 	yo := pos2.y - pos1.y
 	if xo == 0 {
@@ -145,8 +145,8 @@ func (this Vector) checkCross(p Vector, p1 Vector, p2 Vector, width float32) boo
 			f := p1.x*p2.y - p1.y*p2.x
 			dnm := b*d - a*e
 			if dnm != 0 {
-				x := (b*f - c*e) / dnm
-				y := (c*d - a*f) / dnm
+				this.x = (b*f - c*e) / dnm
+				this.y = (c*d - a*f) / dnm
 				if a1x <= this.x && this.x <= a2x && a1y <= this.y && this.y <= a2y &&
 					b1x <= this.x && this.x <= b2x && b1y <= this.y && this.y <= b2y {
 					return true
@@ -182,11 +182,11 @@ func (this Vector) checkHitDist(p Vector, pp Vector, dist float32) bool {
 }
 
 func (this Vector) vctSize() float32 {
-	return sqrt(x*x + y*y)
+	return sqrt32(this.x*this.x + this.y*this.y)
 }
 
 func (this Vector) distVector(v Vector) float32 {
-	return dist(v.x, v.y)
+	return this.dist(v.x, v.y)
 }
 
 func (this Vector) dist(px float32 /* = 0 */, py float32 /* = 0 */) float32 {
@@ -200,7 +200,7 @@ func (this Vector) dist(px float32 /* = 0 */, py float32 /* = 0 */) float32 {
 }
 
 func (this Vector) containsVector(p Vector, r float32 /* = 1 */) bool {
-	return contains(p.x, p.y, r)
+	return this.contains(p.x, p.y, r)
 }
 
 func (this Vector) contains(px float32, py float32, r float32 /*= 1*/) bool {
@@ -254,7 +254,7 @@ func (this *Vector3) MulAssign(a float32) {
 }
 
 func (this *Vector3) DivAssign(a float32) {
-	x /= a
-	y /= a
-	z /= a
+	this.x /= a
+	this.y /= a
+	this.z /= a
 }

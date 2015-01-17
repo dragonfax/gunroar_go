@@ -112,7 +112,6 @@ func (s *Shot) removeHitToEnemy(isSmallEnemy bool /*= false*/) {
 
 func (this *Shot) removeHit() {
 	this.close()
-	var sn int
 	if this.lance {
 		for i := 0; i < 10; i++ {
 			d := this.deg + nextSignedFloat(0.1)

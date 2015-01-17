@@ -59,7 +59,7 @@ func (dp *DisplayList) EndList() {
 	dp.registered = true
 }
 
-func (dp *DisplayList) call(i uint) { // default value should be 0
+func (dp *DisplayList) call(i uint /* = 0 */) {
 	gl.CallList(dp.idx + i)
 }
 

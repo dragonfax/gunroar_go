@@ -232,7 +232,6 @@ var padInput PadState
 var mouseInput MouseState
 
 // static TwinStickState stickInput
-var mouseState MouseInput
 
 type Boat struct {
 	pos                      Vector
@@ -387,7 +386,6 @@ func (this *Boat) move() {
 		this.vel.x = 0
 		this.refVel.x = 0
 	}
-	srf := false
 	if (this.onBlock || field.getBlock(px, this.pos.y+this.vy) < 0) &&
 		field.checkInField(this.pos.x, this.pos.y+this.vy) {
 		this.pos.y += this.vy

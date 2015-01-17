@@ -123,7 +123,7 @@ func (this *StageManager) gotoNextBlockArea() {
 			ses := NewShipEnemySpec()
 			ses.setParam(this.rank, ShipClassBOSS)
 			en := NewEnemy(ses)
-			if !ses.setFirstState(en.state, AppearanceTypeCENTER) {
+			if !ses.setFirstState(en.state, AppearanceTypeCENTER, 0, 0, 0) {
 				en.close()
 			}
 		}
@@ -145,7 +145,7 @@ func (this *StageManager) gotoNextBlockArea() {
 	} else if this.blockDensity > BLOCK_DENSITY_MAX {
 		this.blockDensity = BLOCK_DENSITY_MAX
 	}
-	this.batteryNum = (float32(this.blockDensity) + nextSignedFloat(1)) * 0.75
+	this.batteryNum = int((float32(this.blockDensity) + nextSignedFloat(1)) * 0.75)
 	tr := this.rank
 	largeShipNum := (2 - float32(this.blockDensity) + nextSignedFloat(1)) * 0.5
 	if noSmallShip {
@@ -153,7 +153,7 @@ func (this *StageManager) gotoNextBlockArea() {
 	} else {
 		largeShipNum *= 0.5
 	}
-	appType := nextInt(2)
+	appType := AppearanceType(nextInt(2))
 	if largeShipNum > 0 {
 		lr := tr * (0.25 + nextFloat(0.15))
 		if noSmallShip {
@@ -162,17 +162,17 @@ func (this *StageManager) gotoNextBlockArea() {
 		tr -= lr
 		ses := NewShipEnemySpec()
 		ses.setParam(lr/largeShipNum, ShipClassLARGE)
-		this.enemyApp[0] = NewEnemyAppearance(ses, largeShipNum, appType)
+		this.enemyApp[0] = NewEnemyAppearance(ses, int(largeShipNum), appType)
 	} else {
 		this.enemyApp[0] = nil
 	}
 	if this.batteryNum > 0 {
 		this.platformEnemySpec = NewPlatformEnemySpec()
 		pr := tr * (0.3 + nextFloat(0.1))
-		this.platformEnemySpec.setParam(pr / this.batteryNum)
+		this.platformEnemySpec.setParam(pr / float32(this.batteryNum))
 	}
 	appType = (appType + 1) % 2
-	middleShipNum := (4 - this.blockDensity + nextSignedFloat(1)) * 0.66
+	middleShipNum := (4 - float32(this.blockDensity) + nextSignedFloat(1)) * 0.66
 	if noSmallShip {
 		middleShipNum *= 2
 	}
@@ -186,7 +186,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		tr -= mr
 		ses := NewShipEnemySpec()
 		ses.setParam(mr/middleShipNum, ShipClassMIDDLE)
-		this.enemyApp[1] = NewEnemyAppearance(ses, middleShipNum, appType)
+		this.enemyApp[1] = NewEnemyAppearance(ses, int(middleShipNum), appType)
 	} else {
 		this.enemyApp[1] = nil
 	}
@@ -198,15 +198,15 @@ func (this *StageManager) gotoNextBlockArea() {
 		}
 		sses := NewSmallShipEnemySpec()
 		sses.setParam(tr / smallShipNum)
-		enemyApp[2] = NewEnemyAppearance(sses, smallShipNum, appType)
+		this.enemyApp[2] = NewEnemyAppearance(sses, int(smallShipNum), appType)
 	} else {
-		enemyApp[2] = nil
+		this.enemyApp[2] = nil
 	}
 }
 
 func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum int) {
 	ppn := platformPosNum
-	bn := batteryNum
+	bn := this.batteryNum
 	for i := 0; i < 100; i++ {
 		if ppn <= 0 || bn <= 0 {
 			break
@@ -224,11 +224,11 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 		if platformPos[ppi].used {
 			break
 		}
-		en := NewEnemy(platformEnemySpec)
+		en := NewEnemy(this.platformEnemySpec)
 		platformPos[ppi].used = true
 		ppn--
-		p := field.convertToScreenPos(platformPos[ppi].pos.x, platformPos[ppi].pos.y)
-		if !platformEnemySpec.setFirstState(en.state, p.x, p.y, platformPos[ppi].deg) {
+		p := field.convertToScreenPos(int(platformPos[ppi].pos.x), int(platformPos[ppi].pos.y))
+		if !this.platformEnemySpec.setFirstState(en.state, 0, p.x, p.y, platformPos[ppi].deg) {
 			en.close()
 			continue
 		}
@@ -240,34 +240,33 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 				ppn--
 			}
 		}
-		en.set(platformEnemySpec)
 		bn--
 	}
 }
 
 func (this *StageManager) draw() {
-	drawNum(this.rank*1000, 620, 10, 10, 0, 0, 33, 3)
-	drawTime(this.bossAppTime, 120, 20, 7)
+	drawNumOption(int(this.rank*1000), 620, 10, 10, 0, 0, 33, 3)
+	drawTime(this.bossAppTime, 120, 20, 7, 0)
 }
 
 type EnemyAppearance struct {
 	spec                             EnemySpec
 	nextAppDist, nextAppDistInterval float32
-	appType                          int
+	appType                          AppearanceType
 }
 
-func NewEnemyAppearance(s EnemySpec, num int, appType int) *EnemyAppearance {
+func NewEnemyAppearance(s EnemySpec, num int, appType AppearanceType) *EnemyAppearance {
 	this := new(EnemyAppearance)
 	this.nextAppDistInterval = 1
 	this.spec = s
-	this.nextAppDistInterval = NEXT_BLOCK_AREA_SIZE / num
-	this.nextAppDist = SignedFloat(nextAppDistInterval)
+	this.nextAppDistInterval = float32(NEXT_BLOCK_AREA_SIZE / num)
+	this.nextAppDist = nextSignedFloat(this.nextAppDistInterval)
 	this.appType = appType
 	return this
 }
 
 func (this *EnemyAppearance) move() {
-	if spec == nil {
+	if this.spec == nil {
 		return
 	}
 	this.nextAppDist -= field.lastScrollY
@@ -278,7 +277,8 @@ func (this *EnemyAppearance) move() {
 }
 
 func (this *EnemyAppearance) appear() {
-	if this.spec.setFirstState(en.state, this.appType) {
-		NewEnemy(this.spec)
+	en := NewEnemy(this.spec)
+	if !this.spec.setFirstState(en.state, this.appType, 0, 0, 0) {
+		en.close()
 	}
 }

@@ -143,7 +143,6 @@ func (this *ComplexShape) createDisplayList() {
 
 func (this *ComplexShape) createLoop(s float32, z float32, backToFirst bool /*= false*/, record bool /*= false*/) {
 	var d float32 = 0
-	var pn int
 	firstPoint := true
 	var fpx, fpy float32
 	for i := 0; i < POINT_NUM; i++ {
@@ -212,7 +211,7 @@ func (this *ComplexShape) createSquareLoop(s float32, z float32, backToFirst boo
 		pn = 3
 	}
 	for i := 0; i <= pn; i++ {
-		d := Pi32*2*float32(i)/4 + Pi32/4
+		d = Pi32*2*float32(i)/4 + Pi32/4
 		px := Sin32(d) * this.size * s
 		py := Cos32(d) * this.size * s
 		if py > 0 {
@@ -225,7 +224,7 @@ func (this *ComplexShape) createSquareLoop(s float32, z float32, backToFirst boo
 func (this *ComplexShape) createPillar(p Vector, s float32, z float32) {
 	var d float32
 	for i := 0; i < PILLAR_POINT_NUM; i++ {
-		d := Pi32 * 2 * float32(i) / PILLAR_POINT_NUM
+		d = Pi32 * 2 * float32(i) / PILLAR_POINT_NUM
 		gl.Vertex3f(Sin32(d)*s+p.x, Cos32(d)*s+p.y, z)
 	}
 }
@@ -241,10 +240,10 @@ func (this *ComplexShape) addWake(pos Vector, deg float32, spd float32, sr float
 	}
 	wakePos.x = pos.x + Sin32(deg+Pi32/2+0.7)*this.size*0.5*sr
 	wakePos.y = pos.y + Cos32(deg+Pi32/2+0.7)*this.size*0.5*sr
-	w := NewWake(wakePos, deg+Pi32-0.2+nextSignedFloat(0.1), sp, 40, sz*32*sr, false)
+	NewWake(wakePos, deg+Pi32-0.2+nextSignedFloat(0.1), sp, 40, sz*32*sr, false)
 	wakePos.x = pos.x + Sin32(deg-Pi32/2-0.7)*this.size*0.5*sr
 	wakePos.y = pos.y + Cos32(deg-Pi32/2-0.7)*this.size*0.5*sr
-	w = NewWake(wakePos, deg+Pi32+0.2+nextSignedFloat(0.1), sp, 40, sz*32*sr, false)
+	NewWake(wakePos, deg+Pi32+0.2+nextSignedFloat(0.1), sp, 40, sz*32*sr, false)
 }
 
 func (this *ComplexShape) checkShipCollision(x float32, y float32, deg float32, sr float32 /*= 1*/) bool {
