@@ -586,7 +586,7 @@ func NewShieldShape() ShieldShape {
  */
 type Shape interface {
 	draw()
-	collision() Vector
+	getCollision() Vector
 	checkCollision(ax float32, ay float32, shape Shape /*= null */) bool
 
 	getPointPos() []Vector
@@ -600,37 +600,37 @@ type SimpleShape struct {
 	collision   Vector
 }
 
-func getPointPos() []Vector {
+func (this *SimpleShape) getPointPos() []Vector {
 	return nil
 }
 
-func getPointDeg() []float32 {
+func (this *SimpleShape) getPointDeg() []float32 {
 	return nil
 }
 
-func (ss *SimpleShape) checkCollision(ax float32, ay float32, shape Shape /* = null */) bool {
-	return checkCollisionWithShapes(ax, ay, ss, shape)
+func (this *SimpleShape) checkCollision(ax float32, ay float32, shape Shape /* = null */) bool {
+	return checkCollisionWithShapes(ax, ay, this, shape)
 }
 
-func (ss *SimpleShape) startDisplayList() {
-	ss.displayList = NewDisplayList(1)
-	ss.displayList.beginNewList()
+func (this *SimpleShape) startDisplayList() {
+	this.displayList = NewDisplayList(1)
+	this.displayList.beginNewList()
 }
 
-func (ss *SimpleShape) endDisplayList() {
-	ss.displayList.endNewList()
+func (this *SimpleShape) endDisplayList() {
+	this.displayList.endNewList()
 }
 
-func (ss *SimpleShape) collision() Vector {
-	return ss.collision
+func (this *SimpleShape) getCollision() Vector {
+	return this.collision
 }
 
-func (ss *SimpleShape) close() {
-	ss.displayList.close()
+func (this *SimpleShape) close() {
+	this.displayList.close()
 }
 
-func (ss *SimpleShape) draw() {
-	ss.displayList.call(0)
+func (this *SimpleShape) draw() {
+	this.displayList.call(0)
 }
 
 /*
@@ -645,13 +645,13 @@ type ResizableShape struct {
 }
 
 func (rd *ResizableShape) draw() {
-	gl.Scalef(rs.size, rs.size, rs.size)
-	rs.shape.Draw()
+	gl.Scalef(rd.size, rd.size, rd.size)
+	rd.shape.Draw()
 }
 
-func (rd *ResizableShape) collision() *Vector {
-	rs.resizedCollision = NewVector(cd.collision().x*rs.size, cd.collision().y*rs.size)
-	return rs.resizedCollision
+func (rd *ResizableShape) getCollision() *Vector {
+	rd.resizedCollision = NewVector(rd.shape.getCollision().x*rd.size, rd.shape.getCollision().y*rd.size)
+	return rd.resizedCollision
 }
 
 func checkCollisionWithShapes(ax float32, ay float32, shape1 Shape, shape2 Shape) bool {
@@ -661,11 +661,11 @@ func checkCollisionWithShapes(ax float32, ay float32, shape1 Shape, shape2 Shape
 	}
 	var cx, cy float32
 	if shape2 != nil {
-		cx = shape1.collision().x + shape2.collision().x
-		cy = shape1.collision().y + shape2.collision().y
+		cx = shape1.getCollision().x + shape2.getCollision().x
+		cy = shape1.getCollision().y + shape2.getCollision().y
 	} else {
-		cx = shape1.collision().x
-		cy = shape1.collision().y
+		cx = shape1.getCollision().x
+		cy = shape1.getCollision().y
 	}
 	return ax <= cx && ay <= cy
 }

@@ -30,8 +30,6 @@ func NewMainLoop() {
 	this.maxSkipFrame = 5
 	this.slowdownStartRatio = 1
 	this.slowdownMaxRatio = 1.75
-	this.screen = screen
-	this.input = input
 	this.interval = INTERVAL_BASE
 	return this
 }
