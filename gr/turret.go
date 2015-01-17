@@ -594,13 +594,14 @@ func (this *TurretGroup) checkCollision(x float32, y float32, c Shape, shot *Sho
 type AlignType int
 
 const (
-	ROUND AlignType = iota
-	STRAIGHT
+	AlignTypeROUND AlignType = iota
+	AlignTypeSTRAIGHT
 )
 
 type TurretGroupSpec struct {
 	turretSpec                              TurretSpec
-	num, alignType                          int
+	num                                     int
+	alignType                               AlignType
 	alignDeg, alignWidth, radius, distRatio float32
 	offset                                  Vector
 }

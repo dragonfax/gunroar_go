@@ -818,8 +818,8 @@ func (this *SmallShipEnemySpec) move(es *EnemyState) bool {
 			es.pos.y += Cos32(es.velDeg) * es.speed * 2
 		}
 		var ad float32
-		ship.nearPos = es.pos
-		shipPos := ship.nearPos
+		ship.nearPos(es.pos)
+		shipPos := ship._nearPos
 		if shipPos.distVector(es.pos) < 0.1 {
 			ad = 0
 		} else {
@@ -945,10 +945,10 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 		tgs := this.getTurretGroupSpec()
 		tgs.turretSpec.setParam(0, TurretTypeDUMMY)
 	} else {
-		subTurretRank := rk / (mainTurretNum*3 + subTurretNum)
-		mainTurretRank := subTurretRank * 2.5
+		subTurretRank := int(rk) / (mainTurretNum*3 + subTurretNum)
+		mainTurretRank := float32(subTurretRank) * 2.5
 		if cls != ShipClassBOSS {
-			frontMainTurretNum := int(mainTurretNum/2 + 0.99)
+			frontMainTurretNum := int(float32(mainTurretNum)/2 + 0.99)
 			rearMainTurretNum := mainTurretNum - frontMainTurretNum
 			if frontMainTurretNum > 0 {
 				tgs := this.getTurretGroupSpec()
@@ -980,13 +980,13 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 					tgs := this.getTurretGroupSpec()
 					if i == 0 || i == 2 {
 						if nextInt(2) == 0 {
-							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
+							tgs.turretSpec.setParam(float32(subTurretRank), TurretTypeSUB)
 						} else {
-							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB_DESTRUCTIVE)
+							tgs.turretSpec.setParam(float32(subTurretRank), TurretTypeSUB_DESTRUCTIVE)
 						}
 						pts = tgs.turretSpec
 					} else {
-						tgs.turretSpec.setParam(pts)
+						tgs.turretSpec.setParamTurretSpec(pts)
 					}
 					tgs.num = tn
 					tgs.alignType = AlignTypeROUND
@@ -1019,7 +1019,7 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 						pts = tgs.turretSpec
 						pts.setBossSpec()
 					} else {
-						tgs.turretSpec.setParam(pts)
+						tgs.turretSpec.setParamTurretSpec(pts)
 					}
 					tgs.num = tn
 					tgs.alignType = AlignTypeROUND
@@ -1044,14 +1044,14 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 					tgs := this.getTurretGroupSpec()
 					if i == 0 || i == 2 || i == 4 {
 						if nextInt(2) == 0 {
-							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
+							tgs.turretSpec.setParam(float32(subTurretRank), TurretTypeSUB)
 						} else {
-							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB_DESTRUCTIVE)
+							tgs.turretSpec.setParam(float32(subTurretRank), TurretTypeSUB_DESTRUCTIVE)
 						}
 						pts = tgs.turretSpec
 						pts.setBossSpec()
 					} else {
-						tgs.turretSpec.setParam(pts)
+						tgs.turretSpec.setParamTurretSpec(pts)
 					}
 					tgs.num = tn[idx]
 					tgs.alignType = AlignTypeROUND
@@ -1067,13 +1067,12 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 		if cls == ShipClassBOSS {
 			this.addMovingTurret(rank*movingTurretRatio, true)
 		} else {
-			this.addMovingTurret(rank * movingTurretRatio)
+			this.addMovingTurret(rank*movingTurretRatio, false)
 		}
 	}
 }
 
 func (this *ShipEnemySpec) setFirstState(es *EnemyState, appType AppearanceType) bool {
-	es.setSpec(this)
 	if !es.setAppearancePos(appType) {
 		return false
 	}
@@ -1097,7 +1096,7 @@ func (this *ShipEnemySpec) move(es *EnemyState) bool {
 	if es.destroyedCnt >= SINK_INTERVAL {
 		return false
 	}
-	if !super.move(es) {
+	if !this.EnemySpec.move(es) {
 		return false
 	}
 	es.pos.x += Sin32(es.deg) * es.speed
@@ -1120,13 +1119,13 @@ func (this *ShipEnemySpec) move(es *EnemyState) bool {
 			}
 		}
 		es.deg += (es.trgDeg - es.deg) * 0.0025
-		if this.ship.higherPos.y > es.pos.y {
+		if ship.higherPos().y > es.pos.y {
 			es.speed += (this.speed*2 - es.speed) * 0.005
 		} else {
 			es.speed += (this.speed - es.speed) * 0.01
 		}
 	} else {
-		if !es.checkFrontClear() {
+		if !es.checkFrontClear(false) {
 			es.deg += this.degVel * es.turnWay
 			es.speed *= 0.98
 		} else {
@@ -1147,11 +1146,11 @@ func (this *ShipEnemySpec) move(es *EnemyState) bool {
 func (this *ShipEnemySpec) draw(es *EnemyState) {
 	if es.destroyedCnt >= 0 {
 		setScreenColor(
-			EnemyShapeMIDDLE_COLOR_R*(1-float32(es.destroyedCnt)/SINK_INTERVAL)*0.5,
-			EnemyShapeMIDDLE_COLOR_G*(1-float32(es.destroyedCnt)/SINK_INTERVAL)*0.5,
-			EnemyShapeMIDDLE_COLOR_B*(1-float32(es.destroyedCnt)/SINK_INTERVAL)*0.5)
+			MIDDLE_COLOR_R*(1-float32(es.destroyedCnt)/SINK_INTERVAL)*0.5,
+			MIDDLE_COLOR_G*(1-float32(es.destroyedCnt)/SINK_INTERVAL)*0.5,
+			MIDDLE_COLOR_B*(1-float32(es.destroyedCnt)/SINK_INTERVAL)*0.5, 1)
 	}
-	super.draw(es)
+	this.EnemySpec.draw(es)
 }
 
 func (this *ShipEnemySpec) score() int {
@@ -1163,6 +1162,7 @@ func (this *ShipEnemySpec) score() int {
 	case ShipClassBOSS:
 		return 1000
 	}
+	return 0
 }
 
 /**
@@ -1173,11 +1173,10 @@ type PlatformEnemySpec struct {
 }
 
 func NewPlatformEnemySpec() *PlatformEnemySpec {
-	return &PlatformEnemySpec{NewEnemySpec()}
+	return &PlatformEnemySpec{NewEnemySpec(EnemyTypePLATFORM)}
 }
 
 func (this *PlatformEnemySpec) setParam(rank float32) {
-	this.set(EnemyType.PLATFORM)
 	this.shape = NewEnemyShape(EnemyShapeTypePLATFORM)
 	this.damagedShape = NewEnemyShape(EnemyShapeTypePLATFORM_DAMAGED)
 	this.destroyedShape = NewEnemyShape(EnemyShapeTypePLATFORM_DESTROYED)
@@ -1193,7 +1192,7 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 	var movingTurretRatio float32
 	switch nextInt(3) {
 	case 0:
-		frontTurretNum = int(size*(2+nextSignedFloat(0.5)) + 1)
+		frontTurretNum = int(this.size*(2+nextSignedFloat(0.5)) + 1)
 		movingTurretRatio = 0.33 + nextFloat(0.46)
 		rk *= (1 - movingTurretRatio)
 		movingTurretRatio *= 2.5
@@ -1250,12 +1249,11 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 		}
 	}
 	if movingTurretRatio > 0 {
-		this.addMovingTurret(rank * movingTurretRatio)
+		this.addMovingTurret(rank*movingTurretRatio, false)
 	}
 }
 
 func (this *PlatformEnemySpec) setFirstState(es *EnemyState, x float32, y float32, d float32) bool {
-	es.setSpec(this)
 	es.pos.x = x
 	es.pos.y = y
 	es.deg = d
