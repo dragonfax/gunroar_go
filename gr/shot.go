@@ -201,6 +201,7 @@ type ShotShape struct {
 
 func NewShotShape() *ShotShape {
 	ss := new(ShotShape)
+	ss.SimpleShape = NewSimpleShape()
 	ss.startDisplayList()
 	setScreenColor(0.1, 0.33, 0.1, 1)
 	gl.Begin(gl.QUADS)
@@ -228,6 +229,7 @@ type LanceShape struct {
 
 func NewLanceShape() *LanceShape {
 	ls := new(LanceShape)
+	ls.SimpleShape = NewSimpleShape()
 	ls.startDisplayList()
 	// no display for this shape.
 	ls.endDisplayList()

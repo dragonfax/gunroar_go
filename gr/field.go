@@ -65,11 +65,11 @@ func NewField() *Field {
 	this := new(Field)
 	this.size = Vector{SCREEN_BLOCK_SIZE_X / 2 * 0.9, SCREEN_BLOCK_SIZE_Y / 2 * 0.8}
 	this.outerSize = Vector{SCREEN_BLOCK_SIZE_X / 2, SCREEN_BLOCK_SIZE_Y / 2}
-	this.block = make([][]int, BLOCK_SIZE_Y, BLOCK_SIZE_Y)
-	this.panel = make([][]Panel, BLOCK_SIZE_Y, BLOCK_SIZE_Y)
+	this.block = make([][]int, BLOCK_SIZE_X, BLOCK_SIZE_X)
+	this.panel = make([][]Panel, BLOCK_SIZE_X, BLOCK_SIZE_X)
 	for i, _ := range this.block {
-		this.block[i] = make([]int, BLOCK_SIZE_X, BLOCK_SIZE_X)
-		this.panel[i] = make([]Panel, BLOCK_SIZE_X, BLOCK_SIZE_X)
+		this.block[i] = make([]int, BLOCK_SIZE_Y, BLOCK_SIZE_Y)
+		this.panel[i] = make([]Panel, BLOCK_SIZE_Y, BLOCK_SIZE_Y)
 	}
 	this.platformPos = make([]PlatformPos, SCREEN_BLOCK_SIZE_X*NEXT_BLOCK_AREA_SIZE, SCREEN_BLOCK_SIZE_X*NEXT_BLOCK_AREA_SIZE)
 	/* for i, _ := range this.platformPos {

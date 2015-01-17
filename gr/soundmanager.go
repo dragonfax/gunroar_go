@@ -26,8 +26,8 @@ var seFileName = []string{"shot.wav", "lance.wav", "hit.wav",
 
 var seChannel = []int{0, 1, 2, 3, 4, 5, 6, 7, 7, 6}
 var bgm map[string]*Music
-var se map[string]*Chunk
-var seMark map[string]bool
+var se map[string]*Chunk = make(map[string]*Chunk)
+var seMark map[string]bool = make(map[string]bool)
 var bgmDisabled bool
 var seDisabled bool
 var bgmFileName []string

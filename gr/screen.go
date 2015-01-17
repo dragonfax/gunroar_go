@@ -43,6 +43,7 @@ func NewScreen() *Screen {
 
 // called by InitSDL()
 func (s *Screen) Init() {
+	fmt.Println("initing screen")
 	s.setCaption(CAPTION)
 	gl.LineWidth(1)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE)
@@ -176,6 +177,7 @@ func setScreenColorForced(r float32, g float32, b float32, a float32 /* = 1 */) 
 }
 
 func (s *Screen) initSDL() {
+	fmt.Println("initing SDL")
 	s.farPlane = 1000
 	s.nearPlane = 0.1
 	s.width = 640

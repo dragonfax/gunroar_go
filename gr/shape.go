@@ -50,7 +50,8 @@ type ComplexShape struct {
 
 func NewComplexShape(size float32, distRatio float32, spinyRatio float32, shapeType ShapeType, r float32, g float32, b float32, collidable bool /* = false */) *ComplexShape {
 
-	this := &ComplexShape{SimpleShape: NewSimpleShape()}
+	this := new(ComplexShape)
+	this.SimpleShape = NewSimpleShape()
 	this.size = size
 	this.distRatio = distRatio
 	this.spinyRatio = spinyRatio
@@ -303,6 +304,7 @@ func closeTurretShapes() {
 
 func NewTurretShape(t TurretShapeType) *TurretShape {
 	turretShape := new(TurretShape)
+	turretShape.ResizableShape = NewResizableShape()
 	turretShape.shape = turretShapes[t]
 	return turretShape
 }
@@ -356,6 +358,7 @@ func closeEnemyShapes() {
 
 func NewEnemyShape(t EnemyShapeType) *EnemyShape {
 	e := new(EnemyShape)
+	e.ResizableShape = NewResizableShape()
 	e.shape = enemyShapes[t]
 	return e
 }
@@ -407,12 +410,13 @@ func closeBulletShapes() {
 
 func NewBulletShape(t BulletShapeType) *BulletShape {
 	b := new(BulletShape)
+	b.ResizableShape = NewResizableShape()
 	b.shape = bulletShapes[t]
 	return b
 }
 
 type NormalBulletShape struct {
-	*SimpleShape
+	SimpleShape
 }
 
 func NewNormalBulletShape() *NormalBulletShape {
@@ -450,6 +454,7 @@ type SmallBulletShape struct {
 
 func NewSmallBulletShape() *SmallBulletShape {
 	sbs := new(SmallBulletShape)
+	sbs.SimpleShape = NewSimpleShape()
 	sbs.startDisplayList()
 	gl.Disable(gl.BLEND)
 	setScreenColor(0.6, 0.9, 0.3, 1)
@@ -483,6 +488,7 @@ type MovingTurretBulletShape struct {
 
 func NewMovingTurretBulletShape() *MovingTurretBulletShape {
 	mtbs := new(MovingTurretBulletShape)
+	mtbs.SimpleShape = NewSimpleShape()
 	mtbs.startDisplayList()
 	gl.Disable(gl.BLEND)
 	setScreenColor(0.7, 0.5, 0.9, 1)
@@ -518,6 +524,7 @@ type DestructiveBulletShape struct {
 
 func NewDestructiveBulletShape() *DestructiveBulletShape {
 	dbs := new(DestructiveBulletShape)
+	dbs.SimpleShape = NewSimpleShape()
 	dbs.startDisplayList()
 	gl.Disable(gl.BLEND)
 	setScreenColor(0.9, 0.9, 0.6, 1)
@@ -546,6 +553,7 @@ type CrystalShape struct {
 
 func NewCrystalShape() *CrystalShape {
 	cs := new(CrystalShape)
+	cs.SimpleShape = NewSimpleShape()
 	cs.startDisplayList()
 	setScreenColor(0.6, 1, 0.7, 1)
 	gl.Begin(gl.LINE_LOOP)
@@ -564,6 +572,7 @@ type ShieldShape struct {
 
 func NewShieldShape() *ShieldShape {
 	ss := new(ShieldShape)
+	ss.SimpleShape = NewSimpleShape()
 	ss.startDisplayList()
 	setScreenColor(0.5, 0.5, 0.7, 1)
 	gl.Begin(gl.LINE_LOOP)
@@ -655,6 +664,10 @@ type ResizableShape struct {
 	shape            Shape
 	size             float32
 	resizedCollision Vector
+}
+
+func NewResizableShape() *ResizableShape {
+	return new(ResizableShape)
 }
 
 func (rd *ResizableShape) close() {

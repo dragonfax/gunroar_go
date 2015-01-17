@@ -256,6 +256,9 @@ type EnemyAppearance struct {
 }
 
 func NewEnemyAppearance(s EnemySpec, num int, appType AppearanceType) *EnemyAppearance {
+	if num == 0 {
+		num = 1
+	}
 	this := new(EnemyAppearance)
 	this.nextAppDistInterval = 1
 	this.spec = s

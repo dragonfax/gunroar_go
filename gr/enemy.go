@@ -784,7 +784,8 @@ type SmallShipEnemySpec struct {
 }
 
 func NewSmallShipEnemySpec() *SmallShipEnemySpec {
-	this := &SmallShipEnemySpec{EnemySpecBase: NewEnemySpecBase(EnemyTypeSMALL)}
+	this := new(SmallShipEnemySpec)
+	this.EnemySpecBase = NewEnemySpecBase(EnemyTypeSMALL)
 	this.moveDuration = 1
 	this.stayDuration = 1
 	return this
@@ -942,7 +943,9 @@ type ShipEnemySpec struct {
 }
 
 func NewShipEnemySpec() *ShipEnemySpec {
-	return &ShipEnemySpec{EnemySpecBase: NewEnemySpecBase(EnemyTypeLARGE)}
+	this := new(ShipEnemySpec)
+	this.EnemySpecBase = NewEnemySpecBase(EnemyTypeLARGE)
+	return this
 }
 
 func (this *ShipEnemySpec) bridgeShape() *EnemyShape {
@@ -1251,7 +1254,9 @@ type PlatformEnemySpec struct {
 }
 
 func NewPlatformEnemySpec() *PlatformEnemySpec {
-	return &PlatformEnemySpec{EnemySpecBase: NewEnemySpecBase(EnemyTypePLATFORM)}
+	this := new(PlatformEnemySpec)
+	this.EnemySpecBase = NewEnemySpecBase(EnemyTypePLATFORM)
+	return this
 }
 
 func (this *PlatformEnemySpec) bridgeShape() *EnemyShape {

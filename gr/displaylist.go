@@ -19,7 +19,7 @@ type DisplayList struct {
 }
 
 func NewDisplayList(num uint) *DisplayList {
-	dl := &DisplayList{}
+	dl := new(DisplayList)
 	dl.num = num
 	dl.idx = gl.GenLists(int(num))
 	return dl
