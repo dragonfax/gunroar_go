@@ -63,7 +63,7 @@ func (this *Bullet) move() {
 	if this.cnt < 30 {
 		this.speed += (this.trgSpeed - this.speed) * 0.066
 		md := this.trgDeg - this.deg
-		normalizeDeg(md)
+		md = normalizeDeg(md)
 		this.deg += md * 0.066
 		if this.cnt == 29 {
 			this.speed = this.trgSpeed

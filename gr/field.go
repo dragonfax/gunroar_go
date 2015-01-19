@@ -438,7 +438,7 @@ func (this *Field) calcPlatformDeg(x int, y int) float32 {
 			if b1 && !b2 {
 				pd += Pi32 / 4
 			}
-			normalizeDeg(pd)
+			pd = normalizeDeg(pd)
 			return pd
 		}
 		d++

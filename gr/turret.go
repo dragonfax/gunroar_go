@@ -70,7 +70,7 @@ func (this *Turret) move(x float32, y float32, d float32, bulletFireSpeed float3
 		ad = atan232(ax, ay)
 	}
 	od := td - ad
-	normalizeDeg(od)
+	od = normalizeDeg(od)
 	var ts float32
 	if this.cnt >= 0 {
 		ts = this.spec.turnSpeed
@@ -84,7 +84,7 @@ func (this *Turret) move(x float32, y float32, d float32, bulletFireSpeed float3
 	} else {
 		this.deg += ts
 	}
-	normalizeDeg(this.deg)
+	this.deg = normalizeDeg(this.deg)
 	if this.deg > this.spec.turnRange {
 		this.deg = this.spec.turnRange
 	} else if this.deg < -this.spec.turnRange {
@@ -688,11 +688,11 @@ func (this *MovingTurretGroup) move(p Vector, od float32) {
 				od = atan232(shipPos.x-this.centerPos.x, shipPos.y-this.centerPos.y)
 			}
 			od += this.swingAmpDeg - this.deg
-			normalizeDeg(od)
+			od = normalizeDeg(od)
 			this.deg += od * 0.1
 		} else {
 			od := this.swingFixDeg + this.swingAmpDeg - this.deg
-			normalizeDeg(od)
+			od = normalizeDeg(od)
 			this.deg += od * 0.1
 		}
 	}

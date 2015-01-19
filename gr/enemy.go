@@ -907,7 +907,7 @@ func (this *SmallShipEnemySpec) move(es *EnemyState) bool {
 			ad = atan232(shipPos.x-es.pos.x, shipPos.y-es.pos.y)
 		}
 		od := ad - es.velDeg
-		normalizeDeg(od)
+		od = normalizeDeg(od)
 		if od <= this.turnDeg && od >= -this.turnDeg {
 			es.velDeg = ad
 		} else if od < 0 {
@@ -915,13 +915,13 @@ func (this *SmallShipEnemySpec) move(es *EnemyState) bool {
 		} else {
 			es.velDeg += this.turnDeg
 		}
-		normalizeDeg(es.velDeg)
+		es.velDeg = normalizeDeg(es.velDeg)
 		es.cnt++
 	}
 	od := es.velDeg - es.deg
-	normalizeDeg(od)
+	od = normalizeDeg(od)
 	es.deg += od * 0.05
-	normalizeDeg(es.deg)
+	es.deg = normalizeDeg(es.deg)
 	if es.cnt%6 == 0 && es.speed >= 0.03 {
 		this._shape.addWake(es.pos, es.deg, es.speed)
 	}

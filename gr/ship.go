@@ -477,7 +477,7 @@ func (this *Boat) moveNormal() {
 		ad -= this.deg
 		ad = normalizeDeg(ad)
 		this.deg += ad * this.turnRatio * this.turnSpeed
-		normalizeDeg(this.deg)
+		this.deg = normalizeDeg(this.deg)
 	}
 }
 
@@ -549,11 +549,11 @@ func (this *Boat) moveMouse() {
 	}
 	if this.vx != 0 || this.vy != 0 {
 		ad := atan232(this.vx, this.vy)
-		normalizeDeg(ad)
+		ad = normalizeDeg(ad)
 		ad -= this.deg
-		normalizeDeg(ad)
+		ad = normalizeDeg(ad)
 		this.deg += ad * this.turnRatio * this.turnSpeed
-		normalizeDeg(this.deg)
+		this.deg = normalizeDeg(this.deg)
 	}
 }
 
