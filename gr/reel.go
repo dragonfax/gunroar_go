@@ -64,9 +64,9 @@ func (sr *ScoreReel) drawAtPos(x float32, y float32, s float32) {
 
 func (sr *ScoreReel) addReelScore(as int) {
 	sr.targetScore += as
-	ts := sr.targetScore
+	var ts int = sr.targetScore
 	for i := 0; i < sr.digit; i++ {
-		sr.numReel[i].targetDeg = float32(ts * 360 / 10)
+		sr.numReel[i].targetDeg = float32(ts) * 360 / 10
 		ts /= 10
 		if ts < 0 {
 			break
@@ -207,7 +207,6 @@ type Target struct {
 }
 
 type NumIndicator struct {
-	scoreReel *ScoreReel
 	pos, vel  Vector
 	n         int
 	t         IndicatorType
@@ -246,13 +245,12 @@ func decTargetY() {
 func NewNumIndicator(n int, t IndicatorType, size float32, x float32, y float32) *NumIndicator {
 	ni := new(NumIndicator)
 	ni.alpha = 1
-	ni.scoreReel = NewScoreReel()
 
 	if ni.t == IndicatorTypeSCORE {
 		if ni.target[ni.targetIdx].flyingTo == FlyingToTypeRIGHT {
 			decTargetY()
 		}
-		ni.scoreReel.addReelScore(ni.target[ni.targetNum-1].n)
+		scoreReel.addReelScore(ni.target[ni.targetNum-1].n)
 	}
 	ni.n = n
 	ni.t = t
@@ -282,7 +280,7 @@ func (ni *NumIndicator) gotoNextTarget() {
 	}
 	if ni.targetIdx >= ni.targetNum {
 		if ni.target[ni.targetIdx-1].flyingTo == FlyingToTypeBOTTOM {
-			ni.scoreReel.addReelScore(ni.target[ni.targetIdx-1].n)
+			scoreReel.addReelScore(ni.target[ni.targetIdx-1].n)
 		}
 		ni.close()
 		return
