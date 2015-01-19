@@ -673,7 +673,9 @@ type ResizableShape struct {
 }
 
 func NewResizableShape() *ResizableShape {
-	return new(ResizableShape)
+	this := new(ResizableShape)
+	this.size = 1 // TODO this is too large, but I don't know where the resizableshapes get it from.
+	return this
 }
 
 func (rd *ResizableShape) close() {
