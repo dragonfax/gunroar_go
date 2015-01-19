@@ -9,8 +9,6 @@ import "github.com/veandco/go-sdl2/sdl"
 
 const INTERVAL_BASE = 16
 
-var input *MouseAndPad
-
 // twinStick TwinStick
 var mainLoop *MainLoop
 
@@ -19,7 +17,7 @@ func main() {
 	pad = NewPad()
 	// twinStick = new RecordableTwinStick
 	mouse = NewMouse()
-	input = NewMouseAndPad(mouse, pad)
+	mouseAndPad = NewMouseAndPad()
 	gameManager = NewGameManager()
 	mainLoop = NewMainLoop()
 	mainLoop.loop()
@@ -73,7 +71,7 @@ func (m *MainLoop) loop() {
 	gameManager.start()
 	for !m.done {
 		event := sdl.PollEvent()
-		input.handleEvent(event)
+		mouseAndPad.handleEvent(event)
 		switch event.(type) {
 		case *sdl.QuitEvent:
 			m.breakLoop()

@@ -52,10 +52,8 @@ func (this *GameManager) init() {
 	InitFragments()
 	InitSparkFragments()
 	// InitCrystal.init()
-	pad = input.pad
 	// twinStick = cast(TwinStick) (cast(MultipleInputDevice) input).inputs[1]
 	// twinStick.openJoystick(pad.openJoystick())
-	mouse = input.mouse
 	field = NewField()
 	ship = NewShip()
 	scoreReel = NewScoreReel()

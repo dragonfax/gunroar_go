@@ -16,21 +16,19 @@ type MouseAndPadState struct {
 
 type MouseAndPad struct {
 	state MouseAndPadState
-	mouse *Mouse
-	pad   *Pad
 }
 
-func NewMouseAndPad(mouse *Mouse, pad *Pad) *MouseAndPad {
-	return &MouseAndPad{MouseAndPadState{}, mouse, pad}
+func NewMouseAndPad() *MouseAndPad {
+	return &MouseAndPad{MouseAndPadState{}}
 }
 
 func (this *MouseAndPad) getState() MouseAndPadState {
-	this.state.mouseState = this.mouse.getState()
-	this.state.padState = this.pad.getState()
+	this.state.mouseState = mouse.getState()
+	this.state.padState = pad.getState()
 	return this.state
 }
 
 func (this *MouseAndPad) handleEvent(event sdl.Event) {
 	// this.mouse.handleEvent(event)
-	this.pad.handleEvent(event)
+	pad.handleEvent(event)
 }
