@@ -11,16 +11,15 @@ const MOUSE_SCREEN_MAPPING_RATIO_X = 26.0
 const MOUSE_SCREEN_MAPPING_RATIO_Y = 19.5
 
 func (m *Mouse) adjustPos(ms *MouseState) {
-	ms.x = (ms.x - float32(m.screen.width)/2) * MOUSE_SCREEN_MAPPING_RATIO_X / float32(m.screen.width)
-	ms.y = -(ms.y - float32(m.screen.height)/2) * MOUSE_SCREEN_MAPPING_RATIO_Y / float32(m.screen.height)
+	ms.x = (ms.x - float32(screen.width)/2) * MOUSE_SCREEN_MAPPING_RATIO_X / float32(screen.width)
+	ms.y = -(ms.y - float32(screen.height)/2) * MOUSE_SCREEN_MAPPING_RATIO_Y / float32(screen.height)
 }
 
 /**
  * Mouse input.
  */
 type Mouse struct {
-	screen Screen
-	state  MouseState
+	state MouseState
 }
 
 func NewMouse() *Mouse {
