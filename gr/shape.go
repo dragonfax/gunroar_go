@@ -70,6 +70,7 @@ func NewComplexShape(size float32, distRatio float32, spinyRatio float32, shapeT
 }
 
 func (this *ComplexShape) createDisplayList() {
+	this.startDisplayList()
 	height := this.size * 0.5
 	var z float32 = 0
 	var sz float32 = 1
@@ -140,6 +141,7 @@ func (this *ComplexShape) createDisplayList() {
 	case TURRET_DESTROYED:
 		break
 	}
+	this.endDisplayList()
 }
 
 func (this *ComplexShape) createLoop(s float32, z float32, backToFirst bool /*= false*/, record bool /*= false*/) {
@@ -621,7 +623,7 @@ type SimpleShape struct {
 
 func NewSimpleShape() *SimpleShape {
 	this := new(SimpleShape)
-	this.displayList = NewDisplayList(1)
+	// this.displayList = NewDisplayList(1)
 	this.collision = &Vector{}
 	return this
 }

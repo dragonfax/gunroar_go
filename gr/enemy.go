@@ -571,6 +571,10 @@ func (this *EnemySpecBase) shape() *EnemyShape {
 	return this._shape
 }
 
+func (this *EnemySpecBase) bridgeShape() *EnemyShape {
+	return this._bridgeShape
+}
+
 func (this *EnemySpecBase) score() int {
 	return 0
 }
@@ -950,10 +954,6 @@ func NewShipEnemySpec() *ShipEnemySpec {
 	return this
 }
 
-func (this *ShipEnemySpec) bridgeShape() *EnemyShape {
-	return nil
-}
-
 func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 	this._shipClass = cls
 	this._shape = NewEnemyShape(EnemyShapeTypeMIDDLE)
@@ -1259,10 +1259,6 @@ func NewPlatformEnemySpec() *PlatformEnemySpec {
 	this := new(PlatformEnemySpec)
 	this.EnemySpecBase = NewEnemySpecBase(EnemyTypePLATFORM)
 	return this
-}
-
-func (this *PlatformEnemySpec) bridgeShape() *EnemyShape {
-	return nil
 }
 
 func (this *PlatformEnemySpec) setParam(rank float32) {
