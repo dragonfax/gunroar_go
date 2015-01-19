@@ -103,7 +103,9 @@ func (this *StageManager) move() {
 	}
 	this.rank = this.baseRank + this.addRank
 	for _, ea := range this.enemyApp {
-		ea.move()
+		if ea != nil {
+			ea.move()
+		}
 	}
 }
 
