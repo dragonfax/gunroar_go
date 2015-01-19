@@ -106,7 +106,7 @@ func (this *GameManager) addSlowdownRatio(sr float32) {
 }
 
 func (this *GameManager) move() {
-	if pad.keys[sdl.K_ESCAPE] == sdl.PRESSED {
+	if pad.keys[sdl.SCANCODE_ESCAPE] == sdl.PRESSED {
 		if !this.escPressed {
 			this.escPressed = true
 			if state == inGameState {
@@ -230,7 +230,7 @@ func (this *InGameState) initGameState() {
 }
 
 func (this *InGameState) move() {
-	if pad.keys[sdl.K_p] == sdl.PRESSED {
+	if pad.keys[sdl.SCANCODE_P] == sdl.PRESSED {
 		if !this.pausePressed {
 			if this.pauseCnt <= 0 && !isGameOver {
 				this.pauseCnt = 1

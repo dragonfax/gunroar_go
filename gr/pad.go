@@ -5,9 +5,7 @@
  */
 package main
 
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
+import "github.com/veandco/go-sdl2/sdl"
 
 const JOYSTICK_AXIS = 16384
 
@@ -53,23 +51,23 @@ func (pad *Pad) getState() PadState {
 		x = pad.stick.GetAxis(0)
 		y = pad.stick.GetAxis(1)
 	}
-	if pad.keys[sdl.K_RIGHT] == sdl.PRESSED || pad.keys[sdl.K_KP_6] == sdl.PRESSED ||
-		pad.keys[sdl.K_d] == sdl.PRESSED || pad.keys[sdl.K_l] == sdl.PRESSED ||
+	if pad.keys[sdl.SCANCODE_RIGHT] == sdl.PRESSED || pad.keys[sdl.SCANCODE_KP_6] == sdl.PRESSED ||
+		pad.keys[sdl.SCANCODE_D] == sdl.PRESSED || pad.keys[sdl.SCANCODE_L] == sdl.PRESSED ||
 		x > JOYSTICK_AXIS {
 		pad.state.dir |= PadDirRIGHT
 	}
-	if pad.keys[sdl.K_LEFT] == sdl.PRESSED || pad.keys[sdl.K_KP_4] == sdl.PRESSED ||
-		pad.keys[sdl.K_a] == sdl.PRESSED || pad.keys[sdl.K_j] == sdl.PRESSED ||
+	if pad.keys[sdl.SCANCODE_LEFT] == sdl.PRESSED || pad.keys[sdl.SCANCODE_KP_4] == sdl.PRESSED ||
+		pad.keys[sdl.SCANCODE_A] == sdl.PRESSED || pad.keys[sdl.SCANCODE_J] == sdl.PRESSED ||
 		x < -JOYSTICK_AXIS {
 		pad.state.dir |= PadDirLEFT
 	}
-	if pad.keys[sdl.K_DOWN] == sdl.PRESSED || pad.keys[sdl.K_KP_2] == sdl.PRESSED ||
-		pad.keys[sdl.K_s] == sdl.PRESSED || pad.keys[sdl.K_k] == sdl.PRESSED ||
+	if pad.keys[sdl.SCANCODE_DOWN] == sdl.PRESSED || pad.keys[sdl.SCANCODE_KP_2] == sdl.PRESSED ||
+		pad.keys[sdl.SCANCODE_S] == sdl.PRESSED || pad.keys[sdl.SCANCODE_K] == sdl.PRESSED ||
 		y > JOYSTICK_AXIS {
 		pad.state.dir |= PadDirDOWN
 	}
-	if pad.keys[sdl.K_UP] == sdl.PRESSED || pad.keys[sdl.K_KP_8] == sdl.PRESSED ||
-		pad.keys[sdl.K_w] == sdl.PRESSED || pad.keys[sdl.K_i] == sdl.PRESSED ||
+	if pad.keys[sdl.SCANCODE_UP] == sdl.PRESSED || pad.keys[sdl.SCANCODE_KP_8] == sdl.PRESSED ||
+		pad.keys[sdl.SCANCODE_W] == sdl.PRESSED || pad.keys[sdl.SCANCODE_I] == sdl.PRESSED ||
 		y < -JOYSTICK_AXIS {
 		pad.state.dir |= PadDirUP
 	}
@@ -85,8 +83,8 @@ func (pad *Pad) getState() PadState {
 			pad.stick.GetButton(5) + pad.stick.GetButton(6) +
 			pad.stick.GetButton(9) + pad.stick.GetButton(10)
 	}
-	if pad.keys[sdl.K_z] == sdl.PRESSED || pad.keys[sdl.K_PERIOD] == sdl.PRESSED ||
-		pad.keys[sdl.K_LCTRL] == sdl.PRESSED || pad.keys[sdl.K_RCTRL] == sdl.PRESSED ||
+	if pad.keys[sdl.SCANCODE_Z] == sdl.PRESSED || pad.keys[sdl.SCANCODE_PERIOD] == sdl.PRESSED ||
+		pad.keys[sdl.SCANCODE_LCTRL] == sdl.PRESSED || pad.keys[sdl.SCANCODE_RCTRL] == sdl.PRESSED ||
 		btn1 != 0 {
 		if !pad.buttonReversed {
 			pad.state.button |= PadButtonA
@@ -94,10 +92,10 @@ func (pad *Pad) getState() PadState {
 			pad.state.button |= PadButtonB
 		}
 	}
-	if pad.keys[sdl.K_x] == sdl.PRESSED || pad.keys[sdl.K_SLASH] == sdl.PRESSED ||
-		pad.keys[sdl.K_LALT] == sdl.PRESSED || pad.keys[sdl.K_RALT] == sdl.PRESSED ||
-		pad.keys[sdl.K_LSHIFT] == sdl.PRESSED || pad.keys[sdl.K_RSHIFT] == sdl.PRESSED ||
-		pad.keys[sdl.K_RETURN] == sdl.PRESSED ||
+	if pad.keys[sdl.SCANCODE_X] == sdl.PRESSED || pad.keys[sdl.SCANCODE_SLASH] == sdl.PRESSED ||
+		pad.keys[sdl.SCANCODE_LALT] == sdl.PRESSED || pad.keys[sdl.SCANCODE_RALT] == sdl.PRESSED ||
+		pad.keys[sdl.SCANCODE_LSHIFT] == sdl.PRESSED || pad.keys[sdl.SCANCODE_RSHIFT] == sdl.PRESSED ||
+		pad.keys[sdl.SCANCODE_RETURN] == sdl.PRESSED ||
 		btn2 != 0 {
 		if !pad.buttonReversed {
 			pad.state.button |= PadButtonB
