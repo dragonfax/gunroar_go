@@ -7,15 +7,11 @@ The source was updated to SDL 2.0 along the way.
 See readme_e.txt for the original README in english.
 
 
-**BUGz & TODOs**
+**BUGz**
 
 * enemies display too large
-* can pass through enemies from below
-* glClear panics randomly
+* some enemies can't be shot or collided against
+* can pass through land from below
+* restarting mid-game doesn't reset game
+* restor command line options
 
-**PUT BACK IN**
-
-* command line options
-* replay recording
-* actor caches
-* Twinstick & Doubeplay modes
