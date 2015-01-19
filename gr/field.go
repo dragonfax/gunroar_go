@@ -366,16 +366,16 @@ func (this *Field) drawPanel() {
 	if nci >= TIME_COLOR_INDEX {
 		nci = 0
 	}
-	co := this.time - ci
+	var co float32 = this.time - ci
 	for i := 0; i < 6; i++ {
 		for j := 0; j < 3; j++ {
 			this.baseColor[i][j] = baseColorTime[int(ci)][i][j]*(1-co) + baseColorTime[int(nci)][i][j]*co
 		}
 	}
-	by := this.screenY
-	oy := this.screenY - by
+	var by int = int(this.screenY)
+	var oy float32 = this.screenY - float32(by)
 	var sx float32
-	sy := BLOCK_WIDTH*SCREEN_BLOCK_SIZE_Y/2 + oy
+	var sy float32 = BLOCK_WIDTH*SCREEN_BLOCK_SIZE_Y/2 + oy
 	by--
 	if by < 0 {
 		by += BLOCK_SIZE_Y
