@@ -5,9 +5,7 @@
  */
 package main
 
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
+import "github.com/veandco/go-sdl2/sdl"
 
 const MOUSE_SCREEN_MAPPING_RATIO_X = 26.0
 const MOUSE_SCREEN_MAPPING_RATIO_Y = 19.5
@@ -38,10 +36,10 @@ func (m *Mouse) getState() MouseState {
 	m.state.x = float32(mx)
 	m.state.y = float32(my)
 	m.state.button = MouseButtonNONE
-	if btn&sdl.Button(MouseButtonLEFT) != 0 {
+	if btn&sdl.Button(sdl.BUTTON_LEFT) != 0 {
 		m.state.button |= MouseButtonLEFT
 	}
-	if btn&sdl.Button(MouseButtonRIGHT) != 0 {
+	if btn&sdl.Button(sdl.BUTTON_RIGHT) != 0 {
 		m.state.button |= MouseButtonRIGHT
 	}
 	m.adjustPos(&m.state)
