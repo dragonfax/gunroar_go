@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"path/filepath"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -25,7 +24,7 @@ var seFileName = []string{"shot.wav", "lance.wav", "hit.wav",
 	"ship_destroyed.wav", "ship_shield_lost.wav", "score_up.wav"}
 
 var seChannel = []int{0, 1, 2, 3, 4, 5, 6, 7, 7, 6}
-var bgm map[string]*Music
+var bgm map[string]*Music = make(map[string]*Music)
 var se map[string]*Chunk = make(map[string]*Chunk)
 var seMark map[string]bool = make(map[string]bool)
 var bgmDisabled bool
@@ -41,15 +40,18 @@ func loadSounds() {
 }
 
 func loadMusics() {
-	// musics := make(map[string]Music)
 	files, err := ioutil.ReadDir(musicDir)
 	if err != nil {
 		panic(err.Error())
 	}
+	if len(files) == 0 {
+		panic("no bgms found")
+	}
 	for _, fileInfo := range files {
 		fileName := fileInfo.Name()
 		ext := filepath.Ext(fileName)
-		if ext != "ogg" && ext != "wav" {
+		if ext != ".ogg" && ext != ".wav" {
+			fmt.Printf("skipping extension %s\n", ext)
 			continue
 		}
 		music := &Music{}
@@ -80,8 +82,8 @@ func playBgmByName(name string) {
 }
 
 func playBgm() {
-	bgmIdx := rand.Intn(len(bgm)-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
-	nextIdxMv = rand.Intn(2)*2 - 1
+	bgmIdx := nextInt(len(bgm)-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
+	nextIdxMv = nextInt(2)*2 - 1
 	prevBgmIdx = bgmIdx
 	playBgmByName(bgmFileName[bgmIdx])
 }
