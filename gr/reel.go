@@ -246,6 +246,7 @@ func decTargetY() {
 func NewNumIndicator(n int, t IndicatorType, size float32, x float32, y float32) *NumIndicator {
 	ni := new(NumIndicator)
 	ni.alpha = 1
+	ni.scoreReel = NewScoreReel()
 
 	if ni.t == IndicatorTypeSCORE {
 		if ni.target[ni.targetIdx].flyingTo == FlyingToTypeRIGHT {

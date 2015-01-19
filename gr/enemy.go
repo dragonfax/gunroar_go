@@ -257,7 +257,7 @@ func (this *EnemyState) checkCollision(x float32, y float32, c Shape, shot *Shot
 			return true
 		}
 	}
-	if this.spec.bridgeShape().checkCollision(ox, oy, c) {
+	if this.spec.bridgeShape() != nil && this.spec.bridgeShape().checkCollision(ox, oy, c) {
 		this.addDamage(shot.damage, shot)
 		return true
 	}
