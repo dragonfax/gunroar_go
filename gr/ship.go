@@ -438,19 +438,21 @@ func (this *Boat) move() {
 		this.shape.addWake(this.pos, this.deg, sp, 1)
 	}
 	he := checkAllEnemiesHitShip(this.pos.x, this.pos.y, nil, false)
-	var rd float32
-	if this.pos.distVector(he.pos()) < 0.1 {
-		rd = 0
-	} else {
-		rd = atan232(this.pos.x-he.pos().x, this.pos.y-he.pos().y)
-	}
-	sz := he.size()
-	this.refVel.x = Sin32(rd) * sz * 0.1
-	this.refVel.y = Cos32(rd) * sz * 0.1
-	rs := this.refVel.vctSize()
-	if rs > 1 {
-		this.refVel.x /= rs
-		this.refVel.y /= rs
+	if he != nil {
+		var rd float32
+		if this.pos.distVector(he.pos()) < 0.1 {
+			rd = 0
+		} else {
+			rd = atan232(this.pos.x-he.pos().x, this.pos.y-he.pos().y)
+		}
+		sz := he.size()
+		this.refVel.x = Sin32(rd) * sz * 0.1
+		this.refVel.y = Cos32(rd) * sz * 0.1
+		rs := this.refVel.vctSize()
+		if rs > 1 {
+			this.refVel.x /= rs
+			this.refVel.y /= rs
+		}
 	}
 	if this.shieldCnt > 0 {
 		this.shieldCnt--
