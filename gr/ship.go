@@ -48,11 +48,11 @@ func (this *Ship) close() {
 
 func (this *Ship) start(gameMode GameMode) {
 	this.gameMode = gameMode
-	//if gameMode == GameModeDOUBLE_PLAY {
-	//	this.boatNum = 2
-	//} else {
-	this.boatNum = 1
-	//}
+	if gameMode == GameModeDOUBLE_PLAY {
+		this.boatNum = 2
+	} else {
+		this.boatNum = 1
+	}
 	this.scrollSpeedBase = SCROLL_SPEED_BASE
 	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].start(this.gameMode)
@@ -121,7 +121,7 @@ func (this *Ship) draw() {
 	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].draw()
 	}
-	/*if this.gameMode == GameModeDOUBLE_PLAY && this.boat[0].hasCollision() {
+	if this.gameMode == GameModeDOUBLE_PLAY && this.boat[0].hasCollision() {
 		setScreenColor(0.5, 0.5, 0.9, 0.8)
 		gl.Begin(gl.LINE_STRIP)
 		gl.Vertex2f(this.boat[0].pos.x, this.boat[0].pos.y)
@@ -135,7 +135,7 @@ func (this *Ship) draw() {
 		gl.Rotatef(-this.degAmongBoats()*180/Pi32, 0, 0, 1)
 		this.bridgeShape.draw()
 		gl.PopMatrix()
-	}*/
+	}
 }
 
 func (this *Ship) drawFront() {
@@ -230,8 +230,7 @@ const TURN_CHANGE_RATIO = 0.5
 
 var padInput PadState
 var mouseInput MouseState
-
-// static TwinStickState stickInput
+var stickInput TwinStickState
 
 type Boat struct {
 	pos                      Vector
@@ -284,7 +283,7 @@ func (this *Boat) close() {
 
 func (this *Boat) start(gameMode GameMode) {
 	this.gameMode = gameMode
-	/*if gameMode == GameModeDOUBLE_PLAY {
+	if gameMode == GameModeDOUBLE_PLAY {
 		switch this.idx {
 		case 0:
 			this.pos.x = -field.size.x * 0.5
@@ -293,9 +292,9 @@ func (this *Boat) start(gameMode GameMode) {
 			this.pos.x = field.size.x * 0.5
 			break
 		}
-	} else { */
-	this.pos.x = 0
-	//}
+	} else {
+		this.pos.x = 0
+	}
 	this.pos.y = -field.size.y * 0.8
 	this.firePos.x = 0
 	this.firePos.y = 0
@@ -308,7 +307,7 @@ func (this *Boat) start(gameMode GameMode) {
 	this.aPressed = true
 	this.bPressed = true
 	padInput = pad.getNullState()
-	//stickInput = twinStick.getNullState()
+	stickInput = twinStick.getNullState()
 	mouseInput = mouse.getNullState()
 }
 
@@ -318,11 +317,7 @@ func (this *Boat) restart() {
 		this.fireCnt = 99999
 		this.fireInterval = 99999
 		break
-		/*
-			case InGameState.GameMode.TWIN_STICK:
-			case InGameState.GameMode.DOUBLE_PLAY:
-		*/
-	case GameModeMOUSE:
+	case GameModeTWIN_STICK, GameModeDOUBLE_PLAY, GameModeMOUSE:
 		this.fireCnt = 0
 		this.fireInterval = FIRE_INTERVAL
 		break
@@ -350,14 +345,12 @@ func (this *Boat) move() {
 	case GameModeNORMAL:
 		this.moveNormal()
 		break
-		/*
-			case InGameState.GameMode.TWIN_STICK:
-				moveTwinStick()
-				break
-			case InGameState.GameMode.DOUBLE_PLAY:
-				moveDoublePlay()
-				break
-		*/
+	case GameModeTWIN_STICK:
+		this.moveTwinStick()
+		break
+	case GameModeDOUBLE_PLAY:
+		this.moveDoublePlay()
+		break
 	case GameModeMOUSE:
 		this.moveMouse()
 		break
@@ -414,14 +407,12 @@ func (this *Boat) move() {
 	case GameModeNORMAL:
 		this.fireNormal()
 		break
-		/*
-			case InGameState.GameMode.TWIN_STICK:
-				fireTwinStick()
-				break
-			case InGameState.GameMode.DOUBLE_PLAY:
-				fireDobulePlay()
-				break
-		*/
+	case GameModeTWIN_STICK:
+		this.fireTwinStick()
+		break
+	case GameModeDOUBLE_PLAY:
+		this.fireDobulePlay()
+		break
 	case GameModeMOUSE:
 		this.fireMouse()
 		break
@@ -482,57 +473,55 @@ func (this *Boat) moveNormal() {
 	}
 	if this.vx != 0 || this.vy != 0 {
 		ad := atan232(this.vx, this.vy)
-		normalizeDeg(ad)
+		ad = normalizeDeg(ad)
 		ad -= this.deg
-		normalizeDeg(ad)
+		ad = normalizeDeg(ad)
 		this.deg += ad * this.turnRatio * this.turnSpeed
 		normalizeDeg(this.deg)
 	}
 }
 
-/*
-moveTwinStick() {
-		stickInput = twinStick.getState()
-	if (gameState.isGameOver || cnt < -INVINCIBLE_CNT)
+func (this *Boat) moveTwinStick() {
+	stickInput = twinStick.getState()
+	if isGameOver || this.cnt < -INVINCIBLE_CNT {
 		stickInput.clear()
-	vx = stickInput.left.x
-	vy = stickInput.left.y
-	if (vx != 0 || vy != 0) {
-		float32 ad = atan2(vx, vy)
-		assert(ad <>= 0)
-		Math.normalizeDeg(ad)
-		ad -= deg
-		Math.normalizeDeg(ad)
-		deg += ad * turnRatio * turnSpeed
-		Math.normalizeDeg(deg)
+	}
+	this.vx = stickInput.left.x
+	this.vy = stickInput.left.y
+	if this.vx != 0 || this.vy != 0 {
+		ad := atan232(this.vx, this.vy)
+		ad = normalizeDeg(ad)
+		ad -= this.deg
+		ad = normalizeDeg(ad)
+		this.deg += ad * this.turnRatio * this.turnSpeed
+		this.deg = normalizeDeg(this.deg)
 	}
 }
 
-moveDoublePlay() {
-	switch (idx) {
+func (this *Boat) moveDoublePlay() {
+	switch this.idx {
 	case 0:
-			stickInput = twinStick.getState()
-		if (gameState.isGameOver || cnt < -INVINCIBLE_CNT)
+		stickInput = twinStick.getState()
+		if isGameOver || this.cnt < -INVINCIBLE_CNT {
 			stickInput.clear()
-		vx = stickInput.left.x
-		vy = stickInput.left.y
+		}
+		this.vx = stickInput.left.x
+		this.vy = stickInput.left.y
 		break
 	case 1:
-		vx = stickInput.right.x
-		vy = stickInput.right.y
+		this.vx = stickInput.right.x
+		this.vy = stickInput.right.y
 		break
 	}
-	if (vx != 0 || vy != 0) {
-		float32 ad = atan2(vx, vy)
-		assert(ad <>= 0)
-		Math.normalizeDeg(ad)
-		ad -= deg
-		Math.normalizeDeg(ad)
-		deg += ad * turnRatio * turnSpeed
-		Math.normalizeDeg(deg)
+	if this.vx != 0 || this.vy != 0 {
+		ad := atan232(this.vx, this.vy)
+		ad = normalizeDeg(ad)
+		ad -= this.deg
+		ad = normalizeDeg(ad)
+		this.deg += ad * this.turnRatio * this.turnSpeed
+		this.deg = normalizeDeg(this.deg)
 	}
 }
-*/
 
 func (this *Boat) moveMouse() {
 	mps := mouseAndPad.getState()
@@ -636,103 +625,88 @@ func (this *Boat) fireNormal() {
 	this.fireLanceCnt--
 }
 
-/*
-fireTwinStick() {
-	if (fabs(stickInput.right.x) + fabs(stickInput.right.y) > 0.01) {
-		fireDeg = atan2(stickInput.right.x, stickInput.right.y)
-		assert(fireDeg <>= 0)
-		if (fireCnt <= 0) {
-			SoundManager.playSe("shot.wav")
-			int foc = (fireSprCnt % 2) * 2 - 1
-			float32 rsd = stickInput.right.vctSize
-			if (rsd > 1)
+func (this *Boat) fireTwinStick() {
+	if fabs32(stickInput.right.x)+fabs32(stickInput.right.y) > 0.01 {
+		this.fireDeg = atan232(stickInput.right.x, stickInput.right.y)
+		if this.fireCnt <= 0 {
+			playSe("shot.wav")
+			foc := (this.fireSprCnt%2)*2 - 1
+			rsd := stickInput.right.vctSize()
+			if rsd > 1 {
 				rsd = 1
-			fireSprDeg = 1 - rsd + 0.05
-			firePos.x = this.pos.x + Cos32(fireDeg + Pi32) * 0.2 * foc
-			firePos.y = this.pos.y - Sin32(fireDeg + Pi32) * 0.2 * foc
-			fireCnt = cast(int) fireInterval
-			float32 td
-			switch (foc) {
+			}
+			this.fireSprDeg = 1 - rsd + 0.05
+			this.firePos.x = this.pos.x + Cos32(this.fireDeg+Pi32)*0.2*float32(foc)
+			this.firePos.y = this.pos.y - Sin32(this.fireDeg+Pi32)*0.2*float32(foc)
+			this.fireCnt = int(this.fireInterval)
+			var td float32
+			switch foc {
 			case -1:
-				td = fireSprDeg * (fireSprCnt / 2 % 4 + 1) * 0.2
+				td = this.fireSprDeg * (Mod32(float32(this.fireSprCnt)/2, 4) + 1) * 0.2
 				break
 			case 1:
-				td = -fireSprDeg * (fireSprCnt / 2 % 4 + 1) * 0.2
+				td = -this.fireSprDeg * (Mod32(float32(this.fireSprCnt)/2, 4) + 1) * 0.2
 				break
 			}
-			fireSprCnt++
-			Shot s = shots.getInstance()
-			if (s)
-				s.set(firePos, fireDeg + td / 2, false, 2)
-			s = shots.getInstance()
-			if (s)
-				s.set(firePos, fireDeg + td, false, 2)
-			Smoke sm = smokes.getInstanceForced()
-			float32 sd = fireDeg + td / 2
-			sm.set(firePos, Sin32(sd) * Shot.SPEED * 0.33, Cos32(sd) * Shot.SPEED * 0.33, 0,
-						 Smoke.SmokeType.SPARK, 10, 0.33)
+			this.fireSprCnt++
+			NewShot(this.firePos, this.fireDeg+td/2, false, 2)
+			NewShot(this.firePos, this.fireDeg+td, false, 2)
+			var sd float32 = this.fireDeg + td/2
+			NewSmoke(this.firePos.x, this.firePos.y, 0, Sin32(sd)*SHOT_SPEED*0.33, Cos32(sd)*SHOT_SPEED*0.33, 0, SmokeTypeSPARK, 10, 0.33)
 		}
 	} else {
-		fireDeg = 99999
+		this.fireDeg = 99999
 	}
-	fireCnt--
+	this.fireCnt--
 }
 
-fireDobulePlay() {
-	if (gameState.isGameOver || cnt < -INVINCIBLE_CNT)
+func (this *Boat) fireDobulePlay() {
+	if isGameOver || this.cnt < -INVINCIBLE_CNT {
 		return
-	float32 dist = ship.distAmongBoats()
-	fireInterval = FIRE_INTERVAL + 10.0 / (dist + 0.005)
-	if (dist < 2)
-		fireInterval = 99999
-	else if (dist < 4)
-		fireInterval *= 3
-	else if (dist < 6)
-		fireInterval *= 1.6
-	if (fireCnt > fireInterval)
-		fireCnt = cast(int) fireInterval
-	if (fireCnt <= 0) {
-		SoundManager.playSe("shot.wav")
-		int foc = (fireSprCnt % 2) * 2 - 1
-		fireDeg = 0;//ship.degAmongBoats() + Pi32 / 2
-		firePos.x = this.pos.x + Cos32(fireDeg + Pi32) * 0.2 * foc
-		firePos.y = this.pos.y - Sin32(fireDeg + Pi32) * 0.2 * foc
-		Shot s = shots.getInstance()
-		if (s)
-			s.set(firePos, fireDeg, false , 2)
-		fireCnt = cast(int) fireInterval
-		Smoke sm = smokes.getInstanceForced()
-		float32 sd = fireDeg
-		sm.set(firePos, Sin32(sd) * Shot.SPEED * 0.33, Cos32(sd) * Shot.SPEED * 0.33, 0,
-					 Smoke.SmokeType.SPARK, 10, 0.33)
-		if (idx == 0) {
-			float32 fd = ship.degAmongBoats() + Pi32 / 2
-			float32 td
-			switch (foc) {
+	}
+	dist := ship.distAmongBoats()
+	this.fireInterval = FIRE_INTERVAL + 10.0/(dist+0.005)
+	if dist < 2 {
+		this.fireInterval = 99999
+	} else if dist < 4 {
+		this.fireInterval *= 3
+	} else if dist < 6 {
+		this.fireInterval *= 1.6
+	}
+	if float32(this.fireCnt) > this.fireInterval {
+		this.fireCnt = int(this.fireInterval)
+	}
+	if this.fireCnt <= 0 {
+		playSe("shot.wav")
+		var foc int = (this.fireSprCnt%2)*2 - 1
+		this.fireDeg = 0 //ship.degAmongBoats() + Pi32 / 2
+		this.firePos.x = this.pos.x + Cos32(this.fireDeg+Pi32)*0.2*float32(foc)
+		this.firePos.y = this.pos.y - Sin32(this.fireDeg+Pi32)*0.2*float32(foc)
+		NewShot(this.firePos, this.fireDeg, false, 2)
+		this.fireCnt = int(this.fireInterval)
+		var sd float32 = this.fireDeg
+		NewSmoke(this.firePos.x, this.firePos.y, 0, Sin32(sd)*SHOT_SPEED*0.33, Cos32(sd)*SHOT_SPEED*0.33, 0, SmokeTypeSPARK, 10, 0.33)
+		if this.idx == 0 {
+			var fd float32 = ship.degAmongBoats() + Pi32/2
+			var td float32
+			switch foc {
 			case -1:
-				td = fireSprDeg * (fireSprCnt / 2 % 4 + 1) * 0.15
+				td = this.fireSprDeg * (Mod32(float32(this.fireSprCnt)/2, 4) + 1) * 0.15
 				break
 			case 1:
-				td = -fireSprDeg * (fireSprCnt / 2 % 4 + 1) * 0.15
+				td = -this.fireSprDeg * (Mod32(float32(this.fireSprCnt)/2, 4) + 1) * 0.15
 				break
 			}
-			firePos.x = ship.midstPos.x + Cos32(fd + Pi32) * 0.2 * foc
-			firePos.y = ship.midstPos.y - Sin32(fd + Pi32) * 0.2 * foc
-			s = shots.getInstance()
-			if (s)
-				s.set(firePos, fd, false, 2)
-			s = shots.getInstance()
-			if (s)
-				s.set(firePos, fd + td, false , 2)
-			sm = smokes.getInstanceForced()
-			sm.set(firePos, Sin32(fd + td / 2) * Shot.SPEED * 0.33, Cos32(fd + td / 2) * Shot.SPEED * 0.33, 0,
-						 Smoke.SmokeType.SPARK, 10, 0.33)
+			this.firePos.x = ship.midstPos().x + Cos32(fd+Pi32)*0.2*float32(foc)
+			this.firePos.y = ship.midstPos().y - Sin32(fd+Pi32)*0.2*float32(foc)
+			NewShot(this.firePos, fd, false, 2)
+			NewShot(this.firePos, fd+td, false, 2)
+			NewSmoke(this.firePos.x, this.firePos.y, 0, Sin32(fd+td/2)*SHOT_SPEED*0.33, Cos32(fd+td/2)*SHOT_SPEED*0.33, 0, SmokeTypeSPARK, 10, 0.33)
 		}
-		fireSprCnt++
+		this.fireSprCnt++
 	}
-	fireCnt--
+	this.fireCnt--
 }
-*/
 
 func (this *Boat) fireMouse() {
 	fox := mouseInput.x - this.pos.x
@@ -748,7 +722,7 @@ func (this *Boat) fireMouse() {
 		if this.fireCnt <= 0 {
 			playSe("shot.wav")
 			foc := (this.fireSprCnt%2)*2 - 1
-			//rsd := this.stickInput.right.vctSize
+			// rsd := stickInput.right.vctSize()
 			var fstd float32 = 0.05
 			if mouseInput.button&MouseButtonRIGHT != 0 {
 				fstd += 0.5

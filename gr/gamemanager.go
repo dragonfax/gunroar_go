@@ -20,7 +20,7 @@ var shipReverseFire bool
 var field *Field
 var pad *Pad
 
-// twinStick TwinStick
+var twinStick *TwinStick
 var mouse *Mouse
 var mouseAndPad *MouseAndPad
 var screen *Screen
@@ -53,7 +53,7 @@ func (this *GameManager) init() {
 	InitSparkFragments()
 	// InitCrystal.init()
 	// twinStick = cast(TwinStick) (cast(MultipleInputDevice) input).inputs[1]
-	// twinStick.openJoystick(pad.openJoystick())
+	twinStick.openJoystick(pad.openJoystick(nil))
 	field = NewField()
 	ship = NewShip()
 	scoreReel = NewScoreReel()
@@ -172,14 +172,14 @@ type GameMode int
 
 const (
 	GameModeNORMAL GameMode = iota
-	// GameModeTWIN_STICK
-	// GameModeDOUBLE_PLAY
+	GameModeTWIN_STICK
+	GameModeDOUBLE_PLAY
 	GameModeMOUSE
 )
 
-const GAME_MODE_NUM = 2
+const GAME_MODE_NUM = 4
 
-var gameModeText []string = []string{"NORMAL" /*"TWIN STICK",*/ /*"DOUBLE PLAY",*/, "MOUSE"}
+var gameModeText []string = []string{"NORMAL", "TWIN STICK", "DOUBLE PLAY", "MOUSE"}
 var isGameOver bool
 
 const SCORE_REEL_SIZE_DEFAULT = 0.5
