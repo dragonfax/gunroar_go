@@ -7,13 +7,13 @@ The source was updated to SDL 2.0 along the way.
 See readme_e.txt for the original README in english.
 
 
-BUGz & TODOs
+**BUGz & TODOs**
 
 * enemies display too large
 * can pass through enemies from below
 * glClear panics randomly
 
-PUT BACK IN
+**PUT BACK IN**
 
 * command line options
 * replay recording
