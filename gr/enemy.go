@@ -431,7 +431,9 @@ func (this *EnemyState) draw() {
 		this.spec.damagedShape().draw()
 	}
 	if this.destroyedCnt < 0 {
-		this.spec.bridgeShape().draw()
+		if this.spec.bridgeShape() != nil {
+			this.spec.bridgeShape().draw()
+		}
 	}
 	gl.PopMatrix()
 	if this.destroyedCnt >= 0 {
