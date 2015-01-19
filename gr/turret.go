@@ -16,7 +16,7 @@ import (
 var turretDamagedPos Vector
 
 type Turret struct {
-	spec                          TurretSpec
+	spec                          *TurretSpec
 	pos                           Vector
 	deg, baseDeg                  float32
 	cnt, appCnt, startCnt, shield int
@@ -27,7 +27,10 @@ type Turret struct {
 	parent                        *Enemy
 }
 
-func NewTurret(parent *Enemy, spec TurretSpec) *Turret {
+func NewTurret(parent *Enemy, spec *TurretSpec) *Turret {
+	if spec.shape == nil {
+		panic("turret spec shape nil")
+	}
 	this := new(Turret)
 	this.parent = parent
 	this.bulletSpeed = 1
@@ -146,6 +149,9 @@ func (this *Turret) draw() {
 	if this.destroyedCnt >= 0 {
 		this.spec.destroyedShape.draw()
 	} else if !this.damaged {
+		if this.spec.shape == nil {
+			panic("turret spec shape nil")
+		}
 		this.spec.shape.draw()
 	} else {
 		this.spec.damagedShape.draw()
@@ -307,7 +313,7 @@ func NewTurretSpec() *TurretSpec {
 	return this
 }
 
-func (this *TurretSpec) setParamTurretSpec(ts TurretSpec) {
+func (this *TurretSpec) setParamTurretSpec(ts *TurretSpec) {
 	this.turretType = ts.turretType
 	this.interval = ts.interval
 	this.speed = ts.speed
@@ -521,6 +527,9 @@ type TurretGroup struct {
 
 func NewTurretGroup(parent *Enemy, spec *TurretGroupSpec) *TurretGroup {
 	this := new(TurretGroup)
+	if spec.turretSpec.shape == nil {
+		panic("turret spec shape nil")
+	}
 	for i, _ := range this.turret {
 		this.turret[i] = NewTurret(parent, spec.turretSpec)
 	}
@@ -602,7 +611,7 @@ const (
 )
 
 type TurretGroupSpec struct {
-	turretSpec                              TurretSpec
+	turretSpec                              *TurretSpec
 	num                                     int
 	alignType                               AlignType
 	alignDeg, alignWidth, radius, distRatio float32
@@ -611,6 +620,7 @@ type TurretGroupSpec struct {
 
 func NewTurretGroupSpec() *TurretGroupSpec {
 	this := new(TurretGroupSpec)
+	this.turretSpec = NewTurretSpec()
 	this.num = 1
 	this.alignType = AlignTypeROUND
 	return this
@@ -742,7 +752,7 @@ const (
 )
 
 type MovingTurretGroupSpec struct {
-	turretSpec                                   TurretSpec
+	turretSpec                                   *TurretSpec
 	num                                          int
 	moveType                                     TurretMoveType
 	alignDeg, alignAmp, alignAmpVel, radiusBase  float32
@@ -753,6 +763,7 @@ type MovingTurretGroupSpec struct {
 
 func NewMovingTurretGroupSpec() *MovingTurretGroupSpec {
 	this := new(MovingTurretGroupSpec)
+	this.turretSpec = NewTurretSpec()
 	this.num = 1
 	this.alignDeg = Pi32 * 2
 	this.radiusBase = 1

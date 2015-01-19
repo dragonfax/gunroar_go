@@ -288,8 +288,8 @@ var turretShapes []*ComplexShape
 
 func InitTurretShapes() {
 	turretShapes = append(turretShapes, NewComplexShape(1, 0, 0, TURRET, 1, 0.8, 0.8, true))
-	turretShapes = append(turretShapes, NewComplexShape(1, 0, 0, TURRET_DAMAGED, 0.9, 0.9, 1, true))
-	turretShapes = append(turretShapes, NewComplexShape(1, 0, 0, TURRET_DESTROYED, 0.8, 0.33, 0.66, true))
+	turretShapes = append(turretShapes, NewComplexShape(1, 0, 0, TURRET_DAMAGED, 0.9, 0.9, 1, true))       // TODO might be false (non collidable)
+	turretShapes = append(turretShapes, NewComplexShape(1, 0, 0, TURRET_DESTROYED, 0.8, 0.33, 0.66, true)) // TODO might be false (non collidable)
 }
 
 type TurretShape struct {
@@ -306,6 +306,9 @@ func NewTurretShape(t TurretShapeType) *TurretShape {
 	turretShape := new(TurretShape)
 	turretShape.ResizableShape = NewResizableShape()
 	turretShape.shape = turretShapes[t]
+	if turretShape.shape == nil {
+		panic("nil turret shape")
+	}
 	return turretShape
 }
 

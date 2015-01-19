@@ -1047,7 +1047,7 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 				tgs.alignType = AlignTypeSTRAIGHT
 				tgs.offset.y = this._size * (0.9 + nextSignedFloat(0.05))
 			}
-			var pts TurretSpec
+			var pts *TurretSpec
 			if subTurretNum > 0 {
 				frontSubTurretNum := (subTurretNum + 2) / 4
 				rearSubTurretNum := (subTurretNum - frontSubTurretNum*2) / 2
@@ -1083,7 +1083,7 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 		} else {
 			mainTurretRank *= 2.5
 			subTurretRank *= 2
-			var pts TurretSpec
+			var pts *TurretSpec
 			if mainTurretNum > 0 {
 				frontMainTurretNum := (mainTurretNum + 2) / 4
 				rearMainTurretNum := (mainTurretNum - frontMainTurretNum*2) / 2
@@ -1320,7 +1320,7 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 	}
 	sideTurretNum /= 2
 	if sideTurretNum > 0 {
-		var pts TurretSpec
+		var pts *TurretSpec
 		for i := 0; i < 2; i++ {
 			tgs := this.getTurretGroupSpec()
 			if i == 0 {
