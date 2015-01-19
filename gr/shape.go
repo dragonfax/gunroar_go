@@ -618,6 +618,7 @@ type SimpleShape struct {
 
 func NewSimpleShape() *SimpleShape {
 	this := new(SimpleShape)
+	this.displayList = NewDisplayList(1)
 	this.collision = &Vector{}
 	return this
 }
