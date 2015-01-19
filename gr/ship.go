@@ -48,11 +48,11 @@ func (this *Ship) close() {
 
 func (this *Ship) start(gameMode GameMode) {
 	this.gameMode = gameMode
-	if gameMode == GameModeDOUBLE_PLAY {
-		this.boatNum = 2
-	} else {
-		this.boatNum = 1
-	}
+	//if gameMode == GameModeDOUBLE_PLAY {
+	//	this.boatNum = 2
+	//} else {
+	this.boatNum = 1
+	//}
 	this.scrollSpeedBase = SCROLL_SPEED_BASE
 	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].start(this.gameMode)
@@ -121,7 +121,7 @@ func (this *Ship) draw() {
 	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].draw()
 	}
-	if this.gameMode == GameModeDOUBLE_PLAY && this.boat[0].hasCollision() {
+	/*if this.gameMode == GameModeDOUBLE_PLAY && this.boat[0].hasCollision() {
 		setScreenColor(0.5, 0.5, 0.9, 0.8)
 		gl.Begin(gl.LINE_STRIP)
 		gl.Vertex2f(this.boat[0].pos.x, this.boat[0].pos.y)
@@ -135,7 +135,7 @@ func (this *Ship) draw() {
 		gl.Rotatef(-this.degAmongBoats()*180/Pi32, 0, 0, 1)
 		this.bridgeShape.draw()
 		gl.PopMatrix()
-	}
+	}*/
 }
 
 func (this *Ship) drawFront() {
@@ -284,7 +284,7 @@ func (this *Boat) close() {
 
 func (this *Boat) start(gameMode GameMode) {
 	this.gameMode = gameMode
-	if gameMode == GameModeDOUBLE_PLAY {
+	/*if gameMode == GameModeDOUBLE_PLAY {
 		switch this.idx {
 		case 0:
 			this.pos.x = -field.size.x * 0.5
@@ -293,9 +293,9 @@ func (this *Boat) start(gameMode GameMode) {
 			this.pos.x = field.size.x * 0.5
 			break
 		}
-	} else {
-		this.pos.x = 0
-	}
+	} else { */
+	this.pos.x = 0
+	//}
 	this.pos.y = -field.size.y * 0.8
 	this.firePos.x = 0
 	this.firePos.y = 0

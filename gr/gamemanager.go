@@ -174,8 +174,8 @@ type GameMode int
 
 const (
 	GameModeNORMAL GameMode = iota
-	GameModeTWIN_STICK
-	GameModeDOUBLE_PLAY
+	// GameModeTWIN_STICK
+	// GameModeDOUBLE_PLAY
 	GameModeMOUSE
 )
 
