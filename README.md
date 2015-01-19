@@ -15,3 +15,4 @@ See readme_e.txt for the original README in english.
 * restarting mid-game doesn't reset game
 * restor command line options
 
+![Screenshot](screenshot.png)
