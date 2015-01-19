@@ -5,9 +5,7 @@
  */
 package main
 
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
+import "github.com/veandco/go-sdl2/sdl"
 
 const INTERVAL_BASE = 16
 
@@ -75,12 +73,9 @@ func (m *MainLoop) loop() {
 	gameManager.start()
 	for !m.done {
 		event := sdl.PollEvent()
-		/*if event != nil {
-			event.Type = sdl.USEREVENT
-		}
-		*/
 		input.handleEvent(event)
-		if event == sdl.QUIT {
+		switch event.(type) {
+		case *sdl.QuitEvent:
 			m.breakLoop()
 		}
 		nowTick := sdl.GetTicks()
