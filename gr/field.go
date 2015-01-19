@@ -57,7 +57,7 @@ type Field struct {
 	screenPos               Vector
 	platformPos             []PlatformPos /* SCREEN_BLOCK_SIZE_X * NEXT_BLOCK_AREA_SIZE */
 	platformPosNum          int
-	baseColor               [3][6]float32
+	baseColor               [6][3]float32
 	time                    float32
 }
 
