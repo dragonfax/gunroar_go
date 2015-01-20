@@ -78,13 +78,14 @@ func (m *MainLoop) loop() {
 	m.initFirst()
 	gameManager.start()
 	for !m.done {
-		event := sdl.PollEvent()
-		mouseAndPad.handleEvent(event)
-		twinStick.handleEvent(event)
-		switch event.(type) {
-		case *sdl.QuitEvent:
-			m.breakLoop()
+		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+			switch event.(type) {
+			case *sdl.QuitEvent:
+				m.breakLoop()
+			}
 		}
+		mouseAndPad.update()
+		twinStick.update()
 		nowTick := sdl.GetTicks()
 		var itv uint32 = m.interval
 		var frame = (nowTick - prvTickCount) / itv

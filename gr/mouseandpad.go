@@ -5,10 +5,6 @@
  */
 package main
 
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
-
 type MouseAndPadState struct {
 	mouseState MouseState
 	padState   PadState
@@ -28,7 +24,6 @@ func (this *MouseAndPad) getState() MouseAndPadState {
 	return this.state
 }
 
-func (this *MouseAndPad) handleEvent(event sdl.Event) {
-	// this.mouse.handleEvent(event)
-	pad.handleEvent(event)
+func (this *MouseAndPad) update() {
+	pad.update()
 }

@@ -36,7 +36,7 @@ func (pad *Pad) openJoystick(st *sdl.Joystick /* = null */) *sdl.Joystick {
 	return pad.stick
 }
 
-func (pad *Pad) handleEvent(event sdl.Event) {
+func (pad *Pad) update() {
 	pad.keys = sdl.GetKeyboardState()
 }
 
