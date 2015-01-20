@@ -190,9 +190,9 @@ func (s *Screen) initSDL() {
 	var videoFlags uint32
 	if s.windowMode {
 		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_RESIZABLE
-	} /*else {
+	} else {
 		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_FULLSCREEN
-	}*/
+	}
 	window, err := sdl.CreateWindow("Title", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, s.width, s.height, videoFlags)
 	if err != nil {
 		panic(fmt.Sprintf("SDLInitFailedException (Unable to create SDL screen: %v", sdl.GetError()))
