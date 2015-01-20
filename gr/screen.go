@@ -38,7 +38,10 @@ type Screen struct {
 }
 
 func NewScreen() *Screen {
-	return new(Screen)
+	this := new(Screen)
+	this.width = 640
+	this.height = 480
+	return this
 }
 
 // called by InitSDL()
@@ -180,8 +183,6 @@ func (s *Screen) initSDL() {
 	fmt.Println("initing SDL")
 	s.farPlane = 1000
 	s.nearPlane = 0.1
-	s.width = 640
-	s.height = 480
 	// Initialize SDL.
 	if sdl.Init(sdl.INIT_VIDEO) < 0 {
 		panic(fmt.Sprintf(" SDLInitFailedException( Unable to initialize SDL: %v", sdl.GetError()))
