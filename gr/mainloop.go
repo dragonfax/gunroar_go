@@ -147,7 +147,7 @@ func parseArgs() {
 
 	helpP := flag.Bool("help", false, "show usage")
 	brightnessP := flag.Int("brightness", 100, "0-100")
-	luminosityP := flag.Int("luminosity", 0, "lumonisity, 0-100")
+	luminosityP := flag.Int("luminosity", 100, "lumonisity, 0-100")
 	windowModeP := flag.Bool("window", false, "play in a window (instead of full screen)")
 	resP := flag.String("res", "", "resolution to play at, ex 640x480")
 	noSoundP := flag.Bool("nosound", false, "disable sound")

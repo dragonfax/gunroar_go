@@ -6,6 +6,8 @@
 package main
 
 import (
+	"image"
+
 	"github.com/go-gl/gl"
 )
 
@@ -20,7 +22,7 @@ const LUMINOUS_TEXTURE_HEIGHT_MAX = 64
 
 type LuminousScreen struct {
 	luminousTexture           gl.Texture
-	td                        [LUMINOUS_TEXTURE_WIDTH_MAX * LUMINOUS_TEXTURE_HEIGHT_MAX * 4]gl.GLuint
+	td                        []uint8
 	luminousTextureWidth      int
 	luminousTextureHeight     int
 	screenWidth, screenHeight int
@@ -28,8 +30,9 @@ type LuminousScreen struct {
 }
 
 func (ls *LuminousScreen) Init(luminosity float32, width int, height int) {
-	ls.luminousTextureWidth = 64
-	ls.luminousTextureHeight = 64
+	ls.luminousTextureWidth = LUMINOUS_TEXTURE_WIDTH_MAX
+	ls.luminousTextureHeight = LUMINOUS_TEXTURE_HEIGHT_MAX
+	ls.td = image.NewRGBA(image.Rect(0, 0, ls.luminousTextureHeight, ls.luminousTextureWidth)).Pix
 	ls.makeLuminousTexture()
 	ls.luminosity = luminosity
 	ls.resized(width, height)
