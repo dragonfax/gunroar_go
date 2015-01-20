@@ -188,12 +188,15 @@ func (s *Screen) initSDL() {
 	}
 	// Create an OpenGL screen.
 	var videoFlags uint32
+	var window *sdl.Window
+	var err error
 	if s.windowMode {
 		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_RESIZABLE
+		window, err = sdl.CreateWindow("Title", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, s.width, s.height, videoFlags)
 	} else {
-		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_FULLSCREEN
+		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_FULLSCREEN_DESKTOP
+		window, err = sdl.CreateWindow("Title", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, videoFlags)
 	}
-	window, err := sdl.CreateWindow("Title", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, s.width, s.height, videoFlags)
 	if err != nil {
 		panic(fmt.Sprintf("SDLInitFailedException (Unable to create SDL screen: %v", sdl.GetError()))
 	}
@@ -201,6 +204,8 @@ func (s *Screen) initSDL() {
 	s.context = sdl.GL_CreateContext(window)
 	gl.Viewport(0, 0, s.width, s.height)
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
+	s.width = int(s.window.GetSurface().W)
+	s.height = int(s.window.GetSurface().H)
 	s.resized(s.width, s.height)
 	sdl.ShowCursor(sdl.DISABLE)
 	s.Init()
