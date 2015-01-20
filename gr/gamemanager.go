@@ -121,17 +121,6 @@ func (this *GameManager) move() {
 }
 
 func (this *GameManager) draw() {
-	/*
-			e := mainLoop.event
-			switch (e.type) {
-				case sdl.WindowEvent:
-					re := e.resize
-					if (re.w > 150 && re.h > 100) {
-						this.screen.resized(re.w, re.h)
-					}
-			}
-		 }
-	*/
 	if screen.startRenderToLuminousScreen() {
 		gl.PushMatrix()
 		screen.setEyepos()

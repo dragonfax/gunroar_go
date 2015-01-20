@@ -79,9 +79,18 @@ func (m *MainLoop) loop() {
 	gameManager.start()
 	for !m.done {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			switch event.(type) {
+			switch e := event.(type) {
 			case *sdl.QuitEvent:
 				m.breakLoop()
+			case *sdl.WindowEvent:
+				switch e.Event {
+				case sdl.WINDOWEVENT_RESIZED:
+					w := e.Data1
+					h := e.Data2
+					if w > 150 && h > 100 {
+						screen.resized(int(w), int(h))
+					}
+				}
 			}
 		}
 		mouseAndPad.update()
