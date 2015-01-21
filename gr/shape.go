@@ -290,8 +290,8 @@ var turretShapes []*ComplexShape
 
 func InitTurretShapes() {
 	turretShapes = append(turretShapes, NewComplexShape(1, 0, 0, TURRET, 1, 0.8, 0.8, true))
-	turretShapes = append(turretShapes, NewComplexShape(1, 0, 0, TURRET_DAMAGED, 0.9, 0.9, 1, true))       // TODO might be false (non collidable)
-	turretShapes = append(turretShapes, NewComplexShape(1, 0, 0, TURRET_DESTROYED, 0.8, 0.33, 0.66, true)) // TODO might be false (non collidable)
+	turretShapes = append(turretShapes, NewComplexShape(1, 0, 0, TURRET_DAMAGED, 0.9, 0.9, 1, false))
+	turretShapes = append(turretShapes, NewComplexShape(1, 0, 0, TURRET_DESTROYED, 0.8, 0.33, 0.66, false))
 }
 
 type TurretShape struct {
@@ -684,7 +684,7 @@ type ResizableShape struct {
 
 func NewResizableShape() *ResizableShape {
 	this := new(ResizableShape)
-	this.size = 1 // TODO this is too large, but I don't know where the resizableshapes get it from.
+	this.size = 1
 	return this
 }
 

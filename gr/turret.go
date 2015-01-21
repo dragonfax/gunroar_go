@@ -5,9 +5,7 @@
  */
 package main
 
-import (
-	"github.com/go-gl/gl"
-)
+import "github.com/go-gl/gl"
 
 /**
  * Turret mounted on a deck of an enemy ship.
@@ -152,7 +150,7 @@ func (this *Turret) draw() {
 		if this.spec.shape == nil {
 			panic("turret spec shape nil")
 		}
-		this.spec.shape.draw()
+		this.spec.shape.draw() // this is the bad turret
 	} else {
 		this.spec.damagedShape.draw()
 	}
