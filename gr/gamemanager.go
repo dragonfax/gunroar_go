@@ -51,6 +51,7 @@ func (this *GameManager) init() {
 	InitTurretShapes()
 	InitFragments()
 	InitSparkFragments()
+	InitCrystalShape()
 	// InitCrystal.init()
 	// twinStick = cast(TwinStick) (cast(MultipleInputDevice) input).inputs[1]
 	twinStick.openJoystick(pad.openJoystick(nil))
@@ -71,6 +72,7 @@ func (this *GameManager) close() {
 	closeTurretShapes()
 	CloseFragments()
 	CloseSparkFragments()
+	CloseCrystalShape()
 	// CloseCrystal()
 	titleState.close()
 	CloseLetter()

@@ -571,6 +571,16 @@ func NewCrystalShape() *CrystalShape {
 	return cs
 }
 
+var crystalShape *CrystalShape
+
+func InitCrystalShape() {
+	crystalShape = NewCrystalShape()
+}
+
+func CloseCrystalShape() {
+	crystalShape.close()
+}
+
 type ShieldShape struct {
 	*SimpleShape
 }

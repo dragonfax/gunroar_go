@@ -25,7 +25,7 @@ type Crystal struct {
 
 func NewCrystal(p Vector) *Crystal {
 	c := new(Crystal)
-	c.shape = NewCrystalShape()
+	c.shape = crystalShape
 	c.pos = p
 	c.cnt = COUNT
 	c.vel = Vector{0, 0.1}
