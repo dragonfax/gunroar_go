@@ -5,11 +5,7 @@
  */
 package main
 
-import (
-	"errors"
-
-	"github.com/go-gl/gl"
-)
+import "github.com/go-gl/gl"
 
 type DisplayList struct {
 	registered bool
@@ -28,16 +24,6 @@ func NewDisplayList(num uint) *DisplayList {
 func (dp *DisplayList) beginNewList() {
 	dp.ResetList()
 	dp.NewList()
-}
-
-func (dp *DisplayList) nextNewList() error {
-	gl.EndList()
-	dp.enumIdx++
-	if dp.enumIdx >= dp.idx+dp.num || dp.enumIdx < dp.idx {
-		return errors.New("Can't create new list. Index out of bound.")
-	}
-	gl.NewList(dp.enumIdx, gl.COMPILE)
-	return nil
 }
 
 func (dp *DisplayList) endNewList() {
