@@ -642,11 +642,11 @@ func (this *SimpleShape) checkCollision(ax float32, ay float32, shape Shape /* =
 
 func (this *SimpleShape) startDisplayList() {
 	this.displayList = NewDisplayList(1)
-	this.displayList.beginNewList()
+	this.displayList.beginSingleList()
 }
 
 func (this *SimpleShape) endDisplayList() {
-	this.displayList.endNewList()
+	this.displayList.endSingleList()
 }
 
 func (this *SimpleShape) getCollision() Vector {

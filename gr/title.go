@@ -28,7 +28,7 @@ func NewTitleManager() *TitleManager {
 
 	tm.logo = NewTextureFromBMP("title.bmp")
 	tm.displayList = NewDisplayList(1)
-	tm.displayList.beginNewList()
+	tm.displayList.beginSingleList()
 	gl.Enable(gl.TEXTURE_2D)
 	tm.logo.Bind(0)
 	setScreenColor(1, 1, 1, 1)
@@ -69,7 +69,7 @@ func NewTitleManager() *TitleManager {
 	gl.Vertex2f(-46, 60)
 	gl.End()
 	lineWidth(1)
-	tm.displayList.endNewList()
+	tm.displayList.endSingleList()
 	return tm
 }
 

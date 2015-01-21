@@ -26,7 +26,7 @@ var displayList *DisplayList
 
 func InitLetter() {
 	displayList = NewDisplayList(DISPLAY_LIST_NUM)
-	displayList.ResetList()
+	displayList.ResetLists()
 	for j := 0; j < COLOR_NUM; j++ {
 		for i := 0; i < LETTER_NUM; i++ {
 			displayList.NewList()

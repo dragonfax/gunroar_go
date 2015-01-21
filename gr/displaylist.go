@@ -14,32 +14,58 @@ type DisplayList struct {
 	enumIdx    uint
 }
 
+var displayListsFinalized = false
+
 func NewDisplayList(num uint) *DisplayList {
+	verifyNotFinalized()
 	dl := new(DisplayList)
 	dl.num = num
 	dl.idx = gl.GenLists(int(num))
 	return dl
 }
 
-func (dp *DisplayList) beginNewList() {
-	dp.ResetList()
+func verifyNotFinalized() {
+	if displayListsFinalized {
+		panic("illegal method. display lists already finalized")
+	}
+}
+
+func (dp *DisplayList) beginSingleList() {
+	verifyNotFinalized()
+	if dp.num > 1 {
+		panic("can't use for multi lists")
+	}
+	if dp.registered {
+		panic("already registered this list")
+	}
+	dp.ResetLists()
 	dp.NewList()
 }
 
-func (dp *DisplayList) endNewList() {
+func (dp *DisplayList) endSingleList() {
+	verifyNotFinalized()
+	if dp.num > 1 {
+		panic("can't use for multi lists")
+	}
+	if dp.registered {
+		panic("already registered this list")
+	}
 	gl.EndList()
 	dp.registered = true
 }
 
-func (dp *DisplayList) ResetList() {
+func (dp *DisplayList) ResetLists() {
+	verifyNotFinalized()
 	dp.enumIdx = dp.idx
 }
 
 func (dp *DisplayList) NewList() {
+	verifyNotFinalized()
 	gl.NewList(dp.enumIdx, gl.COMPILE)
 }
 
 func (dp *DisplayList) EndList() {
+	verifyNotFinalized()
 	gl.EndList()
 	dp.enumIdx++
 	dp.registered = true

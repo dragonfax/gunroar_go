@@ -77,6 +77,7 @@ func (m *MainLoop) loop() {
 	screen.initSDL()
 	m.initFirst()
 	gameManager.start()
+	displayListsFinalized = true
 	for !m.done {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch e := event.(type) {

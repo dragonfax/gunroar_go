@@ -274,7 +274,7 @@ type Fragment struct {
 
 func InitFragments() {
 	fragmentDisplayList = NewDisplayList(1)
-	fragmentDisplayList.beginNewList()
+	fragmentDisplayList.beginSingleList()
 	setScreenColor(0.7, 0.5, 0.5, 0.5)
 	gl.Begin(gl.TRIANGLE_FAN)
 	gl.Vertex2f(-0.5, -0.25)
@@ -289,7 +289,7 @@ func InitFragments() {
 	gl.Vertex2f(0.5, 0.25)
 	gl.Vertex2f(-0.5, 0.25)
 	gl.End()
-	fragmentDisplayList.endNewList()
+	fragmentDisplayList.endSingleList()
 }
 
 func CloseFragments() {
@@ -369,14 +369,14 @@ type SparkFragment struct {
 
 func InitSparkFragments() {
 	sparkFragmentDisplayList = NewDisplayList(1)
-	sparkFragmentDisplayList.beginNewList()
+	sparkFragmentDisplayList.beginSingleList()
 	gl.Begin(gl.TRIANGLE_FAN)
 	gl.Vertex2f(-0.25, -0.25)
 	gl.Vertex2f(0.25, -0.25)
 	gl.Vertex2f(0.25, 0.25)
 	gl.Vertex2f(-0.25, 0.25)
 	gl.End()
-	sparkFragmentDisplayList.endNewList()
+	sparkFragmentDisplayList.endSingleList()
 }
 
 func CloseSparkFragments() {
