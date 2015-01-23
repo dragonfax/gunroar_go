@@ -61,9 +61,9 @@ func NewComplexShape(size float32, distRatio float32, spinyRatio float32, shapeT
 	this.b = b
 	this.collidable = collidable
 	if collidable {
-		this.collision = &Vector{size / 2, size / 2}
+		this.collision = Vector{size / 2, size / 2}
 	} else {
-		this.collision = nil
+		this.collision = Vector{}
 	}
 	this.createDisplayList()
 	return this
@@ -624,13 +624,11 @@ type Shape interface {
    and a simple static collision, if collidable */
 type SimpleShape struct {
 	displayList *DisplayList
-	collision   *Vector
+	collision   Vector
 }
 
 func NewSimpleShape() *SimpleShape {
 	this := new(SimpleShape)
-	// this.displayList = NewDisplayList(1)
-	this.collision = &Vector{}
 	return this
 }
 

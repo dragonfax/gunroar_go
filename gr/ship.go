@@ -345,14 +345,7 @@ func (this *Boat) move() {
 	case GameModeMOUSE:
 		this.moveMouse()
 	}
-	if isGameOver {
-		this.clearBullets()
-		if this.cnt < -INVINCIBLE_CNT {
-			this.cnt = -RESTART_CNT
-		}
-	} else if this.cnt < -INVINCIBLE_CNT {
-		this.clearBullets()
-	}
+	this.handleGameOver()
 	this.vx *= this.speed
 	this.vy *= this.speed
 	this.vx += this.refVel.x
@@ -393,6 +386,24 @@ func (this *Boat) move() {
 	} else {
 		this.onBlock = false
 	}
+	this.fire()
+	this.addWake()
+	this.checkForEnemyHit()
+	this.decreaseShield()
+}
+
+func (this *Boat) handleGameOver() {
+	if isGameOver {
+		this.clearBullets()
+		if this.cnt < -INVINCIBLE_CNT {
+			this.cnt = -RESTART_CNT
+		}
+	} else if this.cnt < -INVINCIBLE_CNT {
+		this.clearBullets()
+	}
+}
+
+func (this *Boat) fire() {
 	switch this.gameMode {
 	case GameModeNORMAL:
 		this.fireNormal()
@@ -403,6 +414,9 @@ func (this *Boat) move() {
 	case GameModeMOUSE:
 		this.fireMouse()
 	}
+}
+
+func (this *Boat) addWake() {
 	if this.cnt%3 == 0 && this.cnt >= -INVINCIBLE_CNT {
 		var sp float32
 		if this.vx != 0 || this.vy != 0 {
@@ -414,6 +428,14 @@ func (this *Boat) move() {
 		sp *= SPEED_BASE
 		this.shape.addWake(this.pos, this.deg, sp, 1)
 	}
+}
+
+func (this *Boat) decreaseShield() {
+	if this.shieldCnt > 0 {
+		this.shieldCnt--
+	}
+}
+func (this *Boat) checkForEnemyHit() {
 	he := checkAllEnemiesHitShip(this.pos.x, this.pos.y, nil, false)
 	if he != nil {
 		var rd float32
@@ -430,9 +452,6 @@ func (this *Boat) move() {
 			this.refVel.x /= rs
 			this.refVel.y /= rs
 		}
-	}
-	if this.shieldCnt > 0 {
-		this.shieldCnt--
 	}
 }
 

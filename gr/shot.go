@@ -219,7 +219,7 @@ func NewShotShape() *ShotShape {
 	gl.Vertex3f(-0.1, -0.3, -0.05)
 	gl.End()
 	ss.endDisplayList()
-	ss.collision = &Vector{0.33, 0.33}
+	ss.collision = Vector{0.33, 0.33}
 	return ss
 }
 
@@ -233,6 +233,6 @@ func NewLanceShape() *LanceShape {
 	ls.startDisplayList()
 	// no display for this shape.
 	ls.endDisplayList()
-	ls.collision = &Vector{0.66, 0.66}
+	ls.collision = Vector{0.66, 0.66}
 	return ls
 }
