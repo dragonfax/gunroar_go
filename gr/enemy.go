@@ -801,7 +801,7 @@ func (this *SmallShipEnemySpec) setParam(rank float32) {
 	switch this.moveType {
 	case MoveTypeSTOPANDGO:
 		this.distRatio = 0.5
-		this._size = 0.47 + nextFloat(0.1)
+		this.sizes(0.47 + nextFloat(0.1))
 		this.accel = 0.5 - 0.5/(2.0+nextFloat(rank))
 		this.maxSpeed = 0.05 * (1.0 + sr)
 		this.staySpeed = 0.03
@@ -809,7 +809,7 @@ func (this *SmallShipEnemySpec) setParam(rank float32) {
 		this.stayDuration = 32 + nextSignedInt(12)
 	case MoveTypeCHASE:
 		this.distRatio = 0.5
-		this._size = 0.5 + nextFloat(0.1)
+		this.sizes(0.5 + nextFloat(0.1))
 		this.speed = 0.036 * (1.0 + sr)
 		this.turnDeg = 0.02 + nextSignedFloat(0.04)
 	}
@@ -952,7 +952,7 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 		if sz > ms {
 			sz = ms
 		}
-		this._size = sz
+		this.sizes(sz)
 		this.speed = 0.015 + nextSignedFloat(0.005)
 		this.degVel = 0.005 + nextSignedFloat(0.003)
 		switch nextInt(3) {
@@ -972,7 +972,7 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 		if sz > ms {
 			sz = ms
 		}
-		this._size = sz
+		this.sizes(sz)
 		this.speed = 0.01 + nextSignedFloat(0.005)
 		this.degVel = 0.003 + nextSignedFloat(0.002)
 		mainTurretNum = int(this._size*(0.7+nextSignedFloat(0.2)) + 1)
@@ -986,7 +986,7 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 		if sz > ms {
 			sz = ms
 		}
-		this._size = sz
+		this.sizes(sz)
 		this.speed = ship.scrollSpeedBase + 0.0025 + nextSignedFloat(0.001)
 		this.degVel = 0.003 + nextSignedFloat(0.002)
 		mainTurretNum = int(this._size*0.8*(1.5+nextSignedFloat(0.4)) + 2)
@@ -1242,10 +1242,10 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 	this._destroyedShape = NewEnemyShape(EnemyShapeTypePLATFORM_DESTROYED)
 	this._bridgeShape = NewEnemyShape(EnemyShapeTypePLATFORM_BRIDGE)
 	this.distRatio = 0
-	this._size = 1 + rank/30 + nextFloat(rank/30)
+	this.sizes(1 + rank/30 + nextFloat(rank/30))
 	ms := 1 + nextFloat(0.25)
-	if this._size > ms {
-		this._size = ms
+	if this.size() > ms {
+		this.sizes(ms)
 	}
 	var mainTurretNum, frontTurretNum, sideTurretNum int
 	rk := rank
