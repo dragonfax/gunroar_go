@@ -1003,8 +1003,8 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 		tgs := this.getTurretGroupSpec()
 		tgs.turretSpec.setParam(0, TurretTypeDUMMY)
 	} else {
-		subTurretRank := int(rk) / (mainTurretNum*3 + subTurretNum)
-		mainTurretRank := float32(subTurretRank) * 2.5
+		var subTurretRank float32 = rk / float32(mainTurretNum*3+subTurretNum)
+		var mainTurretRank float32 = subTurretRank * 2.5
 		if cls != ShipClassBOSS {
 			frontMainTurretNum := int(float32(mainTurretNum)/2 + 0.99)
 			rearMainTurretNum := mainTurretNum - frontMainTurretNum
@@ -1038,9 +1038,9 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 					tgs := this.getTurretGroupSpec()
 					if i == 0 || i == 2 {
 						if nextInt(2) == 0 {
-							tgs.turretSpec.setParam(float32(subTurretRank), TurretTypeSUB)
+							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
 						} else {
-							tgs.turretSpec.setParam(float32(subTurretRank), TurretTypeSUB_DESTRUCTIVE)
+							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB_DESTRUCTIVE)
 						}
 						pts = tgs.turretSpec
 					} else {
@@ -1102,9 +1102,9 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 					tgs := this.getTurretGroupSpec()
 					if i == 0 || i == 2 || i == 4 {
 						if nextInt(2) == 0 {
-							tgs.turretSpec.setParam(float32(subTurretRank), TurretTypeSUB)
+							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB)
 						} else {
-							tgs.turretSpec.setParam(float32(subTurretRank), TurretTypeSUB_DESTRUCTIVE)
+							tgs.turretSpec.setParam(subTurretRank, TurretTypeSUB_DESTRUCTIVE)
 						}
 						pts = tgs.turretSpec
 						pts.setBossSpec()
