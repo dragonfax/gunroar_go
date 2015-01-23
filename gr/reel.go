@@ -290,13 +290,11 @@ func (ni *NumIndicator) gotoNextTarget() {
 		x := -0.3 + nextSignedFloat(0.05)
 		y := nextSignedFloat(0.1)
 		ni.vel = Vector{x, y}
-		break
 	case FlyingToTypeBOTTOM:
 		x := nextSignedFloat(0.1)
 		y := 0.3 + nextSignedFloat(0.05)
 		ni.vel = Vector{x, y}
 		decTargetY()
-		break
 	}
 	ni.vel.MulAssign(ni.target[ni.targetIdx].initialVelRatio)
 	ni.cnt = ni.target[ni.targetIdx].cnt
@@ -318,13 +316,11 @@ func (ni *NumIndicator) move() {
 			ni.pos = Vector{ni.pos.x, ni.pos.y + y}
 		}
 		ni.alpha += (1 - ni.alpha) * 0.03
-		break
 	case FlyingToTypeBOTTOM:
 		/* I was here with the conversions */
 		ni.pos = Vector{ni.pos.x + (tp.x-ni.pos.x)*0.1, ni.pos.y}
 		ni.vel = Vector{ni.vel.x, ni.vel.y + (tp.y-ni.pos.y)*0.0036}
 		ni.alpha *= 0.97
-		break
 	}
 	ni.vel.MulAssign(0.98)
 	ni.size += (ni.target[ni.targetIdx].size - ni.size) * 0.025
@@ -341,13 +337,11 @@ func (ni *NumIndicator) move() {
 			ni.pos.x = tp.x
 			ni.vel.x *= -0.05
 		}
-		break
 	case FlyingToTypeBOTTOM:
 		if ni.pos.y < tp.y {
 			ni.pos.y = tp.y
 			ni.vel.y *= -0.05
 		}
-		break
 	}
 	ni.cnt--
 	if ni.cnt < 0 {
@@ -360,11 +354,9 @@ func (ni *NumIndicator) draw() {
 	switch ni.t {
 	case IndicatorTypeSCORE:
 		drawNumSignOption(ni.n, ni.pos.x, ni.pos.y, ni.size, LETTER_LINE_COLOR, -1, -1)
-		break
 	case IndicatorTypeMULTIPLIER:
 		setScreenColor(ni.alpha, ni.alpha, ni.alpha, 1)
 		drawNumSignOption(ni.n, ni.pos.x, ni.pos.y, ni.size, LETTER_LINE_COLOR, 33, 3)
-		break
 	}
 }
 

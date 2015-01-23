@@ -116,16 +116,12 @@ func drawStringOption(str string, lx float32, y float32, s float32, d Direction,
 	switch d {
 	case TO_RIGHT:
 		ld = 0
-		break
 	case TO_DOWN:
 		ld = 90
-		break
 	case TO_LEFT:
 		ld = 180
-		break
 	case TO_UP:
 		ld = 270
-		break
 	}
 	ld += od
 	for _, c := range str {
@@ -141,16 +137,12 @@ func drawStringOption(str string, lx float32, y float32, s float32, d Direction,
 			switch d {
 			case TO_RIGHT:
 				x += s * LETTER_WIDTH
-				break
 			case TO_DOWN:
 				y += s * LETTER_WIDTH
-				break
 			case TO_LEFT:
 				x -= s * LETTER_WIDTH
-				break
 			case TO_UP:
 				y -= s * LETTER_WIDTH
-				break
 			}
 		} else {
 			x += Cos32(ld*math.Pi/180) * s * LETTER_WIDTH
@@ -245,12 +237,8 @@ func drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */
 			switch i {
 			case 3:
 				drawLetterOption(41, x+s*1.16, y, s, 0, cl)
-				break
 			case 5:
 				drawLetterOption(40, x+s*1.16, y, s, 0, cl)
-				break
-			default:
-				break
 			}
 			x -= s * LETTER_WIDTH
 		} else {

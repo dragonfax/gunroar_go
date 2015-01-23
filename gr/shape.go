@@ -106,7 +106,6 @@ func (this *ComplexShape) createDisplayList() {
 			this.createLoop(sz, z, false, false)
 			gl.End()
 		}
-		break
 	case PLATFORM, PLATFORM_DAMAGED, PLATFORM_DESTROYED:
 		setScreenColor(this.r*0.4, this.g*0.4, this.b*0.4, 1)
 		for i := 0; i < 3; i++ {
@@ -117,7 +116,6 @@ func (this *ComplexShape) createDisplayList() {
 				gl.End()
 			}
 		}
-		break
 	case BRIDGE, TURRET, TURRET_DAMAGED:
 		setScreenColor(this.r*0.6, this.g*0.6, this.b*0.6, 1)
 		z += height
@@ -137,9 +135,7 @@ func (this *ComplexShape) createDisplayList() {
 			this.createSquareLoop(sz, z/2, true, 3)
 		}
 		gl.End()
-		break
 	case TURRET_DESTROYED:
-		break
 	}
 	this.endDisplayList()
 }

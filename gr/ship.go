@@ -263,11 +263,9 @@ func NewBoat(idx int) *Boat {
 	case 0:
 		this.shape = NewComplexShape(0.7, 0.6, 0.6, SHIP_ROUNDTAIL, 0.5, 0.7, 0.5, false)
 		this.bridgeShape = NewComplexShape(0.3, 0.6, 0.6, BRIDGE, 0.3, 0.7, 0.3, false)
-		break
 	case 1:
 		this.shape = NewComplexShape(0.7, 0.6, 0.6, SHIP_ROUNDTAIL, 0.4, 0.3, 0.8, false)
 		this.bridgeShape = NewComplexShape(0.3, 0.6, 0.6, BRIDGE, 0.2, 0.3, 0.6, false)
-		break
 	}
 	this.turnSpeed = 1
 	this.fireInterval = FIRE_INTERVAL
@@ -287,10 +285,8 @@ func (this *Boat) start(gameMode GameMode) {
 		switch this.idx {
 		case 0:
 			this.pos.x = -field.size.x * 0.5
-			break
 		case 1:
 			this.pos.x = field.size.x * 0.5
-			break
 		}
 	} else {
 		this.pos.x = 0
@@ -316,11 +312,9 @@ func (this *Boat) restart() {
 	case GameModeNORMAL:
 		this.fireCnt = 99999
 		this.fireInterval = 99999
-		break
 	case GameModeTWIN_STICK, GameModeDOUBLE_PLAY, GameModeMOUSE:
 		this.fireCnt = 0
 		this.fireInterval = FIRE_INTERVAL
-		break
 	}
 	this.fireSprCnt = 0
 	this.fireSprDeg = 0.5
@@ -344,16 +338,12 @@ func (this *Boat) move() {
 	switch this.gameMode {
 	case GameModeNORMAL:
 		this.moveNormal()
-		break
 	case GameModeTWIN_STICK:
 		this.moveTwinStick()
-		break
 	case GameModeDOUBLE_PLAY:
 		this.moveDoublePlay()
-		break
 	case GameModeMOUSE:
 		this.moveMouse()
-		break
 	}
 	if isGameOver {
 		this.clearBullets()
@@ -406,16 +396,12 @@ func (this *Boat) move() {
 	switch this.gameMode {
 	case GameModeNORMAL:
 		this.fireNormal()
-		break
 	case GameModeTWIN_STICK:
 		this.fireTwinStick()
-		break
 	case GameModeDOUBLE_PLAY:
 		this.fireDobulePlay()
-		break
 	case GameModeMOUSE:
 		this.fireMouse()
-		break
 	}
 	if this.cnt%3 == 0 && this.cnt >= -INVINCIBLE_CNT {
 		var sp float32
@@ -507,11 +493,9 @@ func (this *Boat) moveDoublePlay() {
 		}
 		this.vx = stickInput.left.x
 		this.vy = stickInput.left.y
-		break
 	case 1:
 		this.vx = stickInput.right.x
 		this.vy = stickInput.right.y
-		break
 	}
 	if this.vx != 0 || this.vy != 0 {
 		ad := atan232(this.vx, this.vy)
@@ -589,10 +573,8 @@ func (this *Boat) fireNormal() {
 		switch foc {
 		case -1:
 			td = this.fireSprDeg * float32(this.fireSprCnt/2%4+1) * 0.2
-			break
 		case 1:
 			td = -this.fireSprDeg * float32(this.fireSprCnt/2%4+1) * 0.2
-			break
 		}
 		this.fireSprCnt++
 		NewShot(this.firePos, this.fireDeg+td, false, -1)
@@ -643,10 +625,8 @@ func (this *Boat) fireTwinStick() {
 			switch foc {
 			case -1:
 				td = this.fireSprDeg * (Mod32(float32(this.fireSprCnt)/2, 4) + 1) * 0.2
-				break
 			case 1:
 				td = -this.fireSprDeg * (Mod32(float32(this.fireSprCnt)/2, 4) + 1) * 0.2
-				break
 			}
 			this.fireSprCnt++
 			NewShot(this.firePos, this.fireDeg+td/2, false, 2)
@@ -692,10 +672,8 @@ func (this *Boat) fireDobulePlay() {
 			switch foc {
 			case -1:
 				td = this.fireSprDeg * (Mod32(float32(this.fireSprCnt)/2, 4) + 1) * 0.15
-				break
 			case 1:
 				td = -this.fireSprDeg * (Mod32(float32(this.fireSprCnt)/2, 4) + 1) * 0.15
-				break
 			}
 			this.firePos.x = ship.midstPos().x + Cos32(fd+Pi32)*0.2*float32(foc)
 			this.firePos.y = ship.midstPos().y - Sin32(fd+Pi32)*0.2*float32(foc)
@@ -735,10 +713,8 @@ func (this *Boat) fireMouse() {
 			switch foc {
 			case -1:
 				td = this.fireSprDeg * float32(this.fireSprCnt/2%4+1) * 0.2
-				break
 			case 1:
 				td = -this.fireSprDeg * float32(this.fireSprCnt/2%4+1) * 0.2
-				break
 			}
 			this.fireSprCnt++
 			NewShot(this.firePos, this.fireDeg+td/2, false, 2)

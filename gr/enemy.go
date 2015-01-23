@@ -162,7 +162,6 @@ func (this *EnemyState) setAppearancePos(appType AppearanceType /*= AppearanceTy
 				this.deg = Pi32 + nextFloat(0.5)
 				this.velDeg = this.deg
 			}
-			break
 		case AppearanceTypeSIDE:
 			if nextInt(2) == 0 {
 				this.pos.x = -field.outerSize.x * 0.99
@@ -174,13 +173,11 @@ func (this *EnemyState) setAppearancePos(appType AppearanceType /*= AppearanceTy
 				this.velDeg = this.deg
 			}
 			this.pos.y = field.size.y + nextFloat(field.size.y) + this.spec.size()
-			break
 		case AppearanceTypeCENTER:
 			this.pos.x = 0
 			this.pos.y = field.outerSize.y*0.99 + this.spec.size()
 			this.deg = 0
 			this.velDeg = this.deg
-			break
 		}
 		this.ppos.x = this.pos.x
 		this.ppos.y = this.pos.y
@@ -609,13 +606,10 @@ func (this *EnemySpecBase) addMovingTurret(rank float32, bossMode bool /*= false
 		switch nextInt(4) {
 		case 0, 1:
 			moveType = TurretMoveTypeROLL
-			break
 		case 2:
 			moveType = TurretMoveTypeSWING_FIX
-			break
 		case 3:
 			moveType = TurretMoveTypeSWING_AIM
-			break
 		}
 	} else {
 		moveType = TurretMoveTypeROLL
@@ -629,12 +623,10 @@ func (this *EnemySpecBase) addMovingTurret(rank float32, bossMode bool /*= false
 		a = 0.01 + nextFloat(0.04)
 		av = 0.01 + nextFloat(0.03)
 		dv = 0.01 + nextFloat(0.04)
-		break
 	case TurretMoveTypeSWING_FIX:
 		ad = Pi32/10 + nextFloat(Pi32/15)
 		s = 0.01 + nextFloat(0.02)
 		sv = 0.01 + nextFloat(0.03)
-		break
 	case TurretMoveTypeSWING_AIM:
 		ad = Pi32/10 + nextFloat(Pi32/15)
 		if nextInt(5) == 0 {
@@ -643,7 +635,6 @@ func (this *EnemySpecBase) addMovingTurret(rank float32, bossMode bool /*= false
 			s = 0
 		}
 		sv = 0.01 + nextFloat(0.02)
-		break
 	}
 	for i := 0; i < mtn; i++ {
 		tgs := this.getMovingTurretGroupSpec()
@@ -674,7 +665,6 @@ func (this *EnemySpecBase) addMovingTurret(rank float32, bossMode bool /*= false
 				tgs.distRatio = 0.8 + nextSignedFloat(0.3)
 			}
 			sr = br / float32(tgs.num)
-			break
 		case TurretMoveTypeSWING_FIX:
 			tgs.num = 3 + nextInt(5)
 			tgs.alignDeg = ad * (float32(tgs.num)*0.1 + 0.3)
@@ -691,7 +681,6 @@ func (this *EnemySpecBase) addMovingTurret(rank float32, bossMode bool /*= false
 			}
 			sr = br / float32(tgs.num)
 			sr *= 0.6
-			break
 		case TurretMoveTypeSWING_AIM:
 			tgs.num = 3 + nextInt(4)
 			tgs.alignDeg = ad * (float32(tgs.num)*0.1 + 0.3)
@@ -708,7 +697,6 @@ func (this *EnemySpecBase) addMovingTurret(rank float32, bossMode bool /*= false
 			}
 			sr = br / float32(tgs.num)
 			sr *= 0.4
-			break
 		}
 		if nextInt(4) == 0 {
 			tgs.setXReverse(-1)
@@ -819,13 +807,11 @@ func (this *SmallShipEnemySpec) setParam(rank float32) {
 		this.staySpeed = 0.03
 		this.moveDuration = 32 + nextSignedInt(12)
 		this.stayDuration = 32 + nextSignedInt(12)
-		break
 	case MoveTypeCHASE:
 		this.distRatio = 0.5
 		this._size = 0.5 + nextFloat(0.1)
 		this.speed = 0.036 * (1.0 + sr)
 		this.turnDeg = 0.02 + nextSignedFloat(0.04)
-		break
 	}
 	this._shield = 1
 	tgs := this.getTurretGroupSpec()
@@ -841,10 +827,8 @@ func (this *SmallShipEnemySpec) setFirstState(es *EnemyState, appType Appearance
 		es.speed = 0
 		es.state = MoveStateMOVING
 		es.cnt = this.moveDuration
-		break
 	case MoveTypeCHASE:
 		es.speed = this.speed
-		break
 	}
 	return true
 }
@@ -875,7 +859,6 @@ func (this *SmallShipEnemySpec) move(es *EnemyState) bool {
 				es.cnt = this.stayDuration
 				es.state = MoveStateSTAYING
 			}
-			break
 		case MoveStateSTAYING:
 			es.speed += (this.staySpeed - es.speed) * this.accel
 			es.cnt--
@@ -883,9 +866,7 @@ func (this *SmallShipEnemySpec) move(es *EnemyState) bool {
 				es.cnt = this.moveDuration
 				es.state = MoveStateMOVING
 			}
-			break
 		}
-		break
 	case MoveTypeCHASE:
 		es.pos.x += Sin32(es.velDeg) * this.speed
 		es.pos.y += Cos32(es.velDeg) * this.speed
@@ -977,18 +958,14 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 		switch nextInt(3) {
 		case 0:
 			mainTurretNum = int(this._size*(1+nextSignedFloat(0.25)) + 1)
-			break
 		case 1:
 			subTurretNum = int(this._size*1.6*(1+nextSignedFloat(0.5)) + 2)
-			break
 		case 2:
 			mainTurretNum = int(this._size*(0.5+nextSignedFloat(0.12)) + 1)
 			movingTurretRatio = 0.5 + nextFloat(0.25)
 			rk = rank * (1 - movingTurretRatio)
 			movingTurretRatio *= 2
-			break
 		}
-		break
 	case ShipClassLARGE:
 		sz := 2.5 + rank/24 + nextFloat(rank/24)
 		ms := 3 + nextFloat(1)
@@ -1003,7 +980,6 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 		movingTurretRatio = 0.25 + nextFloat(0.5)
 		rk = rank * (1 - movingTurretRatio)
 		movingTurretRatio *= 3
-		break
 	case ShipClassBOSS:
 		sz := 5 + rank/30 + nextFloat(rank/30)
 		ms := 9 + nextFloat(3)
@@ -1018,7 +994,6 @@ func (this *ShipEnemySpec) setParam(rank float32, cls ShipClass) {
 		movingTurretRatio = 0.2 + nextFloat(0.3)
 		rk = rank * (1 - movingTurretRatio)
 		movingTurretRatio *= 2.5
-		break
 	}
 	this._shield = int(this._size * 10)
 	if cls == ShipClassBOSS {
@@ -1281,14 +1256,11 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 		movingTurretRatio = 0.33 + nextFloat(0.46)
 		rk *= (1 - movingTurretRatio)
 		movingTurretRatio *= 2.5
-		break
 	case 1:
 		frontTurretNum = int(this._size*(0.5+nextSignedFloat(0.2)) + 1)
 		sideTurretNum = int(this._size*(0.5+nextSignedFloat(0.2))+1) * 2
-		break
 	case 2:
 		mainTurretNum = int(this._size*(1+nextSignedFloat(0.33)) + 1)
-		break
 	}
 	this._shield = int(this._size * 20)
 	subTurretNum := frontTurretNum + sideTurretNum

@@ -172,22 +172,17 @@ func (this *Field) createBlocks(groundDensity int) {
 				switch c {
 				case 0:
 					b = -2
-					break
 				case 1, 2, 3:
 					b = 0
-					break
 				case 4:
 					b = 2
-					break
 				}
 			} else {
 				switch c {
 				case 0:
 					b = -3
-					break
 				case 1, 2, 3, 4:
 					b = -1
-					break
 				}
 			}
 			this.block[bx][by] = b
@@ -225,17 +220,14 @@ func (this *Field) addGround(groundType int) {
 	switch groundType {
 	case 0:
 		cx = nextInt(int(BLOCK_SIZE_X*0.4)) + int(BLOCK_SIZE_X*0.1)
-		break
 	case 1:
 		cx = nextInt(int(BLOCK_SIZE_X*0.4)) + int(BLOCK_SIZE_X*0.5)
-		break
 	case 2:
 		if nextInt(2) == 0 {
 			cx = nextInt(int(BLOCK_SIZE_X*0.4)) - int(BLOCK_SIZE_X*0.2)
 		} else {
 			cx = nextInt(int(BLOCK_SIZE_X*0.4)) + int(BLOCK_SIZE_X*0.8)
 		}
-		break
 	}
 	/* this crazy bit is required to get dlang to do what I want
 	 * otherwise type and constant conversion and truncation errors, ahoy.

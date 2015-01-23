@@ -127,43 +127,36 @@ func NewSmoke(x float32, y float32, z float32 /*=0*/, mx float32, my float32, mz
 		this.g = nextFloat(0.2) + 0.2
 		this.b = 0
 		this.a = 1
-		break
 	case SmokeTypeEXPLOSION:
 		this.r = nextFloat(0.3) + 0.7
 		this.g = nextFloat(0.3) + 0.3
 		this.b = 0
 		this.a = 1
-		break
 	case SmokeTypeSAND:
 		this.r = 0.8
 		this.g = 0.8
 		this.b = 0.6
 		this.a = 0.6
-		break
 	case SmokeTypeSPARK:
 		this.r = nextFloat(0.3) + 0.7
 		this.g = nextFloat(0.5) + 0.5
 		this.b = 0
 		this.a = 1
-		break
 	case SmokeTypeWAKE:
 		this.r = 0.6
 		this.g = 0.6
 		this.b = 0.8
 		this.a = 0.6
-		break
 	case SmokeTypeSMOKE:
 		this.r = nextFloat(0.1) + 0.1
 		this.g = nextFloat(0.1) + 0.1
 		this.b = 0.1
 		this.a = 0.5
-		break
 	case SmokeTypeLANCE_SPARK:
 		this.r = 0.4
 		this.g = nextFloat(0.2) + 0.7
 		this.b = nextFloat(0.2) + 0.7
 		this.a = 1
-		break
 	}
 	return this
 }
@@ -191,27 +184,22 @@ func (this *Smoke) move() {
 			this.a *= 0.97
 		}
 		this.size *= 1.01
-		break
 	case SmokeTypeSAND:
 		this.r *= 0.98
 		this.g *= 0.98
 		this.b *= 0.98
 		this.a *= 0.98
-		break
 	case SmokeTypeSPARK:
 		this.r *= 0.92
 		this.g *= 0.92
 		this.a *= 0.95
 		this.vel.MulAssign(0.9)
-		break
 	case SmokeTypeWAKE:
 		this.a *= 0.98
 		this.size *= 1.005
-		break
 	case SmokeTypeLANCE_SPARK:
 		this.a *= 0.95
 		this.size *= 0.97
-		break
 	}
 	if this.size > 5 {
 		this.size = 5

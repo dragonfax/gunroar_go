@@ -243,11 +243,9 @@ func (this *Turret) destroyed() {
 	case TurretTypeMAIN:
 		this.parent.increaseMultiplier(2)
 		this.parent.addScore(40)
-		break
 	case TurretTypeSUB, TurretTypeSUB_DESTRUCTIVE:
 		this.parent.increaseMultiplier(1)
 		this.parent.addScore(20)
-		break
 	}
 }
 
@@ -348,7 +346,6 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		this.bulletShape = BulletShapeTypeSMALL
 		this.blind = true
 		this.invisible = true
-		break
 	case TurretTypeMOVING:
 		this.minRange = 6
 		this.bulletShape = BulletShapeTypeMOVING_TURRET
@@ -357,7 +354,6 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		this.turnSpeed = 0
 		this.maxRange = 9 + nextFloat(12)
 		rk *= (10.0 / sqrt32(this.maxRange))
-		break
 	default:
 		this.maxRange = 9 + nextFloat(16)
 		this.minRange = this.maxRange / (4 + nextFloat(0.5))
@@ -388,7 +384,6 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		if nextInt(4) == 0 {
 			this.burstTurnRatio = nextFloat(0.66) + 0.33
 		}
-		break
 	}
 	this.burstInterval = 6 + nextInt(8)
 	switch turretType {
@@ -407,7 +402,6 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		this.speed = sqrt32(sr * 0.6)
 		this.speed *= 0.12
 		this.shield = 20
-		break
 	case TurretTypeSUB:
 		this.sizes(0.36 + nextFloat(0.025))
 		br := (rk * 0.4) * (1 + nextSignedFloat(0.2))
@@ -423,7 +417,6 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		this.speed = sqrt32(sr * 0.7)
 		this.speed *= 0.2
 		this.shield = 12
-		break
 	case TurretTypeSUB_DESTRUCTIVE:
 		this.sizes(0.36 + nextFloat(0.025))
 		br := (rk * 0.4) * (1 + nextSignedFloat(0.2))
@@ -442,7 +435,6 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		this.speed = sqrt32(sr * 0.7)
 		this.speed *= 0.33
 		this.shield = 12
-		break
 	case TurretTypeSMALL:
 		this.sizes(0.33)
 		br := (rk * 0.33) * (1 + nextSignedFloat(0.2))
@@ -456,7 +448,6 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		}
 		this.speed = sqrt32(sr)
 		this.speed *= 0.24
-		break
 	case TurretTypeMOVING:
 		this.sizes(0.36)
 		br := (rk * 0.3) * (1 + nextSignedFloat(0.2))
@@ -471,7 +462,6 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		}
 		this.speed = sqrt32(sr * 0.7)
 		this.speed *= 0.2
-		break
 	}
 	if this.speed < 0.1 {
 		this.speed = 0.1
@@ -549,11 +539,9 @@ func (this *TurretGroup) move(p Vector, deg float32) bool {
 		} else {
 			md = 0
 		}
-		break
 	case AlignTypeSTRAIGHT:
 		y = 0
 		my = this.spec.offset.y / (float32(this.spec.num) + 1)
-		break
 	}
 	for i := 0; i < this.spec.num; i++ {
 		var tbx, tby float32
@@ -561,13 +549,11 @@ func (this *TurretGroup) move(p Vector, deg float32) bool {
 		case AlignTypeROUND:
 			tbx = Sin32(d) * this.spec.radius
 			tby = Cos32(d) * this.spec.radius
-			break
 		case AlignTypeSTRAIGHT:
 			y += my
 			tbx = this.spec.offset.x
 			tby = y
 			d = atan232(tbx, tby)
-			break
 		}
 		tbx *= (1 - this.spec.distRatio)
 		bx := tbx*Cos32(-deg) - tby*Sin32(-deg)
