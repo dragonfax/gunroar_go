@@ -307,7 +307,7 @@ func NewTurretSpec() *TurretSpec {
 	this.nway = 1
 	this.bulletShape = BulletShapeTypeNORMAL
 	this.shield = 99999
-	this.size = 1
+	this.sizes(1)
 	return this
 }
 
@@ -332,7 +332,7 @@ func (this *TurretSpec) setParamTurretSpec(ts *TurretSpec) {
 	this.bulletDestructive = ts.bulletDestructive
 	this.shield = ts.shield
 	this.invisible = ts.invisible
-	this.size = ts.size
+	this.sizes(ts.size)
 }
 
 func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
@@ -393,7 +393,7 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 	this.burstInterval = 6 + nextInt(8)
 	switch turretType {
 	case TurretTypeMAIN:
-		this.size = 0.42 + nextFloat(0.05)
+		this.sizes(0.42 + nextFloat(0.05))
 		br := (rk * 0.3) * (1 + nextSignedFloat(0.2))
 		nr := (rk * 0.33) * nextFloat(1)
 		ir := (rk * 0.1) * (1 + nextSignedFloat(0.2))
@@ -409,7 +409,7 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		this.shield = 20
 		break
 	case TurretTypeSUB:
-		this.size = 0.36 + nextFloat(0.025)
+		this.sizes(0.36 + nextFloat(0.025))
 		br := (rk * 0.4) * (1 + nextSignedFloat(0.2))
 		nr := (rk * 0.2) * nextFloat(1)
 		ir := (rk * 0.2) * (1 + nextSignedFloat(0.2))
@@ -425,7 +425,7 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		this.shield = 12
 		break
 	case TurretTypeSUB_DESTRUCTIVE:
-		this.size = 0.36 + nextFloat(0.025)
+		this.sizes(0.36 + nextFloat(0.025))
 		br := (rk * 0.4) * (1 + nextSignedFloat(0.2))
 		nr := (rk * 0.2) * nextFloat(1)
 		ir := (rk * 0.2) * (1 + nextSignedFloat(0.2))
@@ -444,7 +444,7 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		this.shield = 12
 		break
 	case TurretTypeSMALL:
-		this.size = 0.33
+		this.sizes(0.33)
 		br := (rk * 0.33) * (1 + nextSignedFloat(0.2))
 		ir := (rk * 0.2) * (1 + nextSignedFloat(0.2))
 		this.burstNum = int(br) + 1
@@ -458,7 +458,7 @@ func (this *TurretSpec) setParam(rank float32, turretType TurretType) {
 		this.speed *= 0.24
 		break
 	case TurretTypeMOVING:
-		this.size = 0.36
+		this.sizes(0.36)
 		br := (rk * 0.3) * (1 + nextSignedFloat(0.2))
 		nr := (rk * 0.1) * nextFloat(1)
 		ir := (rk * 0.33) * (1 + nextSignedFloat(0.2))
