@@ -1230,13 +1230,9 @@ type PlatformEnemySpec struct {
 	*EnemySpecBase
 }
 
-func NewPlatformEnemySpec() *PlatformEnemySpec {
+func NewPlatformEnemySpec(rank float32) *PlatformEnemySpec {
 	this := new(PlatformEnemySpec)
 	this.EnemySpecBase = NewEnemySpecBase(EnemyTypePLATFORM)
-	return this
-}
-
-func (this *PlatformEnemySpec) setParam(rank float32) {
 	this._shape = NewEnemyShape(EnemyShapeTypePLATFORM)
 	this._damagedShape = NewEnemyShape(EnemyShapeTypePLATFORM_DAMAGED)
 	this._destroyedShape = NewEnemyShape(EnemyShapeTypePLATFORM_DESTROYED)
@@ -1308,6 +1304,7 @@ func (this *PlatformEnemySpec) setParam(rank float32) {
 	if movingTurretRatio > 0 {
 		this.addMovingTurret(rank*movingTurretRatio, false)
 	}
+	return this
 }
 
 func (this *PlatformEnemySpec) setFirstState(es *EnemyState, appType AppearanceType, x float32, y float32, d float32) bool {

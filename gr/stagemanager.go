@@ -17,11 +17,11 @@ type StageManager struct {
 	enemyApp                                  [3]*EnemyAppearance
 	blockDensity                              int
 	batteryNum                                int
-	platformEnemySpec                         *PlatformEnemySpec
 	bossMode                                  bool
 	bossAppCnt                                int
 	bossAppTime, bossAppTimeBase              int
 	bgmStartCnt                               int
+	platformRank                              float32
 }
 
 func NewStageManager() *StageManager {
@@ -29,7 +29,6 @@ func NewStageManager() *StageManager {
 	/*for i, _ := range this.enemyApp {
 		this.enemyApp[i] = NewEnemyAppearance()
 	} */
-	this.platformEnemySpec = NewPlatformEnemySpec()
 	this.rank = 1
 	this.baseRank = 1
 	this.blockDensity = 2
@@ -169,9 +168,8 @@ func (this *StageManager) gotoNextBlockArea() {
 		this.enemyApp[0] = nil
 	}
 	if this.batteryNum > 0 {
-		this.platformEnemySpec = NewPlatformEnemySpec()
 		pr := tr * (0.3 + nextFloat(0.1))
-		this.platformEnemySpec.setParam(pr / float32(this.batteryNum))
+		this.platformRank = pr / float32(this.batteryNum)
 	}
 	appType = (appType + 1) % 2
 	middleShipNum := (4 - float32(this.blockDensity) + nextSignedFloat(1)) * 0.66
@@ -226,11 +224,11 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 		if platformPos[ppi].used {
 			break
 		}
-		en := NewEnemy(this.platformEnemySpec)
+		en := NewEnemy(NewPlatformEnemySpec(this.platformRank))
 		platformPos[ppi].used = true
 		ppn--
 		p := field.convertToScreenPos(int(platformPos[ppi].pos.x), int(platformPos[ppi].pos.y))
-		if !this.platformEnemySpec.setFirstState(en.state, 0, p.x, p.y, platformPos[ppi].deg) {
+		if !en.spec.setFirstState(en.state, 0, p.x, p.y, platformPos[ppi].deg) {
 			en.close()
 			continue
 		}
