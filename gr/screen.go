@@ -125,7 +125,7 @@ func (s *Screen) screenResized() {
 }
 
 func lineWidth(w int) {
-	gl.LineWidth(lineWidthBase * float32(w))
+	gl.LineWidth(floor32(lineWidthBase * float32(w)))
 }
 
 func (s *Screen) Clear() {

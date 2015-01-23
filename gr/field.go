@@ -294,7 +294,7 @@ func (this *Field) getBlockVector(p Vector) int {
 }
 
 func (this *Field) getBlock(x float32, y float32) int {
-	y -= this.screenY - float32(int(this.screenY))
+	y -= this.screenY - floor32(this.screenY)
 	bx := int((x + BLOCK_WIDTH*SCREEN_BLOCK_SIZE_X/2) / BLOCK_WIDTH)
 	by := int(this.screenY) + int((-y+BLOCK_WIDTH*SCREEN_BLOCK_SIZE_Y/2)/BLOCK_WIDTH)
 	if bx < 0 || bx >= BLOCK_SIZE_X {

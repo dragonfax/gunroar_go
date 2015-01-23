@@ -253,7 +253,7 @@ func drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */
 func setLetter(idx int, c int) {
 	var x, y, length, size, deg float32
 	for i := 0; ; i++ {
-		deg = spData[idx][i][4]
+		deg = floor32(spData[idx][i][4])
 		if deg > 99990 {
 			break
 		}

@@ -121,9 +121,9 @@ func (nr *NumReel) move() {
 }
 
 func (nr *NumReel) drawAtPos(x float32, y float32, s float32) {
-	n := Mod32(((nr.deg*10/360 + 0.99) + 1), 10)
-	d := Mod32(nr.deg, 360)
-	od := d - n*360/10
+	var n int = int(Mod32(((nr.deg*10/360 + 0.99) + 1), 10))
+	var d float32 = Mod32(nr.deg, 360)
+	var od float32 = d - float32(n)*360/10
 	od -= 15
 	od = normalizeDeg360(od)
 	od *= 1.5
@@ -325,7 +325,7 @@ func (ni *NumIndicator) move() {
 	ni.vel.MulAssign(0.98)
 	ni.size += (ni.target[ni.targetIdx].size - ni.size) * 0.025
 	ni.pos.AddAssign(ni.vel)
-	vn := int(float32(ni.target[ni.targetIdx].n-ni.n) * 0.2)
+	var vn int = int(float32(ni.target[ni.targetIdx].n-ni.n) * 0.2)
 	if vn < 10 && vn > -10 {
 		ni.n = ni.target[ni.targetIdx].n
 	} else {

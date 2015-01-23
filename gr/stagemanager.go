@@ -148,11 +148,11 @@ func (this *StageManager) gotoNextBlockArea() {
 	}
 	this.batteryNum = int((float32(this.blockDensity) + nextSignedFloat(1)) * 0.75)
 	tr := this.rank
-	largeShipNum := (2 - float32(this.blockDensity) + nextSignedFloat(1)) * 0.5
+	var largeShipNum int = int((2 - float32(this.blockDensity) + nextSignedFloat(1)) * 0.5)
 	if noSmallShip {
-		largeShipNum *= 1.5
+		largeShipNum = int(float32(largeShipNum) * 1.5)
 	} else {
-		largeShipNum *= 0.5
+		largeShipNum = int(float32(largeShipNum) * 0.5)
 	}
 	appType := AppearanceType(nextInt(2))
 	if largeShipNum > 0 {
@@ -162,7 +162,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		}
 		tr -= lr
 		ses := NewShipEnemySpec()
-		ses.setParam(lr/largeShipNum, ShipClassLARGE)
+		ses.setParam(lr/float32(largeShipNum), ShipClassLARGE)
 		this.enemyApp[0] = NewEnemyAppearance(ses, int(largeShipNum), appType)
 	} else {
 		this.enemyApp[0] = nil
@@ -172,7 +172,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		this.platformRank = pr / float32(this.batteryNum)
 	}
 	appType = (appType + 1) % 2
-	middleShipNum := (4 - float32(this.blockDensity) + nextSignedFloat(1)) * 0.66
+	var middleShipNum int = int((4 - float32(this.blockDensity) + nextSignedFloat(1)) * 0.66)
 	if noSmallShip {
 		middleShipNum *= 2
 	}
@@ -185,19 +185,19 @@ func (this *StageManager) gotoNextBlockArea() {
 		}
 		tr -= mr
 		ses := NewShipEnemySpec()
-		ses.setParam(mr/middleShipNum, ShipClassMIDDLE)
-		this.enemyApp[1] = NewEnemyAppearance(ses, int(middleShipNum), appType)
+		ses.setParam(mr/float32(middleShipNum), ShipClassMIDDLE)
+		this.enemyApp[1] = NewEnemyAppearance(ses, middleShipNum, appType)
 	} else {
 		this.enemyApp[1] = nil
 	}
 	if !noSmallShip {
 		appType = AppearanceTypeTOP
-		smallShipNum := (sqrt32(3+tr) * (1 + nextSignedFloat(0.5)) * 2) + 1
+		var smallShipNum int = int((sqrt32(3+tr) * (1 + nextSignedFloat(0.5)) * 2) + 1)
 		if smallShipNum > 256 {
 			smallShipNum = 256
 		}
 		sses := NewSmallShipEnemySpec()
-		sses.setParam(tr / smallShipNum)
+		sses.setParam(tr / float32(smallShipNum))
 		this.enemyApp[2] = NewEnemyAppearance(sses, int(smallShipNum), appType)
 	} else {
 		this.enemyApp[2] = nil

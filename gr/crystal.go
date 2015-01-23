@@ -14,7 +14,7 @@ import (
  */
 
 const COUNT = 60
-const PULLIN_COUNT = COUNT * 0.8
+const PULLIN_COUNT = 48 // floor(COUNT * 0.8)
 
 type Crystal struct {
 	shape *CrystalShape

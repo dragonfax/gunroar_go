@@ -340,11 +340,11 @@ func (this *EnemyState) setScoreIndicator(sc int, mp float32) {
 		ni := NewNumIndicator(sc, IndicatorTypeSCORE, 0.5, this.pos.x, this.pos.y)
 		ni.addTarget(8, ty, FlyingToTypeRIGHT, 1, 0.5, sc, 40)
 		ni.addTarget(11, ty, FlyingToTypeRIGHT, 0.5, 0.75,
-			(sc * int(mp)), 30)
+			int(float32(sc)*mp), 30)
 		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.25, 1,
-			(sc * int(mp) * int(stageManager.rank)), 20)
+			int(float32(sc)*mp*stageManager.rank), 20)
 		ni.addTarget(12, -8, FlyingToTypeBOTTOM, 0.5, 0.1,
-			(sc * int(mp) * int(stageManager.rank)), 40)
+			int(float32(sc)*mp*stageManager.rank), 40)
 		ni.gotoNextTarget()
 
 		mn := int(mp * 1000)
@@ -369,7 +369,7 @@ func (this *EnemyState) setScoreIndicator(sc int, mp float32) {
 		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.5, 0.2, rn, 40)
 		ni.gotoNextTarget()
 
-		scoreReel.addActualScore(sc * int(stageManager.rank))
+		scoreReel.addActualScore(int(float32(sc) * stageManager.rank))
 	}
 }
 

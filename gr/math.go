@@ -50,3 +50,7 @@ func atan232(x float32, y float32) float32 {
 func tan32(x float32) float32 {
 	return float32(math.Tan(float64(x)))
 }
+
+func floor32(x float32) float32 {
+	return float32(math.Floor(float64(x)))
+}
