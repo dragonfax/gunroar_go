@@ -5,9 +5,7 @@
  */
 package main
 
-import (
-	"github.com/go-gl/gl"
-)
+import "github.com/go-gl/gl"
 
 /**
  * Enemy ships.
@@ -254,7 +252,7 @@ func (this *EnemyState) checkCollision(x float32, y float32, c Shape, shot *Shot
 			return true
 		}
 	}
-	if this.spec.bridgeShape() != nil && this.spec.bridgeShape().checkCollision(ox, oy, c) {
+	if this.spec.bridgeShape().checkCollision(ox, oy, c) {
 		this.addDamage(shot.damage, shot)
 		return true
 	}
@@ -783,10 +781,6 @@ func NewSmallShipEnemySpec() *SmallShipEnemySpec {
 	this.moveDuration = 1
 	this.stayDuration = 1
 	return this
-}
-
-func (this *SmallShipEnemySpec) bridgeShape() *EnemyShape {
-	return nil
 }
 
 func (this *SmallShipEnemySpec) setParam(rank float32) {
