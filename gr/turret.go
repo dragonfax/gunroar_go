@@ -24,9 +24,11 @@ type Turret struct {
 	burstCnt                      int
 	isBoss                        bool
 	enemyIndex                    int
+	multiplier                    *float32
+	addScore                      func(int)
 }
 
-func NewTurret(spec *TurretSpec, isBoss bool, enemyIndex int) *Turret {
+func NewTurret(spec *TurretSpec, isBoss bool, enemyIndex int, multiplier *float32, addScore func(int)) *Turret {
 	if spec.shape == nil {
 		panic("turret spec shape nil")
 	}
@@ -37,6 +39,8 @@ func NewTurret(spec *TurretSpec, isBoss bool, enemyIndex int) *Turret {
 	this.destroyedCnt = -1
 	this.bulletSpeed = 1
 	this.enemyIndex = enemyIndex
+	this.multiplier = multiplier
+	this.addScore = addScore
 	return this
 }
 
@@ -242,11 +246,11 @@ func (this *Turret) destroyed() {
 	}
 	switch this.spec.turretType {
 	case TurretTypeMAIN:
-		this.parent.increaseMultiplier(2)
-		this.parent.addScore(40)
+		*(this.multiplier) += 2
+		this.addScore(40)
 	case TurretTypeSUB, TurretTypeSUB_DESTRUCTIVE:
-		this.parent.increaseMultiplier(1)
-		this.parent.addScore(20)
+		*(this.multiplier) += 1
+		this.addScore(20)
 	}
 }
 
@@ -520,7 +524,7 @@ func NewTurretGroup(parent *Enemy, spec *TurretGroupSpec) *TurretGroup {
 		panic("turret spec shape nil")
 	}
 	for i, _ := range this.turret {
-		this.turret[i] = NewTurret(parent, spec.turretSpec)
+		this.turret[i] = NewTurret(spec.turretSpec, parent.isBoss(), parent.index(), &(parent.multiplier), parent.addScoreFunc())
 	}
 	this.spec = spec
 	return this
@@ -630,7 +634,7 @@ type MovingTurretGroup struct {
 func NewMovingTurretGroup(parent *Enemy, spec *MovingTurretGroupSpec) *MovingTurretGroup {
 	this := new(MovingTurretGroup)
 	for i, _ := range this.turret {
-		this.turret[i] = NewTurret(parent, spec.turretSpec)
+		this.turret[i] = NewTurret(spec.turretSpec, parent.isBoss(), parent.index(), &(parent.multiplier), parent.addScoreFunc())
 	}
 	this.spec = spec
 	this.radius = spec.radiusBase
