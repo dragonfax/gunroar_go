@@ -20,7 +20,7 @@ type Enemy struct {
 	turnCnt, cnt                                          int
 	vel                                                   Vector
 	state                                                 MoveState
-	turretGroup                                           [TURRET_GROUP_MAX]*TurretGroup
+	turretGroup                                           []*TurretGroup
 	movingTurretGroup                                     [MOVING_TURRET_GROUP_MAX]*MovingTurretGroup
 	damaged                                               bool
 	damagedCnt, destroyedCnt, explodeCnt, explodeItv, idx int
@@ -36,9 +36,7 @@ func NewEnemy(spec EnemySpec) *Enemy {
 	this.explodeItv = 1
 	this.multiplier = 1
 
-	for i, _ := range this.turretGroup {
-		this.turretGroup[i] = NewTurretGroup(this, spec.turretGroupSpec()[i])
-	}
+	this.turretGroup = make([]*TurretGroup, 0, TURRET_GROUP_MAX)
 	for i, _ := range this.movingTurretGroup {
 		this.movingTurretGroup[i] = NewMovingTurretGroup(this, spec.movingTurretGroupSpec()[i])
 	}
@@ -51,6 +49,13 @@ func NewEnemy(spec EnemySpec) *Enemy {
 	this.multiplier = 1
 	actors[this] = true
 	return this
+}
+
+func (this *Enemy) addTurretGroup(i int) {
+	for j := len(this.turretGroup); j <= i; j++ {
+		tg := NewTurretGroup(this, this.spec.turretGroupSpec()[j])
+		this.turretGroup = append(this.turretGroup, tg)
+	}
 }
 
 func (this *Enemy) index() int {
@@ -197,6 +202,7 @@ func (this *Enemy) stateMove() bool {
 	}
 	alive := false
 	for i := 0; i < this.spec.turretGroupNum(); i++ {
+		this.addTurretGroup(i)
 		alive = alive || this.turretGroup[i].move(this.pos, this.deg)
 	}
 	for i := 0; i < this.spec.movingTurretGroupNum(); i++ {
@@ -369,8 +375,8 @@ func (this *Enemy) destroyedEdge(n int) {
 }
 
 func (this *Enemy) removeTurrets() {
-	for i := 0; i < this.spec.turretGroupNum(); i++ {
-		this.turretGroup[i].close()
+	for _, t := range this.turretGroup {
+		t.close()
 	}
 	for i := 0; i < this.spec.movingTurretGroupNum(); i++ {
 		this.movingTurretGroup[i].close()
@@ -450,7 +456,7 @@ type EnemySpec interface {
 	draw(es *Enemy)
 	size() float32
 	isBoss() bool
-	turretGroupSpec() [TURRET_GROUP_MAX]*TurretGroupSpec
+	turretGroupSpec() []*TurretGroupSpec
 	turretGroupNum() int
 	movingTurretGroupSpec() [MOVING_TURRET_GROUP_MAX]*MovingTurretGroupSpec
 	movingTurretGroupNum() int
@@ -468,8 +474,7 @@ type EnemySpecBase struct {
 	_shield                                              int
 	_size                                                float32
 	distRatio                                            float32
-	_turretGroupSpec                                     [TURRET_GROUP_MAX]*TurretGroupSpec
-	_turretGroupNum                                      int
+	_turretGroupSpec                                     []*TurretGroupSpec
 	_movingTurretGroupSpec                               [MOVING_TURRET_GROUP_MAX]*MovingTurretGroupSpec
 	_movingTurretGroupNum                                int
 	_shape, _damagedShape, _destroyedShape, _bridgeShape *EnemyShape
@@ -479,9 +484,7 @@ type EnemySpecBase struct {
 
 func NewEnemySpecBase(enemyType EnemyType) *EnemySpecBase {
 	this := new(EnemySpecBase)
-	for i, _ := range this._turretGroupSpec {
-		this._turretGroupSpec[i] = NewTurretGroupSpec()
-	}
+	this._turretGroupSpec = make([]*TurretGroupSpec, 0, TURRET_GROUP_MAX)
 	for i, _ := range this._movingTurretGroupSpec {
 		this._movingTurretGroupSpec[i] = NewMovingTurretGroupSpec()
 	}
@@ -495,12 +498,12 @@ func (this *EnemySpecBase) movingTurretGroupSpec() [MOVING_TURRET_GROUP_MAX]*Mov
 	return this._movingTurretGroupSpec
 }
 
-func (this *EnemySpecBase) turretGroupSpec() [TURRET_GROUP_MAX]*TurretGroupSpec {
+func (this *EnemySpecBase) turretGroupSpec() []*TurretGroupSpec {
 	return this._turretGroupSpec
 }
 
 func (this *EnemySpecBase) turretGroupNum() int {
-	return this._turretGroupNum
+	return len(this._turretGroupSpec)
 }
 
 func (this *EnemySpecBase) movingTurretGroupNum() int {
@@ -548,8 +551,9 @@ func (this *EnemySpecBase) isBoss() bool {
 }
 
 func (this *EnemySpecBase) getTurretGroupSpec() *TurretGroupSpec {
-	this._turretGroupNum++
-	return this._turretGroupSpec[this._turretGroupNum-1]
+	tgs := NewTurretGroupSpec()
+	this._turretGroupSpec = append(this._turretGroupSpec, tgs)
+	return tgs
 }
 
 func (this *EnemySpecBase) getMovingTurretGroupSpec() *MovingTurretGroupSpec {
