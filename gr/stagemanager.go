@@ -196,8 +196,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		if smallShipNum > 256 {
 			smallShipNum = 256
 		}
-		sses := NewSmallShipEnemySpec()
-		sses.setParam(tr / float32(smallShipNum))
+		sses := NewSmallShipEnemySpec(tr / float32(smallShipNum))
 		this.enemyApp[2] = NewEnemyAppearance(sses, int(smallShipNum), appType)
 	} else {
 		this.enemyApp[2] = nil

@@ -744,15 +744,11 @@ type SmallShipEnemySpec struct {
 	speed, turnDeg             float32
 }
 
-func NewSmallShipEnemySpec() *SmallShipEnemySpec {
+func NewSmallShipEnemySpec(rank float32) *SmallShipEnemySpec {
 	this := new(SmallShipEnemySpec)
 	this.EnemySpecBase = NewEnemySpecBase(EnemyTypeSMALL)
 	this.moveDuration = 1
 	this.stayDuration = 1
-	return this
-}
-
-func (this *SmallShipEnemySpec) setParam(rank float32) {
 	this._shape = NewEnemyShape(EnemyShapeTypeSMALL)
 	this._damagedShape = NewEnemyShape(EnemyShapeTypeSMALL_DAMAGED)
 	this._bridgeShape = NewEnemyShape(EnemyShapeTypeSMALL_BRIDGE)
@@ -779,6 +775,7 @@ func (this *SmallShipEnemySpec) setParam(rank float32) {
 	this._shield = 1
 	tgs := this.getTurretGroupSpec()
 	tgs.turretSpec.setParam(rank-sr*0.5, TurretTypeSMALL)
+	return this
 }
 
 func (this *SmallShipEnemySpec) setFirstState(es *Enemy, appType AppearanceType, x float32, y float32, d float32) bool {
