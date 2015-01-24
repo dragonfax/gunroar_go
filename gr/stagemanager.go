@@ -121,8 +121,7 @@ func (this *StageManager) gotoNextBlockArea() {
 	if this.bossMode {
 		this.bossAppCnt--
 		if this.bossAppCnt == 0 {
-			ses := NewShipEnemySpec()
-			ses.setParam(this.rank, ShipClassBOSS)
+			ses := NewShipEnemySpec(this.rank, ShipClassBOSS)
 			en := NewEnemy(ses)
 			if !ses.setFirstState(en, AppearanceTypeCENTER, 0, 0, 0) {
 				en.close()
@@ -161,8 +160,7 @@ func (this *StageManager) gotoNextBlockArea() {
 			lr *= 1.5
 		}
 		tr -= lr
-		ses := NewShipEnemySpec()
-		ses.setParam(lr/float32(largeShipNum), ShipClassLARGE)
+		ses := NewShipEnemySpec(lr/float32(largeShipNum), ShipClassLARGE)
 		this.enemyApp[0] = NewEnemyAppearance(ses, int(largeShipNum), appType)
 	} else {
 		this.enemyApp[0] = nil
@@ -184,8 +182,7 @@ func (this *StageManager) gotoNextBlockArea() {
 			mr = tr * (0.33 + nextFloat(0.33))
 		}
 		tr -= mr
-		ses := NewShipEnemySpec()
-		ses.setParam(mr/float32(middleShipNum), ShipClassMIDDLE)
+		ses := NewShipEnemySpec(mr/float32(middleShipNum), ShipClassMIDDLE)
 		this.enemyApp[1] = NewEnemyAppearance(ses, middleShipNum, appType)
 	} else {
 		this.enemyApp[1] = nil
