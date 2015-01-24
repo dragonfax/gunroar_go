@@ -22,20 +22,21 @@ type Turret struct {
 	destroyedCnt, damagedCnt      int
 	bulletSpeed                   float32
 	burstCnt                      int
-	parent                        *Enemy
+	isBoss                        bool
+	enemyIndex                    int
 }
 
-func NewTurret(parent *Enemy, spec *TurretSpec) *Turret {
+func NewTurret(spec *TurretSpec, isBoss bool, enemyIndex int) *Turret {
 	if spec.shape == nil {
 		panic("turret spec shape nil")
 	}
 	this := new(Turret)
-	this.parent = parent
 	this.bulletSpeed = 1
 	this.spec = spec
 	this.shield = spec.shield
 	this.destroyedCnt = -1
 	this.bulletSpeed = 1
+	this.enemyIndex = enemyIndex
 	return this
 }
 
@@ -89,7 +90,7 @@ func (this *Turret) move(x float32, y float32, d float32, bulletFireSpeed float3
 		this.deg = -this.spec.turnRange
 	}
 	this.cnt++
-	if field.checkInFieldVector(this.pos) || (this.parent.isBoss() && this.cnt%4 == 0) {
+	if field.checkInFieldVector(this.pos) || (this.isBoss && this.cnt%4 == 0) {
 		this.appCnt++
 	}
 	if this.cnt >= this.spec.interval {
@@ -103,7 +104,7 @@ func (this *Turret) move(x float32, y float32, d float32, bulletFireSpeed float3
 	}
 	if this.cnt <= 0 && -this.cnt%this.spec.burstInterval == 0 &&
 		((this.spec.invisible && field.checkInFieldVector(this.pos)) ||
-			(this.spec.invisible && this.parent.isBoss() && field.checkInOuterFieldVector(this.pos)) ||
+			(this.spec.invisible && this.isBoss && field.checkInOuterFieldVector(this.pos)) ||
 			(!this.spec.invisible && field.checkInFieldExceptTop(this.pos))) &&
 		this.pos.distVector(shipPos) > this.spec.minRange {
 		bd := this.baseDeg + this.deg
@@ -115,7 +116,7 @@ func (this *Turret) move(x float32, y float32, d float32, bulletFireSpeed float3
 		}
 		bd -= this.spec.nwayAngle * (float32(nw) - 1) / 2
 		for i := 0; i < nw; i++ {
-			NewBullet(this.parent.index(),
+			NewBullet(this.enemyIndex,
 				this.pos, bd, this.bulletSpeed, this.spec.size*3, this.spec.bulletShape, this.spec.maxRange,
 				bulletFireSpeed, bulletFireDeg, this.spec.bulletDestructive)
 			bd += this.spec.nwayAngle
