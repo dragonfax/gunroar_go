@@ -124,7 +124,7 @@ func (this *StageManager) gotoNextBlockArea() {
 			ses := NewShipEnemySpec()
 			ses.setParam(this.rank, ShipClassBOSS)
 			en := NewEnemy(ses)
-			if !ses.setFirstState(en.state, AppearanceTypeCENTER, 0, 0, 0) {
+			if !ses.setFirstState(en, AppearanceTypeCENTER, 0, 0, 0) {
 				en.close()
 			}
 		}
@@ -228,7 +228,7 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 		platformPos[ppi].used = true
 		ppn--
 		p := field.convertToScreenPos(int(platformPos[ppi].pos.x), int(platformPos[ppi].pos.y))
-		if !en.spec.setFirstState(en.state, 0, p.x, p.y, platformPos[ppi].deg) {
+		if !en.spec.setFirstState(en, 0, p.x, p.y, platformPos[ppi].deg) {
 			en.close()
 			continue
 		}
@@ -281,7 +281,7 @@ func (this *EnemyAppearance) move() {
 
 func (this *EnemyAppearance) appear() {
 	en := NewEnemy(this.spec)
-	if !this.spec.setFirstState(en.state, this.appType, 0, 0, 0) {
+	if !this.spec.setFirstState(en, this.appType, 0, 0, 0) {
 		en.close()
 	}
 }

@@ -439,10 +439,10 @@ func (this *Boat) checkForEnemyHit() {
 	he := checkAllEnemiesHitShip(this.pos.x, this.pos.y, nil, false)
 	if he != nil {
 		var rd float32
-		if this.pos.distVector(he.pos()) < 0.1 {
+		if this.pos.distVector(he.pos) < 0.1 {
 			rd = 0
 		} else {
-			rd = atan232(this.pos.x-he.pos().x, this.pos.y-he.pos().y)
+			rd = atan232(this.pos.x-he.pos.x, this.pos.y-he.pos.y)
 		}
 		sz := he.size()
 		this.refVel.x = Sin32(rd) * sz * 0.1
