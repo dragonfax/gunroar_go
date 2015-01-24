@@ -50,16 +50,20 @@ func NewEnemy(spec EnemySpec) *Enemy {
 }
 
 func (this *Enemy) addTurretGroup(i int) {
-	for j := len(this.turretGroup); j <= i; j++ {
-		tg := NewTurretGroup(this, this.spec.turretGroupSpec()[j])
-		this.turretGroup = append(this.turretGroup, tg)
+	if len(this.turretGroup) <= i {
+		for j := len(this.turretGroup); j <= i; j++ {
+			tg := NewTurretGroup(this, this.spec.turretGroupSpec()[j])
+			this.turretGroup = append(this.turretGroup, tg)
+		}
 	}
 }
 
 func (this *Enemy) addMovingTurretGroup(i int) {
-	for j := len(this.movingTurretGroup); j <= i; j++ {
-		tg := NewMovingTurretGroup(this, this.spec.movingTurretGroupSpec()[j])
-		this.movingTurretGroup = append(this.movingTurretGroup, tg)
+	if len(this.movingTurretGroup) <= i {
+		for j := len(this.movingTurretGroup); j <= i; j++ {
+			tg := NewMovingTurretGroup(this, this.spec.movingTurretGroupSpec()[j])
+			this.movingTurretGroup = append(this.movingTurretGroup, tg)
+		}
 	}
 }
 
@@ -206,13 +210,13 @@ func (this *Enemy) stateMove() bool {
 		this.damagedCnt--
 	}
 	alive := false
-	for i := 0; i < this.spec.turretGroupNum(); i++ {
-		this.addTurretGroup(i)
-		alive = alive || this.turretGroup[i].move(this.pos, this.deg)
+	this.addTurretGroup(this.spec.turretGroupNum() - 1)
+	for _, tg := range this.turretGroup {
+		alive = alive || tg.move(this.pos, this.deg)
 	}
-	for i := 0; i < this.spec.movingTurretGroupNum(); i++ {
-		this.addMovingTurretGroup(i)
-		this.movingTurretGroup[i].move(this.pos, this.deg)
+	this.addMovingTurretGroup(this.spec.movingTurretGroupNum() - 1)
+	for _, mtg := range this.movingTurretGroup {
+		mtg.move(this.pos, this.deg)
 	}
 	if this.destroyedCnt < 0 && !alive {
 		return this.destroyed(nil)
@@ -226,8 +230,8 @@ func (this *Enemy) checkCollision(x float32, y float32, c Shape, shot *Shot) boo
 	if ox+oy > this.spec.size()*2 {
 		return false
 	}
-	for i := 0; i < this.spec.turretGroupNum(); i++ {
-		if this.turretGroup[i].checkCollision(x, y, c, shot) {
+	for _, t := range this.turretGroup {
+		if t.checkCollision(x, y, c, shot) {
 			return true
 		}
 	}
@@ -415,8 +419,8 @@ func (this *Enemy) draw() {
 	if this.destroyedCnt >= 0 {
 		return
 	}
-	for i := 0; i < this.spec.turretGroupNum(); i++ {
-		this.turretGroup[i].draw()
+	for _, t := range this.turretGroup {
+		t.draw()
 	}
 	if this.multiplier > 1 {
 		var ox, oy float32
