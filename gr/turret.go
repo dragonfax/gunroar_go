@@ -574,7 +574,8 @@ func (this *TurretGroup) move(p Vector, deg float32) bool {
 		tbx *= (1 - this.spec.distRatio)
 		bx := tbx*Cos32(-deg) - tby*Sin32(-deg)
 		by := tbx*Sin32(-deg) + tby*Cos32(-deg)
-		alive = alive || t.move(this.centerPos.x+bx, this.centerPos.y+by, d+deg, 0, -99999)
+		a := t.move(this.centerPos.x+bx, this.centerPos.y+by, d+deg, 0, -99999)
+		alive = alive || a
 		if this.spec.alignType == AlignTypeROUND {
 			d += md
 		}

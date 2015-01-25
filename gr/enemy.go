@@ -212,7 +212,8 @@ func (this *Enemy) stateMove() bool {
 	alive := false
 	this.addTurretGroup(this.spec.turretGroupNum() - 1)
 	for _, tg := range this.turretGroup {
-		alive = alive || tg.move(this.pos, this.deg)
+		a := tg.move(this.pos, this.deg)
+		alive = alive || a
 	}
 	this.addMovingTurretGroup(this.spec.movingTurretGroupNum() - 1)
 	for _, mtg := range this.movingTurretGroup {
