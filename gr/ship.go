@@ -26,6 +26,12 @@ type Ship struct {
 	bridgeShape                                          *ComplexShape
 }
 
+var shipBridgeShape *ComplexShape
+
+func InitShip() {
+	shipBridgeShape = NewComplexShape(0.3, 0.2, 0.1, BRIDGE, 0.3, 0.7, 0.7, false)
+}
+
 func NewShip() *Ship {
 	this := new(Ship)
 	for i, _ := range this.boat {
@@ -34,7 +40,7 @@ func NewShip() *Ship {
 	this.boatNum = 1
 	this.scrollSpeed = SCROLL_SPEED_BASE
 	this.scrollSpeedBase = SCROLL_SPEED_BASE
-	this.bridgeShape = NewComplexShape(0.3, 0.2, 0.1, BRIDGE, 0.3, 0.7, 0.7, false)
+	this.bridgeShape = shipBridgeShape
 	actors[this] = true
 	return this
 }
@@ -256,20 +262,32 @@ type Boat struct {
 	idx                      int
 }
 
+var boatShapes []*ComplexShape
+var shieldShape *ShieldShape
+
+func InitBoats() {
+	boatShapes = make([]*ComplexShape, 4, 4)
+	boatShapes[0] = NewComplexShape(0.7, 0.6, 0.6, SHIP_ROUNDTAIL, 0.5, 0.7, 0.5, false)
+	boatShapes[1] = NewComplexShape(0.3, 0.6, 0.6, BRIDGE, 0.3, 0.7, 0.3, false)
+	boatShapes[2] = NewComplexShape(0.7, 0.6, 0.6, SHIP_ROUNDTAIL, 0.4, 0.3, 0.8, false)
+	boatShapes[3] = NewComplexShape(0.3, 0.6, 0.6, BRIDGE, 0.2, 0.3, 0.6, false)
+	shieldShape = NewShieldShape()
+}
+
 func NewBoat(idx int) *Boat {
 	this := new(Boat)
 	this.idx = idx
 	switch idx {
 	case 0:
-		this.shape = NewComplexShape(0.7, 0.6, 0.6, SHIP_ROUNDTAIL, 0.5, 0.7, 0.5, false)
-		this.bridgeShape = NewComplexShape(0.3, 0.6, 0.6, BRIDGE, 0.3, 0.7, 0.3, false)
+		this.shape = boatShapes[0]
+		this.bridgeShape = boatShapes[1]
 	case 1:
-		this.shape = NewComplexShape(0.7, 0.6, 0.6, SHIP_ROUNDTAIL, 0.4, 0.3, 0.8, false)
-		this.bridgeShape = NewComplexShape(0.3, 0.6, 0.6, BRIDGE, 0.2, 0.3, 0.6, false)
+		this.shape = boatShapes[2]
+		this.bridgeShape = boatShapes[3]
 	}
 	this.turnSpeed = 1
 	this.fireInterval = FIRE_INTERVAL
-	this.shieldShape = NewShieldShape()
+	this.shieldShape = shieldShape
 	return this
 }
 
