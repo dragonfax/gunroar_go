@@ -514,20 +514,31 @@ const TURRET_GROUP_MAX_NUM = 16
 type TurretGroup struct {
 	spec      *TurretGroupSpec
 	centerPos Vector
-	turret    [TURRET_GROUP_MAX_NUM]*Turret
+	turret    []*Turret
 	cnt       int
+	parent    *Enemy
 }
 
 func NewTurretGroup(parent *Enemy, spec *TurretGroupSpec) *TurretGroup {
 	this := new(TurretGroup)
+	this.parent = parent
 	if spec.turretSpec.shape == nil {
 		panic("turret spec shape nil")
 	}
-	for i, _ := range this.turret {
-		this.turret[i] = NewTurret(spec.turretSpec, parent.isBoss(), parent.index(), &(parent.multiplier), parent.addScoreFunc())
-	}
+	this.turret = make([]*Turret, 0, TURRET_GROUP_MAX_NUM)
 	this.spec = spec
+	this.addTurrets()
 	return this
+}
+
+func (this *TurretGroup) addTurret() {
+	this.turret = append(this.turret, NewTurret(this.spec.turretSpec, this.parent.isBoss(), this.parent.index(), &(this.parent.multiplier), this.parent.addScoreFunc()))
+}
+
+func (this *TurretGroup) addTurrets() {
+	for len(this.turret) < this.spec.num {
+		this.addTurret()
+	}
 }
 
 func (this *TurretGroup) move(p Vector, deg float32) bool {
