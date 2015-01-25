@@ -639,18 +639,29 @@ type MovingTurretGroup struct {
 	alignAmpCnt, distDeg, distAmpCnt      float32
 	cnt                                   int
 	centerPos                             Vector
-	turret                                [MOVING_TURRET_MAX_NUM]*Turret
+	turret                                []*Turret
+	parent                                *Enemy
 }
 
 func NewMovingTurretGroup(parent *Enemy, spec *MovingTurretGroupSpec) *MovingTurretGroup {
 	this := new(MovingTurretGroup)
-	for i, _ := range this.turret {
-		this.turret[i] = NewTurret(spec.turretSpec, parent.isBoss(), parent.index(), &(parent.multiplier), parent.addScoreFunc())
-	}
+	this.turret = make([]*Turret, 0, MOVING_TURRET_MAX_NUM)
 	this.spec = spec
 	this.radius = spec.radiusBase
 	this.swingFixDeg = Pi32
+	this.parent = parent
+	this.addTurrets()
 	return this
+}
+
+func (this *MovingTurretGroup) addTurret() {
+	this.turret = append(this.turret, NewTurret(this.spec.turretSpec, this.parent.isBoss(), this.parent.index(), &(this.parent.multiplier), this.parent.addScoreFunc()))
+}
+
+func (this *MovingTurretGroup) addTurrets() {
+	for len(this.turret) < this.spec.num {
+		this.addTurret()
+	}
 }
 
 func (this *MovingTurretGroup) move(p Vector, od float32) {
