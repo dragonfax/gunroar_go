@@ -548,7 +548,7 @@ func (this *TurretGroup) move(p Vector, deg float32) bool {
 		y = 0
 		my = this.spec.offset.y / (float32(this.spec.num) + 1)
 	}
-	for i := 0; i < this.spec.num; i++ {
+	for _, t := range this.turret {
 		var tbx, tby float32
 		switch this.spec.alignType {
 		case AlignTypeROUND:
@@ -563,7 +563,7 @@ func (this *TurretGroup) move(p Vector, deg float32) bool {
 		tbx *= (1 - this.spec.distRatio)
 		bx := tbx*Cos32(-deg) - tby*Sin32(-deg)
 		by := tbx*Sin32(-deg) + tby*Cos32(-deg)
-		alive = alive || this.turret[i].move(this.centerPos.x+bx, this.centerPos.y+by, d+deg, 0, -99999)
+		alive = alive || t.move(this.centerPos.x+bx, this.centerPos.y+by, d+deg, 0, -99999)
 		if this.spec.alignType == AlignTypeROUND {
 			d += md
 		}
@@ -573,21 +573,21 @@ func (this *TurretGroup) move(p Vector, deg float32) bool {
 }
 
 func (this *TurretGroup) draw() {
-	for i := 0; i < this.spec.num; i++ {
-		this.turret[i].draw()
+	for _, t := range this.turret {
+		t.draw()
 	}
 }
 
 func (this *TurretGroup) close() {
-	for i := 0; i < this.spec.num; i++ {
-		this.turret[i].close()
+	for _, t := range this.turret {
+		t.close()
 	}
 }
 
 func (this *TurretGroup) checkCollision(x float32, y float32, c Shape, shot *Shot) bool {
 	col := false
-	for i := 0; i < this.spec.num; i++ {
-		col = col || this.turret[i].checkCollision(x, y, c, shot)
+	for _, t := range this.turret {
+		col = col || t.checkCollision(x, y, c, shot)
 	}
 	return col
 }
@@ -687,7 +687,7 @@ func (this *MovingTurretGroup) move(p Vector, od float32) {
 	}
 	var d, ad, md float32
 	this.calcAlignDeg(&d, &ad, &md)
-	for i := 0; i < this.spec.num; i++ {
+	for _, t := range this.turret {
 		d += md
 		bx := Sin32(d) * this.radius * this.spec.xReverse
 		by := Cos32(d) * this.radius * (1 - this.spec.distRatio)
@@ -700,7 +700,7 @@ func (this *MovingTurretGroup) move(p Vector, od float32) {
 			fd = atan232(bx, by)
 		}
 		fs *= 0.06
-		this.turret[i].move(this.centerPos.x, this.centerPos.y, d, fs, fd)
+		t.move(this.centerPos.x, this.centerPos.y, d, fs, fd)
 	}
 	this.cnt++
 }
@@ -721,14 +721,14 @@ func (this *MovingTurretGroup) calcAlignDeg(d *float32, ad *float32, md *float32
 }
 
 func (this *MovingTurretGroup) draw() {
-	for i := 0; i < this.spec.num; i++ {
-		this.turret[i].draw()
+	for _, t := range this.turret {
+		t.draw()
 	}
 }
 
 func (this *MovingTurretGroup) close() {
-	for i := 0; i < this.spec.num; i++ {
-		this.turret[i].close()
+	for _, t := range this.turret {
+		t.close()
 	}
 }
 
