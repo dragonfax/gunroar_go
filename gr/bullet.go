@@ -70,9 +70,6 @@ func (this *Bullet) move() {
 			this.deg = this.trgDeg
 		}
 	}
-	if field.checkInOuterFieldVector(this.pos) {
-		limiter.addSlowdownRatio(this.speed * 0.24)
-	}
 	mx := Sin32(this.deg) * this.speed
 	my := Cos32(this.deg) * this.speed
 	this.pos.x += mx

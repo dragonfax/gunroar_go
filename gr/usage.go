@@ -21,8 +21,6 @@ func parseArgs() {
 	resP := flag.String("res", "", "resolution to play at, ex 640x480")
 	noSoundP := flag.Bool("nosound", false, "disable sound")
 	buttonReverseP := flag.Bool("exchange", false, "swap buttons")
-	nowaitP := flag.Bool("nowait", false, "disable wait in loop")
-	accframeP := flag.Bool("accframe", false, "")
 	turnspeedP := flag.Int("turnspeed", 100, "ship turning speed, 0-500")
 	firerearP := flag.Bool("firerear", false, "fire from back of ship")
 	rightStickRotationP := flag.Int("rotaterightstick", 0, "degree to rotate right stick control")
@@ -87,10 +85,6 @@ func parseArgs() {
 	noSound = *noSoundP
 
 	pad.buttonReversed = *buttonReverseP
-
-	limiter.nowait = *nowaitP
-
-	limiter.accframe = *accframeP
 
 	if *turnspeedP < 0 {
 		fmt.Println("ship turning speed is too low")

@@ -551,7 +551,6 @@ func sparkFragmentsDrawLuminous() {
 func (this *InGameState) shipDestroyed() {
 	clearBullets()
 	stageManager.shipDestroyed()
-	limiter.initInterval()
 	ship.livesLeft--
 	if ship.livesLeft < 0 {
 		isGameOver = true
