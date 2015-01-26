@@ -71,7 +71,7 @@ func (this *Bullet) move() {
 		}
 	}
 	if field.checkInOuterFieldVector(this.pos) {
-		gameManager.addSlowdownRatio(this.speed * 0.24)
+		limiter.addSlowdownRatio(this.speed * 0.24)
 	}
 	mx := Sin32(this.deg) * this.speed
 	my := Cos32(this.deg) * this.speed

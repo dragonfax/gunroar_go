@@ -88,9 +88,9 @@ func parseArgs() {
 
 	pad.buttonReversed = *buttonReverseP
 
-	mainLoop.nowait = *nowaitP
+	limiter.nowait = *nowaitP
 
-	mainLoop.accframe = *accframeP
+	limiter.accframe = *accframeP
 
 	if *turnspeedP < 0 {
 		fmt.Println("ship turning speed is too low")

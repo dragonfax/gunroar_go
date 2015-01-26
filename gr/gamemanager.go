@@ -100,14 +100,6 @@ func (this *GameManager) startState() {
 	state.start()
 }
 
-func (this *GameManager) initInterval() {
-	mainLoop.initInterval()
-}
-
-func (this *GameManager) addSlowdownRatio(sr float32) {
-	mainLoop.addSlowdownRatio(sr)
-}
-
 func (this *GameManager) move() {
 	if pad.keys[sdl.SCANCODE_ESCAPE] == sdl.PRESSED {
 		if !this.escPressed {
@@ -559,7 +551,7 @@ func sparkFragmentsDrawLuminous() {
 func (this *InGameState) shipDestroyed() {
 	clearBullets()
 	stageManager.shipDestroyed()
-	gameManager.initInterval()
+	limiter.initInterval()
 	ship.livesLeft--
 	if ship.livesLeft < 0 {
 		isGameOver = true
