@@ -45,7 +45,9 @@ func NewShip() *Ship {
 	this.scrollSpeed = SCROLL_SPEED_BASE
 	this.scrollSpeedBase = SCROLL_SPEED_BASE
 	this.bridgeShape = shipBridgeShape
+	actorsLock.Lock()
 	actors[this] = true
+	actorsLock.Unlock()
 	return this
 }
 
@@ -53,7 +55,9 @@ func (this *Ship) close() {
 	for _, b := range this.boat {
 		b.close()
 	}
+	actorsLock.Lock()
 	delete(actors, this)
+	actorsLock.Unlock()
 }
 
 func (this *Ship) start(gameMode GameMode) {

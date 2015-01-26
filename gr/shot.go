@@ -53,7 +53,9 @@ func NewShot(p Vector, d float32, lance bool /*= false*/, dmg int /*= -1*/) *Sho
 	if dmg >= 0 {
 		s.damage = dmg
 	}
+	actorsLock.Lock()
 	actors[s] = true
+	actorsLock.Unlock()
 
 	s.stopMovingC = make(chan bool)
 	go func() {
@@ -111,7 +113,9 @@ func (s *Shot) moveG() {
 }
 
 func (s *Shot) close() {
+	actorsLock.Lock()
 	delete(actors, s)
+	actorsLock.Unlock()
 	if s.lance && s.hitCnt <= 0 {
 		s.hitCnt = 1
 		return

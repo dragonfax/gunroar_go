@@ -29,13 +29,17 @@ func NewCrystal(p Vector) *Crystal {
 	c.pos = p
 	c.cnt = COUNT
 	c.vel = Vector{0, 0.1}
+	actorsLock.Lock()
 	actors[c] = true
+	actorsLock.Unlock()
 	return c
 }
 
 func (c *Crystal) close() {
 	c.shape.close()
+	actorsLock.Lock()
 	delete(actors, c)
+	actorsLock.Unlock()
 }
 
 func (c *Crystal) move() {

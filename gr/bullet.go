@@ -52,7 +52,9 @@ func NewBullet(enemyIdx int,
 	b.rng = rng
 	b.destructive = destructive
 	b.shape.size = size
+	actorsLock.Lock()
 	actors[b] = true
+	actorsLock.Unlock()
 
 	b.stopMovingC = make(chan bool)
 	go func() {
@@ -149,7 +151,9 @@ func (this *Bullet) checkShotHit(p Vector, s Shape, shot *Shot) {
 }
 
 func (this *Bullet) close() {
+	actorsLock.Lock()
 	delete(actors, this)
+	actorsLock.Unlock()
 	this.stopMovingC <- true
 }
 

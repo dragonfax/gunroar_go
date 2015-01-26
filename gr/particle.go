@@ -31,7 +31,9 @@ func NewSpark(p Vector, vx float32, vy float32, r float32, g float32, b float32,
 	this.g = g
 	this.b = b
 	this.cnt = c
+	actorsLock.Lock()
 	actors[this] = true
+	actorsLock.Unlock()
 	return this
 }
 
@@ -48,7 +50,9 @@ func (this *Spark) move() {
 }
 
 func (this *Spark) close() {
+	actorsLock.Lock()
 	delete(actors, this)
+	actorsLock.Unlock()
 }
 
 func (this *Spark) draw() {
@@ -107,7 +111,9 @@ func NewSmoke(x float32, y float32, z float32 /*=0*/, mx float32, my float32, mz
 	this := new(Smoke)
 	this.startCnt = 1
 	this.size = 1
+	actorsLock.Lock()
 	actors[this] = true
+	actorsLock.Unlock()
 	if !field.checkInOuterField(x, y) {
 		return nil
 	}
@@ -247,7 +253,9 @@ func (this *Smoke) drawLuminous() {
 }
 
 func (this *Smoke) close() {
+	actorsLock.Lock()
 	delete(actors, this)
+	actorsLock.Unlock()
 }
 
 /**
@@ -304,7 +312,9 @@ func NewFragment(p Vector, mx float32, my float32, mz float32, sz float32 /* = 1
 	this.d2 = nextFloat(360)
 	this.md2 = nextSignedFloat(20)
 
+	actorsLock.Lock()
 	actors[this] = true
+	actorsLock.Unlock()
 	return this
 }
 
@@ -340,7 +350,9 @@ func (this *Fragment) draw() {
 }
 
 func (this *Fragment) close() {
+	actorsLock.Lock()
 	delete(actors, this)
+	actorsLock.Unlock()
 }
 
 /**
@@ -397,7 +409,9 @@ func NewSparkFragment(p Vector, mx float32, my float32, mz float32, sz float32 /
 	}
 	this.cnt = 0
 
+	actorsLock.Lock()
 	actors[this] = true
+	actorsLock.Unlock()
 	return this
 }
 
@@ -448,7 +462,9 @@ func (this *SparkFragment) drawLuminous() {
 }
 
 func (this *SparkFragment) close() {
+	actorsLock.Lock()
 	delete(actors, this)
+	actorsLock.Unlock()
 }
 
 /**
@@ -477,7 +493,9 @@ func NewWake(p Vector, deg float32, speed float32, c int /*= 60*/, sz float32 /*
 	this.cnt = c
 	this.size = sz
 	this.revShape = rs
+	actorsLock.Lock()
 	actors[this] = true
+	actorsLock.Unlock()
 
 	return this
 }
@@ -513,5 +531,7 @@ func (this *Wake) draw() {
 }
 
 func (this *Wake) close() {
+	actorsLock.Lock()
 	delete(actors, this)
+	actorsLock.Unlock()
 }

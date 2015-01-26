@@ -5,6 +5,8 @@
  */
 package main
 
+import "sync"
+
 /**
  * Actor in the game that has the interface to move and draw.
  */
@@ -21,10 +23,13 @@ type Actor interface {
  *	But the pointer is needed to make every struct act as a unique key in the map.
  */
 var actors = make(map[Actor]bool)
+var actorsLock = sync.RWMutex{}
 
 func clearActors() {
 	for a, _ := range actors {
 		a.close()
 	}
+	actorsLock.Lock()
 	actors = make(map[Actor]bool)
+	actorsLock.Unlock()
 }

@@ -30,7 +30,9 @@ func NewScoreReel() *ScoreReel {
 		sr.numReel[i] = NewNumReel()
 	}
 	sr.digit = 1
+	actorsLock.Lock()
 	actors[sr] = true
+	actorsLock.Unlock()
 	return sr
 }
 
@@ -87,7 +89,9 @@ func (sr *ScoreReel) addActualScore(as int) {
 }
 
 func (sr *ScoreReel) close() {
+	actorsLock.Lock()
 	delete(actors, sr)
+	actorsLock.Unlock()
 }
 
 const VEL_MIN float32 = 5
@@ -102,7 +106,9 @@ type NumReel struct {
 func NewNumReel() *NumReel {
 	nr := new(NumReel)
 	nr.velRatio = 1
+	actorsLock.Lock()
 	actors[nr] = true
+	actorsLock.Unlock()
 	return nr
 }
 
@@ -172,7 +178,9 @@ func (nr *NumReel) accelerate() {
 }
 
 func (nr *NumReel) close() {
+	actorsLock.Lock()
 	delete(actors, nr)
+	actorsLock.Unlock()
 }
 
 /**
@@ -260,7 +268,9 @@ func NewNumIndicator(n int, t IndicatorType, size float32, x float32, y float32)
 	ni.pos = Vector{x, y}
 	ni.targetIdx = -1
 	ni.alpha = 0.1
+	actorsLock.Lock()
 	actors[ni] = true
+	actorsLock.Unlock()
 	return ni
 }
 
@@ -363,5 +373,7 @@ func (ni *NumIndicator) draw() {
 }
 
 func (ni *NumIndicator) close() {
+	actorsLock.Lock()
 	delete(actors, ni)
+	actorsLock.Unlock()
 }

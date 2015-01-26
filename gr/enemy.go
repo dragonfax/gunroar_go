@@ -45,7 +45,9 @@ func NewEnemy(spec EnemySpec) *Enemy {
 	this.destroyedCnt = -1
 	this.explodeItv = 1
 	this.multiplier = 1
+	actorsLock.Lock()
 	actors[this] = true
+	actorsLock.Unlock()
 	return this
 }
 
@@ -98,7 +100,9 @@ func (this *Enemy) checkHitShip(x float32, y float32, largeOnly bool /*= false*/
 
 func (this *Enemy) close() {
 	this.removeTurrets()
+	actorsLock.Lock()
 	delete(actors, this)
+	actorsLock.Unlock()
 }
 
 func (this *Enemy) ndex() int {
