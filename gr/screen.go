@@ -20,6 +20,8 @@ import (
 
 const CAPTION = "Gunroar"
 
+var screen *Screen
+
 var lineWidthBase float32
 var brightness float32 = 1
 

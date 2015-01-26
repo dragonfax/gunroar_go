@@ -9,6 +9,8 @@ import "github.com/veandco/go-sdl2/sdl"
 
 const JOYSTICK_AXIS = 16384
 
+var pad *Pad
+
 /**
  * Joystick and keyboard input.
  */

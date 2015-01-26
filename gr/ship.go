@@ -17,6 +17,8 @@ const SCROLL_SPEED_BASE = 0.01
 const SCROLL_SPEED_MAX = 0.1
 const SCROLL_START_Y = 2.5
 
+var ship *Ship
+
 type Ship struct {
 	livesLeft                                            int
 	boat                                                 [2]*Boat

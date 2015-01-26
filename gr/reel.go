@@ -15,6 +15,8 @@ import (
 
 const MAX_DIGIT = 16
 
+var scoreReel *ScoreReel
+
 type ScoreReel struct {
 	score, targetScore int
 	actualScore        int

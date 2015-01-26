@@ -5,6 +5,8 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+var inGameState *InGameState
+
 type GameMode int
 
 const (

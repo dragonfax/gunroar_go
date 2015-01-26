@@ -12,6 +12,8 @@ const RANK_INC_BASE = 0.0018
 const BLOCK_DENSITY_MIN = 0
 const BLOCK_DENSITY_MAX = 3
 
+var stageManager *StageManager
+
 type StageManager struct {
 	rank, baseRank, addRank, rankVel, rankInc float32
 	enemyApp                                  [3]*EnemyAppearance

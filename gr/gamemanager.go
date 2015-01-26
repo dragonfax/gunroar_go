@@ -10,6 +10,8 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+var state GameState
+
 type GameState interface {
 	start()
 	move()
@@ -23,15 +25,6 @@ type GameState interface {
  * Manage the game state
  */
 
-var field *Field
-var pad *Pad
-var ship *Ship
-var stageManager *StageManager
-var titleManager *TitleManager
-var scoreReel *ScoreReel
-var state GameState
-var titleState *TitleState
-var inGameState *InGameState
 var gameManager *GameManager
 
 type GameManager struct {

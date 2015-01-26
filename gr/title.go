@@ -15,6 +15,8 @@ import (
 
 const TITLE_SCROLL_SPEED_BASE = 0.025
 
+var titleManager *TitleManager
+
 type TitleManager struct {
 	displayList   *DisplayList
 	logo          *Texture

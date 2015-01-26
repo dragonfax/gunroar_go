@@ -10,6 +10,8 @@ import "github.com/veandco/go-sdl2/sdl"
 const MOUSE_SCREEN_MAPPING_RATIO_X = 26.0
 const MOUSE_SCREEN_MAPPING_RATIO_Y = 19.5
 
+var mouse *Mouse
+
 func (m *Mouse) adjustPos(ms *MouseState) {
 	ms.x = (ms.x - float32(screen.width)/2) * MOUSE_SCREEN_MAPPING_RATIO_X / float32(screen.width)
 	ms.y = -(ms.y - float32(screen.height)/2) * MOUSE_SCREEN_MAPPING_RATIO_Y / float32(screen.height)

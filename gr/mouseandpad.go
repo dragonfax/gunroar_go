@@ -5,6 +5,8 @@
  */
 package main
 
+var mouseAndPad *MouseAndPad
+
 type MouseAndPadState struct {
 	mouseState MouseState
 	padState   PadState

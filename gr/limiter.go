@@ -7,6 +7,8 @@ import "github.com/banthar/Go-SDL/sdl"
 
 const INTERVAL_BASE = 16 // how many milliseconds in a "frame"
 
+var limiter FrameLimiter
+
 type FrameLimiter struct {
 	moveFrame func()
 	drawFrame func()

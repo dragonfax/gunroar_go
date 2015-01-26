@@ -2,6 +2,8 @@ package main
 
 /* title screen state */
 
+var titleState *TitleState
+
 type TitleState struct {
 	gameOverCnt int
 }

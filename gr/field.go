@@ -9,6 +9,8 @@ import (
 	"github.com/go-gl/gl"
 )
 
+var field *Field
+
 type PlatformPos struct {
 	pos  Vector
 	deg  float32

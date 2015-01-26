@@ -9,6 +9,8 @@ import "github.com/veandco/go-sdl2/sdl"
 
 const JOYSTICK_AXIS_MAX = 32768
 
+var twinStick *TwinStick
+
 /**
  * Twinstick input.
  */
