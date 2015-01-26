@@ -18,6 +18,7 @@ const SCROLL_SPEED_MAX = 0.1
 const SCROLL_START_Y = 2.5
 
 type Ship struct {
+	livesLeft                                            int
 	boat                                                 [2]*Boat
 	gameMode                                             GameMode
 	boatNum                                              int
@@ -34,6 +35,7 @@ func InitShip() {
 
 func NewShip() *Ship {
 	this := new(Ship)
+	this.livesLeft = 2
 	for i, _ := range this.boat {
 		this.boat[i] = NewBoat(i)
 	}

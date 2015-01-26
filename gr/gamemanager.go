@@ -180,12 +180,12 @@ const SCORE_REEL_SIZE_DEFAULT = 0.5
 const SCORE_REEL_SIZE_SMALL = 0.01
 
 type InGameState struct {
-	livesLeft, time, gameOverCnt int
-	btnPressed              bool
-	pauseCnt                int
-	pausePressed            bool
-	scoreReelSize           float32
-	gameMode                GameMode
+	time, gameOverCnt int
+	btnPressed        bool
+	pauseCnt          int
+	pausePressed      bool
+	scoreReelSize     float32
+	gameMode          GameMode
 }
 
 func NewInGameState() *InGameState {
@@ -221,7 +221,6 @@ func (this *InGameState) startInGame() {
 
 func (this *InGameState) initGameState() {
 	this.time = 0
-	this.livesLeft = 2
 	scoreReel.clear(9)
 	InitTargetY()
 }
@@ -495,7 +494,7 @@ func (this *InGameState) drawFront() {
 		-8.2-(SCORE_REEL_SIZE_DEFAULT-this.scoreReelSize)*3,
 		this.scoreReelSize)
 	var x float32 = -12
-	for i := 0; i < this.livesLeft; i++ {
+	for i := 0; i < ship.livesLeft; i++ {
 		gl.PushMatrix()
 		gl.Translatef(x, -9, 0)
 		gl.Scalef(0.7, 0.7, 0.7)
@@ -561,8 +560,8 @@ func (this *InGameState) shipDestroyed() {
 	clearBullets()
 	stageManager.shipDestroyed()
 	gameManager.initInterval()
-	this.livesLeft--
-	if this.livesLeft < 0 {
+	ship.livesLeft--
+	if ship.livesLeft < 0 {
 		isGameOver = true
 		this.btnPressed = true
 		fadeBgm()
