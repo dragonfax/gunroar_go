@@ -5,11 +5,7 @@
  */
 package main
 
-import (
-	"time"
-
-	"github.com/go-gl/gl"
-)
+import "github.com/go-gl/gl"
 
 type Bullet struct {
 	pos              Vector
@@ -60,8 +56,8 @@ func NewBullet(enemyIdx int,
 
 	b.stopMovingC = make(chan bool)
 	go func() {
-		ticker := time.NewTicker(time.Second / 60)
-		for range ticker.C {
+		limit := NewFrameLimiter()
+		for {
 			select {
 			case <-b.stopMovingC:
 				close(b.stopMovingC)
@@ -69,6 +65,7 @@ func NewBullet(enemyIdx int,
 			default:
 				b.moveG()
 			}
+			limit.cycle()
 		}
 	}()
 
