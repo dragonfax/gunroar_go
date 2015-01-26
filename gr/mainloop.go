@@ -62,7 +62,6 @@ func (m *MainLoop) setup() {
 	mouseAndPad = NewMouseAndPad()
 	gameManager = NewGameManager()
 	parseArgs()
-	flag.Usage()
 	m.done = false
 	m.prvTickCount = 0
 	screen.initSDL()
@@ -156,8 +155,6 @@ var resRegex = regexp.MustCompile(`^(\d+)x(\d+)$`)
 
 func parseArgs() {
 
-	progName := os.Args[0]
-
 	helpP := flag.Bool("help", false, "show usage")
 	brightnessP := flag.Int("brightness", 100, "0-100")
 	luminosityP := flag.Int("luminosity", 100, "lumonisity, 0-100")
@@ -176,30 +173,30 @@ func parseArgs() {
 	flag.Parse()
 
 	if *helpP {
-		usage(progName)
+		flag.Usage()
 		os.Exit(0)
 	}
 
 	if *brightnessP < 0 {
 		fmt.Println("brightness set too low")
-		usage(progName)
+		flag.Usage()
 		os.Exit(1)
 	}
 	if *brightnessP > 100 {
 		fmt.Println("brightness set too high")
-		usage(progName)
+		flag.Usage()
 		os.Exit(1)
 	}
 	brightness = float32(*brightnessP) / 100
 
 	if *luminosityP < 0 {
 		fmt.Println("luminosity set too low")
-		usage(progName)
+		flag.Usage()
 		os.Exit(1)
 	}
 	if *luminosityP > 100 {
 		fmt.Println("luminosity set too high")
-		usage(progName)
+		flag.Usage()
 		os.Exit(1)
 	}
 	screen.luminosity = float32(*luminosityP) / 100
@@ -210,7 +207,7 @@ func parseArgs() {
 		matches := resRegex.FindStringSubmatch(*resP)
 		if len(matches) == 0 {
 			fmt.Println("resolution provided does not match the required format of ###x###")
-			usage(progName)
+			flag.Usage()
 			os.Exit(1)
 		}
 		var w, h int
@@ -221,7 +218,8 @@ func parseArgs() {
 		}
 		if err != nil {
 			fmt.Println("Error parsing the width and height values")
-			usage(progName)
+			flag.Usage()
+			os.Exit(1)
 		}
 		screen.width = w
 		screen.height = h
@@ -237,12 +235,12 @@ func parseArgs() {
 
 	if *turnspeedP < 0 {
 		fmt.Println("ship turning speed is too low")
-		usage(progName)
+		flag.Usage()
 		os.Exit(1)
 	}
 	if *turnspeedP > 500 {
 		fmt.Println("ship turning speed is too high")
-		usage(progName)
+		flag.Usage()
 		os.Exit(1)
 	}
 	shipTurnSpeed = float32(*turnspeedP) / 100
@@ -257,8 +255,4 @@ func parseArgs() {
 
 	twinStick.enableAxis5 = *enableAxis5P
 
-}
-
-func usage(progName string) {
-	fmt.Printf("Usage: " + progName + " [-window] [-res x y] [-brightness [0-100]] [-luminosity [0-100]] [-nosound] [-exchange] [-turnspeed [0-500]] [-firerear] [-rotatestick2 deg] [-reversestick2] [-enableaxis5] [-nowait]\n")
 }
