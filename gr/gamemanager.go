@@ -115,7 +115,7 @@ func (this *GameManager) move() {
 			if state == inGameState {
 				this.startTitle()
 			} else {
-				mainLoop.breakLoop()
+				mainLoop.done = true
 			}
 			return
 		}

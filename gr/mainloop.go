@@ -20,15 +20,8 @@ const INTERVAL_BASE = 16
 var mainLoop *MainLoop
 
 func main() {
-	screen = NewScreen()
-	pad = NewPad()
-	twinStick = NewTwinStick()
-	mouse = NewMouse()
-	mouseAndPad = NewMouseAndPad()
-	gameManager = NewGameManager()
 	mainLoop = NewMainLoop()
-	parseArgs()
-	mainLoop.loop()
+	mainLoop.run()
 }
 
 type MainLoop struct {
@@ -41,6 +34,7 @@ type MainLoop struct {
 	interval           uint32
 	slowdownStartRatio float32
 	slowdownMaxRatio   float32
+	prvTickCount       uint32
 
 	done bool
 }
@@ -54,35 +48,37 @@ func NewMainLoop() *MainLoop {
 	return this
 }
 
-func (this *MainLoop) initFirst() {
+func (this *MainLoop) run() {
+	mainLoop.setup()
+	mainLoop.loop()
+	mainLoop.tearDown()
+}
+
+func (m *MainLoop) setup() {
+	screen = NewScreen()
+	pad = NewPad()
+	twinStick = NewTwinStick()
+	mouse = NewMouse()
+	mouseAndPad = NewMouseAndPad()
+	gameManager = NewGameManager()
+	parseArgs()
+	flag.Usage()
+	m.done = false
+	m.prvTickCount = 0
+	screen.initSDL()
 	InitSoundManager()
 	gameManager.init()
-	this.initInterval()
-}
-
-func (m *MainLoop) quitLast() {
-	gameManager.close()
-	CloseSoundManager()
-	screen.closeSDL()
-	sdl.Quit()
-}
-
-func (m *MainLoop) breakLoop() {
-	m.done = true
+	m.initInterval()
+	gameManager.start()
+	displayListsFinalized = true
 }
 
 func (m *MainLoop) loop() {
-	m.done = false
-	var prvTickCount uint32 = 0
-	screen.initSDL()
-	m.initFirst()
-	gameManager.start()
-	displayListsFinalized = true
 	for !m.done {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch e := event.(type) {
 			case *sdl.QuitEvent:
-				m.breakLoop()
+				m.done = true
 			case *sdl.WindowEvent:
 				switch e.Event {
 				case sdl.WINDOWEVENT_RESIZED:
@@ -98,20 +94,20 @@ func (m *MainLoop) loop() {
 		twinStick.update()
 		nowTick := sdl.GetTicks()
 		var itv uint32 = m.interval
-		var frame = (nowTick - prvTickCount) / itv
+		var frame = (nowTick - m.prvTickCount) / itv
 		if frame <= 0 {
 			frame = 1
-			sdl.Delay(prvTickCount + itv - nowTick)
+			sdl.Delay(m.prvTickCount + itv - nowTick)
 			if m.accframe {
-				prvTickCount = sdl.GetTicks()
+				m.prvTickCount = sdl.GetTicks()
 			} else {
-				prvTickCount += m.interval
+				m.prvTickCount += m.interval
 			}
 		} else if frame > m.maxSkipFrame {
 			frame = m.maxSkipFrame
-			prvTickCount = nowTick
+			m.prvTickCount = nowTick
 		} else {
-			prvTickCount = nowTick
+			m.prvTickCount = nowTick
 		}
 		m.slowdownRatio = 0
 		for i := uint32(0); i < frame; i++ {
@@ -125,7 +121,13 @@ func (m *MainLoop) loop() {
 			m.calcInterval()
 		}
 	}
-	m.quitLast()
+}
+
+func (m *MainLoop) tearDown() {
+	gameManager.close()
+	CloseSoundManager()
+	screen.closeSDL()
+	sdl.Quit()
 }
 
 // Intentional slowdown.
