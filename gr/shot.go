@@ -20,12 +20,13 @@ var shotShape *ShotShape
 var lanceShape *LanceShape
 
 type Shot struct {
-	pos    Vector
-	cnt    int
-	hitCnt int
-	deg    float32
-	damage int
-	lance  bool
+	pos         Vector
+	cnt         int
+	hitCnt      int
+	deg         float32
+	damage      int
+	lance       bool
+	stopMovingC chan bool
 }
 
 func initShots() {
@@ -53,10 +54,29 @@ func NewShot(p Vector, d float32, lance bool /*= false*/, dmg int /*= -1*/) *Sho
 		s.damage = dmg
 	}
 	actors[s] = true
+
+	s.stopMovingC = make(chan bool)
+	go func() {
+		limit := NewFrameLimiter()
+		for {
+			select {
+			case <-s.stopMovingC:
+				close(s.stopMovingC)
+				return
+			default:
+				s.moveG()
+			}
+			limit.cycle()
+		}
+	}()
+
 	return s
 }
 
 func (s *Shot) move() {
+}
+
+func (s *Shot) moveG() {
 	s.cnt++
 	if s.hitCnt > 0 {
 		s.hitCnt++
@@ -96,6 +116,7 @@ func (s *Shot) close() {
 		s.hitCnt = 1
 		return
 	}
+	s.stopMovingC <- true
 }
 
 func (s *Shot) removeHitToBullet() {
