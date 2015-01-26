@@ -292,9 +292,14 @@ func NewBoat(idx int) *Boat {
 }
 
 func (this *Boat) close() {
-	this.shape.close()
-	this.bridgeShape.close()
-	this.shieldShape.close()
+}
+
+func closeBoats() {
+	shipBridgeShape.close()
+	shieldShape.close()
+	for _, s := range boatShapes {
+		s.close()
+	}
 }
 
 func (this *Boat) start(gameMode GameMode) {

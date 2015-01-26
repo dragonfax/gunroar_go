@@ -21,3 +21,10 @@ type Actor interface {
  *	But the pointer is needed to make every struct act as a unique key in the map.
  */
 var actors = make(map[Actor]bool)
+
+func clearActors() {
+	for a, _ := range actors {
+		a.close()
+	}
+	actors = make(map[Actor]bool)
+}

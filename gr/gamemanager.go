@@ -69,6 +69,7 @@ func (this *GameManager) init() {
 
 func (this *GameManager) close() {
 	ship.close()
+	closeBoats()
 	closeBulletShapes()
 	closeEnemyShapes()
 	closeTurretShapes()
@@ -81,10 +82,10 @@ func (this *GameManager) close() {
 }
 
 func (this *GameManager) start() {
-	this.startTitle(false)
+	this.startTitle()
 }
 
-func (this *GameManager) startTitle(fromGameover bool /*= false*/) {
+func (this *GameManager) startTitle() {
 	state = titleState
 	this.startState()
 }
@@ -112,7 +113,7 @@ func (this *GameManager) move() {
 		if !this.escPressed {
 			this.escPressed = true
 			if state == inGameState {
-				this.startTitle(false)
+				this.startTitle()
 			} else {
 				mainLoop.breakLoop()
 			}
@@ -201,6 +202,7 @@ func (this *InGameState) start() {
 }
 
 func (this *InGameState) startInGame() {
+	clearActors()
 	field = NewField()
 	ship = NewShip()
 	scoreReel = NewScoreReel()
@@ -248,7 +250,7 @@ func (this *InGameState) move() {
 		mouseInput := mouse.getState()
 		if (input.button&PadButtonA) != 0 || (this.gameMode == GameModeMOUSE && (mouseInput.button&MouseButtonLEFT) != 0) {
 			if this.gameOverCnt > 60 && !this.btnPressed {
-				gameManager.startTitle(true)
+				gameManager.startTitle()
 			}
 			this.btnPressed = true
 		} else {
@@ -259,7 +261,7 @@ func (this *InGameState) move() {
 			disableBgm()
 		}
 		if this.gameOverCnt > 1200 {
-			gameManager.startTitle(true)
+			gameManager.startTitle()
 		}
 	}
 }
