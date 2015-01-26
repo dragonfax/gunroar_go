@@ -6,6 +6,9 @@
 package main
 
 import (
+	"fmt"
+	"runtime"
+
 	"github.com/go-gl/gl"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -125,5 +128,6 @@ func (this *GameManager) draw() {
 	state.drawOrtho()
 	limiter.draw(0, 0)
 	drawLimiter.draw(0, 10)
+	drawString(fmt.Sprintf("%3d", int(runtime.NumGoroutine())), 0, 30, 3.0)
 	viewPerspective()
 }
