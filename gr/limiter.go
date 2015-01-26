@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -9,37 +10,32 @@ import (
 /* FrameLimit handles skipping draw frames, and slowing down for performance
  */
 
-const INTERVAL_BASE = 2 // how many milliseconds in a "frame"
+const INTERVAL_BASE = 16 // how many milliseconds in a "frame"
 
 const NUM_FPS_TO_AVERAGE = 10
 
 var limiter FrameLimiter
+var drawLimiter FrameLimiter
 
 type FrameLimiter struct {
-	moveFrame   func()
-	drawFrame   func()
 	thenTick    uint32
 	previousFps []float32
 }
 
-func NewFrameLimiter(moveFrame func(), drawFrame func()) FrameLimiter {
+func NewFrameLimiter() FrameLimiter {
 	this := FrameLimiter{}
-	this.moveFrame = moveFrame
-	this.drawFrame = drawFrame
 	return this
 }
 
 func (this *FrameLimiter) cycle() {
-
-	this.moveFrame()
-	this.drawFrame()
 
 	// sleep until next frame
 	nowTick := sdl.GetTicks()
 	timeTaken := nowTick - this.thenTick
 
 	if timeTaken < INTERVAL_BASE {
-		sdl.Delay(INTERVAL_BASE - timeTaken)
+		sleepTime := INTERVAL_BASE - timeTaken
+		time.Sleep(time.Millisecond * time.Duration(sleepTime))
 	}
 
 	this.addFps(sdl.GetTicks() - this.thenTick)
@@ -55,11 +51,11 @@ func (this *FrameLimiter) addFps(frameTime uint32) {
 	}
 }
 
-func (this *FrameLimiter) draw() {
+func (this *FrameLimiter) draw(px, py float32) {
 	var totalFps float32
 	for _, fps := range this.previousFps {
 		totalFps += fps
 	}
 	avgFps := totalFps / float32(len(this.previousFps))
-	drawString(fmt.Sprintf("%3d", int(avgFps)), 10, 10, 3.0)
+	drawString(fmt.Sprintf("%3d", int(avgFps)), 10+px, 10+py, 3.0)
 }

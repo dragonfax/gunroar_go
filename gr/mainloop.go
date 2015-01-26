@@ -27,7 +27,7 @@ func NewMainLoop() *MainLoop {
 
 func (this *MainLoop) run() {
 	mainLoop.setup()
-	mainLoop.loop()
+	MainQueueLoop()
 	mainLoop.tearDown()
 }
 
@@ -35,27 +35,42 @@ func (m *MainLoop) setup() {
 	screen = NewScreen()
 	pad = NewPad()
 	twinStick = NewTwinStick()
+	twinStick.update()
 	mouse = NewMouse()
 	mouseAndPad = NewMouseAndPad()
+	mouseAndPad.update()
 	gameManager = NewGameManager()
-	limiter = NewFrameLimiter(gameManager.move, m.draw)
+	limiter = NewFrameLimiter()
+	drawLimiter = NewFrameLimiter()
 	parseArgs()
+	go MuxEvents()
 	screen.initSDL()
 	InitSoundManager()
 	gameManager.init()
 	gameManager.startTitle()
 	displayListsFinalized = true
+	go m.inputLoop()
+	go m.drawLoop()
+	go m.moveLoop()
 }
 
-func (m *MainLoop) loop() {
-	for !m.done {
-		m.handleInput()
+func (m *MainLoop) moveLoop() {
+	for {
+		gameManager.move()
 		limiter.cycle()
 	}
 }
 
-func (m *MainLoop) handleInput() {
-	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+func (m *MainLoop) inputLoop() {
+	eventReceiver := GetEventReceiver()
+	for {
+		m.handleInput(eventReceiver)
+	}
+}
+
+func (m *MainLoop) handleInput(eventReceiver EventC) {
+	select {
+	case event := <-eventReceiver:
 		switch e := event.(type) {
 		case *sdl.QuitEvent:
 			m.done = true
@@ -65,13 +80,25 @@ func (m *MainLoop) handleInput() {
 				w := e.Data1
 				h := e.Data2
 				if w > 150 && h > 100 {
-					screen.resized(int(w), int(h))
+					QueueMain(func() {
+						screen.resized(int(w), int(h))
+					}, nil)
 				}
 			}
 		}
 	}
 	mouseAndPad.update()
 	twinStick.update()
+}
+
+// goroutine for drawing the screen.
+func (m *MainLoop) drawLoop() {
+	w := make(WaitChannel)
+	for {
+		QueueMain(m.draw, w)
+		<-w // wait until the drawing is complete
+		drawLimiter.cycle()
+	}
 }
 
 func (m *MainLoop) draw() {

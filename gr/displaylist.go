@@ -79,5 +79,7 @@ func (dp *DisplayList) close() {
 	if !dp.registered {
 		return
 	}
-	gl.DeleteLists(dp.idx, int(dp.num))
+	QueueMain(func() {
+		gl.DeleteLists(dp.idx, int(dp.num))
+	}, nil)
 }
