@@ -243,12 +243,6 @@ func (this *Enemy) checkCollision(x float32, y float32, c Shape, shot *Shot) boo
 	return false
 }
 
-func (this *Enemy) addScoreFunc() func(int) {
-	return func(s int) {
-		this.addScore(s)
-	}
-}
-
 func (this *Enemy) addScore(s int) {
 	this.setScoreIndicator(s, 1)
 }

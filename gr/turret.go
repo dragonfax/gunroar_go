@@ -532,7 +532,7 @@ func NewTurretGroup(parent *Enemy, spec *TurretGroupSpec) *TurretGroup {
 }
 
 func (this *TurretGroup) addTurret() {
-	this.turret = append(this.turret, NewTurret(this.spec.turretSpec, this.parent.isBoss(), this.parent.index(), &(this.parent.multiplier), this.parent.addScoreFunc()))
+	this.turret = append(this.turret, NewTurret(this.spec.turretSpec, this.parent.isBoss(), this.parent.index(), &(this.parent.multiplier), this.parent.addScore))
 }
 
 func (this *TurretGroup) addTurrets() {
@@ -656,7 +656,7 @@ func NewMovingTurretGroup(parent *Enemy, spec *MovingTurretGroupSpec) *MovingTur
 }
 
 func (this *MovingTurretGroup) addTurret() {
-	this.turret = append(this.turret, NewTurret(this.spec.turretSpec, this.parent.isBoss(), this.parent.index(), &(this.parent.multiplier), this.parent.addScoreFunc()))
+	this.turret = append(this.turret, NewTurret(this.spec.turretSpec, this.parent.isBoss(), this.parent.index(), &(this.parent.multiplier), this.parent.addScore))
 }
 
 func (this *MovingTurretGroup) addTurrets() {
