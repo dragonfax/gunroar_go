@@ -21,8 +21,6 @@ func parseArgs() {
 	resP := flag.String("res", "", "resolution to play at, ex 640x480")
 	noSoundP := flag.Bool("nosound", false, "disable sound")
 	buttonReverseP := flag.Bool("exchange", false, "swap buttons")
-	turnspeedP := flag.Int("turnspeed", 100, "ship turning speed, 0-500")
-	firerearP := flag.Bool("firerear", false, "fire from back of ship")
 	rightStickRotationP := flag.Int("rotaterightstick", 0, "degree to rotate right stick control")
 	reverseRightStickP := flag.Bool("reverserightstick", false, "reverse right stick controls")
 	enableAxis5P := flag.Bool("enableaxis5", false, "enable the 5th axis for some controllers")
@@ -85,20 +83,6 @@ func parseArgs() {
 	noSound = *noSoundP
 
 	pad.buttonReversed = *buttonReverseP
-
-	if *turnspeedP < 0 {
-		fmt.Println("ship turning speed is too low")
-		flag.Usage()
-		os.Exit(1)
-	}
-	if *turnspeedP > 500 {
-		fmt.Println("ship turning speed is too high")
-		flag.Usage()
-		os.Exit(1)
-	}
-	shipTurnSpeed = float32(*turnspeedP) / 100
-
-	shipReverseFire = *firerearP
 
 	twinStick.rotate = float32(*rightStickRotationP) * Pi32 / 180
 

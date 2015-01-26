@@ -9,6 +9,10 @@ import "github.com/veandco/go-sdl2/sdl"
 
 var mainLoop *MainLoop
 var limiter FrameLimiter
+var screen *Screen
+var twinStick *TwinStick
+var mouse *Mouse
+var mouseAndPad *MouseAndPad
 
 func main() {
 	mainLoop = NewMainLoop()
@@ -44,7 +48,7 @@ func (m *MainLoop) setup() {
 	screen.initSDL()
 	InitSoundManager()
 	gameManager.init()
-	gameManager.start()
+	gameManager.startTitle()
 	displayListsFinalized = true
 }
 
