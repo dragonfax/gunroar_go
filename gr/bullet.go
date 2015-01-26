@@ -6,6 +6,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/go-gl/gl"
 )
 
@@ -20,6 +22,7 @@ type Bullet struct {
 	destructive      bool
 	shape            *BulletShape
 	enemyIdx         int
+	stopMovingC      chan bool
 }
 
 func NewBullet(enemyIdx int,
@@ -54,10 +57,29 @@ func NewBullet(enemyIdx int,
 	b.destructive = destructive
 	b.shape.size = size
 	actors[b] = true
+
+	b.stopMovingC = make(chan bool)
+	go func() {
+		ticker := time.NewTicker(time.Second / 60)
+		for range ticker.C {
+			select {
+			case <-b.stopMovingC:
+				close(b.stopMovingC)
+				return
+			default:
+				b.moveG()
+			}
+		}
+	}()
+
 	return b
 }
 
 func (this *Bullet) move() {
+	// to satisfy interface
+}
+
+func (this *Bullet) moveG() {
 	this.ppos.x = this.pos.x
 	this.ppos.y = this.pos.y
 	if this.cnt < 30 {
@@ -131,6 +153,7 @@ func (this *Bullet) checkShotHit(p Vector, s Shape, shot *Shot) {
 
 func (this *Bullet) close() {
 	delete(actors, this)
+	this.stopMovingC <- true
 }
 
 /* operations against the set of all bullets */
