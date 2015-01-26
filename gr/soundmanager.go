@@ -18,12 +18,10 @@ import (
 var noSound bool
 
 const RANDOM_BGM_START_INDEX = 1
+const soundDir = "sounds/chunks"
+const fadeOutSpeed = 1280
+const musicDir = "sounds/musics"
 
-var seFileName = []string{"shot.wav", "lance.wav", "hit.wav",
-	"turret_destroyed.wav", "destroyed.wav", "small_destroyed.wav", "explode.wav",
-	"ship_destroyed.wav", "ship_shield_lost.wav", "score_up.wav"}
-
-var seChannel = []int{0, 1, 2, 3, 4, 5, 6, 7, 7, 6}
 var bgm map[string]*Music = make(map[string]*Music)
 var se map[string]*Chunk = make(map[string]*Chunk)
 var seMark map[string]bool = make(map[string]bool)
@@ -63,9 +61,17 @@ func loadMusics() {
 }
 
 func loadChunks() {
-	for i, fileName := range seFileName {
+	files, err := ioutil.ReadDir(soundDir)
+	if err != nil {
+		panic(err)
+	}
+	if len(files) == 0 {
+		panic("no sound effects found")
+	}
+	for _, fileInfo := range files {
+		fileName := fileInfo.Name()
 		chunk := &Chunk{}
-		chunk.LoadToChannel(fileName, seChannel[i])
+		chunk.LoadToChannel(fileName)
 		se[fileName] = chunk
 		seMark[fileName] = false
 		fmt.Println("Load SE: " + fileName)
@@ -172,18 +178,6 @@ func CloseSoundManager() {
 	mix.CloseAudio()
 }
 
-type Sound interface {
-	Load(name string)
-	LoadToChannel(name string, ch int)
-	Free()
-	Play()
-	Fade()
-	Halt()
-}
-
-const fadeOutSpeed = 1280
-const musicDir = "sounds/musics"
-
 type Music struct {
 	music *mix.Music
 }
@@ -200,17 +194,6 @@ func (m *Music) Load(name string) {
 	}
 }
 
-func (m *Music) LoadToChannel(name string, ch int) {
-	m.Load(name)
-}
-
-func (m *Music) Free() {
-	if m.music != nil {
-		m.Halt()
-		m.music.Free()
-	}
-}
-
 func (m *Music) Play() {
 	if noSound {
 		return
@@ -223,14 +206,6 @@ func (m *Music) PlayOnce() {
 		return
 	}
 	m.music.Play(1)
-}
-
-func (m *Music) Fade() {
-	fadeMusic()
-}
-
-func (m *Music) Halt() {
-	haltMusic()
 }
 
 func fadeMusic() {
@@ -249,18 +224,11 @@ func haltMusic() {
 	}
 }
 
-const soundDir = "sounds/chunks"
-
 type Chunk struct {
-	chunk        *mix.Chunk
-	chunkChannel int
+	chunk *mix.Chunk
 }
 
-func (c *Chunk) Load(name string) {
-	c.LoadToChannel(name, 0)
-}
-
-func (c *Chunk) LoadToChannel(name string, ch int) {
+func (c *Chunk) LoadToChannel(name string) {
 	if noSound {
 		return
 	}
@@ -270,30 +238,11 @@ func (c *Chunk) LoadToChannel(name string, ch int) {
 		noSound = true
 		panic("SDLException Couldn't load: " + fileName)
 	}
-	c.chunkChannel = ch
-}
-
-func (c *Chunk) Free() {
-	if c.chunk != nil {
-		c.Halt()
-		c.chunk.Free()
-	}
 }
 
 func (c *Chunk) Play() {
 	if noSound {
 		return
 	}
-	c.chunk.PlayChannel(c.chunkChannel, 0)
-}
-
-func (c *Chunk) Halt() {
-	if noSound {
-		return
-	}
-	mix.HaltChannel(c.chunkChannel)
-}
-
-func (c *Chunk) Fade() {
-	c.Halt()
+	c.chunk.PlayChannel(-1, 0)
 }
