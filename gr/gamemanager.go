@@ -123,5 +123,6 @@ func (this *GameManager) draw() {
 	gl.PopMatrix()
 	viewOrthoFixed()
 	state.drawOrtho()
+	limiter.draw()
 	viewPerspective()
 }
