@@ -15,6 +15,7 @@ var resRegex = regexp.MustCompile(`^(\d+)x(\d+)$`)
 func parseArgs() {
 
 	helpP := flag.Bool("help", false, "show usage")
+	fpsP := flag.Int("fps", 60, "limit FPS")
 	showFpsP := flag.Bool("showfps", false, "show fps counter")
 	brightnessP := flag.Int("brightness", 100, "0-100")
 	luminosityP := flag.Int("luminosity", 100, "lumonisity, 0-100")
@@ -32,6 +33,8 @@ func parseArgs() {
 		flag.Usage()
 		os.Exit(0)
 	}
+
+	INTERVAL_BASE = 1000 / uint32(*fpsP)
 
 	showFps = *showFpsP
 

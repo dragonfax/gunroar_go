@@ -10,7 +10,8 @@ import (
 /* FrameLimit handles skipping draw frames, and slowing down for performance
  */
 
-const INTERVAL_BASE = 16 // how many milliseconds in a "frame"
+// how many milliseconds in a "frame"
+var INTERVAL_BASE uint32 = 16
 
 const NUM_FPS_TO_AVERAGE = 10
 
