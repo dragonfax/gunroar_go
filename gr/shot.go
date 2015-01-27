@@ -26,7 +26,7 @@ type Shot struct {
 	deg         float32
 	damage      int
 	lance       bool
-	stopMovingC chan bool
+	stopMovingC bool
 }
 
 func initShots() {
@@ -57,17 +57,10 @@ func NewShot(p Vector, d float32, lance bool /*= false*/, dmg int /*= -1*/) *Sho
 	actors[s] = true
 	actorsLock.Unlock()
 
-	s.stopMovingC = make(chan bool)
 	go func() {
 		limit := NewFrameLimiter()
-		for {
-			select {
-			case <-s.stopMovingC:
-				close(s.stopMovingC)
-				return
-			default:
-				s.moveG()
-			}
+		for !s.stopMovingC {
+			s.moveG()
 			limit.cycle()
 		}
 	}()
@@ -120,7 +113,7 @@ func (s *Shot) close() {
 		s.hitCnt = 1
 		return
 	}
-	s.stopMovingC <- true
+	s.stopMovingC = true
 }
 
 func (s *Shot) removeHitToBullet() {

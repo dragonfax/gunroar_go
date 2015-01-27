@@ -18,7 +18,7 @@ type Bullet struct {
 	destructive      bool
 	shape            *BulletShape
 	enemyIdx         int
-	stopMovingC      chan bool
+	stopMovingC      bool
 }
 
 func NewBullet(enemyIdx int,
@@ -56,17 +56,10 @@ func NewBullet(enemyIdx int,
 	actors[b] = true
 	actorsLock.Unlock()
 
-	b.stopMovingC = make(chan bool)
 	go func() {
 		limit := NewFrameLimiter()
-		for {
-			select {
-			case <-b.stopMovingC:
-				close(b.stopMovingC)
-				return
-			default:
-				b.moveG()
-			}
+		for !b.stopMovingC {
+			b.moveG()
 			limit.cycle()
 		}
 	}()
@@ -154,7 +147,7 @@ func (this *Bullet) close() {
 	actorsLock.Lock()
 	delete(actors, this)
 	actorsLock.Unlock()
-	this.stopMovingC <- true
+	this.stopMovingC = true
 }
 
 /* operations against the set of all bullets */
