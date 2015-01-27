@@ -9,7 +9,7 @@ import (
 /* FrameLimit handles skipping draw frames, and slowing down for performance
  */
 
-const INTERVAL_BASE = 16 // how many milliseconds in a "frame"
+const INTERVAL_BASE = 2 // how many milliseconds in a "frame"
 
 const NUM_FPS_TO_AVERAGE = 10
 
@@ -61,5 +61,5 @@ func (this *FrameLimiter) draw() {
 		totalFps += fps
 	}
 	avgFps := totalFps / float32(len(this.previousFps))
-	drawString(fmt.Sprintf("%3d", int(avgFps)), 265, 210, 12)
+	drawString(fmt.Sprintf("%3d", int(avgFps)), 10, 10, 3.0)
 }
