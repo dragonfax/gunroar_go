@@ -14,6 +14,7 @@ import (
 )
 
 var state GameState
+var showFps bool
 
 type GameState interface {
 	start()
@@ -126,8 +127,10 @@ func (this *GameManager) draw() {
 	gl.PopMatrix()
 	viewOrthoFixed()
 	state.drawOrtho()
-	limiter.draw(0, 0)
-	drawLimiter.draw(0, 10)
-	drawString(fmt.Sprintf("%3d", int(runtime.NumGoroutine())), 0, 30, 3.0)
+	if showFps {
+		limiter.draw(0, 0)
+		drawLimiter.draw(0, 10)
+		drawString(fmt.Sprintf("%3d", int(runtime.NumGoroutine())), 0, 30, 3.0)
+	}
 	viewPerspective()
 }

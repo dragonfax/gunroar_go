@@ -15,6 +15,7 @@ var resRegex = regexp.MustCompile(`^(\d+)x(\d+)$`)
 func parseArgs() {
 
 	helpP := flag.Bool("help", false, "show usage")
+	showFpsP := flag.Bool("showfps", false, "show fps counter")
 	brightnessP := flag.Int("brightness", 100, "0-100")
 	luminosityP := flag.Int("luminosity", 100, "lumonisity, 0-100")
 	windowModeP := flag.Bool("window", false, "play in a window (instead of full screen)")
@@ -31,6 +32,8 @@ func parseArgs() {
 		flag.Usage()
 		os.Exit(0)
 	}
+
+	showFps = *showFpsP
 
 	if *brightnessP < 0 {
 		fmt.Println("brightness set too low")
