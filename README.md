@@ -9,7 +9,8 @@ See readme_e.txt for the original README in english.
 1. git clone git@github.com:dragonfax/gunroar_go.git
 2. cd gunroar_go/gr
 3. go build
-4. ./gr
+4. cd ..
+4. ./gr/gr
 
 You can play with Keyboard, Mouse or Gamepad.
 
