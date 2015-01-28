@@ -13,10 +13,11 @@ import (
  * Sparks.
  */
 type Spark struct {
-	pos, ppos Vector
-	vel       Vector
-	r, g, b   float32
-	cnt       int
+	pos, ppos  Vector
+	vel        Vector
+	r, g, b    float32
+	cnt        int
+	stopMoving bool
 }
 
 func NewSpark(p Vector, vx float32, vy float32, r float32, g float32, b float32, c int) *Spark {
@@ -34,10 +35,22 @@ func NewSpark(p Vector, vx float32, vy float32, r float32, g float32, b float32,
 	actorsLock.Lock()
 	actors[this] = true
 	actorsLock.Unlock()
+
+	go func() {
+		limit := NewFrameLimiter()
+		for !this.stopMoving {
+			this.moveG()
+			limit.cycle()
+		}
+	}()
+
 	return this
 }
 
 func (this *Spark) move() {
+}
+
+func (this *Spark) moveG() {
 	this.cnt--
 	if this.cnt <= 0 || this.vel.dist(0, 0) < 0.005 {
 		this.close()
@@ -53,6 +66,7 @@ func (this *Spark) close() {
 	actorsLock.Lock()
 	delete(actors, this)
 	actorsLock.Unlock()
+	this.stopMoving = true
 }
 
 func (this *Spark) draw() {
@@ -105,6 +119,7 @@ type Smoke struct {
 	smokeType        SmokeType
 	cnt, startCnt    int
 	size, r, g, b, a float32
+	stopMoving       bool
 }
 
 func NewSmoke(x float32, y float32, z float32 /*=0*/, mx float32, my float32, mz float32, t SmokeType, c int /* = 60 */, sz float32 /* = 2 */) *Smoke {
@@ -164,10 +179,22 @@ func NewSmoke(x float32, y float32, z float32 /*=0*/, mx float32, my float32, mz
 		this.b = nextFloat(0.2) + 0.7
 		this.a = 1
 	}
+
+	go func() {
+		limit := NewFrameLimiter()
+		for !this.stopMoving {
+			this.moveG()
+			limit.cycle()
+		}
+	}()
+
 	return this
 }
 
 func (this *Smoke) move() {
+}
+
+func (this *Smoke) moveG() {
 	this.cnt--
 	if this.cnt <= 0 || !field.checkInOuterField(this.pos.x, this.pos.y) {
 		this.close()
@@ -256,6 +283,7 @@ func (this *Smoke) close() {
 	actorsLock.Lock()
 	delete(actors, this)
 	actorsLock.Unlock()
+	this.stopMoving = true
 }
 
 /**
@@ -266,6 +294,7 @@ var fragmentDisplayList *DisplayList
 type Fragment struct {
 	pos, vel      Vector3
 	size, d2, md2 float32
+	stopMoving    bool
 }
 
 func InitFragments() {
@@ -315,10 +344,22 @@ func NewFragment(p Vector, mx float32, my float32, mz float32, sz float32 /* = 1
 	actorsLock.Lock()
 	actors[this] = true
 	actorsLock.Unlock()
+
+	go func() {
+		limit := NewFrameLimiter()
+		for !this.stopMoving {
+			this.moveG()
+			limit.cycle()
+		}
+	}()
+
 	return this
 }
 
 func (this *Fragment) move() {
+}
+
+func (this *Fragment) moveG() {
 	if !field.checkInOuterField(this.pos.x, this.pos.y) {
 		this.close()
 		return
@@ -353,6 +394,7 @@ func (this *Fragment) close() {
 	actorsLock.Lock()
 	delete(actors, this)
 	actorsLock.Unlock()
+	this.stopMoving = true
 }
 
 /**
@@ -365,6 +407,7 @@ type SparkFragment struct {
 	size, d2, md2 float32
 	cnt           int
 	hasSmoke      bool
+	stopMoving    bool
 }
 
 func InitSparkFragments() {
@@ -412,10 +455,22 @@ func NewSparkFragment(p Vector, mx float32, my float32, mz float32, sz float32 /
 	actorsLock.Lock()
 	actors[this] = true
 	actorsLock.Unlock()
+
+	go func() {
+		limit := NewFrameLimiter()
+		for !this.stopMoving {
+			this.moveG()
+			limit.cycle()
+		}
+	}()
+
 	return this
 }
 
 func (this *SparkFragment) move() {
+}
+
+func (this *SparkFragment) moveG() {
 	if !field.checkInOuterField(this.pos.x, this.pos.y) {
 		this.close()
 		return
@@ -465,6 +520,7 @@ func (this *SparkFragment) close() {
 	actorsLock.Lock()
 	delete(actors, this)
 	actorsLock.Unlock()
+	this.stopMoving = true
 }
 
 /**
@@ -475,6 +531,7 @@ type Wake struct {
 	deg, speed, size float32
 	cnt              int
 	revShape         bool
+	stopMoving       bool
 }
 
 func NewWake(p Vector, deg float32, speed float32, c int /*= 60*/, sz float32 /*= 1*/, rs bool /* = false */) *Wake {
@@ -497,10 +554,21 @@ func NewWake(p Vector, deg float32, speed float32, c int /*= 60*/, sz float32 /*
 	actors[this] = true
 	actorsLock.Unlock()
 
+	go func() {
+		limit := NewFrameLimiter()
+		for !this.stopMoving {
+			this.moveG()
+			limit.cycle()
+		}
+	}()
+
 	return this
 }
 
 func (this *Wake) move() {
+}
+
+func (this *Wake) moveG() {
 	this.cnt--
 	if this.cnt <= 0 || this.vel.dist(0, 0) < 0.005 || !field.checkInOuterField(this.pos.x, this.pos.y) {
 		this.close()
@@ -534,4 +602,5 @@ func (this *Wake) close() {
 	actorsLock.Lock()
 	delete(actors, this)
 	actorsLock.Unlock()
+	this.stopMoving = true
 }
