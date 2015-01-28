@@ -22,6 +22,7 @@ type ScoreReel struct {
 	actualScore        int
 	digit              int
 	numReel            [MAX_DIGIT]*NumReel
+	stopMoving         bool
 }
 
 func NewScoreReel() *ScoreReel {
@@ -33,6 +34,15 @@ func NewScoreReel() *ScoreReel {
 	actorsLock.Lock()
 	actors[sr] = true
 	actorsLock.Unlock()
+
+	go func() {
+		limit := NewFrameLimiter()
+		for !sr.stopMoving {
+			sr.moveG()
+			limit.cycle()
+		}
+	}()
+
 	return sr
 }
 
@@ -48,6 +58,9 @@ func (sr *ScoreReel) clear(digit int /*= 9 */) {
 }
 
 func (sr *ScoreReel) move() {
+}
+
+func (sr *ScoreReel) moveG() {
 	for i := 0; i < sr.digit; i++ {
 		sr.numReel[i].move()
 	}
@@ -92,6 +105,7 @@ func (sr *ScoreReel) close() {
 	actorsLock.Lock()
 	delete(actors, sr)
 	actorsLock.Unlock()
+	sr.stopMoving = true
 }
 
 const VEL_MIN float32 = 5
@@ -217,15 +231,16 @@ type Target struct {
 }
 
 type NumIndicator struct {
-	pos, vel  Vector
-	n         int
-	t         IndicatorType
-	size      float32
-	cnt       int
-	alpha     float32
-	target    [4]Target
-	targetIdx int
-	targetNum int
+	pos, vel   Vector
+	n          int
+	t          IndicatorType
+	size       float32
+	cnt        int
+	alpha      float32
+	target     [4]Target
+	targetIdx  int
+	targetNum  int
+	stopMoving bool
 }
 
 func InitNumIndicators() {
@@ -271,6 +286,15 @@ func NewNumIndicator(n int, t IndicatorType, size float32, x float32, y float32)
 	actorsLock.Lock()
 	actors[ni] = true
 	actorsLock.Unlock()
+
+	go func() {
+		limit := NewFrameLimiter()
+		for !ni.stopMoving {
+			ni.moveG()
+			limit.cycle()
+		}
+	}()
+
 	return ni
 }
 
@@ -313,6 +337,9 @@ func (ni *NumIndicator) gotoNextTarget() {
 }
 
 func (ni *NumIndicator) move() {
+}
+
+func (ni *NumIndicator) moveG() {
 	if ni.targetIdx < 0 {
 		return
 	}
@@ -376,4 +403,5 @@ func (ni *NumIndicator) close() {
 	actorsLock.Lock()
 	delete(actors, ni)
 	actorsLock.Unlock()
+	ni.stopMoving = true
 }
