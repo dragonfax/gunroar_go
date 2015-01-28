@@ -17,10 +17,11 @@ const COUNT = 60
 const PULLIN_COUNT = 48 // floor(COUNT * 0.8)
 
 type Crystal struct {
-	shape *CrystalShape
-	pos   Vector
-	vel   Vector
-	cnt   int
+	shape      *CrystalShape
+	pos        Vector
+	vel        Vector
+	cnt        int
+	stopMoving bool
 }
 
 func NewCrystal(p Vector) *Crystal {
@@ -32,6 +33,15 @@ func NewCrystal(p Vector) *Crystal {
 	actorsLock.Lock()
 	actors[c] = true
 	actorsLock.Unlock()
+
+	go func() {
+		limit := NewFrameLimiter()
+		for !c.stopMoving {
+			c.moveG()
+			limit.cycle()
+		}
+	}()
+
 	return c
 }
 
@@ -40,9 +50,13 @@ func (c *Crystal) close() {
 	actorsLock.Lock()
 	delete(actors, c)
 	actorsLock.Unlock()
+	c.stopMoving = true
 }
 
 func (c *Crystal) move() {
+}
+
+func (c *Crystal) moveG() {
 	c.cnt--
 	dist := c.pos.distVector(ship.midstPos())
 	if dist < 0.1 {
