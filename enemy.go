@@ -25,6 +25,7 @@ type Enemy struct {
 	damaged                                               bool
 	damagedCnt, destroyedCnt, explodeCnt, explodeItv, idx int
 	multiplier                                            float32
+	stopMoving                                            bool
 }
 
 func NewEnemy(spec EnemySpec) *Enemy {
@@ -48,6 +49,15 @@ func NewEnemy(spec EnemySpec) *Enemy {
 	actorsLock.Lock()
 	actors[this] = true
 	actorsLock.Unlock()
+
+	go func() {
+		limit := NewFrameLimiter()
+		for !this.stopMoving {
+			this.moveG()
+			limit.cycle()
+		}
+	}()
+
 	return this
 }
 
@@ -74,6 +84,9 @@ func (this *Enemy) index() int {
 }
 
 func (this *Enemy) move() {
+}
+
+func (this *Enemy) moveG() {
 	if !this.spec.move(this) {
 		this.close()
 	}
@@ -103,6 +116,7 @@ func (this *Enemy) close() {
 	actorsLock.Lock()
 	delete(actors, this)
 	actorsLock.Unlock()
+	this.stopMoving = true
 }
 
 func (this *Enemy) ndex() int {
