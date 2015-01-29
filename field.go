@@ -116,6 +116,10 @@ func (this *Field) scroll(my float32, isDemo bool /*= false*/) {
 	}
 	this.blockCreateCnt -= my
 	if this.blockCreateCnt < 0 {
+		if stageManager == nil {
+			// init may not yet be complete
+			return
+		}
 		stageManager.gotoNextBlockArea()
 		var bd int
 		if stageManager.bossMode {

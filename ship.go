@@ -27,6 +27,7 @@ type Ship struct {
 	scrollSpeed, scrollSpeedBase                         float32
 	_midstPos, _higherPos, _lowerPos, _nearPos, _nearVel Vector
 	bridgeShape                                          *ComplexShape
+	stopMoving                                           bool
 }
 
 var shipBridgeShape *ComplexShape
@@ -48,6 +49,15 @@ func NewShip() *Ship {
 	actorsLock.Lock()
 	actors[this] = true
 	actorsLock.Unlock()
+
+	go func() {
+		limit := NewFrameLimiter()
+		for !this.stopMoving {
+			this.moveG()
+			limit.cycle()
+		}
+	}()
+
 	return this
 }
 
@@ -58,6 +68,8 @@ func (this *Ship) close() {
 	actorsLock.Lock()
 	delete(actors, this)
 	actorsLock.Unlock()
+
+	this.stopMoving = true
 }
 
 func (this *Ship) start(gameMode GameMode) {
@@ -92,6 +104,9 @@ func (this *Ship) restart() {
 }
 
 func (this *Ship) move() {
+}
+
+func (this *Ship) moveG() {
 	field.scroll(this.scrollSpeed, false)
 	sf := false
 	for i := 0; i < this.boatNum; i++ {
