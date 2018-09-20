@@ -53,15 +53,16 @@ func (this *TwinStick) update() {
 
 func (this *TwinStick) getState() TwinStickState {
 	if this.stick != nil {
-		this.state.left.x = adjustAxis(int(this.stick.Axis(0)))
-		this.state.left.y = -adjustAxis(int(this.stick.Axis(1)))
-		var rx int = 0
+		this.state.left.x = adjustAxis(this.stick.Axis(0))
+		this.state.left.y = -adjustAxis(this.stick.Axis(1))
+		var rx int16 = 0
 		if this.enableAxis5 {
-			rx = int(this.stick.Axis(4))
+			rx = this.stick.Axis(4)
 		} else {
-			rx = int(this.stick.Axis(2))
+			rx = this.stick.Axis(2)
 		}
-		var ry int = int(this.stick.Axis(3))
+		ry := this.stick.Axis(3)
+		println("axis 3 was ", rx)
 		if rx == 0 && ry == 0 {
 			this.state.right.x = 0
 			this.state.right.y = 0
@@ -69,8 +70,8 @@ func (this *TwinStick) getState() TwinStickState {
 			ry = -ry
 			var rd float32 = atan232(float32(rx), float32(ry))*this.reverse + this.rotate
 			var rl float32 = sqrt32(float32(rx)*float32(rx) + float32(ry)*float32(ry))
-			this.state.right.x = adjustAxis(int(Sin32(rd) * rl))
-			this.state.right.y = adjustAxis(int(Cos32(rd) * rl))
+			this.state.right.x = adjustAxis(int16(Sin32(rd) * rl))
+			this.state.right.y = adjustAxis(int16(Cos32(rd) * rl))
 		}
 	} else {
 		this.state.left.x = 0
@@ -105,15 +106,15 @@ func (this *TwinStick) getState() TwinStickState {
 	return this.state
 }
 
-func adjustAxis(v int) float32 {
+func adjustAxis(v int16) float32 {
 	var a float32 = 0
 	if v > JOYSTICK_AXIS_MAX/3 {
-		a = float32(v-JOYSTICK_AXIS_MAX/3) / (JOYSTICK_AXIS_MAX - JOYSTICK_AXIS_MAX/3)
+		a = (float32(v) - JOYSTICK_AXIS_MAX/3) / (JOYSTICK_AXIS_MAX - JOYSTICK_AXIS_MAX/3)
 		if a > 1 {
 			a = 1
 		}
 	} else if v < -(JOYSTICK_AXIS_MAX / 3) {
-		a = float32(v+JOYSTICK_AXIS_MAX/3) / (JOYSTICK_AXIS_MAX - JOYSTICK_AXIS_MAX/3)
+		a = (float32(v) + JOYSTICK_AXIS_MAX/3) / (JOYSTICK_AXIS_MAX - JOYSTICK_AXIS_MAX/3)
 		if a < -1 {
 			a = -1
 		}
