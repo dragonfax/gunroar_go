@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"github.com/dragonfax/glu"
-	"github.com/go-gl/gl/v3.3-compatibility/gl"
+	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -194,8 +194,8 @@ func (s *Screen) initSDL() {
 	var window *sdl.Window
 	var err error
 	if s.windowMode {
-		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_RESIZABLE
-		window, err = sdl.CreateWindow("Title", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, int32(s.width), int32(s.height), videoFlags)
+		videoFlags = sdl.WINDOW_OPENGL
+		window, err = sdl.CreateWindow("Title", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, int32(s.width), int32(s.height), videoFlags)
 	} else {
 		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_FULLSCREEN_DESKTOP
 		window, err = sdl.CreateWindow("Title", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, videoFlags)
@@ -204,23 +204,17 @@ func (s *Screen) initSDL() {
 		panic(fmt.Sprintf("SDLInitFailedException (Unable to create SDL screen: %v", sdl.GetError()))
 	}
 	s.window = window
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_COMPATIBILITY)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
-	s.context, err = window.GLCreateContext()
+	// sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
+	// sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2)
+	// sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
+	s.context, err = s.window.GLCreateContext()
 	if err != nil {
 		panic(err)
 	}
-	err = s.window.GLMakeCurrent(s.context)
+	err = gl.Init()
 	if err != nil {
 		panic(err)
 	}
-	/*
-		err = gl.Init()
-		if err != nil {
-			panic(err)
-		}
-	*/
 	gl.Viewport(0, 0, int32(s.width), int32(s.height))
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
 	surface, err := s.window.GetSurface()

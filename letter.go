@@ -8,7 +8,7 @@ package main
 import (
 	"math"
 
-	"github.com/go-gl/gl/v3.3-compatibility/gl"
+	"github.com/go-gl/gl/v2.1/gl"
 )
 
 const LETTER_WIDTH = 2.1

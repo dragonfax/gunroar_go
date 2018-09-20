@@ -5,7 +5,7 @@
  */
 package main
 
-import "github.com/go-gl/gl/v3.3-compatibility/gl"
+import "github.com/go-gl/gl/v2.1/gl"
 
 /**
  * Turret mounted on a deck of an enemy ship.
