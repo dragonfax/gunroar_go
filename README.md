@@ -19,5 +19,9 @@ You can play with Keyboard, Mouse or Gamepad.
 * -res 640x480
 * -nosound
 * -help for other options
+* -enableaxis5 for some weird controllers.j
 
 ![Screenshot](screenshot.png)
+
+### Todo
+* Twinstick is broken. Axis problems.
