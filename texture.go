@@ -41,10 +41,12 @@ func LoadBmp(name string) *sdl.Surface {
 		format.Gmask = 0x0000ff00
 		format.Bmask = 0x00ff0000
 		format.Amask = 0xff000000
-		format.Rmask = 0
-		format.Rmask = 8
-		format.Rmask = 16
-		format.Rmask = 24
+		/*
+			format.Rshift = 0
+			format.Rshift = 8
+			format.Rshift = 16
+			format.Rshift = 24
+		*/
 		/* format.Rloss = 0
 		format.Gloss = 0
 		format.Bloss = 0
