@@ -18,9 +18,9 @@ const MAX_DIGIT = 16
 var scoreReel *ScoreReel
 
 type ScoreReel struct {
-	score, targetScore uint32
-	actualScore        uint32
-	digit              uint32
+	score, targetScore int
+	actualScore        int
+	digit              int
 	numReel            [MAX_DIGIT]*NumReel
 }
 
@@ -34,19 +34,19 @@ func NewScoreReel() *ScoreReel {
 	return sr
 }
 
-func (sr *ScoreReel) clear(digit uint32 /*= 9 */) {
+func (sr *ScoreReel) clear(digit int /*= 9 */) {
 	sr.score = 0
 	sr.targetScore = 0
 	sr.actualScore = 0
 	sr.digit = digit
-	for i := uint32(0); i < digit; i++ {
+	for i := 0; i < digit; i++ {
 		sr.numReel[i].close()
 		sr.numReel[i] = NewNumReel()
 	}
 }
 
 func (sr *ScoreReel) move() {
-	for i := uint32(0); i < sr.digit; i++ {
+	for i := 0; i < sr.digit; i++ {
 		sr.numReel[i].move()
 	}
 }
@@ -58,16 +58,16 @@ func (sr *ScoreReel) draw() {
 func (sr *ScoreReel) drawAtPos(x float32, y float32, s float32) {
 	lx := x
 	ly := y
-	for i := uint32(0); i < sr.digit; i++ {
+	for i := 0; i < sr.digit; i++ {
 		sr.numReel[i].drawAtPos(lx, ly, s)
 		lx -= s * 2
 	}
 }
 
-func (sr *ScoreReel) addReelScore(as uint32) {
+func (sr *ScoreReel) addReelScore(as int) {
 	sr.targetScore += as
-	ts := sr.targetScore
-	for i := uint32(0); i < sr.digit; i++ {
+	var ts int = sr.targetScore
+	for i := 0; i < sr.digit; i++ {
 		sr.numReel[i].targetDeg = float32(ts) * 360 / 10
 		ts /= 10
 		if ts < 0 {
@@ -77,12 +77,12 @@ func (sr *ScoreReel) addReelScore(as uint32) {
 }
 
 func (sr *ScoreReel) accelerate() {
-	for i := uint32(0); i < sr.digit; i++ {
+	for i := 0; i < sr.digit; i++ {
 		sr.numReel[i].accelerate()
 	}
 }
 
-func (sr *ScoreReel) addActualScore(as uint32) {
+func (sr *ScoreReel) addActualScore(as int) {
 	sr.actualScore += as
 }
 
@@ -123,7 +123,7 @@ func (nr *NumReel) move() {
 }
 
 func (nr *NumReel) drawAtPos(x float32, y float32, s float32) {
-	n := uint32(Mod32(((nr.deg*10/360 + 0.99) + 1), 10))
+	var n int = int(Mod32(((nr.deg*10/360 + 0.99) + 1), 10))
 	var d float32 = Mod32(nr.deg, 360)
 	var od float32 = d - float32(n)*360/10
 	od -= 15
@@ -144,9 +144,9 @@ func (nr *NumReel) drawAtPos(x float32, y float32, s float32) {
 			a = 0
 		}
 		setScreenColor(a, a, a, 1)
-		drawLetter(n, 2)
+		drawLetter(int(n), 2)
 		setScreenColor(a/2, a/2, a/2, 1)
-		drawLetter(n, 3)
+		drawLetter(int(n), 3)
 		gl.PopMatrix()
 		n--
 		if n < 0 {
@@ -204,16 +204,16 @@ type Target struct {
 	flyingTo        FlyingToType
 	initialVelRatio float32
 	size            float32
-	n               uint32
-	cnt             uint32
+	n               int
+	cnt             int
 }
 
 type NumIndicator struct {
 	pos, vel  Vector
-	n         uint32
+	n         int
 	t         IndicatorType
 	size      float32
-	cnt       uint32
+	cnt       int
 	alpha     float32
 	target    [4]Target
 	targetIdx int
@@ -244,7 +244,7 @@ func decTargetY() {
 	}
 }
 
-func NewNumIndicator(n uint32, t IndicatorType, size float32, x float32, y float32) *NumIndicator {
+func NewNumIndicator(n int, t IndicatorType, size float32, x float32, y float32) *NumIndicator {
 	ni := new(NumIndicator)
 	ni.alpha = 1
 
@@ -265,7 +265,7 @@ func NewNumIndicator(n uint32, t IndicatorType, size float32, x float32, y float
 }
 
 func (ni *NumIndicator) addTarget(x float32, y float32, flyingTo FlyingToType, initialVelRatio float32,
-	size float32, n uint32, cnt uint32) {
+	size float32, n int, cnt int) {
 	ni.target[ni.targetNum].pos = Vector{x, y}
 	ni.target[ni.targetNum].flyingTo = flyingTo
 	ni.target[ni.targetNum].initialVelRatio = initialVelRatio
@@ -327,11 +327,11 @@ func (ni *NumIndicator) move() {
 	ni.vel.MulAssign(0.98)
 	ni.size += (ni.target[ni.targetIdx].size - ni.size) * 0.025
 	ni.pos.AddAssign(ni.vel)
-	vn := int32(float32(ni.target[ni.targetIdx].n-ni.n) * 0.2)
+	var vn int = int(float32(ni.target[ni.targetIdx].n-ni.n) * 0.2)
 	if vn < 10 && vn > -10 {
 		ni.n = ni.target[ni.targetIdx].n
 	} else {
-		ni.n = uint32(int32(ni.n) + vn)
+		ni.n += vn
 	}
 	switch ni.target[ni.targetIdx].flyingTo {
 	case FlyingToTypeRIGHT:

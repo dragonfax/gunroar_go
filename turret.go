@@ -25,10 +25,10 @@ type Turret struct {
 	isBoss                        bool
 	enemyIndex                    int
 	multiplier                    *float32
-	addScore                      func(uint32)
+	addScore                      func(int)
 }
 
-func NewTurret(spec *TurretSpec, isBoss bool, enemyIndex int, multiplier *float32, addScore func(uint32)) *Turret {
+func NewTurret(spec *TurretSpec, isBoss bool, enemyIndex int, multiplier *float32, addScore func(int)) *Turret {
 	if spec.shape == nil {
 		panic("turret spec shape nil")
 	}

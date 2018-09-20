@@ -152,11 +152,11 @@ func drawStringOption(str string, lx float32, y float32, s float32, d Direction,
 	}
 }
 
-func drawNum(num uint32, lx float32, y float32, s float32) {
+func drawNum(num int, lx float32, y float32, s float32) {
 	drawNumOption(num, lx, y, s, 0, 0, -1, -1)
 }
 
-func drawNumOption(num uint32, lx float32, y float32, s float32, cl uint32, dg uint32, headChar int, floatDigit int) {
+func drawNumOption(num int, lx float32, y float32, s float32, cl int, dg int, headChar int, floatDigit int) {
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
 	n := num
@@ -188,11 +188,11 @@ func drawNumOption(num uint32, lx float32, y float32, s float32, cl uint32, dg u
 	}
 }
 
-func drawNumSign(num uint32, lx float32, ly float32, s float32) {
+func drawNumSign(num int, lx float32, ly float32, s float32) {
 	drawNumSignOption(num, lx, ly, s, 0, -1, -1)
 }
 
-func drawNumSignOption(num uint32, lx float32, ly float32, s float32, cl uint32, headChar int, floatDigit int) {
+func drawNumSignOption(num int, lx float32, ly float32, s float32, cl int, headChar int, floatDigit int) {
 	x := lx
 	y := ly
 	n := num
@@ -220,7 +220,7 @@ func drawNumSignOption(num uint32, lx float32, ly float32, s float32, cl uint32,
 	}
 }
 
-func drawTime(time uint32, lx float32, y float32, s float32, cl uint32 /* default 0 */) {
+func drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */) {
 	n := time
 	if n < 0 {
 		n = 0

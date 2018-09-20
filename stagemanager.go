@@ -243,8 +243,8 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 }
 
 func (this *StageManager) draw() {
-	drawNumOption(uint32(this.rank*1000), 620, 10, 10, 0, 0, 33, 3)
-	drawTime(uint32(this.bossAppTime), 120, 20, 7, 0)
+	drawNumOption(int(this.rank*1000), 620, 10, 10, 0, 0, 33, 3)
+	drawTime(this.bossAppTime, 120, 20, 7, 0)
 }
 
 type EnemyAppearance struct {

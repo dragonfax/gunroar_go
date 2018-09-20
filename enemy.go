@@ -243,7 +243,7 @@ func (this *Enemy) checkCollision(x float32, y float32, c Shape, shot *Shot) boo
 	return false
 }
 
-func (this *Enemy) addScore(s uint32) {
+func (this *Enemy) addScore(s int) {
 	this.setScoreIndicator(s, 1)
 }
 
@@ -308,46 +308,46 @@ func (this *Enemy) destroyed(shot *Shot /*= null*/) bool {
 			screen.setScreenShake(45, 0.04)
 		}
 	}
-	this.setScoreIndicator(uint32(sc), this.multiplier)
+	this.setScoreIndicator(sc, this.multiplier)
 	return r
 }
 
-func (this *Enemy) setScoreIndicator(sc uint32, mp float32) {
+func (this *Enemy) setScoreIndicator(sc int, mp float32) {
 	ty := getTargetY()
 	if mp > 1 {
 		ni := NewNumIndicator(sc, IndicatorTypeSCORE, 0.5, this.pos.x, this.pos.y)
 		ni.addTarget(8, ty, FlyingToTypeRIGHT, 1, 0.5, sc, 40)
 		ni.addTarget(11, ty, FlyingToTypeRIGHT, 0.5, 0.75,
-			uint32(float32(sc)*mp), 30)
+			int(float32(sc)*mp), 30)
 		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.25, 1,
-			uint32(float32(sc)*mp*stageManager.rank), 20)
+			int(float32(sc)*mp*stageManager.rank), 20)
 		ni.addTarget(12, -8, FlyingToTypeBOTTOM, 0.5, 0.1,
-			uint32(float32(sc)*mp*stageManager.rank), 40)
+			int(float32(sc)*mp*stageManager.rank), 40)
 		ni.gotoNextTarget()
 
-		mn := uint32(mp * 1000)
+		mn := int(mp * 1000)
 		ni = NewNumIndicator(mn, IndicatorTypeMULTIPLIER, 0.7, this.pos.x, this.pos.y)
 		ni.addTarget(10.5, ty, FlyingToTypeRIGHT, 0.5, 0.2, mn, 70)
 		ni.gotoNextTarget()
 
-		rn := uint32(stageManager.rank * 1000)
+		rn := int(stageManager.rank * 1000)
 		ni = NewNumIndicator(rn, IndicatorTypeMULTIPLIER, 0.4, 11, 8)
 		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.5, 0.2, rn, 40)
 		ni.gotoNextTarget()
-		scoreReel.addActualScore(uint32(float32(sc) * mp * stageManager.rank))
+		scoreReel.addActualScore(int(float32(sc) * mp * stageManager.rank))
 	} else {
 		ni := NewNumIndicator(sc, IndicatorTypeSCORE, 0.3, this.pos.x, this.pos.y)
 		ni.addTarget(11, ty, FlyingToTypeRIGHT, 1.5, 0.2, sc, 40)
-		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.25, 0.25, sc*uint32(stageManager.rank), 20)
-		ni.addTarget(12, -8, FlyingToTypeBOTTOM, 0.5, 0.1, sc*uint32(stageManager.rank), 40)
+		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.25, 0.25, sc*int(stageManager.rank), 20)
+		ni.addTarget(12, -8, FlyingToTypeBOTTOM, 0.5, 0.1, sc*int(stageManager.rank), 40)
 		ni.gotoNextTarget()
 
-		rn := uint32(stageManager.rank * 1000)
+		rn := int(stageManager.rank * 1000)
 		ni = NewNumIndicator(rn, IndicatorTypeMULTIPLIER, 0.4, 11, 8)
 		ni.addTarget(13, ty, FlyingToTypeRIGHT, 0.5, 0.2, rn, 40)
 		ni.gotoNextTarget()
 
-		scoreReel.addActualScore(uint32(float32(sc) * stageManager.rank))
+		scoreReel.addActualScore(int(float32(sc) * stageManager.rank))
 	}
 }
 
@@ -429,7 +429,7 @@ func (this *Enemy) draw() {
 			ox += 4
 			oy -= 1.25
 		}
-		drawNumSignOption(uint32(this.multiplier*1000), this.pos.x+ox, this.pos.y+oy, 0.33, 1, 33, 3)
+		drawNumSignOption(int(this.multiplier*1000), this.pos.x+ox, this.pos.y+oy, 0.33, 1, 33, 3)
 	}
 }
 
