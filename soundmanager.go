@@ -11,8 +11,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/veandco/go-sdl2/sdl_mixer"
 )
 
 var noSound bool
@@ -153,26 +153,30 @@ func InitSoundManager() {
 	if noSound {
 		return
 	}
-	if sdl.InitSubSystem(sdl.INIT_AUDIO) < 0 {
+	if err := sdl.InitSubSystem(sdl.INIT_AUDIO); err != nil {
 		noSound = true
-		panic(errors.New(fmt.Sprintf("SDLInitFailedException Unable to initialize SDL_AUDIO: %v", sdl.GetError())))
+		panic(errors.New(fmt.Sprintf("SDLInitFailedException Unable to initialize SDL_AUDIO: %s", err)))
 	}
 	audio_rate := 44100
 	var audio_format uint16 = sdl.AUDIO_S16
 	audio_channels := 1
 	audio_buffers := 4096
-	if !mix.OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) {
+	if err := mix.OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers); err != nil {
 		noSound = true
-		panic(errors.New(fmt.Sprintf("SDLInitFailedException Couldn't open audio: %v", sdl.GetError())))
+		panic(errors.New(fmt.Sprintf("SDLInitFailedException Couldn't open audio: %s", err)))
 	}
-	mix.QuerySpec(&audio_rate, &audio_format, &audio_channels)
+	var err error
+	audio_rate, audio_format, audio_channels, _, err = mix.QuerySpec()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func CloseSoundManager() {
 	if noSound {
 		return
 	}
-	if mix.MusicPlaying() {
+	if mix.Playing(-1) > 0 {
 		mix.HaltMusic()
 	}
 	mix.CloseAudio()
@@ -187,7 +191,11 @@ func (m *Music) Load(name string) {
 		return
 	}
 	fileName := musicDir + "/" + name
-	m.music = mix.LoadMUS(fileName)
+	mus, err := mix.LoadMUS(fileName)
+	if err != nil {
+		panic(err)
+	}
+	m.music = mus
 	if m.music == nil {
 		noSound = true
 		panic("Couldn't load: " + fileName)
@@ -219,7 +227,7 @@ func haltMusic() {
 	if noSound {
 		return
 	}
-	if mix.MusicPlaying() {
+	if mix.Playing(-1) > 0 {
 		mix.HaltMusic()
 	}
 }
@@ -233,7 +241,11 @@ func (c *Chunk) LoadToChannel(name string) {
 		return
 	}
 	fileName := soundDir + "/" + name
-	c.chunk = mix.LoadWAV(fileName)
+	chunk, err := mix.LoadWAV(fileName)
+	if err != nil {
+		panic(err)
+	}
+	c.chunk = chunk
 	if c.chunk == nil {
 		noSound = true
 		panic("SDLException Couldn't load: " + fileName)
@@ -244,5 +256,5 @@ func (c *Chunk) Play() {
 	if noSound {
 		return
 	}
-	c.chunk.PlayChannel(-1, 0)
+	c.chunk.Play(-1, 0)
 }

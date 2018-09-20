@@ -8,8 +8,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/go-gl/gl"
-	"github.com/go-gl/glu"
+	"github.com/dragonfax/glu"
+	"github.com/go-gl/gl/v3.3-compatibility/gl"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -32,8 +32,8 @@ type Screen struct {
 	screenShakeIntense float32
 	farPlane           float32
 	nearPlane          float32
-	width              int
-	height             int
+	width              uint32
+	height             uint32
 	windowMode         bool
 	window             *sdl.Window
 	context            sdl.GLContext
@@ -95,7 +95,7 @@ func (s *Screen) drawLuminous() {
 	}
 }
 
-func (s *Screen) resized(width int, height int) {
+func (s *Screen) resized(width uint32, height uint32) {
 	if s.luminousScreen != nil {
 		s.luminousScreen.resized(width, height)
 	}
@@ -106,7 +106,7 @@ func (s *Screen) resized(width int, height int) {
 }
 
 func (s *Screen) screenResized() {
-	gl.Viewport(0, 0, s.width, s.height)
+	gl.Viewport(0, 0, int32(s.width), int32(s.height))
 	gl.MatrixMode(gl.PROJECTION)
 	gl.LoadIdentity()
 	gl.Frustum(-float64(s.nearPlane),
@@ -186,8 +186,8 @@ func (s *Screen) initSDL() {
 	s.farPlane = 1000
 	s.nearPlane = 0.1
 	// Initialize SDL.
-	if sdl.Init(sdl.INIT_VIDEO) < 0 {
-		panic(fmt.Sprintf(" SDLInitFailedException( Unable to initialize SDL: %v", sdl.GetError()))
+	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
+		panic(fmt.Sprintf(" SDLInitFailedException( Unable to initialize SDL: %s )", err))
 	}
 	// Create an OpenGL screen.
 	var videoFlags uint32
@@ -195,7 +195,7 @@ func (s *Screen) initSDL() {
 	var err error
 	if s.windowMode {
 		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_RESIZABLE
-		window, err = sdl.CreateWindow("Title", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, s.width, s.height, videoFlags)
+		window, err = sdl.CreateWindow("Title", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, int32(s.width), int32(s.height), videoFlags)
 	} else {
 		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_FULLSCREEN_DESKTOP
 		window, err = sdl.CreateWindow("Title", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, videoFlags)
@@ -204,11 +204,31 @@ func (s *Screen) initSDL() {
 		panic(fmt.Sprintf("SDLInitFailedException (Unable to create SDL screen: %v", sdl.GetError()))
 	}
 	s.window = window
-	s.context = sdl.GL_CreateContext(window)
-	gl.Viewport(0, 0, s.width, s.height)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_COMPATIBILITY)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
+	s.context, err = window.GLCreateContext()
+	if err != nil {
+		panic(err)
+	}
+	err = s.window.GLMakeCurrent(s.context)
+	if err != nil {
+		panic(err)
+	}
+	/*
+		err = gl.Init()
+		if err != nil {
+			panic(err)
+		}
+	*/
+	gl.Viewport(0, 0, int32(s.width), int32(s.height))
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
-	s.width = int(s.window.GetSurface().W)
-	s.height = int(s.window.GetSurface().H)
+	surface, err := s.window.GetSurface()
+	if err != nil {
+		panic(err)
+	}
+	s.width = uint32(surface.W)
+	s.height = uint32(surface.H)
 	s.resized(s.width, s.height)
 	sdl.ShowCursor(sdl.DISABLE)
 	s.Init()
@@ -221,7 +241,7 @@ func (s *Screen) closeSDL() {
 
 func (s *Screen) flip() {
 	// s.handleError()
-	sdl.GL_SwapWindow(s.window)
+	s.window.GLSwap()
 }
 
 func (s *Screen) clear() {
@@ -262,5 +282,5 @@ func setScreenColor(r float32, g float32, b float32, a float32 /* = 1 */) {
 }
 
 func setClearColor(r float32, g float32, b float32, a float32 /*= 1*/) {
-	gl.ClearColor(gl.GLclampf(r*brightness), gl.GLclampf(g*brightness), gl.GLclampf(b*brightness), gl.GLclampf(a))
+	gl.ClearColor(r*brightness, g*brightness, b*brightness, a)
 }

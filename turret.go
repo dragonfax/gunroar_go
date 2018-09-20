@@ -5,7 +5,7 @@
  */
 package main
 
-import "github.com/go-gl/gl"
+import "github.com/go-gl/gl/v3.3-compatibility/gl"
 
 /**
  * Turret mounted on a deck of an enemy ship.
@@ -25,10 +25,10 @@ type Turret struct {
 	isBoss                        bool
 	enemyIndex                    int
 	multiplier                    *float32
-	addScore                      func(int)
+	addScore                      func(uint32)
 }
 
-func NewTurret(spec *TurretSpec, isBoss bool, enemyIndex int, multiplier *float32, addScore func(int)) *Turret {
+func NewTurret(spec *TurretSpec, isBoss bool, enemyIndex int, multiplier *float32, addScore func(uint32)) *Turret {
 	if spec.shape == nil {
 		panic("turret spec shape nil")
 	}

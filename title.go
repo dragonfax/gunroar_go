@@ -6,7 +6,7 @@
 package main
 
 import (
-	"github.com/go-gl/gl"
+	"github.com/go-gl/gl/v3.3-compatibility/gl"
 )
 
 /**
@@ -141,7 +141,7 @@ func (this *TitleManager) draw() {
 	if this.cnt > 200 {
 		drawStringOption("LAST", 3, 345, 4, TO_RIGHT, 1, false, 0)
 		ls := 0
-		drawNumOption(ls, 80, 360, 4, 0, 9, -1, -1)
+		drawNumOption(uint32(ls), 80, 360, 4, 0, 9, -1, -1)
 	}
 	drawString(gameModeText[this.gameMode], 3, 400, 5)
 }

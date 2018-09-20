@@ -82,8 +82,8 @@ func parseArgs() {
 			flag.Usage()
 			os.Exit(1)
 		}
-		screen.width = w
-		screen.height = h
+		screen.width = uint32(w)
+		screen.height = uint32(h)
 	}
 
 	noSound = *noSoundP

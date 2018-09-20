@@ -8,7 +8,7 @@ package main
 import (
 	"math"
 
-	"github.com/go-gl/gl"
+	"github.com/go-gl/gl/v3.3-compatibility/gl"
 )
 
 const LETTER_WIDTH = 2.1
@@ -48,25 +48,25 @@ func getLetterHeight(s float32) float32 {
 	return s * LETTER_HEIGHT
 }
 
-func drawLetter(n int, c int) {
-	displayList.call(uint(n + c*LETTER_NUM))
+func drawLetter(n uint32, c uint32) {
+	displayList.call(n + c*uint32(LETTER_NUM))
 }
 
-func drawLetterOption(n int, x float32, y float32, s float32, d float32, c int) {
+func drawLetterOption(n uint32, x float32, y float32, s float32, d float32, c uint32) {
 	gl.PushMatrix()
 	gl.Translatef(x, y, 0)
 	gl.Scalef(s, s, s)
 	gl.Rotatef(float32(d), 0, 0, 1)
-	displayList.call(uint(n + c*LETTER_NUM))
+	displayList.call(n + c*uint32(LETTER_NUM))
 	gl.PopMatrix()
 }
 
-func drawLetterRev(n int, x float32, y float32, s float32, d float32, c int) {
+func drawLetterRev(n uint32, x float32, y float32, s float32, d float32, c uint32) {
 	gl.PushMatrix()
 	gl.Translatef(x, y, 0)
 	gl.Scalef(s, -s, s)
 	gl.Rotatef(float32(d), 0, 0, 1)
-	displayList.call(uint(n + c*LETTER_NUM))
+	displayList.call(n + c*uint32(LETTER_NUM))
 	gl.PopMatrix()
 }
 
@@ -79,14 +79,14 @@ const ( // Direction
 	TO_UP
 )
 
-func convertCharToInt(c rune) int {
-	var idx int
+func convertCharToInt(c rune) uint32 {
+	var idx uint32
 	if c >= '0' && c <= '9' {
-		idx = int(c - '0')
+		idx = uint32(c - '0')
 	} else if c >= 'A' && c <= 'Z' {
-		idx = int(c-'A') + 10
+		idx = uint32(c-'A') + 10
 	} else if c >= 'a' && c <= 'z' {
-		idx = int(c-'a') + 10
+		idx = uint32(c-'a') + 10
 	} else if c == '.' {
 		idx = 36
 	} else if c == '-' {
@@ -107,11 +107,11 @@ func drawString(str string, lx float32, y float32, s float32) {
 	drawStringOption(str, lx, y, s, TO_RIGHT, 0, false, 0)
 }
 
-func drawStringOption(str string, lx float32, y float32, s float32, d Direction, cl int, rev bool, od float32) {
+func drawStringOption(str string, lx float32, y float32, s float32, d Direction, cl uint32, rev bool, od float32) {
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
 	x := lx
-	var idx int
+	var idx uint32
 	var ld float32
 	switch d {
 	case TO_RIGHT:
@@ -124,7 +124,8 @@ func drawStringOption(str string, lx float32, y float32, s float32, d Direction,
 		ld = 270
 	}
 	ld += od
-	for _, c := range str {
+	var c rune
+	for _, c = range str {
 		if c != ' ' {
 			idx = convertCharToInt(c)
 			if rev {
@@ -151,11 +152,11 @@ func drawStringOption(str string, lx float32, y float32, s float32, d Direction,
 	}
 }
 
-func drawNum(num int, lx float32, y float32, s float32) {
+func drawNum(num uint32, lx float32, y float32, s float32) {
 	drawNumOption(num, lx, y, s, 0, 0, -1, -1)
 }
 
-func drawNumOption(num int, lx float32, y float32, s float32, cl int, dg int, headChar int, floatDigit int) {
+func drawNumOption(num uint32, lx float32, y float32, s float32, cl uint32, dg uint32, headChar int, floatDigit int) {
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
 	n := num
@@ -183,15 +184,15 @@ func drawNumOption(num int, lx float32, y float32, s float32, cl int, dg int, he
 		}
 	}
 	if headChar >= 0 {
-		drawLetterOption(headChar, x+s*LETTER_WIDTH*0.2, y+s*LETTER_WIDTH*0.2, s*0.6, ld, cl)
+		drawLetterOption(uint32(headChar), x+s*LETTER_WIDTH*0.2, y+s*LETTER_WIDTH*0.2, s*0.6, ld, cl)
 	}
 }
 
-func drawNumSign(num int, lx float32, ly float32, s float32) {
+func drawNumSign(num uint32, lx float32, ly float32, s float32) {
 	drawNumSignOption(num, lx, ly, s, 0, -1, -1)
 }
 
-func drawNumSignOption(num int, lx float32, ly float32, s float32, cl int, headChar int, floatDigit int) {
+func drawNumSignOption(num uint32, lx float32, ly float32, s float32, cl uint32, headChar int, floatDigit int) {
 	x := lx
 	y := ly
 	n := num
@@ -215,11 +216,11 @@ func drawNumSignOption(num int, lx float32, ly float32, s float32, cl int, headC
 		}
 	}
 	if headChar >= 0 {
-		drawLetterRev(headChar, x+s*LETTER_WIDTH*0.2, y-s*LETTER_WIDTH*0.2, s*0.6, 0, cl)
+		drawLetterRev(uint32(headChar), x+s*LETTER_WIDTH*0.2, y-s*LETTER_WIDTH*0.2, s*0.6, 0, cl)
 	}
 }
 
-func drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */) {
+func drawTime(time uint32, lx float32, y float32, s float32, cl uint32 /* default 0 */) {
 	n := time
 	if n < 0 {
 		n = 0
@@ -265,7 +266,7 @@ func setLetter(idx int, c int) {
 		size *= 1.4
 		length *= 1.05
 		x = -x
-		y = y
+		// y = y
 		deg = Mod32(deg, 180)
 		if c == LETTER_LINE_COLOR {
 			setBoxLine(x, y, size, length, deg)

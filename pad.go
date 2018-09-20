@@ -26,16 +26,16 @@ func NewPad() *Pad {
 	return new(Pad)
 }
 
-func (pad *Pad) openJoystick(st *sdl.Joystick /* = null */) *sdl.Joystick {
+func (pad *Pad) openJoystick(st *sdl.Joystick /* = null */) (*sdl.Joystick, error) {
 	if st == nil {
-		if sdl.InitSubSystem(sdl.INIT_JOYSTICK) < 0 {
-			return nil
+		if err := sdl.InitSubSystem(sdl.INIT_JOYSTICK); err != nil {
+			return nil, err
 		}
 		pad.stick = sdl.JoystickOpen(0)
 	} else {
 		pad.stick = st
 	}
-	return pad.stick
+	return pad.stick, nil
 }
 
 func (pad *Pad) update() {
@@ -50,8 +50,8 @@ func (pad *Pad) getState() PadState {
 	var x, y int16
 	pad.state.dir = 0
 	if pad.stick != nil {
-		x = pad.stick.GetAxis(0)
-		y = pad.stick.GetAxis(1)
+		x = pad.stick.Axis(0)
+		y = pad.stick.Axis(1)
 	}
 	if pad.keys[sdl.SCANCODE_RIGHT] == sdl.PRESSED || pad.keys[sdl.SCANCODE_KP_6] == sdl.PRESSED ||
 		pad.keys[sdl.SCANCODE_D] == sdl.PRESSED || pad.keys[sdl.SCANCODE_L] == sdl.PRESSED ||
@@ -78,12 +78,12 @@ func (pad *Pad) getState() PadState {
 	// var leftTrigger float32 = 0
 	// var rightTrigger float32 = 0
 	if pad.stick != nil {
-		btn1 = pad.stick.GetButton(0) + pad.stick.GetButton(3) +
-			pad.stick.GetButton(4) + pad.stick.GetButton(7) +
-			pad.stick.GetButton(8) + pad.stick.GetButton(11)
-		btn2 = pad.stick.GetButton(1) + pad.stick.GetButton(2) +
-			pad.stick.GetButton(5) + pad.stick.GetButton(6) +
-			pad.stick.GetButton(9) + pad.stick.GetButton(10)
+		btn1 = pad.stick.Button(0) + pad.stick.Button(3) +
+			pad.stick.Button(4) + pad.stick.Button(7) +
+			pad.stick.Button(8) + pad.stick.Button(11)
+		btn2 = pad.stick.Button(1) + pad.stick.Button(2) +
+			pad.stick.Button(5) + pad.stick.Button(6) +
+			pad.stick.Button(9) + pad.stick.Button(10)
 	}
 	if pad.keys[sdl.SCANCODE_Z] == sdl.PRESSED || pad.keys[sdl.SCANCODE_PERIOD] == sdl.PRESSED ||
 		pad.keys[sdl.SCANCODE_LCTRL] == sdl.PRESSED || pad.keys[sdl.SCANCODE_RCTRL] == sdl.PRESSED ||

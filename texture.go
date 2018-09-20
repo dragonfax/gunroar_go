@@ -9,8 +9,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"github.com/go-gl/gl"
-	"github.com/go-gl/glu"
+
+	"github.com/dragonfax/glu"
+	"github.com/go-gl/gl/v3.3-compatibility/gl"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -19,7 +20,7 @@ const imagesDir = "images/"
 var surface = make(map[string]*sdl.Surface)
 
 type Texture struct {
-	textures, maskTextures []gl.Texture
+	textures, maskTextures []uint32
 	pixels, maskPixels     [128 * 128]uint32
 }
 
@@ -28,28 +29,32 @@ func LoadBmp(name string) *sdl.Surface {
 		return val
 	} else {
 		fileName := imagesDir + name
-		s := sdl.LoadBMP(fileName)
-		if s == nil {
-			panic(errors.New("SDLInitFailedException: Unable to load: " + fileName))
+		s, err := sdl.LoadBMP(fileName)
+		if err != nil {
+			panic(errors.New("SDLInitFailedException: Unable to load: " + fileName + " : " + err.Error()))
 		}
 		var format sdl.PixelFormat
 		format.Palette = nil
-		format.BitsPerPixels = 32
+		format.BitsPerPixel = 32
 		format.BytesPerPixel = 4
 		format.Rmask = 0x000000ff
 		format.Gmask = 0x0000ff00
 		format.Bmask = 0x00ff0000
 		format.Amask = 0xff000000
-		format.Rshift = 0
-		format.Gshift = 8
-		format.Bshift = 16
-		format.Ashift = 24
-		format.Rloss = 0
+		format.Rmask = 0
+		format.Rmask = 8
+		format.Rmask = 16
+		format.Rmask = 24
+		/* format.Rloss = 0
 		format.Gloss = 0
 		format.Bloss = 0
 		format.Aloss = 0
+		*/
 		/* format.Alpha = 0 */
-		cs := s.Convert(&format, sdl.SWSURFACE)
+		cs, err := s.Convert(&format, sdl.SWSURFACE)
+		if err != nil {
+			panic(err)
+		}
 		surface[name] = cs
 		return cs
 	}
@@ -58,11 +63,11 @@ func LoadBmp(name string) *sdl.Surface {
 func NewTextureFromBMP(name string) *Texture {
 	this := new(Texture)
 	s := LoadBmp(name)
-	this.textures = make([]gl.Texture, 1)
+	this.textures = make([]uint32, 1)
 
-	gl.GenTextures(this.textures)
+	gl.GenTextures(1, &this.textures[0])
 
-	this.textures[0].Bind(gl.TEXTURE_2D)
+	gl.BindTexture(gl.TEXTURE_2D, this.textures[0])
 	glu.Build2DMipmaps(gl.TEXTURE_2D, 4, int(s.W), int(s.H),
 		gl.RGBA, gl.UNSIGNED_BYTE, s.Pixels())
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
@@ -95,12 +100,12 @@ func NewTexture(surfacePixels []uint32, surfaceWidth int,
 	this := new(Texture)
 
 	textureNum := xn * yn
-	this.textures = make([]gl.Texture, textureNum)
-	gl.GenTextures(this.textures)
+	this.textures = make([]uint32, textureNum)
+	gl.GenTextures(int32(len(this.textures)), &this.textures[0])
 	if maskColor != 0xffffffff {
 		maskTextureNum := textureNum
-		this.maskTextures = make([]gl.Texture, maskTextureNum)
-		gl.GenTextures(this.maskTextures)
+		this.maskTextures = make([]uint32, maskTextureNum)
+		gl.GenTextures(int32(len(this.maskTextures)), &this.maskTextures[0])
 	}
 	ti := 0
 	for oy := 0; oy < yn; oy++ {
@@ -123,13 +128,13 @@ func NewTexture(surfacePixels []uint32, surfaceWidth int,
 					pi++
 				}
 			}
-			this.textures[ti].Bind(gl.TEXTURE_2D)
+			gl.BindTexture(gl.TEXTURE_2D, this.textures[ti])
 			glu.Build2DMipmaps(gl.TEXTURE_2D, 4, panelWidth, panelHeight,
 				gl.RGBA, gl.UNSIGNED_BYTE, this.pixels)
 			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
 			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 			if maskColor != 0xffffffff {
-				this.maskTextures[ti].Bind(gl.TEXTURE_2D)
+				gl.BindTexture(gl.TEXTURE_2D, this.maskTextures[ti])
 				glu.Build2DMipmaps(gl.TEXTURE_2D, 4, panelWidth, panelHeight,
 					gl.RGBA, gl.UNSIGNED_BYTE, this.maskPixels)
 				gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
@@ -142,16 +147,16 @@ func NewTexture(surfacePixels []uint32, surfaceWidth int,
 }
 
 func (t *Texture) Close() {
-	gl.DeleteTextures(t.textures)
+	gl.DeleteTextures(int32(len(t.textures)), &t.textures[0])
 	if len(t.maskTextures) != 0 {
-		gl.DeleteTextures(t.maskTextures)
+		gl.DeleteTextures(int32(len(t.maskTextures)), &t.maskTextures[0])
 	}
 }
 
 func (t *Texture) Bind(idx int /* = 0 */) {
-	t.textures[idx].Bind(gl.TEXTURE_2D)
+	gl.BindTexture(gl.TEXTURE_2D, t.textures[idx])
 }
 
 func (t *Texture) BindMask(idx int /* = 0 */) {
-	t.maskTextures[idx].Bind(gl.TEXTURE_2D)
+	gl.BindTexture(gl.TEXTURE_2D, t.maskTextures[idx])
 }

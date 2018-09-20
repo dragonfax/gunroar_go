@@ -33,7 +33,11 @@ func NewTwinStick() *TwinStick {
 
 func (this *TwinStick) openJoystick(st *sdl.Joystick /*= null*/) *sdl.Joystick {
 	if st == nil {
-		if sdl.InitSubSystem(sdl.INIT_JOYSTICK) < 0 {
+		err := sdl.InitSubSystem(sdl.INIT_JOYSTICK)
+		if err != nil {
+			panic(err)
+		}
+		if n := sdl.NumJoysticks(); n <= 0 {
 			return nil
 		}
 		this.stick = sdl.JoystickOpen(0)
@@ -49,15 +53,15 @@ func (this *TwinStick) update() {
 
 func (this *TwinStick) getState() TwinStickState {
 	if this.stick != nil {
-		this.state.left.x = adjustAxis(int(this.stick.GetAxis(0)))
-		this.state.left.y = -adjustAxis(int(this.stick.GetAxis(1)))
+		this.state.left.x = adjustAxis(int(this.stick.Axis(0)))
+		this.state.left.y = -adjustAxis(int(this.stick.Axis(1)))
 		var rx int = 0
 		if this.enableAxis5 {
-			rx = int(this.stick.GetAxis(4))
+			rx = int(this.stick.Axis(4))
 		} else {
-			rx = int(this.stick.GetAxis(2))
+			rx = int(this.stick.Axis(2))
 		}
-		var ry int = int(this.stick.GetAxis(3))
+		var ry int = int(this.stick.Axis(3))
 		if rx == 0 && ry == 0 {
 			this.state.right.x = 0
 			this.state.right.y = 0

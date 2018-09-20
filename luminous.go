@@ -7,8 +7,9 @@ package main
 
 import (
 	"image"
+	"unsafe"
 
-	"github.com/go-gl/gl"
+	"github.com/go-gl/gl/v3.3-compatibility/gl"
 )
 
 /**
@@ -21,18 +22,18 @@ const LUMINOUS_TEXTURE_WIDTH_MAX = 64
 const LUMINOUS_TEXTURE_HEIGHT_MAX = 64
 
 type LuminousScreen struct {
-	luminousTexture           gl.Texture
+	luminousTexture           uint32
 	td                        []uint8
-	luminousTextureWidth      int
-	luminousTextureHeight     int
-	screenWidth, screenHeight int
+	luminousTextureWidth      uint32
+	luminousTextureHeight     uint32
+	screenWidth, screenHeight uint32
 	luminosity                float32
 }
 
-func (ls *LuminousScreen) Init(luminosity float32, width int, height int) {
+func (ls *LuminousScreen) Init(luminosity float32, width uint32, height uint32) {
 	ls.luminousTextureWidth = LUMINOUS_TEXTURE_WIDTH_MAX
 	ls.luminousTextureHeight = LUMINOUS_TEXTURE_HEIGHT_MAX
-	ls.td = image.NewRGBA(image.Rect(0, 0, ls.luminousTextureHeight, ls.luminousTextureWidth)).Pix
+	ls.td = image.NewRGBA(image.Rect(0, 0, int(ls.luminousTextureHeight), int(ls.luminousTextureWidth))).Pix
 	ls.makeLuminousTexture()
 	ls.luminosity = luminosity
 	ls.resized(width, height)
@@ -40,30 +41,30 @@ func (ls *LuminousScreen) Init(luminosity float32, width int, height int) {
 
 func (ls *LuminousScreen) makeLuminousTexture() {
 	data := ls.td
-	ls.luminousTexture = gl.GenTexture()
-	ls.luminousTexture.Bind(gl.TEXTURE_2D)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, 4, ls.luminousTextureWidth, ls.luminousTextureHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, data)
+	gl.GenTextures(1, &ls.luminousTexture)
+	gl.BindTexture(gl.TEXTURE_2D, ls.luminousTexture)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, 4, int32(ls.luminousTextureWidth), int32(ls.luminousTextureHeight), 0, gl.RGBA, gl.UNSIGNED_BYTE, unsafe.Pointer(&data[0]))
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 }
 
-func (ls *LuminousScreen) resized(width int, height int) {
+func (ls *LuminousScreen) resized(width uint32, height uint32) {
 	ls.screenWidth = width
 	ls.screenHeight = height
 }
 
 func (ls *LuminousScreen) close() {
-	ls.luminousTexture.Delete()
+	gl.DeleteTextures(1, &ls.luminousTexture)
 }
 
 func (ls *LuminousScreen) startRender() {
-	gl.Viewport(0, 0, ls.luminousTextureWidth, ls.luminousTextureHeight)
+	gl.Viewport(0, 0, int32(ls.luminousTextureWidth), int32(ls.luminousTextureHeight))
 }
 
 func (ls *LuminousScreen) endRender() {
-	ls.luminousTexture.Bind(gl.TEXTURE_2D)
-	gl.CopyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, ls.luminousTextureWidth, ls.luminousTextureHeight, 0)
-	gl.Viewport(0, 0, ls.screenWidth, ls.screenHeight)
+	gl.BindTexture(gl.TEXTURE_2D, ls.luminousTexture)
+	gl.CopyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, int32(ls.luminousTextureWidth), int32(ls.luminousTextureHeight), 0)
+	gl.Viewport(0, 0, int32(ls.screenWidth), int32(ls.screenHeight))
 }
 
 func (ls *LuminousScreen) viewOrtho() {
@@ -89,7 +90,7 @@ const lmOfsBs = 3
 
 func (ls *LuminousScreen) draw() {
 	gl.Enable(gl.TEXTURE_2D)
-	ls.luminousTexture.Bind(gl.TEXTURE_2D)
+	gl.BindTexture(gl.TEXTURE_2D, ls.luminousTexture)
 	ls.viewOrtho()
 	gl.Color4f(1, 0.8, 0.9, ls.luminosity)
 	gl.Begin(gl.QUADS)

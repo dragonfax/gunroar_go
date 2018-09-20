@@ -6,7 +6,7 @@
 package main
 
 import (
-	"github.com/go-gl/gl"
+	"github.com/go-gl/gl/v3.3-compatibility/gl"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -50,7 +50,11 @@ func (this *GameManager) init() {
 	InitCrystalShape()
 	// InitCrystal.init()
 	// twinStick = cast(TwinStick) (cast(MultipleInputDevice) input).inputs[1]
-	twinStick.openJoystick(pad.openJoystick(nil))
+	j, err := pad.openJoystick(nil)
+	if err != nil {
+		panic(err)
+	}
+	twinStick.openJoystick(j)
 	field = NewField()
 	ship = NewShip()
 	scoreReel = NewScoreReel()

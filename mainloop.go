@@ -5,11 +5,16 @@
  */
 package main
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"runtime"
+
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 var mainLoop *MainLoop
 
 func main() {
+	runtime.LockOSThread()
 	mainLoop = NewMainLoop()
 	mainLoop.run()
 }
@@ -65,7 +70,7 @@ func (m *MainLoop) handleInput() {
 				w := e.Data1
 				h := e.Data2
 				if w > 150 && h > 100 {
-					screen.resized(int(w), int(h))
+					screen.resized(uint32(w), uint32(h))
 				}
 			}
 		}

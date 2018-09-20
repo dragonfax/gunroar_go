@@ -6,7 +6,7 @@
 package main
 
 import (
-	"github.com/go-gl/gl"
+	"github.com/go-gl/gl/v3.3-compatibility/gl"
 )
 
 var field *Field
