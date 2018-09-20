@@ -123,7 +123,7 @@ func (nr *NumReel) move() {
 }
 
 func (nr *NumReel) drawAtPos(x float32, y float32, s float32) {
-	var n int = int(Mod32(((nr.deg*10/360 + 0.99) + 1), 10))
+	n := uint32(Mod32(((nr.deg*10/360 + 0.99) + 1), 10))
 	var d float32 = Mod32(nr.deg, 360)
 	var od float32 = d - float32(n)*360/10
 	od -= 15
@@ -144,9 +144,9 @@ func (nr *NumReel) drawAtPos(x float32, y float32, s float32) {
 			a = 0
 		}
 		setScreenColor(a, a, a, 1)
-		drawLetter(int(n), 2)
+		drawLetter(n, 2)
 		setScreenColor(a/2, a/2, a/2, 1)
-		drawLetter(int(n), 3)
+		drawLetter(n, 3)
 		gl.PopMatrix()
 		n--
 		if n < 0 {

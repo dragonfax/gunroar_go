@@ -156,7 +156,7 @@ func drawNum(num int, lx float32, y float32, s float32) {
 	drawNumOption(num, lx, y, s, 0, 0, -1, -1)
 }
 
-func drawNumOption(num int, lx float32, y float32, s float32, cl int, dg int, headChar int, floatDigit int) {
+func drawNumOption(num int, lx float32, y float32, s float32, cl uint32, dg int, headChar int, floatDigit int) {
 	lx += LETTER_WIDTH * s / 2
 	y += LETTER_HEIGHT * s / 2
 	n := num
@@ -166,10 +166,10 @@ func drawNumOption(num int, lx float32, y float32, s float32, cl int, dg int, he
 	var fd int = floatDigit
 	for {
 		if fd <= 0 {
-			drawLetterOption(n%10, x, y, s, ld, cl)
+			drawLetterOption(uint32(n%10), x, y, s, ld, cl)
 			x -= s * LETTER_WIDTH
 		} else {
-			drawLetterOption(n%10, x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
+			drawLetterOption(uint32(n%10), x, y+s*LETTER_WIDTH*0.25, s*0.5, ld, cl)
 			x -= s * LETTER_WIDTH * 0.5
 		}
 		n /= 10
@@ -192,17 +192,17 @@ func drawNumSign(num int, lx float32, ly float32, s float32) {
 	drawNumSignOption(num, lx, ly, s, 0, -1, -1)
 }
 
-func drawNumSignOption(num int, lx float32, ly float32, s float32, cl int, headChar int, floatDigit int) {
+func drawNumSignOption(num int, lx float32, ly float32, s float32, cl uint32, headChar int, floatDigit int) {
 	x := lx
 	y := ly
 	n := num
 	fd := floatDigit
 	for {
 		if fd <= 0 {
-			drawLetterRev(n%10, x, y, s, 0, cl)
+			drawLetterRev(uint32(n%10), x, y, s, 0, cl)
 			x -= s * LETTER_WIDTH
 		} else {
-			drawLetterRev(n%10, x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
+			drawLetterRev(uint32(n%10), x, y-s*LETTER_WIDTH*0.25, s*0.5, 0, cl)
 			x -= s * LETTER_WIDTH * 0.5
 		}
 		n /= 10
@@ -220,7 +220,7 @@ func drawNumSignOption(num int, lx float32, ly float32, s float32, cl int, headC
 	}
 }
 
-func drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */) {
+func drawTime(time int, lx float32, y float32, s float32, cl uint32 /* default 0 */) {
 	n := time
 	if n < 0 {
 		n = 0
@@ -228,10 +228,10 @@ func drawTime(time int, lx float32, y float32, s float32, cl int /* default 0 */
 	var x float32 = lx
 	for i := 0; i < 7; i++ {
 		if i != 4 {
-			drawLetterOption(n%10, x, y, s, 0, cl)
+			drawLetterOption(uint32(n%10), x, y, s, 0, cl)
 			n /= 10
 		} else {
-			drawLetterOption(n%6, x, y, s, 0, cl)
+			drawLetterOption(uint32(n%6), x, y, s, 0, cl)
 			n /= 6
 		}
 		if (i&1) == 1 || i == 0 {
