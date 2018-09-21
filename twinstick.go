@@ -5,7 +5,11 @@
  */
 package main
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"math"
+
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 const JOYSTICK_AXIS_MAX = 32768
 
@@ -53,8 +57,8 @@ func (this *TwinStick) update() {
 
 func (this *TwinStick) getState() TwinStickState {
 	if this.stick != nil {
-		this.state.left.x = adjustAxis(this.stick.Axis(0))
-		this.state.left.y = -adjustAxis(this.stick.Axis(1))
+		this.state.left.x = adjustAxis(float32(this.stick.Axis(0)))
+		this.state.left.y = -adjustAxis(float32(this.stick.Axis(1)))
 		var rx int16 = 0
 		if this.enableAxis5 {
 			rx = this.stick.Axis(4)
@@ -62,16 +66,21 @@ func (this *TwinStick) getState() TwinStickState {
 			rx = this.stick.Axis(2)
 		}
 		ry := this.stick.Axis(3)
-		println("axis 3 was ", rx)
 		if rx == 0 && ry == 0 {
 			this.state.right.x = 0
 			this.state.right.y = 0
 		} else {
-			ry = -ry
+			if ry != math.MinInt16 {
+				ry = -ry
+			} else {
+				ry = math.MaxInt16
+			}
+			// apply any configured rotation, and reversal of joystick axis
 			var rd float32 = atan232(float32(rx), float32(ry))*this.reverse + this.rotate
 			var rl float32 = sqrt32(float32(rx)*float32(rx) + float32(ry)*float32(ry))
-			this.state.right.x = adjustAxis(int16(Sin32(rd) * rl))
-			this.state.right.y = adjustAxis(int16(Cos32(rd) * rl))
+			this.state.right.x = adjustAxis(Sin32(rd) * rl)
+			temp := adjustAxis(Cos32(rd) * rl)
+			this.state.right.y = temp
 		}
 	} else {
 		this.state.left.x = 0
@@ -106,15 +115,20 @@ func (this *TwinStick) getState() TwinStickState {
 	return this.state
 }
 
-func adjustAxis(v int16) float32 {
+/* axis defaults to 0
+ * If moved past 1/3 of range,
+ * then it becomes a ratio of the remaining range (2/3 of original range).
+ * with a max of 1
+ */
+func adjustAxis(v float32) float32 {
 	var a float32 = 0
 	if v > JOYSTICK_AXIS_MAX/3 {
-		a = (float32(v) - JOYSTICK_AXIS_MAX/3) / (JOYSTICK_AXIS_MAX - JOYSTICK_AXIS_MAX/3)
+		a = (v - JOYSTICK_AXIS_MAX/3) / (JOYSTICK_AXIS_MAX - JOYSTICK_AXIS_MAX/3)
 		if a > 1 {
 			a = 1
 		}
 	} else if v < -(JOYSTICK_AXIS_MAX / 3) {
-		a = (float32(v) + JOYSTICK_AXIS_MAX/3) / (JOYSTICK_AXIS_MAX - JOYSTICK_AXIS_MAX/3)
+		a = (v + JOYSTICK_AXIS_MAX/3) / (JOYSTICK_AXIS_MAX - JOYSTICK_AXIS_MAX/3)
 		if a < -1 {
 			a = -1
 		}
