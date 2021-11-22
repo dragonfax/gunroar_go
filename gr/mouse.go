@@ -1,15 +1,14 @@
 package main
 
+const MOUSE_SCREEN_MAPPING_RATIO_X = 26.0
+const MOUSE_SCREEN_MAPPING_RATIO_Y = 19.5
+
 /**
  * Mouse input.
  */
 type RecordableMouse struct {
-
-}: abagames.util.sdl.mouse.RecordableMouse {
- private:
-  static const float MOUSE_SCREEN_MAPPING_RATIO_X = 26.0f;
-  static const float MOUSE_SCREEN_MAPPING_RATIO_Y = 19.5f;
-  SizableScreen screen;
+  mouse.RecordableMouse
+}
 
   public this(SizableScreen screen) {
     super();
