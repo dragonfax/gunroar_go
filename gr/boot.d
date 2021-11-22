@@ -1,27 +1,6 @@
-/*
- * $Id: boot.d,v 1.6 2006/03/18 02:42:09 kenta Exp $
- *
- * Copyright 2005 Kenta Cho. Some rights reserved.
- */
-module abagames.gr.boot;
+package main
 
-private import std.string;
-private import std.stream;
-private import std.math;
-private import std.c.stdlib;
-private import abagames.util.logger;
-private import abagames.util.tokenizer;
-private import abagames.util.sdl.mainloop;
-private import abagames.util.sdl.input;
-private import abagames.util.sdl.pad;
-private import abagames.util.sdl.twinstick;
-private import abagames.util.sdl.recordableinput;
-private import abagames.util.sdl.sound;
-private import abagames.gr.screen;
-private import abagames.gr.gamemanager;
-private import abagames.gr.prefmanager;
-private import abagames.gr.ship;
-private import abagames.gr.mouse;
+// "Usage: " ~ progName ~ " [-window] [-res x y] [-brightness [0-100]] [-luminosity [0-100]] [-nosound] [-exchange] [-turnspeed [0-500]] [-firerear] [-rotatestick2 deg] [-reversestick2] [-enableaxis5] [-nowait]");
 
 /**
  * Boot the game.
@@ -105,7 +84,7 @@ public int boot(char[][] args) {
 }
 
 private void parseArgs(char[][] commandArgs) {
-  char[][] args = readOptionsIniFile();
+  char[][] args
   for (int i = 1; i < commandArgs.length; i++)
     args ~= commandArgs[i];
   char[] progName = commandArgs[0];
@@ -217,17 +196,6 @@ private void parseArgs(char[][] commandArgs) {
   }
 }
 
-private final const char[] OPTIONS_INI_FILE = "options.ini";
-
-private char[][] readOptionsIniFile() {
-  try {
-    return Tokenizer.readFile(OPTIONS_INI_FILE, " ");
-  } catch (Object e) {
-    return null;
-  }
-}
-
 private void usage(char[] progName) {
   Logger.error
-    ("Usage: " ~ progName ~ " [-window] [-res x y] [-brightness [0-100]] [-luminosity [0-100]] [-nosound] [-exchange] [-turnspeed [0-500]] [-firerear] [-rotatestick2 deg] [-reversestick2] [-enableaxis5] [-nowait]");
 }

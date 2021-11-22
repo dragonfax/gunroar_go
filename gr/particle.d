@@ -72,7 +72,7 @@ public class Spark: LuminousActor {
 
   public override void move() {
     cnt--;
-    if (cnt <= 0 || vel.dist() < 0.005f) {
+    if (cnt <= 0 || vel.dist(0,0) < 0.005f) {
       exists = false;
       return;
     }
@@ -673,7 +673,7 @@ public class Wake: Actor {
 
   public override void move() {
     cnt--;
-    if (cnt <= 0 || vel.dist() < 0.005f || !field.checkInOuterField(pos.x, pos.y)) {
+    if (cnt <= 0 || vel.dist(0,0) < 0.005f || !field.checkInOuterField(pos.x, pos.y)) {
       exists = false;
       return;
     }
