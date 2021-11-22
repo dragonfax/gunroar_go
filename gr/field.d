@@ -463,19 +463,19 @@ public class Field {
   }
 
   public bool checkInField(Vector p) {
-    return _size.contains(p);
+    return _size.contains(p, 1);
   }
 
   public bool checkInField(float x, float y) {
-    return _size.contains(x, y);
+    return _size.contains(x, y, 1);
   }
 
   public bool checkInOuterField(Vector p) {
-    return _outerSize.contains(p);
+    return _outerSize.contains(p, 1);
   }
 
   public bool checkInOuterField(float x, float y) {
-    return _outerSize.contains(x, y);
+    return _outerSize.contains(x, y, 1);
   }
 
   public bool checkInOuterHeightField(Vector p) {

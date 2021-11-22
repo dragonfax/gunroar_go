@@ -198,11 +198,11 @@ func (this *Vector) Dist(px, py float64) float64 {
   }
 }
 
-func (this *Vector) Contains(Vector p, float r = 1) bool {
-  return contains(p.x, p.y, r)
+func (this *Vector) ContainsVector(p Vector, r float64) bool {
+  return this.Contains(p.x, p.y, r)
 }
 
-func (this *Vector) Contains(float px, float py, float r = 1) bool {
+func (this *Vector) Contains(px, py, r float64) bool {
 if (px >= -x * r && px <= x * r && py >= -y * r && py <= y * r) {
     return true
 } else {
