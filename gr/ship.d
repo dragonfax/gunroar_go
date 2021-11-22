@@ -610,11 +610,11 @@ public class Boat {
     if (vx != 0 || vy != 0) {
       float ad = atan2(vx, vy);
       assert(ad <>= 0);
-      Math.normalizeDeg(ad);
+      ad = normalizeDeg(ad);
       ad -= deg;
-      Math.normalizeDeg(ad);
+      ad = normalizeDeg(ad);
       deg += ad * turnRatio * turnSpeed;
-      Math.normalizeDeg(deg);
+      deg = normalizeDeg(deg);
     }
   }
 
@@ -636,11 +636,11 @@ public class Boat {
     if (vx != 0 || vy != 0) {
       float ad = atan2(vx, vy);
       assert(ad <>= 0);
-      Math.normalizeDeg(ad);
+      ad = normalizeDeg(ad);
       ad -= deg;
-      Math.normalizeDeg(ad);
+      ad = normalizeDeg(ad);
       deg += ad * turnRatio * turnSpeed;
-      Math.normalizeDeg(deg);
+      deg = normalizeDeg(deg);
     }
   }
 
@@ -670,11 +670,11 @@ public class Boat {
     if (vx != 0 || vy != 0) {
       float ad = atan2(vx, vy);
       assert(ad <>= 0);
-      Math.normalizeDeg(ad);
+      ad = normalizeDeg(ad);
       ad -= deg;
-      Math.normalizeDeg(ad);
+      ad = normalizeDeg(ad);
       deg += ad * turnRatio * turnSpeed;
-      Math.normalizeDeg(deg);
+      deg = normalizeDeg(deg);
     }
   }
 
@@ -713,11 +713,11 @@ public class Boat {
     if (vx != 0 || vy != 0) {
       float ad = atan2(vx, vy);
       assert(ad <>= 0);
-      Math.normalizeDeg(ad);
+      ad = normalizeDeg(ad);
       ad -= deg;
-      Math.normalizeDeg(ad);
+      ad = normalizeDeg(ad);
       deg += ad * turnRatio * turnSpeed;
-      Math.normalizeDeg(deg);
+      deg = normalizeDeg(deg);
     }
   }
 

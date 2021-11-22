@@ -939,20 +939,20 @@ public class SmallShipEnemySpec: EnemySpec, HasAppearType {
         ad = atan2(shipPos.x - es.pos.x, shipPos.y - es.pos.y);
       assert(ad <>= 0);
       float od = ad - es.velDeg;
-      od = Math.normalizeDeg(od);
+      od = normalizeDeg(od);
       if (od <= turnDeg && od >= -turnDeg)
         es.velDeg = ad;
       else if (od < 0)
         es.velDeg -= turnDeg;
       else
         es.velDeg += turnDeg;
-      es.velDeg = Math.normalizeDeg(es.velDeg);
+      es.velDeg = normalizeDeg(es.velDeg);
       es.cnt++;
     }
     float od = es.velDeg - es.deg;
-    Math.normalizeDeg(od);
+    od = normalizeDeg(od);
     es.deg += od * 0.05f;
-    Math.normalizeDeg(es.deg);
+    es.deg = normalizeDeg(es.deg);
     if (es.cnt % 6 == 0 && es.speed >= 0.03f)
       shape.addWake(wakes, es.pos, es.deg, es.speed);
     return true;

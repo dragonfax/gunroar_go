@@ -108,7 +108,7 @@ public class Bullet: Actor {
     if (cnt < 30) {
       speed += (trgSpeed - speed) * 0.066f;
       float md = trgDeg - deg;
-      md = Math.normalizeDeg(md);
+      md = normalizeDeg(md);
       deg += md * 0.066f;
       if (cnt == 29) {
         speed = trgSpeed;

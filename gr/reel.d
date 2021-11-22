@@ -134,7 +134,7 @@ public class NumReel {
     float d = deg % 360;
     float od = d - n * 360 / 10;
     od -= 15;
-    Math.normalizeDeg360(od);
+    od = normalizeDeg360(od);
     od *= 1.5f;
     for (int i = 0; i < 3; i++) {
       glPushMatrix();
@@ -157,7 +157,7 @@ public class NumReel {
       if (n < 0)
         n = 9;
       od += 360 / 10 * 1.5f;
-      Math.normalizeDeg360(od);
+      od = normalizeDeg360(od);
     }
     ofs *= 0.95f;
   }

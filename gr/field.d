@@ -428,7 +428,7 @@ public class Field {
           pd -= PI / 4;
         if (b1 && !b2)
           pd += PI / 4;
-        Math.normalizeDeg(pd);
+        pd = normalizeDeg(pd);
         return pd;
       }
       d++;

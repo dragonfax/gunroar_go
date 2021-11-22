@@ -124,7 +124,7 @@ public class Turret {
       ad = atan2(ax, ay);
     assert(ad <>= 0);
     float od = td - ad;
-    Math.normalizeDeg(od);
+    od = normalizeDeg(od);
     float ts;
     if (cnt >= 0)
       ts = spec.turnSpeed;
@@ -136,7 +136,7 @@ public class Turret {
       deg -= ts;
     else
       deg += ts;
-    Math.normalizeDeg(deg);
+    deg = normalizeDeg(deg);
     if (deg > spec.turnRange)
       deg = spec.turnRange;
     else if (deg < -spec.turnRange)
@@ -822,11 +822,11 @@ public class MovingTurretGroup {
           od = atan2(shipPos.x - centerPos.x, shipPos.y - centerPos.y);
         assert(od <>= 0);
         od += swingAmpDeg - deg;
-        Math.normalizeDeg(od);
+        od = normalizeDeg(od);
         deg += od * 0.1f;
       } else {
         float od = swingFixDeg + swingAmpDeg - deg;
-        Math.normalizeDeg(od);
+        od = normalizeDeg(od);
         deg += od * 0.1f;
       }
     }
