@@ -6,6 +6,9 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+const MOUSE_SCREEN_MAPPING_RATIO_X = 26.0
+const MOUSE_SCREEN_MAPPING_RATIO_Y = 19.5
+
 var _ Input = &Mouse{}
 
 /**
@@ -14,11 +17,14 @@ var _ Input = &Mouse{}
 type Mouse struct {
 	screen SizableScreen
 	state  MouseState
+
+	record.RecordableInput // !(MouseState);
 }
 
-func New() *Mouse {
+func New(screen SizableScreen) *Mouse {
 	this := &Mouse{}
 	this.state = MouseState{}
+	this.screen = screen
 	return this
 }
 
@@ -29,7 +35,7 @@ func (this *Mouse) Init(screen SizableScreen) {
 func (this *Mouse) HandleEvent(event *sdl.Event) {
 }
 
-func (this *Mouse) GetState() MouseState {
+func (this *Mouse) GetState(doRecord bool /* = true */) MouseState {
 	mx, my, btn := sdl.GetMouseState()
 	this.state.X = float64(mx)
 	this.state.Y = float64(my)
@@ -41,10 +47,16 @@ func (this *Mouse) GetState() MouseState {
 		this.state.Button |= MouseButtonRIGHT
 	}
 	this.adjustPos(&this.state)
+	if doRecord {
+		record(this.state)
+	}
 	return this.state
 }
 
-func (this *Mouse) adjustPos(ms *MouseState) {}
+func (this *Mouse) adjustPos(ms *MouseState) {
+	ms.X = (ms.X - this.screen.Width/2) * MOUSE_SCREEN_MAPPING_RATIO_X / this.screen.Width
+	ms.Y = -(ms.Y - this.screen.Height/2) * MOUSE_SCREEN_MAPPING_RATIO_Y / this.screen.Height
+}
 
 func (this *Mouse) GetNullState() MouseState {
 	this.state.Clear()

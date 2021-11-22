@@ -86,7 +86,7 @@ public class RecordableMouseAndPad {
     if (rm)
       state.mouseState = rm.getState(false);
     else
-      state.mouseState = mouse.getState();
+      state.mouseState = mouse.getState(true);
     RecordablePad rp = cast(RecordablePad) pad;
     if (rp)
       state.padState = rp.getState(false);

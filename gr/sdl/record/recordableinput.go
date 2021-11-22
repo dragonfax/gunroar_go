@@ -1,12 +1,4 @@
-/*
- * $Id: recordableinput.d,v 1.1.1.1 2005/06/18 00:46:00 kenta Exp $
- *
- * Copyright 2005 Kenta Cho. Some rights reserved.
- */
-module abagames.util.sdl.recordableinput;
-
-private import std.stream;
-private import abagames.util.iterator;
+package record
 
 /**
  * Record an input for a replay.
@@ -38,11 +30,6 @@ public template RecordableInput(T) {
   }
 }
 
-public class NoRecordDataException: Exception {
-  public this(char[] msg) {
-    super(msg);
-  }
-}
 
 public class InputRecord(T) {
  private:
