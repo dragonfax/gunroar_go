@@ -3,6 +3,7 @@ package sdl
 import (
 	. "github.com/dragonfax/gunroar/gr/sdl"
 	"github.com/dragonfax/gunroar/gr/sdl/file"
+	"github.com/dragonfax/gunroar/gr/sdl/record"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -17,8 +18,6 @@ var _ Input = &Mouse{}
 type Mouse struct {
 	screen SizableScreen
 	state  MouseState
-
-	record.RecordableInput // !(MouseState);
 }
 
 func New(screen SizableScreen) *Mouse {
@@ -91,4 +90,17 @@ func (this *MouseState) Write(fd file.File) {
 
 func (this MouseState) Equals(s MouseState) bool {
 	return this.X == s.X && this.Y == s.Y && this.Button == s.Button
+}
+
+type RecordableMouse struct {
+	Mouse
+	record.RecordableInput
+}
+
+func (this *RecordableMouse) GetState(doRecord bool /* = true */) MouseState {
+	var s = this.GetState()
+	if doRecord {
+		this.record(s)
+	}
+	return s
 }
