@@ -1,8 +1,0 @@
-{
-    "gopls": {
-		"staticcheck": true,
-		"analyses": {
-			"ST1006": false
-		}
-	}
-}

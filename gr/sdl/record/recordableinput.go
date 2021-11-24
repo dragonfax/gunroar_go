@@ -3,10 +3,10 @@ package record
 import "github.com/dragonfax/gunroar/gr/sdl/file"
 
 type InputState interface {
-	read(file.File)
-	write(file.File)
+	Read(file.File)
+	Write(file.File)
 	Equals(InputState) bool
-	set(InputState)
+	Set(InputState)
 }
 
 /**
@@ -22,7 +22,7 @@ func (this *RecordableInput) startRecord() {
 	this.inputRecord.clear()
 }
 
-func (this *RecordableInput) record(d InputState) {
+func (this *RecordableInput) Record(d InputState) {
 	this.inputRecord.add(d)
 }
 
@@ -61,7 +61,7 @@ func New(constructor InputStateConstructor) *InputRecord {
 	return this
 }
 
-func (this *InputRecord) clear() {
+func (this *InputRecord) clear() { //lint:ignore ST1006
 	this.record = make([]Record, 0)
 }
 
@@ -92,7 +92,7 @@ func (this *InputRecord) next() InputState {
 	if this.series <= 0 {
 		this.series = this.record[this.idx].series
 	}
-	this.replayData.set(this.record[this.idx].data)
+	this.replayData.Set(this.record[this.idx].data)
 	this.series--
 	if this.series <= 0 {
 		this.idx++
@@ -104,7 +104,7 @@ func (this *InputRecord) save(fd file.File) {
 	fd.WriteInt(len(this.record))
 	for _, r := range this.record {
 		fd.WriteInt(r.series)
-		r.data.write(fd)
+		r.data.Write(fd)
 	}
 }
 
@@ -114,7 +114,7 @@ func (this *InputRecord) load(fd file.File) {
 	for i := 0; i < l; i++ {
 		s := fd.ReadInt()
 		d := this.stateConstructor(nil)
-		d.read(fd)
+		d.Read(fd)
 		var r Record
 		r.series = s
 		r.data = d

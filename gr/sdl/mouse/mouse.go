@@ -20,10 +20,9 @@ type Mouse struct {
 	state  MouseState
 }
 
-func New(screen SizableScreen) *Mouse {
+func New() *Mouse {
 	this := &Mouse{}
 	this.state = MouseState{}
-	this.screen = screen
 	return this
 }
 
@@ -34,7 +33,7 @@ func (this *Mouse) Init(screen SizableScreen) {
 func (this *Mouse) HandleEvent(event *sdl.Event) {
 }
 
-func (this *Mouse) GetState(doRecord bool /* = true */) MouseState {
+func (this *Mouse) GetState() *MouseState {
 	mx, my, btn := sdl.GetMouseState()
 	this.state.X = float64(mx)
 	this.state.Y = float64(my)
@@ -46,15 +45,11 @@ func (this *Mouse) GetState(doRecord bool /* = true */) MouseState {
 		this.state.Button |= MouseButtonRIGHT
 	}
 	this.adjustPos(&this.state)
-	if doRecord {
-		record(this.state)
-	}
-	return this.state
+	stateCopy := this.state
+	return &stateCopy
 }
 
 func (this *Mouse) adjustPos(ms *MouseState) {
-	ms.X = (ms.X - this.screen.Width/2) * MOUSE_SCREEN_MAPPING_RATIO_X / this.screen.Width
-	ms.Y = -(ms.Y - this.screen.Height/2) * MOUSE_SCREEN_MAPPING_RATIO_Y / this.screen.Height
 }
 
 func (this *Mouse) GetNullState() MouseState {
@@ -70,6 +65,22 @@ const MouseButtonRIGHT MouseButton = 2
 type MouseState struct {
 	X, Y   float64
 	Button MouseButton
+}
+
+func NewMouseState(s *MouseState) *MouseState {
+	this := &MouseState{}
+	this.Set(s)
+	return this
+}
+
+func (this *MouseState) Set(s record.InputState) {
+	ms, ok := s.(*MouseState)
+	if !ok {
+		panic("wrong state type given to MouseState")
+	}
+	this.X = ms.X
+	this.Y = ms.Y
+	this.Button = ms.Button
 }
 
 func (this *MouseState) Clear() {
@@ -88,8 +99,12 @@ func (this *MouseState) Write(fd file.File) {
 	fd.WriteInt(int(this.Button))
 }
 
-func (this MouseState) Equals(s MouseState) bool {
-	return this.X == s.X && this.Y == s.Y && this.Button == s.Button
+func (this MouseState) Equals(s record.InputState) bool {
+	ms, ok := s.(*MouseState)
+	if !ok {
+		return false
+	}
+	return this.X == ms.X && this.Y == ms.Y && this.Button == ms.Button
 }
 
 type RecordableMouse struct {
@@ -97,10 +112,10 @@ type RecordableMouse struct {
 	record.RecordableInput
 }
 
-func (this *RecordableMouse) GetState(doRecord bool /* = true */) MouseState {
+func (this *RecordableMouse) GetStateWithRecord(doRecord bool /* = true */) *MouseState {
 	var s = this.GetState()
 	if doRecord {
-		this.record(s)
+		this.Record(s)
 	}
 	return s
 }
