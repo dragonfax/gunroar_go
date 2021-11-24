@@ -1,4 +1,4 @@
-package sdl
+package screen
 
 /**
  * SDL screen handler interface.

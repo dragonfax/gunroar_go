@@ -1,4 +1,4 @@
-package sdl
+package mouse
 
 import (
 	. "github.com/dragonfax/gunroar/gr/sdl"
@@ -16,18 +16,13 @@ var _ Input = &Mouse{}
  * Mouse input.
  */
 type Mouse struct {
-	screen SizableScreen
-	state  MouseState
+	state MouseState
 }
 
 func New() *Mouse {
 	this := &Mouse{}
 	this.state = MouseState{}
 	return this
-}
-
-func (this *Mouse) Init(screen SizableScreen) {
-	this.screen = screen
 }
 
 func (this *Mouse) HandleEvent(event *sdl.Event) {
@@ -108,8 +103,13 @@ func (this MouseState) Equals(s record.InputState) bool {
 }
 
 type RecordableMouse struct {
-	Mouse
+	*Mouse
 	record.RecordableInput
+}
+
+func NewRecordableMouse() *RecordableMouse {
+	this := &RecordableMouse{Mouse: New()}
+	return this
 }
 
 func (this *RecordableMouse) GetStateWithRecord(doRecord bool /* = true */) *MouseState {
