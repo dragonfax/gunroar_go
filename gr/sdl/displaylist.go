@@ -21,8 +21,8 @@ func NewDisplayList(num int) *DisplayList {
 }
 
 func (this *DisplayList) beginNewList() {
-	this.resetList()
-	this.newList()
+	this.ResetList()
+	this.NewList()
 }
 
 func (this *DisplayList) nextNewList() {
@@ -39,25 +39,25 @@ func (this *DisplayList) endNewList() {
 	this.registered = true
 }
 
-func (this *DisplayList) resetList() {
+func (this *DisplayList) ResetList() {
 	this.enumIdx = this.idx
 }
 
-func (this *DisplayList) newList() {
+func (this *DisplayList) NewList() {
 	gl.NewList(this.enumIdx, gl.COMPILE)
 }
 
-func (this *DisplayList) endList() {
+func (this *DisplayList) EndList() {
 	gl.EndList()
 	this.enumIdx++
 	this.registered = true
 }
 
-func (this *DisplayList) call(i int /* = 0 */) {
+func (this *DisplayList) Call(i int /* = 0 */) {
 	gl.CallList(this.idx + i)
 }
 
-func (this *DisplayList) close() {
+func (this *DisplayList) Close() {
 	if !this.registered {
 		return
 	}

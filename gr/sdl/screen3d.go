@@ -151,7 +151,7 @@ func glTranslate3(v vector.Vector3) {
 	gl.Translatef(v.X, v.Y, v.Z)
 }
 
-func setColor(r, g, b, a float64 /* = 1 */) {
+func SetColor(r, g, b, a float64 /* = 1 */) {
 	gl.Color4f(r*_brightness, g*_brightness, b*_brightness, a)
 }
 

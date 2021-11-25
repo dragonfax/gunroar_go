@@ -149,9 +149,9 @@ public class NumReel {
       if (a < 0)
         a = 0;
       Screen.setColor(a, a, a);
-      Letter.drawLetter(n, 2);
+      Letter.drawLetterAsIs(n, 2);
       Screen.setColor(a / 2, a / 2, a / 2);
-      Letter.drawLetter(n, 3);
+      Letter.drawLetterAsIs(n, 3);
       glPopMatrix();
       n--;
       if (n < 0)
