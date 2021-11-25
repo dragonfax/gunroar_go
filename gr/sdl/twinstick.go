@@ -47,7 +47,7 @@ func (this *TwinStick) openJoystick(st *sdl.Joystick) *sdl.Joystick {
 	return stick
 }
 
-func (this *TwinStick) handleEvent(event *sdl.Event) {
+func (this *TwinStick) HandleEvent(event *sdl.Event) {
 	this.keys = sdl.GetKeyboardState()
 }
 
@@ -67,10 +67,10 @@ func (this *TwinStick) getState() TwinStickState {
 			this.state.right.Y = 0
 		} else {
 			ry = -ry
-			rd := math.Atan2(rx, ry)*this.reverse + this.rotate
-			rl := math.Sqrt(rx*rx + ry*ry)
-			this.state.right.X = this.adjustAxis((math.Sin(rd) * rl))
-			this.state.right.Y = this.adjustAxis((math.Cos(rd) * rl))
+			rd := math.Atan2(float64(rx), float64(ry))*this.reverse + this.rotate
+			rl := math.Sqrt(float64(rx*rx + ry*ry))
+			this.state.right.X = this.adjustAxis(int16(math.Sin(rd) * rl))
+			this.state.right.Y = this.adjustAxis(int16(math.Cos(rd) * rl))
 		}
 	} else {
 		this.state.left.X = 0
@@ -106,7 +106,7 @@ func (this *TwinStick) getState() TwinStickState {
 }
 
 func (this *TwinStick) adjustAxis(v int16) float64 {
-	a := 0.0
+	var a int16
 	if v > JOYSTICK_AXIS_MAX/3 {
 		a = (v - JOYSTICK_AXIS_MAX/3) /
 			(JOYSTICK_AXIS_MAX - JOYSTICK_AXIS_MAX/3)
@@ -120,7 +120,7 @@ func (this *TwinStick) adjustAxis(v int16) float64 {
 			a = -1
 		}
 	}
-	return a
+	return float64(a)
 }
 
 func (this *TwinStick) getNullState() TwinStickState {
