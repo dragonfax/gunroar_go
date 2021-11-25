@@ -120,7 +120,7 @@ func (this *TwinStick) adjustAxis(v int16) float64 {
 			a = -1
 		}
 	}
-	return float64(a)
+	return float64(a) // TODO its possible float cast shoudl be deeper in this funcdtion,to avoid precision loss.
 }
 
 func (this *TwinStick) getNullState() TwinStickState {
