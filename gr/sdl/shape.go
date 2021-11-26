@@ -30,7 +30,12 @@ type CollidableImpl struct {
 }
 
 func NewCollidable(child HasCollision) *CollidableImpl {
-	return &CollidableImpl{Child: child}
+	this := NewCollidableInternal(child)
+	return &this
+}
+
+func NewCollidableInternal(child HasCollision) CollidableImpl {
+	return CollidableImpl{Child: child}
 }
 
 func (this *CollidableImpl) CheckCollision(ax, ay float64, shape Collidable /* = null */) bool {
@@ -60,7 +65,11 @@ type DrawableShape struct {
 }
 
 func NewDrawableShape(child HasCreateDisplayList) *DrawableShape {
-	this := &DrawableShape{}
+	this := NewDrawableShapeInternal(child)
+	return &this
+}
+func NewDrawableShapeInternal(child HasCreateDisplayList) DrawableShape {
+	this := DrawableShape{}
 	this.displayList = NewDisplayList(1)
 	this.displayList.beginNewList()
 	child.CreateDisplayList(this.displayList)
