@@ -34,6 +34,10 @@ const (
 	TURRET_DESTROYED
 )
 
+type ShapeI interface {
+	Draw()
+}
+
 /**
  * Shape of a ship/platform/turret/bridge.
  */
@@ -56,6 +60,10 @@ func SetRandSeed(seed int64) {
 	rand = r.New(r.NewSource(seed))
 }
 
+func NewBaseShape(size, distRatio, spinyRatio float64, typ ShapeType, r, g, b float64) *BaseShape {
+	this := NewBaseShapeInternal(size, distRatio, spinyRatio, typ, r, g, b)
+	return &this
+}
 func NewBaseShapeInternal(size, distRatio, spinyRatio float64, typ ShapeType, r, g, b float64) BaseShape {
 	this := BaseShape{
 		size:       size,
@@ -282,6 +290,11 @@ type CollidableBaseShape struct {
 	sdl.CollidableImpl
 
 	_collision vector.Vector
+}
+
+func NewCollidableBaseShape(size, distRatio, spinyRatio float64, typ ShapeType, r, g, b float64) *CollidableBaseShape {
+	this := NewCollidableBaseShapeInternal(size, distRatio, spinyRatio, typ, r, g, b)
+	return &this
 }
 
 func NewCollidableBaseShapeInternal(size, distRatio, spinyRatio float64, typ ShapeType, r, g, b float64) CollidableBaseShape {

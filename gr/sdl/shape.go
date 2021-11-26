@@ -54,7 +54,7 @@ func (this *CollidableImpl) CheckCollision(ax, ay float64, shape Collidable /* =
 }
 
 type HasCreateDisplayList interface {
-	CreateDisplayList(*DisplayList)
+	CreateDisplayList()
 }
 
 /**
@@ -72,7 +72,7 @@ func NewDrawableShapeInternal(child HasCreateDisplayList) DrawableShape {
 	this := DrawableShape{}
 	this.displayList = NewDisplayList(1)
 	this.displayList.beginNewList()
-	child.CreateDisplayList(this.displayList)
+	child.CreateDisplayList()
 	this.displayList.endNewList()
 	return this
 }
@@ -81,7 +81,7 @@ func (this *DrawableShape) Close() {
 	this.displayList.Close()
 }
 
-func (this *DrawableShape) draw() {
+func (this *DrawableShape) Draw() {
 	this.displayList.Call(0)
 }
 
@@ -129,6 +129,12 @@ type ResizableDrawable struct {
 	_shape     Drawable
 	_size      float64
 	_collision vector.Vector
+}
+
+func NewResizableDrawableInternal() ResizableDrawable {
+	this := ResizableDrawable{}
+	this.CollidableImpl = NewCollidableInternal(&this)
+	return this
 }
 
 func (this *ResizableDrawable) Draw() {
