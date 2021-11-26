@@ -111,82 +111,82 @@ public class BulletShape: ResizableDrawable {
 
 public class NormalBulletShape: DrawableShape {
   public override void createDisplayList() {
-    glDisable(GL_BLEND);
+    gl.Disable(gl.BLEND);
     Screen.setColor(1, 1, 0.3);
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(0.2, -0.25, 0.2);
-    glVertex3f(0, 0.33, 0);
-    glVertex3f(-0.2, -0.25, -0.2);
-    glEnd();
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(-0.2, -0.25, 0.2);
-    glVertex3f(0, 0.33, 0);
-    glVertex3f(0.2, -0.25, -0.2);
-    glEnd();
-    glEnable(GL_BLEND);
+    gl.Begin(gl.LINE_STRIP);
+    gl.Vertex3f(0.2, -0.25, 0.2);
+    gl.Vertex3f(0, 0.33, 0);
+    gl.Vertex3f(-0.2, -0.25, -0.2);
+    gl.End();
+    gl.Begin(gl.LINE_STRIP);
+    gl.Vertex3f(-0.2, -0.25, 0.2);
+    gl.Vertex3f(0, 0.33, 0);
+    gl.Vertex3f(0.2, -0.25, -0.2);
+    gl.End();
+    gl.Enable(gl.BLEND);
     Screen.setColor(0.5, 0.2, 0.1);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(0, 0.33, 0);
-    glVertex3f(0.2, -0.25, 0.2);
-    glVertex3f(-0.2, -0.25, 0.2);
-    glVertex3f(-0.2, -0.25, -0.2);
-    glVertex3f(0.2, -0.25, -0.2);
-    glVertex3f(0.2, -0.25, 0.2);
-    glEnd();
+    gl.Begin(gl.TRIANGLE_FAN);
+    gl.Vertex3f(0, 0.33, 0);
+    gl.Vertex3f(0.2, -0.25, 0.2);
+    gl.Vertex3f(-0.2, -0.25, 0.2);
+    gl.Vertex3f(-0.2, -0.25, -0.2);
+    gl.Vertex3f(0.2, -0.25, -0.2);
+    gl.Vertex3f(0.2, -0.25, 0.2);
+    gl.End();
   }
 }
 
 public class SmallBulletShape: DrawableShape {
   public override void createDisplayList() {
-    glDisable(GL_BLEND);
+    gl.Disable(gl.BLEND);
     Screen.setColor(0.6, 0.9, 0.3);
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(0.25, -0.25, 0.25);
-    glVertex3f(0, 0.33, 0);
-    glVertex3f(-0.25, -0.25, -0.25);
-    glEnd();
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(-0.25, -0.25, 0.25);
-    glVertex3f(0, 0.33, 0);
-    glVertex3f(0.25, -0.25, -0.25);
-    glEnd();
-    glEnable(GL_BLEND);
+    gl.Begin(gl.LINE_STRIP);
+    gl.Vertex3f(0.25, -0.25, 0.25);
+    gl.Vertex3f(0, 0.33, 0);
+    gl.Vertex3f(-0.25, -0.25, -0.25);
+    gl.End();
+    gl.Begin(gl.LINE_STRIP);
+    gl.Vertex3f(-0.25, -0.25, 0.25);
+    gl.Vertex3f(0, 0.33, 0);
+    gl.Vertex3f(0.25, -0.25, -0.25);
+    gl.End();
+    gl.Enable(gl.BLEND);
     Screen.setColor(0.2, 0.4, 0.1);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(0, 0.33, 0);
-    glVertex3f(0.25, -0.25, 0.25);
-    glVertex3f(-0.25, -0.25, 0.25);
-    glVertex3f(-0.25, -0.25, -0.25);
-    glVertex3f(0.25, -0.25, -0.25);
-    glVertex3f(0.25, -0.25, 0.25);
-    glEnd();
+    gl.Begin(gl.TRIANGLE_FAN);
+    gl.Vertex3f(0, 0.33, 0);
+    gl.Vertex3f(0.25, -0.25, 0.25);
+    gl.Vertex3f(-0.25, -0.25, 0.25);
+    gl.Vertex3f(-0.25, -0.25, -0.25);
+    gl.Vertex3f(0.25, -0.25, -0.25);
+    gl.Vertex3f(0.25, -0.25, 0.25);
+    gl.End();
   }
 }
 
 public class MovingTurretBulletShape: DrawableShape {
   public override void createDisplayList() {
-    glDisable(GL_BLEND);
+    gl.Disable(gl.BLEND);
     Screen.setColor(0.7, 0.5, 0.9);
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(0.25, -0.25, 0.25);
-    glVertex3f(0, 0.33, 0);
-    glVertex3f(-0.25, -0.25, -0.25);
-    glEnd();
-    glBegin(GL_LINE_STRIP);
-    glVertex3f(-0.25, -0.25, 0.25);
-    glVertex3f(0, 0.33, 0);
-    glVertex3f(0.25, -0.25, -0.25);
-    glEnd();
-    glEnable(GL_BLEND);
+    gl.Begin(gl.LINE_STRIP);
+    gl.Vertex3f(0.25, -0.25, 0.25);
+    gl.Vertex3f(0, 0.33, 0);
+    gl.Vertex3f(-0.25, -0.25, -0.25);
+    gl.End();
+    gl.Begin(gl.LINE_STRIP);
+    gl.Vertex3f(-0.25, -0.25, 0.25);
+    gl.Vertex3f(0, 0.33, 0);
+    gl.Vertex3f(0.25, -0.25, -0.25);
+    gl.End();
+    gl.Enable(gl.BLEND);
     Screen.setColor(0.2, 0.2, 0.3);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(0, 0.33, 0);
-    glVertex3f(0.25, -0.25, 0.25);
-    glVertex3f(-0.25, -0.25, 0.25);
-    glVertex3f(-0.25, -0.25, -0.25);
-    glVertex3f(0.25, -0.25, -0.25);
-    glVertex3f(0.25, -0.25, 0.25);
-    glEnd();
+    gl.Begin(gl.TRIANGLE_FAN);
+    gl.Vertex3f(0, 0.33, 0);
+    gl.Vertex3f(0.25, -0.25, 0.25);
+    gl.Vertex3f(-0.25, -0.25, 0.25);
+    gl.Vertex3f(-0.25, -0.25, -0.25);
+    gl.Vertex3f(0.25, -0.25, -0.25);
+    gl.Vertex3f(0.25, -0.25, 0.25);
+    gl.End();
   }
 }
 
@@ -196,22 +196,22 @@ public class DestructiveBulletShape: DrawableShape, Collidable {
   Vector _collision;
 
   public override void createDisplayList() {
-    glDisable(GL_BLEND);
+    gl.Disable(gl.BLEND);
     Screen.setColor(0.9, 0.9, 0.6);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(0.2, 0, 0);
-    glVertex3f(0, 0.4, 0);
-    glVertex3f(-0.2, 0, 0);
-    glVertex3f(0, -0.4, 0);
-    glEnd();
-    glEnable(GL_BLEND);
+    gl.Begin(gl.LINE_LOOP);
+    gl.Vertex3f(0.2, 0, 0);
+    gl.Vertex3f(0, 0.4, 0);
+    gl.Vertex3f(-0.2, 0, 0);
+    gl.Vertex3f(0, -0.4, 0);
+    gl.End();
+    gl.Enable(gl.BLEND);
     Screen.setColor(0.7, 0.5, 0.4);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(0.2, 0, 0);
-    glVertex3f(0, 0.4, 0);
-    glVertex3f(-0.2, 0, 0);
-    glVertex3f(0, -0.4, 0);
-    glEnd();
+    gl.Begin(gl.TRIANGLE_FAN);
+    gl.Vertex3f(0.2, 0, 0);
+    gl.Vertex3f(0, 0.4, 0);
+    gl.Vertex3f(-0.2, 0, 0);
+    gl.Vertex3f(0, -0.4, 0);
+    gl.End();
     _collision = new Vector(0.4, 0.4);
   }
 
@@ -223,34 +223,34 @@ public class DestructiveBulletShape: DrawableShape, Collidable {
 public class CrystalShape: DrawableShape {
   public override void createDisplayList() {
     Screen.setColor(0.6, 1, 0.7);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(-0.2, 0.2, 0);
-    glVertex3f(0.2, 0.2, 0);
-    glVertex3f(0.2, -0.2, 0);
-    glVertex3f(-0.2, -0.2, 0);
-    glEnd();
+    gl.Begin(gl.LINE_LOOP);
+    gl.Vertex3f(-0.2, 0.2, 0);
+    gl.Vertex3f(0.2, 0.2, 0);
+    gl.Vertex3f(0.2, -0.2, 0);
+    gl.Vertex3f(-0.2, -0.2, 0);
+    gl.End();
   }
 }
 
 public class ShieldShape: DrawableShape {
   public override void createDisplayList() {
     Screen.setColor(0.5, 0.5, 0.7);
-    glBegin(GL_LINE_LOOP);
+    gl.Begin(gl.LINE_LOOP);
     float d = 0;
     for (int i = 0; i < 8; i++) {
-      glVertex3f(sin(d), cos(d), 0);
+      gl.Vertex3f(sin(d), cos(d), 0);
       d += PI / 4;
     }
-    glEnd();
-    glBegin(GL_TRIANGLE_FAN);
+    gl.End();
+    gl.Begin(gl.TRIANGLE_FAN);
     Screen.setColor(0, 0, 0);
-    glVertex3f(0, 0, 0);
+    gl.Vertex3f(0, 0, 0);
     d = 0;
     Screen.setColor(0.3, 0.3, 0.5);
     for (int i = 0; i < 9; i++) {
-      glVertex3f(sin(d), cos(d), 0);
+      gl.Vertex3f(sin(d), cos(d), 0);
       d += PI / 4;
     }
-    glEnd();
+    gl.End();
   }
 }
