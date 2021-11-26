@@ -1,16 +1,24 @@
-public class TurretShape: ResizableDrawable {
- public:
-  static enum TurretShapeType {
-    NORMAL, DAMAGED, DESTROYED,
-  };
- private:
-  static BaseShape[] shapes;
+package main
 
-  public static void init() {
-    shapes ~= new CollidableBaseShape(1, 0, 0, BaseShape.ShapeType.TURRET, 1, 0.8f, 0.8f);
-    shapes ~= new BaseShape(1, 0, 0, BaseShape.ShapeType.TURRET_DAMAGED, 0.9f, 0.9f, 1);
-    shapes ~= new BaseShape(1, 0, 0, BaseShape.ShapeType.TURRET_DESTROYED, 0.8f, 0.33f, 0.66f);
-  }
+type TurretShapeType int 
+
+const (
+    NORMAL TurretShapeType = iota + 1
+    DAMAGED
+    DESTROYED
+)
+
+var turretShapes []*BaseShape
+
+type TurretShape struct {
+  ResizableDrawable
+}
+
+func TurretInit() {
+  turretShapes = append(turretShapes, NewCollidableBaseShape(1, 0, 0, BaseShape.ShapeType.TURRET, 1, 0.8, 0.8));
+  turretShapes = append(turretShapes, NewBaseShape(1, 0, 0, BaseShape.ShapeType.TURRET_DAMAGED, 0.9, 0.9, 1));
+  turretShapes = append(turretShapes, NewBaseShape(1, 0, 0, BaseShape.ShapeType.TURRET_DESTROYED, 0.8, 0.33, 0.66));
+}
 
   public static void close() {
     foreach (BaseShape s; shapes)
@@ -29,13 +37,13 @@ public class EnemyShape: ResizableDrawable {
     MIDDLE, MIDDLE_DAMAGED, MIDDLE_DESTROYED, MIDDLE_BRIDGE,
     PLATFORM, PLATFORM_DAMAGED, PLATFORM_DESTROYED, PLATFORM_BRIDGE,
   };
-  static const float MIDDLE_COLOR_R = 1, MIDDLE_COLOR_G = 0.6f, MIDDLE_COLOR_B = 0.5f;
+  static const float MIDDLE_COLOR_R = 1, MIDDLE_COLOR_G = 0.6, MIDDLE_COLOR_B = 0.5;
  private:
   static BaseShape[] shapes;
 
   public static void init() {
     shapes ~= new BaseShape
-      (1, 0.5f, 0.1f, BaseShape.ShapeType.SHIP, 0.9f, 0.7f, 0.5f);
+      (1, 0.5, 0.1f, BaseShape.ShapeType.SHIP, 0.9f, 0.7f, 0.5f);
     shapes ~= new BaseShape
       (1, 0.5f, 0.1f, BaseShape.ShapeType.SHIP_DAMAGED, 0.5f, 0.5f, 0.9f);
     shapes ~= new CollidableBaseShape
