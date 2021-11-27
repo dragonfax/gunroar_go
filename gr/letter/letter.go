@@ -188,7 +188,7 @@ func drawNum(num int, lx, y, s float64,
 	}
 }
 
-func drawNumSign(num int, lx, ly, s float64, cl int, /* = 0 */
+func DrawNumSign(num int, lx, ly, s float64, cl int, /* = 0 */
 	headChar int /* = -1 */, floatDigit int /* = -1 */) {
 	x := lx
 	y := ly

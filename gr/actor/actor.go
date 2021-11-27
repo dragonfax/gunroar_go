@@ -19,7 +19,7 @@ func (this ExistImpl) Exists() bool {
   return this._exists;
 }
 
-func (this *ExistsImpl) exists(value bool) bool {
+func (this *ExistsImpl) SetExists(value bool) bool {
   this._exists = value;
   return value
 }
@@ -123,4 +123,3 @@ func NewActorPoolInternal(f createActorFunc, n int, args []interface{}) ActorPoo
     }
     this.actorIdx = 0;
   }
-}
