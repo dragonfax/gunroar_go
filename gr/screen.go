@@ -9,7 +9,7 @@ import (
 
 const CAPTION = "Gunroar"
 
-var rand *r.Rand = r.New(r.NewSource(0)) // TODO should the seed be random?
+var screenRand *r.Rand = r.New(r.NewSource(0)) // TODO should the seed be random?
 var lineWidthBase float64
 
 /**
@@ -29,7 +29,7 @@ func NewScreen() *Screen {
 	return &Screen{Screen3D: sdl.NewScreen3D()}
 }
 
-func setRandSeed(seed int64) {
+func setScreenRandSeed(seed int64) {
 	rand = r.New(r.NewSource(seed))
 }
 

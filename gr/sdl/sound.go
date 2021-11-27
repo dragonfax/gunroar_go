@@ -10,8 +10,6 @@ var noSound = false
 /**
  * Initialize and close SDL_mixer.
  */
-type SoundManager struct {
-}
 
 func SoundManagerInit() {
 	if noSound {
@@ -52,29 +50,29 @@ func close() {
  * Music / Chunk.
  */
 type Sound interface {
-	load(name string)
-	loadWithChannel(name string, ch int)
-	free()
-	play()
-	fade()
-	halt()
+	Load(name string)
+	LoadWithChannel(name string, ch int)
+	Free()
+	Play()
+	Fade()
+	Halt()
 }
 
 var _ Sound = &Music{}
 
 var fadeOutSpeed = 1280
 
-const music_dir = "sounds/musics"
+const MusicDir = "sounds/musics"
 
 type Music struct {
 	music *mix.Music
 }
 
-func (this *Music) load(name string) {
+func (this *Music) Load(name string) {
 	if noSound {
 		return
 	}
-	fileName := music_dir + "/" + name
+	fileName := MusicDir + "/" + name
 	this.music = mix.LoadMUS(fileName)
 	if this.music == nil {
 		noSound = true
@@ -83,37 +81,37 @@ func (this *Music) load(name string) {
 	}
 }
 
-func (this *Music) loadWithChannel(name string, ch int) {
-	this.load(name)
+func (this *Music) LoadWithChannel(name string, ch int) {
+	this.Load(name)
 }
 
-func (this *Music) free() {
+func (this *Music) Free() {
 	if this.music != nil {
-		this.halt()
+		this.Halt()
 		mix.FreeMusic(this.music)
 	}
 }
 
-func (this *Music) play() {
+func (this *Music) Play() {
 	if noSound {
 		return
 	}
 	mix.PlayMusic(this.music, -1)
 }
 
-func (this *Music) playOnce() {
+func (this *Music) PlayOnce() {
 	if noSound {
 		return
 	}
 	mix.PlayMusic(this.music, 1)
 }
 
-func (this *Music) fade() {
+func (this *Music) Fade() {
 	fadeMusic()
 }
 
-func (this *Music) halt() {
-	haltMusic()
+func (this *Music) Halt() {
+	HaltMusic()
 }
 
 func fadeMusic() {
@@ -123,7 +121,7 @@ func fadeMusic() {
 	mix.FadeOutMusic(fadeOutSpeed)
 }
 
-func haltMusic() {
+func HaltMusic() {
 	if noSound {
 		return
 	}
@@ -141,11 +139,11 @@ type Chunk struct {
 	chunkChannel int
 }
 
-func (this *Chunk) load(name string) {
-	this.loadWithChannel(name, 0)
+func (this *Chunk) Load(name string) {
+	this.LoadWithChannel(name, 0)
 }
 
-func (this *Chunk) loadWithChannel(name string, ch int) {
+func (this *Chunk) LoadWithChannel(name string, ch int) {
 	if noSound {
 		return
 	}
@@ -159,27 +157,27 @@ func (this *Chunk) loadWithChannel(name string, ch int) {
 	this.chunkChannel = ch
 }
 
-func (this *Chunk) free() {
+func (this *Chunk) Free() {
 	if this.chunk != nil {
-		this.halt()
+		this.Halt()
 		mix.FreeChunk(this.chunk)
 	}
 }
 
-func (this *Chunk) play() {
+func (this *Chunk) Play() {
 	if noSound {
 		return
 	}
 	mix.PlayChannel(this.chunkChannel, this.chunk, 0)
 }
 
-func (this *Chunk) halt() {
+func (this *Chunk) Halt() {
 	if noSound {
 		return
 	}
 	mix.HaltChannel(this.chunkChannel)
 }
 
-func (this *Chunk) fade() {
-	this.halt()
+func (this *Chunk) Fade() {
+	this.Halt()
 }
