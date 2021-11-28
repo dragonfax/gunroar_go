@@ -43,7 +43,7 @@ func NewActorPool(f CreateActorFunc, n int, args []interface{}) ActorPool {
 
 func NewActorPoolInternal(f CreateActorFunc, n int, args []interface{}) ActorPool {
 	this := ActorPool{
-		Actor:       nil,
+		Actor:       make([]Actor, n, 0),
 		createActor: f,
 	}
 	this.createActors(n, args)
