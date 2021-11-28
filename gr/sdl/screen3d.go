@@ -57,15 +57,15 @@ func (this *Screen3D) InitSDL() {
 		panic(err)
 	}
 
-	gl.Viewport(0, 0, this.Width(), this.Height())
+	gl.Viewport(0, 0, int32(this.Width()), int32(this.Height()))
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
-	this.resized(this._width, this._height)
+	this.Resized(this._width, this._height)
 	sdl.ShowCursor(sdl.DISABLE)
 }
 
 // Reset a viewport when the screen is resized.
 func (this *Screen3D) ScreenResized() {
-	gl.Viewport(0, 0, this._width, this._height)
+	gl.Viewport(0, 0, int32(this._width), int32(this._height))
 	gl.MatrixMode(gl.PROJECTION)
 	gl.LoadIdentity()
 	gl.Frustum(-this._nearPlane,
@@ -79,7 +79,7 @@ func (this *Screen3D) ScreenResized() {
 func (this *Screen3D) Resized(w, h int) {
 	this._width = w
 	this._height = h
-	this.screenResized()
+	this.ScreenResized()
 }
 
 func (this *Screen3D) CloseSDL() {
@@ -88,7 +88,7 @@ func (this *Screen3D) CloseSDL() {
 
 func (this *Screen3D) Flip() {
 	this.handleError()
-	gl.SwapBuffers()
+	window.GLSwap() // NOTE watch out for macos special issues.
 }
 
 func (this *Screen3D) Clear() {
@@ -101,7 +101,7 @@ func (this *Screen3D) handleError() {
 		return
 	}
 	this.CloseSDL()
-	panic("OpenGL error(" + err.Error() + ")")
+	panic("error from open gl")
 }
 
 func (this *Screen3D) SetCaption(name string) {
@@ -136,27 +136,27 @@ func (this *Screen3D) Height() int {
 }
 
 func glVertex(v vector.Vector) {
-	gl.Vertex3f(v.X, v.Y, 0)
+	gl.Vertex3d(v.X, v.Y, 0)
 }
 
 func glVertex3(v vector.Vector3) {
-	gl.Vertex3f(v.X, v.Y, v.Z)
+	gl.Vertex3d(v.X, v.Y, v.Z)
 }
 
 func glTranslate(v vector.Vector) {
-	gl.Translatef(v.X, v.Y, 0)
+	gl.Translated(v.X, v.Y, 0)
 }
 
 func glTranslate3(v vector.Vector3) {
-	gl.Translatef(v.X, v.Y, v.Z)
+	gl.Translated(v.X, v.Y, v.Z)
 }
 
 func SetColor(r, g, b, a float64 /* = 1 */) {
-	gl.Color4f(r*_brightness, g*_brightness, b*_brightness, a)
+	gl.Color4d(r*_brightness, g*_brightness, b*_brightness, a)
 }
 
 func SetClearColor(r, g, b, a float64 /* = 1 */) {
-	gl.ClearColor(r*_brightness, g*_brightness, b*_brightness, a)
+	gl.ClearColor(float32(r*_brightness), float32(g*_brightness), float32(b*_brightness), float32(a))
 }
 
 func brightness(v float64) float64 {

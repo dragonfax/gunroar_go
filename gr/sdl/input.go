@@ -13,6 +13,11 @@ type MultipleInputDevice struct {
 	Inputs []Input
 }
 
+func NewMultipleInputDevice() *MultipleInputDevice {
+	this := &MultipleInputDevice{Inputs: make([]Input, 0)}
+	return this
+}
+
 func (this *MultipleInputDevice) HandleEvent(event *sdl.Event) {
 	for _, i := range this.Inputs {
 		i.HandleEvent(event)

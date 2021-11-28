@@ -56,18 +56,18 @@ func drawLetterAsIs(n, c int) {
 
 func drawLetter(n int, x, y, s, d float64, c int) {
 	gl.PushMatrix()
-	gl.Translatef(x, y, 0)
-	gl.Scalef(s, s, s)
-	gl.Rotatef(d, 0, 0, 1)
+	gl.Translated(x, y, 0)
+	gl.Scaled(s, s, s)
+	gl.Rotated(d, 0, 0, 1)
 	displayList.Call(n + c*LETTER_NUM)
 	gl.PopMatrix()
 }
 
 func drawLetterRev(n int, x, y, s, d float64, c int) {
 	gl.PushMatrix()
-	gl.Translatef(x, y, 0)
-	gl.Scalef(s, -s, s)
-	gl.Rotatef(d, 0, 0, 1)
+	gl.Translated(x, y, 0)
+	gl.Scaled(s, -s, s)
+	gl.Rotated(d, 0, 0, 1)
 	displayList.Call(n + c*LETTER_NUM)
 	gl.PopMatrix()
 }
@@ -280,8 +280,8 @@ func setLetter(idx, c int) {
 
 func setBox(x, y, width, height, deg, r, g, b float64) {
 	gl.PushMatrix()
-	gl.Translatef(x-width/2, y-height/2, 0)
-	gl.Rotatef(deg, 0, 0, 1)
+	gl.Translated(x-width/2, y-height/2, 0)
+	gl.Rotated(deg, 0, 0, 1)
 	sdl.SetColor(r, g, b, 0.5)
 	gl.Begin(gl.TRIANGLE_FAN)
 	setBoxPart(width, height)
@@ -295,8 +295,8 @@ func setBox(x, y, width, height, deg, r, g, b float64) {
 
 func setBoxLine(x, y, width, height, deg float64) {
 	gl.PushMatrix()
-	gl.Translatef(x-width/2, y-height/2, 0)
-	gl.Rotatef(deg, 0, 0, 1)
+	gl.Translated(x-width/2, y-height/2, 0)
+	gl.Rotated(deg, 0, 0, 1)
 	gl.Begin(gl.LINE_LOOP)
 	setBoxPart(width, height)
 	gl.End()
@@ -305,8 +305,8 @@ func setBoxLine(x, y, width, height, deg float64) {
 
 func setBoxPoly(x, y, width, height, deg float64) {
 	gl.PushMatrix()
-	gl.Translatef(x-width/2, y-height/2, 0)
-	gl.Rotatef(deg, 0, 0, 1)
+	gl.Translated(x-width/2, y-height/2, 0)
+	gl.Rotated(deg, 0, 0, 1)
 	gl.Begin(gl.TRIANGLE_FAN)
 	setBoxPart(width, height)
 	gl.End()
@@ -314,12 +314,12 @@ func setBoxPoly(x, y, width, height, deg float64) {
 }
 
 func setBoxPart(width, height float64) {
-	gl.Vertex3f(-width/2, 0, 0)
-	gl.Vertex3f(-width/3*1, -height/2, 0)
-	gl.Vertex3f(width/3*1, -height/2, 0)
-	gl.Vertex3f(width/2, 0, 0)
-	gl.Vertex3f(width/3*1, height/2, 0)
-	gl.Vertex3f(-width/3*1, height/2, 0)
+	gl.Vertex3d(-width/2, 0, 0)
+	gl.Vertex3d(-width/3*1, -height/2, 0)
+	gl.Vertex3d(width/3*1, -height/2, 0)
+	gl.Vertex3d(width/2, 0, 0)
+	gl.Vertex3d(width/3*1, height/2, 0)
+	gl.Vertex3d(-width/3*1, height/2, 0)
 }
 
 var spData = [][][5]float64{{

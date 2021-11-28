@@ -7,15 +7,15 @@ import "github.com/go-gl/gl/v4.1-compatibility/gl"
  */
 type DisplayList struct {
 	registered bool
-	num        int
-	idx        int
-	enumIdx    int
+	num        uint32
+	idx        uint32
+	enumIdx    uint32
 }
 
-func NewDisplayList(num int) *DisplayList {
+func NewDisplayList(num uint32) *DisplayList {
 	this := &DisplayList{
 		num: num,
-		idx: gl.GenLists(num),
+		idx: gl.GenLists(int32(num)),
 	}
 	return this
 }
@@ -54,12 +54,12 @@ func (this *DisplayList) EndList() {
 }
 
 func (this *DisplayList) Call(i int /* = 0 */) {
-	gl.CallList(this.idx + i)
+	gl.CallList(this.idx + uint32(i))
 }
 
 func (this *DisplayList) Close() {
 	if !this.registered {
 		return
 	}
-	gl.DeleteLists(this.idx, this.num)
+	gl.DeleteLists(this.idx, int32(this.num))
 }
