@@ -1,38 +1,37 @@
 package sdl
 
-// "github.com/dragonfax/gunroar/gr/vector"
 import (
-	"github.com/go-gl/gl/v4.1-compatibility/gl"
-	"github.com/veandco/go-sdl2/sdl"
+	gl "github.com/go-gl/gl/v4.1-compatibility/gl"
+	sdl2 "github.com/veandco/go-sdl2/sdl"
 )
 
 const imagesDir = "images/"
 
-var surface = make(map[string]*sdl.Surface)
+var surface = make(map[string]*sdl2.Surface)
 
 /**
  * Manage OpenGL textures.
  */
 type Texture struct {
-	num, maskNum               int32
-	textureNum, maskTextureNum int
+	num, maskNum               uint32
+	textureNum, maskTextureNum uint32
 	pixels                     [128 * 128]uint32
 	maskPixels                 [128 * 128]uint32
 }
 
-func loadBmp(name string) *sdl.Surface {
+func loadBmp(name string) *sdl2.Surface {
 	if _, ok := surface[name]; ok {
 		return surface[name]
 	} else {
 		fileName := imagesDir + name
-		s, err := sdl.LoadBMP(fileName)
+		s, err := sdl2.LoadBMP(fileName)
 		if err != nil {
 			panic(err)
 		}
 		if s == nil {
 			panic("Unable to load: " + fileName)
 		}
-		var format sdl.PixelFormat
+		var format sdl2.PixelFormat
 		format.Palette = nil
 		format.BitsPerPixel = 32
 		format.BytesPerPixel = 4
@@ -46,7 +45,7 @@ func loadBmp(name string) *sdl.Surface {
 		format.Bshift = 16
 		format.Ashift = 24
 		*/
-		cs, err := s.Convert(&format, sdl.SWSURFACE)
+		cs, err := s.Convert(&format, sdl2.SWSURFACE)
 		if err != nil {
 			panic(err)
 		}
@@ -57,11 +56,10 @@ func loadBmp(name string) *sdl.Surface {
 
 func NewTexture(name string) *Texture {
 	this := &Texture{}
-	s := loadBmp(name)
+	// TODO s := loadBmp(name)
 	gl.GenTextures(1, &this.num)
 	gl.BindTexture(gl.TEXTURE_2D, this.num)
-	gluBuild2DMipmaps(gl.TEXTURE_2D, 4, s.W, s.H,
-		gl.RGBA, gl.UNSIGNED_BYTE, s.Pixels)
+	// TODO gluBuild2DMipmaps(gl.TEXTURE_2D, 4, s.W, s.H, gl.RGBA, gl.UNSIGNED_BYTE, s.Pixels)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	return this
@@ -69,21 +67,19 @@ func NewTexture(name string) *Texture {
 
 func NewTextureWithScale(name string, sx, sy, xn, yn, panelWidth, panelHeight int, maskColor uint32 /* = 0xffffffffu */) *Texture {
 	s := loadBmp(name)
-	surfacePixels := s.Pixels
+	surfacePixels := s.Pixels()
 	return NewTextureWithPixels(surfacePixels, s.W, sx, sy, xn, yn, panelWidth, panelHeight, maskColor)
 }
 
-func NewTextureWithPixels(surfacePixels []uint32, surfaceWidth,
-	sx, sy, xn, yn, panelWidth, panelHeight int,
-	maskColor uint32 /* = 0xffffffffu */) *Texture {
+func NewTextureWithPixels(surfacePixels []uint32, surfaceWidth, sx, sy, xn, yn, panelWidth, panelHeight int, maskColor uint32 /* = 0xffffffffu */) *Texture {
 	this := &Texture{}
 	this.textureNum = xn * yn
-	gl.GenTextures(this.textureNum, &this.num)
+	gl.GenTextures(int32(this.textureNum), &this.num)
 	if maskColor != 0xffffffff {
 		this.maskTextureNum = this.textureNum
-		gl.GenTextures(this.maskTextureNum, &this.maskNum)
+		gl.GenTextures(int32(this.maskTextureNum), &this.maskNum)
 	}
-	ti := int32(0)
+	ti := uint32(0)
 	for oy := 0; oy < yn; oy++ {
 		for ox := 0; ox < xn; ox++ {
 			pi := 0
@@ -105,14 +101,12 @@ func NewTextureWithPixels(surfacePixels []uint32, surfaceWidth,
 				}
 			}
 			gl.BindTexture(gl.TEXTURE_2D, this.num+ti)
-			gluBuild2DMipmaps(gl.TEXTURE_2D, 4, panelWidth, panelHeight,
-				gl.RGBA, gl.UNSIGNED_BYTE, this.pixels)
+			// TODO gluBuild2DMipmaps(gl.TEXTURE_2D, 4, panelWidth, panelHeight, gl.RGBA, gl.UNSIGNED_BYTE, this.pixels)
 			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
 			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 			if maskColor != 0xffffffff {
 				gl.BindTexture(gl.TEXTURE_2D, this.maskNum+ti)
-				gluBuild2DMipmaps(gl.TEXTURE_2D, 4, panelWidth, panelHeight,
-					gl.RGBA, gl.UNSIGNED_BYTE, this.maskPixels)
+				// TODO gluBuild2DMipmaps(gl.TEXTURE_2D, 4, panelWidth, panelHeight, gl.RGBA, gl.UNSIGNED_BYTE, this.maskPixels)
 				gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
 				gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 			}
@@ -123,16 +117,16 @@ func NewTextureWithPixels(surfacePixels []uint32, surfaceWidth,
 }
 
 func (this *Texture) Close() {
-	gl.DeleteTextures(this.textureNum, &this.num)
+	gl.DeleteTextures(int32(this.textureNum), &this.num)
 	if this.maskTextureNum > 0 {
-		gl.DeleteTextures(this.maskTextureNum, &this.maskNum)
+		gl.DeleteTextures(int32(this.maskTextureNum), &this.maskNum)
 	}
 }
 
 func (this *Texture) bind(idx int /* = 0 */) {
-	gl.BindTexture(gl.TEXTURE_2D, this.num+int32(idx))
+	gl.BindTexture(gl.TEXTURE_2D, this.num+uint32(idx))
 }
 
 func (this *Texture) bindMask(idx int /* = 0 */) {
-	gl.BindTexture(gl.TEXTURE_2D, this.maskNum+int32(idx))
+	gl.BindTexture(gl.TEXTURE_2D, this.maskNum+uint32(idx))
 }

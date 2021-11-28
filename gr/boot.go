@@ -4,6 +4,8 @@ import (
 	"math"
 	"os"
 	"strconv"
+
+	"github.com/dragonfax/gunroar/gr/sdl"
 )
 
 // "Usage: " ~ progName ~ " [-window] [-res x y] [-brightness [0-100]] [-luminosity [0-100]] [-nosound] [-exchange] [-turnspeed [0-500]] [-firerear] [-rotatestick2 deg] [-reversestick2] [-enableaxis5] [-nowait]");
@@ -13,36 +15,28 @@ import (
  */
 var screen Screen
 var input sdl.MultipleInputDevice
-var pad sdl.RecordablePad
 var twinStick sdl.RecordableTwinStick
 
 // RecordableMouse mouse;
-var gameManager GameManager
-var prefManager PrefManager
-var mainLoop MainLoop
+var gameManager *GameManager
+var prefManager *PrefManager
+var mainLoop *sdl.MainLoop
 
 func main() {
-	return boot(os.Args)
+	boot(os.Args)
 }
 
 func boot(args []string) {
-	screen = NewScreen
-	input = NewMultipleInputDevice
-	// pad = new RecordablePad;
+	screen = NewScreen()
+	input = NewMultipleInputDevice()
 	twinStick = sdl.NewRecordableTwinStick()
-	// mouse = new RecordableMouse(screen);
-	// input.inputs ~= pad;
-	input.inputs = append(input.inputs, twinStick)
-	// input.inputs ~= mouse;
+	input.Inputs = append(input.Inputs, twinStick)
 	gameManager = NewGameManager()
 	prefManager = NewPrefManager()
 	mainLoop = NewMainLoop(screen, input, gameManager, prefManager)
-	err := parseArgs(args)
-	if err != nil {
-		panic(err)
-	}
+	parseArgs(args)
 
-	err = mainLoop.loop()
+	err := mainLoop.loop()
 	if err != nil {
 		panic(err)
 	}
@@ -51,11 +45,11 @@ func boot(args []string) {
 
 func parseArgs(commandArgs []string) {
 	args := make([]string, len(commandArgs)-1, len(commandArgs)-1)
-	for i := 1; i < commandArgs.length; i++ {
+	for i := 1; i < len(commandArgs); i++ {
 		args[i] = commandArgs[i]
 	}
 	progName := commandArgs[0]
-	for i := 0; i < args.length; i++ {
+	for i := 0; i < len(args); i++ {
 		switch args[i] {
 		case "-brightness":
 			if i >= len(args)-1 {
