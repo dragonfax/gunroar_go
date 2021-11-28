@@ -5,6 +5,7 @@ import (
 	r "math/rand"
 	"time"
 
+	"github.com/dragonfax/gunroar/gr/actor"
 	"github.com/dragonfax/gunroar/gr/sdl"
 	"github.com/dragonfax/gunroar/gr/vector"
 	"github.com/go-gl/gl/v4.1-compatibility/gl"
@@ -14,10 +15,10 @@ import (
  * Enemy ships.
  */
 
-var _ Actor = &Enemy{}
+var _ actor.Actor = &Enemy{}
 
 type Enemy struct {
-	ExistsImpl
+	actor.ExistsImpl
 
 	spec   EnemySpec
 	_state EnemyState
@@ -28,16 +29,16 @@ func NewEnemy() *Enemy {
 	return this
 }
 
-func (this *Enemy) init(args []interface{}) {
+func (this *Enemy) Init(args []interface{}) {
 	this._state = NewEnemyState(
-		args[0].(Field), args[1].(Screen),
+		args[0].(*Field), args[1].(Screen),
 		args[2].(*BulletPool), args[3].(*Ship),
 		args[4].(*SparkPool), args[5].(*SmokePool),
 		args[6].(*FragmentPool), args[7].(*SparkFragmentPool),
 		args[8].(*NumIndicatorPool), args[9].(*ScoreReel))
 }
 
-func (this *Enemey) setEnemyPool(enemies *EnemyPool) {
+func (this *Enemy) setEnemyPool(enemies *EnemyPool) {
 	this._state.setEnemyAndPool(this, enemies)
 }
 
@@ -50,13 +51,13 @@ func (this *Enemy) set(spec EnemySpec) {
 	this.SetExists(true)
 }
 
-func (this *Enemy) move() {
-	if !this.spec.move(this.state) {
+func (this *Enemy) Move() {
+	if !this.spec.move(this.state()) {
 		this.remove()
 	}
 }
 
-func (this *Enemy) checkShotHit(p vector.Vector, shape Collidable, shot *Shot) {
+func (this *Enemy) checkShotHit(p vector.Vector, shape sdl.Collidable, shot *Shot) {
 	if this._state.destroyedCnt >= 0 {
 		return
 	}
@@ -88,7 +89,7 @@ func (this *Enemy) remove() {
 	this.SetEexists(false)
 }
 
-func (this *Enemy) draw() {
+func (this *Enemy) Draw() {
 	this.spec.draw(this._state)
 }
 
@@ -150,7 +151,7 @@ type EnemyState struct {
 	multiplier                                            float64
 	spec                                                  EnemySpec
 
-	field          Field
+	field          *Field
 	screen         Screen
 	bullets        *BulletPool
 	ship           *Ship
@@ -159,19 +160,19 @@ type EnemyState struct {
 	fragments      FragmentPool
 	sparkFragments SparkFragmentPool
 	numIndicators  NumIndicatorPool
-	enemy          Enemy
-	enemies        EnemyPool
+	enemy          *Enemy
+	enemies        *EnemyPool
 	stageManager   stageManager
 	scoreReel      ScoreReel
 }
 
-func NewEnemyState(field Field, screen Screen, bullets BulletPool, ship *Ship,
+func NewEnemyState(field *Field, screen Screen, bullets *BulletPool, ship *Ship,
 	sparks SparkPool, smokes SmokePool,
 	fragments FragmentPool, sparkFragments SparkFragmentPool,
-	numIndicators NumIndicatorPool, scoreReel ScoreReel) {
-	this := &EnemyState()
+	numIndicators NumIndicatorPool, scoreReel ScoreReel) EnemyState {
+	this := EnemyState{}
 	this.idx = idxCount
-	this.idxCount++
+	idxCount++
 	this.field = field
 	this.screen = screen
 	this.bullets = bullets
@@ -182,20 +183,20 @@ func NewEnemyState(field Field, screen Screen, bullets BulletPool, ship *Ship,
 	this.sparkFragments = sparkFragments
 	this.numIndicators = numIndicators
 	this.scoreReel = scoreReel
-	turnWay = 1
-	explodeItv = 1
-	multiplier = 1
+	this.turnWay = 1
+	this.explodeItv = 1
+	this.multiplier = 1
 	return this
 }
 
-func (this *EnemyState) setEnemyAndPool(enemy Enemy, enemies EnemyPool) {
+func (this *EnemyState) setEnemyAndPool(enemy *Enemy, enemies *EnemyPool) {
 	this.enemy = enemy
 	this.enemies = enemies
 	for i := range this.turretGroup {
 		this.turretGroup[i] = NewTurretGroup(this.field, this.bullets, this.ship, this.sparks, this.smokes, this.fragments, this.enemy)
 	}
 	for i := range this.movingTurretGroup {
-		this.turretGruop[i] = NewMovingTurretGroup(this.field, this.bullets, this.ship, this.sparks, this.smokes, this.fragments, this.enemy)
+		this.movingTurretGroup[i] = NewMovingTurretGroup(this.field, this.bullets, this.ship, this.sparks, this.smokes, this.fragments, this.enemy)
 	}
 }
 
@@ -564,15 +565,16 @@ var enemySpecRand = r.New(r.NewSource(time.Now().Unix()))
 type EnemySpec interface {
 	score() int
 	isBoss() bool
+	move(EnemyState) bool
 }
 
 type EnemySpecBase struct {
-	field                                            Field
-	ship                                             Ship
-	sparks                                           SparkPool
-	smokes                                           SmokePool
-	fragments                                        FragmentPool
-	wakes                                            WakePool
+	field                                            *Field
+	ship                                             *Ship
+	sparks                                           *SparkPool
+	smokes                                           *SmokePool
+	fragments                                        *FragmentPool
+	wakes                                            *WakePool
 	shield                                           int
 	_size, distRatio                                 float64
 	turretGroupSpec                                  [TURRET_GROUP_MAX]TurretGroupSpec
@@ -587,9 +589,9 @@ func setenemySpecRandSeed(seed int64) {
 	enemySpecRand = r.New(r.NewSource(seed))
 }
 
-func NewEnemySpecBase(field field, Ship *Ship,
-	sparks SparkPool, smokes SmokePool, fragmens FragmentPool, wakes WakePool) {
-	this := &EnemySpecBase{}
+func NewEnemySpecBase(field *Field, ship *Ship,
+	sparks *SparkPool, smokes *SmokePool, fragmens *FragmentPool, wakes *WakePool) EnemySpecBase {
+	this := EnemySpecBase{}
 	this.field = field
 	this.ship = ship
 	this.sparks = sparks
@@ -633,14 +635,14 @@ func (this *EnemySpecBase) addMovingTurret(rank float64, bossMode bool /* = fals
 		mtn = MOVING_TURRET_GROUP_MAX
 	}
 	if mtn >= 2 {
-		mtn = 1 + rand.nextInt(mtn-1)
+		mtn = 1 + rand.Intn(mtn-1)
 	} else {
 		mtn = 1
 	}
 	br := rank / mtn
 	var typ int
 	if !bossMode {
-		switch rand.nextInt(4) {
+		switch rand.Intn(4) {
 		case 0, 1:
 			typ = ROLL
 		case 2:
@@ -651,27 +653,27 @@ func (this *EnemySpecBase) addMovingTurret(rank float64, bossMode bool /* = fals
 	} else {
 		typ = MovingTurretGroupSpec.MoveType.ROLL
 	}
-	rad := 0.9 + rand.nextFloat(0.4) - mtn*0.1
-	radInc := 0.5 + rand.nextFloat(0.25)
+	rad := 0.9 + nextFloat(rand, 0.4) - mtn*0.1
+	radInc := 0.5 + nextFloat(rand, 0.25)
 	ad := math.Pi * 2
 	var a, av, dv, s, sv float64
 	switch typ {
 	case ROLL:
-		a = 0.01 + rand.nextFloat(0.04)
-		av = 0.01 + rand.nextFloat(0.03)
-		dv = 0.01 + rand.nextFloat(0.04)
+		a = 0.01 + nextFloat(rand, 0.04)
+		av = 0.01 + nextFloat(rand, 0.03)
+		dv = 0.01 + nextFloat(rand, 0.04)
 	case SWING_FIX:
-		ad = math.Pi/10 + rand.nextFloat(PI/15)
-		s = 0.01 + rand.nextFloat(0.02)
-		sv = 0.01 + rand.nextFloat(0.03)
+		ad = math.Pi/10 + nextFloat(rand, math.Pi/15)
+		s = 0.01 + nextFloat(rand, 0.02)
+		sv = 0.01 + nextFloat(rand, 0.03)
 	case SWING_AIM:
-		ad = math.Pi/10 + rand.nextFloat(PI/15)
-		if rand.nextInt(5) == 0 {
-			s = 0.01 + rand.nextFloat(0.01)
+		ad = math.Pi/10 + nextFloat(rand, math.Pi/15)
+		if rand.Intn(5) == 0 {
+			s = 0.01 + nextFloat(rand, 0.01)
 		} else {
 			s = 0
 		}
-		sv = 0.01 + rand.nextFloat(0.02)
+		sv = 0.01 + nextFloat(rand, 0.02)
 	}
 	for i := 0; i < mtn; i++ {
 		tgs := this.getMovingTurretGroupSpec()
