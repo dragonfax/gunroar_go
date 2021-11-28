@@ -221,31 +221,35 @@ func (this *EnemyState) setSpec(spec EnemySpec) {
 	this.multiplier = 1
 }
 
+func nextFloat(rand *r.Rand, n float64) float64 {
+	return rand.Float64() * n
+}
+
 func (this *EnemyState) setAppearancePos(field Field, ship *Ship, rand *r.Rand, appType int /* = AppearanceType.TOP */) bool {
 	this.appType = appType
 	for i := 0; i < 8; i++ {
 		switch appType {
 		case TOP:
-			this.pos.X = rand.nextSignedFloat(field.size.X)
+			this.pos.X = nextSignedFloat(rand, field.size.X)
 			this.pos.Y = field.outerSize.Y*0.99 + this.spec.size
 			if this.pos.X < 0 {
-				this.velDeg = math.Pi - rand.nextFloat(0.5)
-				this.deg = math.Pi - rand.nextFloat(0.5)
+				this.velDeg = math.Pi - nextFloat(rand, 0.5)
+				this.deg = math.Pi - nextFloat(rand, 0.5)
 			} else {
-				this.velDeg = math.Pi + rand.nextFloat(0.5)
-				this.deg = math.Pi + rand.nextFloat(0.5)
+				this.velDeg = math.Pi + nextFloat(rand, 0.5)
+				this.deg = math.Pi + nextFloat(rand, 0.5)
 			}
 		case SIDE:
-			if rand.nextInt(2) == 0 {
+			if rand.Intn(2) == 0 {
 				this.pos.X = -field.outerSize.X * 0.99
-				this.velDeg = math.Pi/2 + rand.nextFloat(0.66)
-				tihs.deg = this.velDeg
+				this.velDeg = math.Pi/2 + nextFloat(rand, 0.66)
+				this.deg = this.velDeg
 			} else {
 				this.pos.X = field.outerSize.X * 0.99
-				this.velDeg = -math.Pi/2 - rand.nextFloat(0.66)
+				this.velDeg = -math.Pi/2 - nextFloat(rand, 0.66)
 				this.deg = this.velDeg
 			}
-			this.pos.Y = field.size.Y + rand.nextFloat(field.size.Y) + this.spec.size
+			this.pos.Y = field.size.Y + nextFloat(rand, field.size.Y) + this.spec.size
 		case CENTER:
 			this.pos.X = 0
 			this.pos.Y = field.outerSize.Y*0.99 + this.spec.size
@@ -377,19 +381,19 @@ func (this *EnemyState) destroyed(shot *Shot /* = null */) bool {
 		sn = 3
 	}
 	for i := 0; i < sn*8; i++ {
-		s := smokes.getInstanceForced()
-		s.set(this.pos, rand.nextSignedFloat(0.1)+this.explodeVel.X, rand.nextSignedFloat(0.1)+this.explodeVel.Y,
+		s := this.smokes.getInstanceForced()
+		s.set(this.pos, nextSignedFloat(rand, 0.1)+this.explodeVel.X, nextSignedFloat(rand, 0.1)+this.explodeVel.Y,
 			rand.nextFloat(vz),
 			EXPLOSION, 32+rand.nextInt(30), ss)
 	}
 	for i := 0; i < sn*36; i++ {
 		sp := sparks.getInstanceForced()
-		sp.set(this.pos, rand.nextSignedFloat(0.8)+this.explodeVel.X, rand.nextSignedFloat(0.8)+this.explodeVel.Y,
-			0.5+rand.nextFloat(0.5), 0.5+rand.nextFloat(0.5), 0, 30+rand.nextInt(30))
+		sp.set(this.pos, nextSignedFloat(rand, 0.8)+this.explodeVel.X, nextSignedFloat(rand, 0.8)+this.explodeVel.Y,
+			0.5+nextFloat(rand, 0.5), 0.5+nextFloat(rand, 0.5), 0, 30+rand.Intn(30))
 	}
 	for i = 0; i < sn*12; i++ {
 		f := fragments.getInstanceForced()
-		f.set(this.pos, rand.nextSignedFloat(0.33)+this.explodeVel.X, rand.nextSignedFloat(0.33)+this.explodeVel.Y,
+		f.set(this.pos, nextSignedFloat(rand, 0.33)+this.explodeVel.X, nextSignedFloat(rand, 0.33)+this.explodeVel.Y,
 			0.05+rand.nextFloat(0.1),
 			0.2+rand.nextFloat(0.33))
 	}
@@ -550,9 +554,9 @@ func (this *EnemyState) draw() {
 type EnemyType int
 
 const (
-	SMALL EnemyType = iota
-	LARGE
-	PLATFORM
+	EnemySMALL EnemyType = iota
+	EnemyLARGE
+	EnemyPLATFORM
 )
 
 var enemySpecRand = r.New(r.NewSource(time.Now().Unix()))

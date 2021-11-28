@@ -9,7 +9,7 @@ import (
  * Title screen.
  */
 
-const SCROLL_SPEED_BASE = 0.025
+const TITLE_SCROLL_SPEED_BASE = 0.025
 
 type TitleManager struct {
 	prefManager PrefManager

@@ -36,9 +36,9 @@ type ActorPool struct {
 	createActor CreateActorFunc
 }
 
-func NewActorPool(f CreateActorFunc, n int, args []interface{}) *ActorPool {
+func NewActorPool(f CreateActorFunc, n int, args []interface{}) ActorPool {
 	this := NewActorPoolInternal(f, n, args)
-	return &this
+	return this
 }
 
 func NewActorPoolInternal(f CreateActorFunc, n int, args []interface{}) ActorPool {

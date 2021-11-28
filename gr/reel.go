@@ -124,30 +124,34 @@ func (this *NumReel) move() {
 	}
 }
 
+func nextSignedFloat(rand *r.Rand, n float64) float64 {
+	return rand.Float64()*n*2 - n
+}
+
 func (this *NumReel) draw(x, y, s float64) {
-	n := math.Mod(((this.deg*10/360 + 0.99) + 1), 10) // TODO this was cast to int
+	n := int((this.deg*10/360+0.99)+1) % 10
 	d := math.Mod(this.deg, 360)
-	od := d - n*360/10
+	od := d - float64(n)*360/10
 	od -= 15
 	od = normalizeDeg360(od)
 	od *= 1.5
 	for i := 0; i < 3; i++ {
 		gl.PushMatrix()
 		if this.ofs > 0.005 {
-			gl.Translatef(x+rand.nextSignedFloat(1)*this.ofs, y+rand.nextSignedFloat(1)*this.ofs, 0)
+			gl.Translated(x+nextSignedFloat(rand, 1)*this.ofs, y+nextSignedFloat(rand, 1)*this.ofs, 0)
 		} else {
-			gl.Translatef(x, y, 0)
+			gl.Translated(x, y, 0)
 		}
-		gl.Rotatef(od, 1, 0, 0)
-		gl.Translatef(0, 0, s*2.4)
-		gl.Scalef(s, -s, s)
+		gl.Rotated(od, 1, 0, 0)
+		gl.Translated(0, 0, s*2.4)
+		gl.Scaled(s, -s, s)
 		a := 1 - math.Abs((od+15)/(360/10*1.5))/2
 		if a < 0 {
 			a = 0
 		}
-		sdl.SetColor(a, a, a)
+		sdl.SetColor(a, a, a, 1)
 		letter.DrawLetterAsIs(n, 2)
-		sdl.SetColor(a/2, a/2, a/2)
+		sdl.SetColor(a/2, a/2, a/2, 1)
 		letter.DrawLetterAsIs(n, 3)
 		gl.PopMatrix()
 		n--
@@ -253,7 +257,7 @@ func NewNumIndicator() *NumIndicator {
 	return this
 }
 
-func (this *NumIndicator) init(args []interface{}) {
+func (this *NumIndicator) Init(args []interface{}) {
 	this.scoreReel = args[0].(ScoreReel)
 }
 
@@ -305,18 +309,18 @@ func (this *NumIndicator) gotoNextTarget() {
 	}
 	switch this.target[this.targetIdx].flyingTo {
 	case RIGHT:
-		this.vel.X = -0.3 + rand.nextSignedFloat(0.05)
-		this.vel.Y = rand.nextSignedFloat(0.1)
+		this.vel.X = -0.3 + nextSignedFloat(rand, 0.05)
+		this.vel.Y = nextSignedFloat(rand, 0.1)
 	case BOTTOM:
-		this.vel.X = rand.nextSignedFloat(0.1)
-		this.vel.Y = 0.3 + rand.nextSignedFloat(0.05)
+		this.vel.X = nextSignedFloat(rand, 0.1)
+		this.vel.Y = 0.3 + nextSignedFloat(rand, 0.05)
 		decTargetY()
 	}
 	this.vel.OpMulAssign(this.target[this.targetIdx].initialVelRatio)
 	this.cnt = this.target[this.targetIdx].cnt
 }
 
-func (this *NumIndicator) move() {
+func (this *NumIndicator) Move() {
 	if this.targetIdx < 0 {
 		return
 	}
@@ -361,11 +365,11 @@ func (this *NumIndicator) move() {
 	}
 }
 
-func (this *NumIndicator) draw() {
+func (this *NumIndicator) Draw() {
 	sdl.SetColor(this.alpha, this.alpha, this.alpha, 1)
 	switch this.typ {
 	case SCORE:
-		letter.DrawNumSign(this.n, this.pos.X, this.pos.Y, this.size, letter.LINE_COLOR)
+		letter.DrawNumSign(this.n, this.pos.X, this.pos.Y, this.size, letter.LINE_COLOR, -1, -1)
 	case MULTIPLIER:
 		sdl.SetColor(this.alpha, this.alpha, this.alpha, 1)
 		letter.DrawNumSign(this.n, this.pos.X, this.pos.Y, this.size, letter.LINE_COLOR, 33, 3)
@@ -377,8 +381,9 @@ type NumIndicatorPool struct {
 }
 
 func NewNumIndicatorPool(n int, args []interface{}) *NumIndicatorPool {
+	var f actor.CreateActorFunc = func() actor.Actor { return NewNumIndicator() }
 	this := &NumIndicatorPool{
-		ActorPool: actor.NewActorPool(func() actor.Actor { return NewNumIndicator() }, n, args),
+		ActorPool: actor.NewActorPool(f, n, args),
 	}
 
 	return this

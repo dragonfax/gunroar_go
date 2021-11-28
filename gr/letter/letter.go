@@ -46,7 +46,7 @@ func getHeight(s float64) float64 {
 	return s * LETTER_HEIGHT
 }
 
-func drawLetterAsIs(n, c int) {
+func DrawLetterAsIs(n, c int) {
 	displayList.Call(n + c*LETTER_NUM)
 }
 

@@ -60,25 +60,25 @@ func (this *Screen) startRenderToLuminousScreen() bool {
 	if this.luminousScreen == nil {
 		return false
 	}
-	this.luminousScreen.startRender()
+	this.luminousScreen.StartRender()
 	return true
 }
 
 func (this *Screen) endRenderToLuminousScreen() {
 	if this.luminousScreen != nil {
-		this.luminousScreen.endRender()
+		this.luminousScreen.EndRender()
 	}
 }
 
 func (this *Screen) drawLuminous() {
 	if this.luminousScreen != nil {
-		this.luminousScreen.draw()
+		this.luminousScreen.Draw()
 	}
 }
 
 func (this *Screen) resized(width, height int) {
 	if this.luminousScreen != nil {
-		this.luminousScreen.resized(width, height)
+		this.luminousScreen.Resized(width, height)
 	}
 	this.Screen3D.Resized(width, height)
 }
@@ -121,18 +121,20 @@ func viewPerspective() {
 }
 
 func (this *Screen) setEyepos() {
+	/* TODO gluLookAt
 	var ex, ey, ez float64
 	var lx, ly, lz float64
 	ez = 13.0
 	if this.screenShakeCnt > 0 {
-		mx := rand.nextSignedFloat(this.screenShakeIntense * (this.screenShakeCnt + 4))
-		my := rand.nextSignedFloat(this.screenShakeIntense * (this.screenShakeCnt + 4))
+		mx := nextSignedFloat(rand, this.screenShakeIntense*float64(this.screenShakeCnt+4))
+		my := nextSignedFloat(rand, this.screenShakeIntense*float64(this.screenShakeCnt+4))
 		ex += mx
 		ey += my
 		lx += mx
 		ly += my
 	}
-	gluLookAt(ex, ey, ez, lx, ly, lz, 0, 1, 0)
+	// TODO gluLookAt(ex, ey, ez, lx, ly, lz, 0, 1, 0)
+	*/
 }
 
 func (this *Screen) setScreenShake(cnt int, its float64) {
@@ -152,5 +154,5 @@ func (this *Screen) luminosity(v float64) float64 {
 }
 
 func setColorForced(r, g, b, a float64 /* = 1 */) {
-	gl.Color4f(r, g, b, a)
+	gl.Color4d(r, g, b, a)
 }

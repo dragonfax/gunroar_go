@@ -41,17 +41,17 @@ const (
 type EnemyShapeType int
 
 const (
-	EnemySMALL EnemyShapeType = iota
-	EnemySMALL_DAMAGED
-	EnemySMALL_BRIDGE
-	EnemyMIDDLE
-	EnemyMIDDLE_DAMAGED
-	EnemyMIDDLE_DESTROYED
-	EnemyMIDDLE_BRIDGE
-	EnemyPLATFORM
-	EnemyPLATFORM_DAMAGED
-	EnemyPLATFORM_DESTROYED
-	EnemyPLATFORM_BRIDGE
+	EnemyShapeSMALL EnemyShapeType = iota
+	EnemyShapeSMALL_DAMAGED
+	EnemyShapeSMALL_BRIDGE
+	EnemyShapeMIDDLE
+	EnemyShapeMIDDLE_DAMAGED
+	EnemyShapeMIDDLE_DESTROYED
+	EnemyShapeMIDDLE_BRIDGE
+	EnemyShapePLATFORM
+	EnemyShapePLATFORM_DAMAGED
+	EnemyShapePLATFORM_DESTROYED
+	EnemyShapePLATFORM_BRIDGE
 )
 
 var enemyShapes = []ShapeI{
@@ -290,7 +290,7 @@ func (this *ShieldShape) CreateDisplayList() {
 	gl.Begin(gl.LINE_LOOP)
 	var d float64
 	for i := 0; i < 8; i++ {
-		gl.Vertex3f(math.Sin(d), math.Cos(d), 0)
+		gl.Vertex3d(math.Sin(d), math.Cos(d), 0)
 		d += math.Pi / 4
 	}
 	gl.End()
@@ -300,7 +300,7 @@ func (this *ShieldShape) CreateDisplayList() {
 	d = 0
 	sdl.SetColor(0.3, 0.3, 0.5, 1)
 	for i := 0; i < 9; i++ {
-		gl.Vertex3f(math.Sin(d), math.Cos(d), 0)
+		gl.Vertex3d(math.Sin(d), math.Cos(d), 0)
 		d += math.Pi / 4
 	}
 	gl.End()

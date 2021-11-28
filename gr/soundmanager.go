@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	r "math/rand"
+	"path/filepath"
 	"time"
 
 	"github.com/dragonfax/gunroar/gr/sdl"
@@ -40,9 +42,12 @@ func loadSounds() {
 }
 
 func loadMusics() {
-	files := listdir(sdl.MusicDir)
+	files, err := filepath.Glob(sdl.MusicDir + "/*")
+	if err != nil {
+		panic(err)
+	}
 	for _, fileName := range files {
-		ext := getExt(fileName)
+		ext := filepath.Ext(fileName)
 		if ext != "ogg" && ext != "wav" {
 			continue
 		}
@@ -50,7 +55,7 @@ func loadMusics() {
 		music.Load(fileName)
 		bgm[fileName] = music
 		bgmFileName = append(bgmFileName, fileName)
-		Logger.info("Load bgm: " + fileName)
+		fmt.Println("Load bgm: " + fileName)
 	}
 }
 
@@ -61,7 +66,7 @@ func loadChunks() {
 		chunk.LoadWithChannel(fileName, seChannel[i])
 		se[fileName] = chunk
 		seMark[fileName] = false
-		Logger.info("Load SE: " + fileName)
+		fmt.Println("Load SE: " + fileName)
 		i++
 	}
 }
@@ -71,38 +76,38 @@ func playBgmWithName(name string) {
 	if bgmDisabled {
 		return
 	}
-	sdl.Music.HaltMusic()
+	sdl.HaltMusic()
 	bgm[name].Play()
 }
 
 func playBgm() {
-	bgmIdx := rand.nextInt(bgm.length-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
-	nextIdxMv = rand.nextInt(2)*2 - 1
+	bgmIdx := rand.Intn(len(bgm)-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
+	nextIdxMv = rand.Intn(2)*2 - 1
 	prevBgmIdx = bgmIdx
-	playBgm(bgmFileName[bgmIdx])
+	playBgmWithName(bgmFileName[bgmIdx])
 }
 
 func nextBgm() {
 	bgmIdx := prevBgmIdx + nextIdxMv
 	if bgmIdx < RANDOM_BGM_START_INDEX {
-		bgmIdx = bgm.length - 1
-	} else if bgmIdx >= bgm.length {
+		bgmIdx = len(bgm) - 1
+	} else if bgmIdx >= len(bgm) {
 		bgmIdx = RANDOM_BGM_START_INDEX
 	}
 	prevBgmIdx = bgmIdx
-	playBgm(bgmFileName[bgmIdx])
+	playBgmWithName(bgmFileName[bgmIdx])
 }
 
 func playCurrentBgm() {
-	playBgm(currentBgm)
+	playBgmWithName(currentBgm)
 }
 
 func fadeBgm() {
-	sdl.Music.fadeMusic()
+	sdl.FadeMusic()
 }
 
 func haltBgm() {
-	sdl.Music.HaltMusic()
+	sdl.HaltMusic()
 }
 
 func playSe(name string) {
@@ -115,7 +120,7 @@ func playSe(name string) {
 func playMarkedSe() {
 	for key := range seMark {
 		if seMark[key] {
-			se[key].play()
+			se[key].Play()
 			seMark[key] = false
 		}
 	}

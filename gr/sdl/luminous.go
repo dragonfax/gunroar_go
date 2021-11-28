@@ -35,7 +35,7 @@ func NewLuminousScreen() *LuminousScreen {
 func (this *LuminousScreen) Init(luminosity float64, width, height int) {
 	this.makeLuminousTexture()
 	this.luminosity = luminosity
-	this.resized(width, height)
+	this.Resized(width, height)
 }
 
 func (this *LuminousScreen) makeLuminousTexture() {
@@ -50,16 +50,16 @@ func (this *LuminousScreen) makeLuminousTexture() {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 }
 
-func (this *LuminousScreen) resized(width, height int) {
+func (this *LuminousScreen) Resized(width, height int) {
 	this.screenWidth = width
 	this.screenHeight = height
 }
 
-func (this *LuminousScreen) startRender() {
+func (this *LuminousScreen) StartRender() {
 	gl.Viewport(0, 0, int32(this.luminousTextureWidth), int32(this.luminousTextureHeight))
 }
 
-func (this *LuminousScreen) endRender() {
+func (this *LuminousScreen) EndRender() {
 	gl.BindTexture(gl.TEXTURE_2D, this.luminousTexture)
 	gl.CopyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
 		0, 0, int32(this.luminousTextureWidth), int32(this.luminousTextureHeight), 0)
@@ -83,7 +83,7 @@ func (this *LuminousScreen) viewPerspective() {
 	gl.PopMatrix()
 }
 
-func (this *LuminousScreen) draw() {
+func (this *LuminousScreen) Draw() {
 	gl.Enable(gl.TEXTURE_2D)
 	gl.BindTexture(gl.TEXTURE_2D, this.luminousTexture)
 	this.viewOrtho()

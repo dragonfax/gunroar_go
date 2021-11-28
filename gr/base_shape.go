@@ -74,7 +74,7 @@ func NewBaseShapeInternal(size, distRatio, spinyRatio float64, typ ShapeType, r,
 		g:          g,
 		b:          g,
 	}
-	this.DrawableShape = sdl.NewDrawableShapeInternal(this)
+	this.DrawableShape = sdl.NewDrawableShapeInternal(&this)
 	return this
 }
 
@@ -86,36 +86,36 @@ func (this *BaseShape) CreateDisplayList() {
 		z += height
 	}
 	if this.typ != SHIP_DESTROYED {
-		Screen.SetColor(r, g, b)
+		sdl.SetColor(this.r, this.g, this.b, 1)
 	}
 	gl.Begin(gl.LINE_LOOP)
 	if this.typ != BRIDGE {
 		this.createLoop(sz, z, false, true)
 	} else {
-		this.createSquareLoop(sz, z, false, true)
+		this.createSquareLoop(sz, z, false, 1)
 	}
 	gl.End()
 	if this.typ != SHIP_SHADOW && this.typ != SHIP_DESTROYED &&
 		this.typ != PLATFORM_DESTROYED && this.typ != TURRET_DESTROYED {
-		Screen.SetColor(r*0.4, g*0.4, b*0.4)
+		sdl.SetColor(this.r*0.4, this.g*0.4, this.b*0.4, 1)
 		gl.Begin(gl.TRIANGLE_FAN)
-		this.createLoop(sz, z, true)
+		this.createLoop(sz, z, true, false)
 		gl.End()
 	}
 	switch this.typ {
 	case SHIP, SHIP_ROUNDTAIL, SHIP_SHADOW, SHIP_DAMAGED, SHIP_DESTROYED:
 		if this.typ != SHIP_DESTROYED {
-			Screen.SetColor(r*0.4, g*0.4, b*0.4)
+			sdl.SetColor(this.r*0.4, this.g*0.4, this.b*0.4, 1)
 		}
 		for i := 0; i < 3; i++ {
 			z -= height / 4
 			sz -= 0.2
 			gl.Begin(gl.LINE_LOOP)
-			this.createLoop(sz, z)
+			this.createLoop(sz, z, false, false)
 			gl.End()
 		}
 	case PLATFORM, PLATFORM_DAMAGED, PLATFORM_DESTROYED:
-		Screen.SetColor(r*0.4, g*0.4, b*0.4)
+		sdl.SetColor(this.r*0.4, this.g*0.4, this.b*0.4, 1)
 		for i := 0; i < 3; i++ {
 			z -= height / 3
 			for _, pp := range this.pillarPos {
@@ -125,20 +125,20 @@ func (this *BaseShape) CreateDisplayList() {
 			}
 		}
 	case BRIDGE, TURRET, TURRET_DAMAGED:
-		Screen.SetColor(r*0.6, g*0.6, b*0.6)
+		sdl.SetColor(this.r*0.6, this.g*0.6, this.b*0.6, 1)
 		z += height
 		sz -= 0.33
 		gl.Begin(gl.LINE_LOOP)
 		if this.typ == BRIDGE {
-			this.createSquareLoop(sz, z)
+			this.createSquareLoop(sz, z, false, 1)
 		} else {
 			this.createSquareLoop(sz, z/2, false, 3)
 		}
 		gl.End()
-		Screen.SetColor(r*0.25, g*0.25, b*0.25)
+		sdl.SetColor(this.r*0.25, this.g*0.25, this.b*0.25, 1)
 		gl.Begin(gl.TRIANGLE_FAN)
 		if this.typ == BRIDGE {
-			this.createSquareLoop(sz, z, true)
+			this.createSquareLoop(sz, z, true, 1)
 		} else {
 			this.createSquareLoop(sz, z/2, true, 3)
 		}
@@ -148,7 +148,7 @@ func (this *BaseShape) CreateDisplayList() {
 
 func (this *BaseShape) createLoop(s, z float64, backToFirst bool /* = false */, record bool /* = false */) {
 	var d float64
-	var pn int
+	// var pn int
 	firstPoint := true
 	var fpx, fpy float64
 	for i := 0; i < POINT_NUM; i++ {
@@ -180,7 +180,7 @@ func (this *BaseShape) createLoop(s, z float64, backToFirst bool /* = false */, 
 		sy *= this.size * s
 		px := cx*(1-this.spinyRatio) + sx*this.spinyRatio
 		py := cy*(1-this.spinyRatio) + sy*this.spinyRatio
-		gl.Vertex3f(px, py, z)
+		gl.Vertex3d(px, py, z)
 		if backToFirst && firstPoint {
 			fpx = px
 			fpy = py
@@ -196,7 +196,7 @@ func (this *BaseShape) createLoop(s, z float64, backToFirst bool /* = false */, 
 		}
 	}
 	if backToFirst {
-		gl.Vertex3f(fpx, fpy, z)
+		gl.Vertex3d(fpx, fpy, z)
 	}
 }
 
@@ -215,7 +215,7 @@ func (this *BaseShape) createSquareLoop(s, z float64, backToFirst bool /* = fals
 		if py > 0 {
 			py *= yRatio
 		}
-		gl.Vertex3f(px, py, z)
+		gl.Vertex3d(px, py, z)
 	}
 }
 
@@ -223,7 +223,7 @@ func (this *BaseShape) createPillar(p vector.Vector, s, z float64) {
 	var d float64
 	for i := 0; i < PILLAR_POINT_NUM; i++ {
 		d := math.Pi * 2 * float64(i) / PILLAR_POINT_NUM
-		gl.Vertex3f(math.Sin(d)*s+p.X, math.Cos(d)*s+p.Y, z)
+		gl.Vertex3d(math.Sin(d)*s+p.X, math.Cos(d)*s+p.Y, z)
 	}
 }
 
@@ -239,11 +239,11 @@ func (this *BaseShape) addWake(wakes WakePool, pos vector.Vector, deg float64, s
 	wakePos.X = pos.X + math.Sin(deg+math.Pi/2+0.7)*this.size*0.5*sr
 	wakePos.Y = pos.Y + math.Cos(deg+math.Pi/2+0.7)*this.size*0.5*sr
 	w := wakes.getInstanceForced()
-	w.Set(wakePos, deg+math.Pi-0.2+rand.nextSignedFloat(0.1), sp, 40, sz*32*sr)
+	w.Set(wakePos, deg+math.Pi-0.2+nextSignedFloat(rand, 0.1), sp, 40, sz*32*sr)
 	wakePos.X = pos.X + math.Sin(deg-math.Pi/2-0.7)*this.size*0.5*sr
 	wakePos.Y = pos.Y + math.Cos(deg-math.Pi/2-0.7)*this.size*0.5*sr
 	w = wakes.getInstanceForced()
-	w.Set(wakePos, deg+math.Pi+0.2+rand.nextSignedFloat(0.1), sp, 40, sz*32*sr)
+	w.Set(wakePos, deg+math.Pi+0.2+nextSignedFloat(rand, 0.1), sp, 40, sz*32*sr)
 }
 
 func (this *BaseShape) pointPos() []vector.Vector {

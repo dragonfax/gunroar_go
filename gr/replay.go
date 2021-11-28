@@ -5,7 +5,7 @@ package main
  */
 
 const dir = "replay"
-const VERSION_NUM = 11
+const REPLAY_VERSION_NUM = 11
 
 type ReplayData struct {
 	// jInputRecord!(PadState) padInputRecord;
@@ -26,7 +26,7 @@ func NewReplayData() *ReplayData {
 func (this *ReplayData) save(fileName string) {
 	fd := NewFile()
 	fd.create(dir + "/" + fileName)
-	fd.writeInt(VERSION_NUM)
+	fd.writeInt(REPLAY_VERSION_NUM)
 	fd.writeInt(this.seed)
 	fd.writeInt(this.score)
 	fd.writeInt(this.shipTurnSpeed)
@@ -50,10 +50,10 @@ func (this *ReplayData) save(fileName string) {
 }
 
 func (this *ReplayData) load(fileName string) {
-	fd := NewFile()
+	fd := file.NewFile()
 	fd.open(dir + "/" + fileName)
 	ver := fd.readInt()
-	if ver != VERSION_NUM {
+	if ver != REPLAY_VERSION_NUM {
 		panic("Wrong version num")
 	}
 	this.seed = fd.readInt()

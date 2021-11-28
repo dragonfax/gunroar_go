@@ -100,14 +100,14 @@ func (this *Music) PlayOnce() {
 }
 
 func (this *Music) Fade() {
-	fadeMusic()
+	FadeMusic()
 }
 
 func (this *Music) Halt() {
 	HaltMusic()
 }
 
-func fadeMusic() {
+func FadeMusic() {
 	if noSound {
 		return
 	}

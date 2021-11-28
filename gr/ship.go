@@ -13,7 +13,7 @@ import (
  * Player's ship.
  */
 
-const SCROLL_SPEED_BASE = 0.01
+const SHIP_SCROLL_SPEED_BASE = 0.01
 const SCROLL_SPEED_MAX = 0.1
 const SCROLL_START_Y = 2.5
 
@@ -22,13 +22,13 @@ type Ship struct {
 	boat                                                 [2]Boat
 	gameMode                                             int
 	boatNum                                              int
-	InGameState                                          gameState
+	InGameState                                          GameState
 	scrollSpeed, _scrollSpeedBase                        float64
 	_midstPos, _higherPos, _lowerPos, _nearPos, _nearVel vector.Vector
 	bridgeShape                                          BaseShape
 }
 
-func NewShip(twinStick TwinStick, field Field, screen Screen,
+func NewShip(twinStick sdl.TwinStick, field Field, screen Screen,
 	sparks SparkPool, smokes SmokePool, fragments FragmentPool, wakes WakePool) {
 	this := &Ship{}
 	this.field = field

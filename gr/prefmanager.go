@@ -6,7 +6,7 @@ import "github.com/dragonfax/gunroar/gr/sdl/file"
  * Save/Load the high score.
  */
 
-const VERSION_NUM = 14
+const PREFS_VERSION_NUM = 14
 const PREF_FILE = "gr.prf"
 
 type PrefManager struct {
@@ -23,7 +23,7 @@ func (this *PrefManager) load() {
 	err := fd.Open(PREF_FILE)
 	if err != nil {
 		ver := fd.ReadInt()
-		if ver != VERSION_NUM {
+		if ver != PREFS_VERSION_NUM {
 			panic("Wrong version num")
 		} else {
 			this._prefData.load(fd)
@@ -40,7 +40,7 @@ func (this *PrefManager) load() {
 func (this *PrefManager) save() {
 	fd := file.New()
 	fd.Create(PREF_FILE)
-	fd.WriteInt(VERSION_NUM)
+	fd.WriteInt(PREFS_VERSION_NUM)
 	this._prefData.save(fd)
 	fd.Close()
 }
