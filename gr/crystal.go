@@ -31,10 +31,6 @@ func crystalInit() {
 	_crystalShape = NewCrystalShape()
 }
 
-func crystalClose() {
-	_crystalShape.close()
-}
-
 func NewCrystalShape() *Crystal {
 	this := &Crystal{
 		ExistsImpl: NewExistsImpl(),

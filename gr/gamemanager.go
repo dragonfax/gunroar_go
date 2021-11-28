@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/dragonfax/gunroar/gr/sdl"
+	"github.com/go-gl/gl/v4.1-compatibility/gl"
 )
 
 /**
@@ -106,18 +107,6 @@ func (this *GameManager) init() {
 		crystals, numIndicators, stageManager, scoreReel,
 		titleManager, inGameState)
 	this.ship.setGameState(this.inGameState)
-}
-
-func (this *GameManager) close() {
-	this.ship.close()
-	this.BulletShape.close()
-	this.EnemyShape.close()
-	this.TurretShape.close()
-	this.Fragment.close()
-	this.SparkFragment.close()
-	this.Crystal.close()
-	this.titleState.close()
-	this.Letter.close()
 }
 
 func (this *GameManager) start() {
@@ -619,10 +608,6 @@ func NewTitleState(GameManager gameManager, Screen screen,
 	this.inGameState = inGameState
 	this.gameOverCnt = 0
 	return this
-}
-
-func (this *TitleState) close() {
-	this.titleManager.close()
 }
 
 func (this *TitleState) start() {

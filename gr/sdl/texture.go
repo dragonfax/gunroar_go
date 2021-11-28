@@ -56,22 +56,38 @@ func loadBmp(name string) *sdl2.Surface {
 
 func NewTexture(name string) *Texture {
 	this := &Texture{}
-	// TODO s := loadBmp(name)
+	s := loadBmp(name)
 	gl.GenTextures(1, &this.num)
 	gl.BindTexture(gl.TEXTURE_2D, this.num)
-	// TODO gluBuild2DMipmaps(gl.TEXTURE_2D, 4, s.W, s.H, gl.RGBA, gl.UNSIGNED_BYTE, s.Pixels)
+
+	var mode int32 = gl.RGB
+	if s.Format.BytesPerPixel == 4 {
+		mode = gl.RGBA
+	}
+
+	// code copied from the internet
+	// data := s.Pixels()
+	//sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&data))
+
+	gl.TexImage2D(gl.TEXTURE_2D, 0, mode, s.w, s.h, 0, uint32(mode), gl.UNSIGNED_BYTE, s.Data())
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	//gluBuild2DMipmaps(gl.TEXTURE_2D, 4, s.W, s.H, gl.RGBA, gl.UNSIGNED_BYTE, s.Pixels) # not found
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	return this
 }
 
-func NewTextureWithScale(name string, sx, sy, xn, yn, panelWidth, panelHeight int, maskColor uint32 /* = 0xffffffffu */) *Texture {
+/*
+I think we don't use this.
+func NewTextureWithScale(name string, sx, sy, xn, yn, panelWidth, panelHeight int, maskColor uint32 = 0xffffffffu ) *Texture {
 	s := loadBmp(name)
 	surfacePixels := s.Pixels()
 	return NewTextureWithPixels(surfacePixels, s.W, sx, sy, xn, yn, panelWidth, panelHeight, maskColor)
 }
 
-func NewTextureWithPixels(surfacePixels []uint32, surfaceWidth, sx, sy, xn, yn, panelWidth, panelHeight int, maskColor uint32 /* = 0xffffffffu */) *Texture {
+func NewTextureWithPixels(surfacePixels []uint32, surfaceWidth, sx, sy, xn, yn, panelWidth, panelHeight int, maskColor uint32 = 0xffffffffu ) *Texture {
 	this := &Texture{}
 	this.textureNum = xn * yn
 	gl.GenTextures(int32(this.textureNum), &this.num)
@@ -115,6 +131,7 @@ func NewTextureWithPixels(surfacePixels []uint32, surfaceWidth, sx, sy, xn, yn, 
 	}
 	return this
 }
+*/
 
 func (this *Texture) Close() {
 	gl.DeleteTextures(int32(this.textureNum), &this.num)

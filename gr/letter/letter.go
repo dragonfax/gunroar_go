@@ -38,10 +38,6 @@ func LetterInit() {
 	}
 }
 
-func close() {
-	displayList.Close()
-}
-
 func getWidth(n int, s float64) float64 {
 	return float64(n) * s * LETTER_WIDTH
 }

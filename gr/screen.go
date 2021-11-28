@@ -19,7 +19,7 @@ var lineWidthBase float64
 type Screen struct {
 	*sdl.Screen3D
 
-	luminousScreen     LuminousScreen
+	luminousScreen     *sdl.LuminousScreen
 	_luminosity        float64
 	screenShakeCnt     int
 	screenShakeIntense float64
@@ -48,19 +48,12 @@ func (this *Screen) init() {
 	gl.Disable(gl.LIGHTING)
 	sdl.SetClearColor(0, 0, 0, 1)
 	if this._luminosity > 0 {
-		this.luminousScreen = NewLuminousScreen()
-		this.luminousScreen.init(this._luminosity, this.Width(), this.Height())
+		this.luminousScreen = sdl.NewLuminousScreen()
+		this.luminousScreen.Init(this._luminosity, this.Width(), this.Height())
 	} else {
 		this.luminousScreen = nil
 	}
 	this.screenResized()
-}
-
-func (this *Screen) close() {
-	if this.luminousScreen != nil {
-		this.luminousScreen.close()
-	}
-	this.Screen3D.CloseSDL()
 }
 
 func (this *Screen) startRenderToLuminousScreen() bool {
@@ -99,10 +92,10 @@ func (this *Screen) screenResized() {
 		lw = 4
 	}
 	lineWidthBase = float64(lw)
-	lineWidth(1)
+	LineWidth(1)
 }
 
-func lineWidth(w int) {
+func LineWidth(w int) {
 	gl.LineWidth(float32(lineWidthBase) * float32(w))
 }
 

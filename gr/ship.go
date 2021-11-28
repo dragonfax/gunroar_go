@@ -49,12 +49,6 @@ func (this *Ship) setRandSeed(seed int64) {
 	Boat.setRandSeed(seed)
 }
 
-func (this *Ship) close() {
-	for _, b := range this.boat {
-		b.close()
-	}
-}
-
 func (this *Ship) setShots(shots *ShotPool) {
 	for _, b := range this.boat {
 		b.setShots(shots)
@@ -349,12 +343,6 @@ func NewBoat(idx int, ship *Ship,
 	this.fireInterval = FIRE_INTERVAL
 	this.shieldShape = NewShieldShape()
 	return this
-}
-
-func (this *Boat) close() {
-	this._shape.close()
-	this.bridgeShape.close()
-	this.shieldShape.close()
 }
 
 func (this *Boat) setShots(shots ShotPool) {

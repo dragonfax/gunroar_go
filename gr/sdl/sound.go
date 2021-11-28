@@ -36,16 +36,6 @@ func SoundManagerInit() {
 	// audio_rate, audio_format, audio_channels, audio_opened, err := mix.QuerySpec() # serves no purpose
 }
 
-func close() {
-	if noSound {
-		return
-	}
-	if mix.PlayingMusic() {
-		mix.HaltMusic()
-	}
-	mix.CloseAudio()
-}
-
 /**
  * Music / Chunk.
  */

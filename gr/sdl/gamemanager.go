@@ -7,7 +7,6 @@ package sdl
 type GameManager interface {
 	init()
 	start()
-	close()
 	move()
 	draw()
 

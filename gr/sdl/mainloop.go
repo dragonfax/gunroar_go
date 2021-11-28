@@ -52,13 +52,8 @@ func (this *MainLoop) initFirst() {
 	this.initInterval()
 }
 
-// Quit and save preference.
 func (this *MainLoop) quitLast() {
-	this.gameManager.close()
-	this.SoundManagerClose()
-	this.prefManager.save()
-	this.screen.closeSDL()
-	this.SDL_Quit()
+	sdl.Quit()
 }
 
 func (this *MainLoop) breakLoop() {

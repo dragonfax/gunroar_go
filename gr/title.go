@@ -37,12 +37,12 @@ func NewTitleManager(prefManager PrefManager /* Pad pad, Mouse mouse, */, field 
 }
 
 func (this *TitleManager) init() {
-	this.logo = NewTexture("title.bmp")
-	this.displayList = NewDisplayList(1)
+	this.logo = sdl.NewTexture("title.bmp")
+	this.displayList = sdl.NewDisplayList(1)
 	this.displayList.beginNewList()
 	gl.Enable(gl.TEXTURE_2D)
 	this.logo.bind()
-	sdl.SetColor(1, 1, 1)
+	sdl.SetColor(1, 1, 1, 1)
 	gl.Begin(gl.TRIANGLE_FAN)
 	gl.TexCoord2f(0, 0)
 	gl.Vertex2f(0, -63)
@@ -82,11 +82,6 @@ func (this *TitleManager) init() {
 	sdl.lineWidth(1)
 	this.displayList.endNewList()
 	this.gameMode = prefManager.prefData.gameMode
-}
-
-func (this *TitleManager) close() {
-	this.displayList.close()
-	this.logo.close()
 }
 
 func (this *TitleManager) start() {

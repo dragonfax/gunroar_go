@@ -407,10 +407,6 @@ public class Fragment: Actor {
     rand.setSeed(seed);
   }
 
-  public static void close() {
-    displayList.close();
-  }
-
   public this() {
     pos = new Vector3;
     vel = new Vector3;
@@ -524,9 +520,6 @@ public class SparkFragment: LuminousActor {
     rand.setSeed(seed);
   }
 
-  public static void close() {
-    displayList.close();
-  }
 
   public this() {
     pos = new Vector3;
