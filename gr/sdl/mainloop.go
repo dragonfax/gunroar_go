@@ -1,6 +1,9 @@
 package sdl
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"github.com/dragonfax/gunroar/gr/sdl/screen"
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 /**
  * SDL main loop.
@@ -8,12 +11,17 @@ import "github.com/veandco/go-sdl2/sdl"
 
 const INTERVAL_BASE = 16
 
+type PrefManager interface {
+	Save()
+	Load()
+}
+
 type MainLoop struct {
 	nowait              bool
 	accframe            bool
-	maxSkipFrame        int
-	event               *SDL_Event
-	screen              *Screen
+	maxSkipFrame        uint32
+	event               sdl.Event
+	screen              screen.Screen
 	input               Input
 	gameManager         GameManager
 	prefManager         PrefManager
@@ -24,7 +32,7 @@ type MainLoop struct {
 	done                bool
 }
 
-func NewMainLoop(screen Screen, input Input, gameManager GameManager, prefManager PrefManager) *MainLoop {
+func NewMainLoop(screen screen.Screen, input Input, gameManager GameManager, prefManager PrefManager) *MainLoop {
 	this := &MainLoop{
 		maxSkipFrame:        5,
 		interval:            INTERVAL_BASE,
@@ -43,11 +51,8 @@ func NewMainLoop(screen Screen, input Input, gameManager GameManager, prefManage
 
 // Initialize and load preference.
 func (this *MainLoop) initFirst() {
-	this.prefManager.load()
-	err := SoundManagerInit()
-	if err != nil {
-		Logger.error(err)
-	}
+	this.prefManager.Load()
+	SoundManagerInit()
 	this.gameManager.init()
 	this.initInterval()
 }
@@ -63,10 +68,9 @@ func (this *MainLoop) breakLoop() {
 func (this *MainLoop) loop() {
 	this.done = false
 	var prvTickCount uint32
-	var i int
 	var nowTick uint32
 	var frame uint32
-	this.screen.initSDL()
+	this.screen.InitSDL()
 	this.initFirst()
 	this.gameManager.start()
 	for !this.done {
@@ -80,14 +84,14 @@ func (this *MainLoop) loop() {
 		}
 		nowTick = sdl.GetTicks()
 		itv := uint32(this.interval)
-		frame := (nowTick - prvTickCount) / itv
+		frame = (nowTick - prvTickCount) / itv
 		if frame <= 0 {
 			frame = 1
 			sdl.Delay(prvTickCount + itv - nowTick)
 			if this.accframe {
 				prvTickCount = sdl.GetTicks()
 			} else {
-				prvTickCount += this.interval
+				prvTickCount += uint32(this.interval)
 			}
 		} else if frame > this.maxSkipFrame {
 			frame = this.maxSkipFrame
@@ -96,13 +100,13 @@ func (this *MainLoop) loop() {
 			prvTickCount = nowTick
 		}
 		this.slowdownRatio = 0
-		for i := 0; i < frame; i++ {
+		for i := uint32(0); i < frame; i++ {
 			this.gameManager.move()
 		}
-		this.slowdownRatio /= frame
-		screen.clear()
+		this.slowdownRatio /= float64(frame)
+		this.screen.Clear()
 		this.gameManager.draw()
-		screen.flip()
+		this.screen.Flip()
 		if !this.nowait {
 			this.calcInterval()
 		}

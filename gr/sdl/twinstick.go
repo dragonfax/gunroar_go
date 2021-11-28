@@ -47,7 +47,7 @@ func (this *TwinStick) openJoystick(st *sdl.Joystick) *sdl.Joystick {
 	return stick
 }
 
-func (this *TwinStick) HandleEvent(event *sdl.Event) {
+func (this *TwinStick) HandleEvent(event sdl.Event) {
 	this.keys = sdl.GetKeyboardState()
 }
 

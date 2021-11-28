@@ -138,7 +138,7 @@ func NewResizableDrawableInternal() ResizableDrawable {
 }
 
 func (this *ResizableDrawable) Draw() {
-	gl.Scalef(this._size, this._size, this._size)
+	gl.Scaled(this._size, this._size, this._size)
 	this._shape.Draw()
 }
 

@@ -6,7 +6,7 @@ import "github.com/veandco/go-sdl2/sdl"
  * Input device interface.
  */
 type Input interface {
-	HandleEvent(event *sdl.Event)
+	HandleEvent(event sdl.Event)
 }
 
 type MultipleInputDevice struct {
@@ -18,7 +18,7 @@ func NewMultipleInputDevice() *MultipleInputDevice {
 	return this
 }
 
-func (this *MultipleInputDevice) HandleEvent(event *sdl.Event) {
+func (this *MultipleInputDevice) HandleEvent(event sdl.Event) {
 	for _, i := range this.Inputs {
 		i.HandleEvent(event)
 	}

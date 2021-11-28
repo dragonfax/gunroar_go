@@ -69,7 +69,7 @@ func NewTexture(name string) *Texture {
 	// data := s.Pixels()
 	//sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&data))
 
-	gl.TexImage2D(gl.TEXTURE_2D, 0, mode, s.w, s.h, 0, uint32(mode), gl.UNSIGNED_BYTE, s.Data())
+	gl.TexImage2D(gl.TEXTURE_2D, 0, mode, s.W, s.H, 0, uint32(mode), gl.UNSIGNED_BYTE, s.Data())
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

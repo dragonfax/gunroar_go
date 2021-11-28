@@ -1,5 +1,7 @@
 package sdl
 
+import "github.com/dragonfax/gunroar/gr/sdl/screen"
+
 /**
  * Manage the lifecycle of the game.
  */
@@ -11,15 +13,15 @@ type GameManager interface {
 	draw()
 
 	setMainLoop(*MainLoop)
-	setUIs(Screen, Input)
+	setUIs(screen.Screen, Input)
 	setPrefManager(PrefManager)
 }
 
 type GameManagerBase struct {
-	MainLoop    mainLoop
-	Screen      abstScreen
-	Input       input
-	PrefManager abstPrefManager
+	mainLoop        MainLoop
+	abstScreen      screen.Screen
+	input           Input
+	abstPrefManager PrefManager
 }
 
 func NewGameManagerBaseInternal() GameManagerBase {
@@ -30,7 +32,7 @@ func (this *GameManagerBase) setMainLoop(mainLoop MainLoop) {
 	this.mainLoop = mainLoop
 }
 
-func (this *GameManagerBase) setUIs(screen Screen, input Input) {
+func (this *GameManagerBase) setUIs(screen screen.Screen, input Input) {
 	this.abstScreen = screen
 	this.input = input
 }
