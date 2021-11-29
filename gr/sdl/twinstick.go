@@ -51,7 +51,7 @@ func (this *TwinStick) HandleEvent(event sdl.Event) {
 	this.keys = sdl.GetKeyboardState()
 }
 
-func (this *TwinStick) getState() TwinStickState {
+func (this *TwinStick) GetState() TwinStickState {
 	if this.stick != nil {
 		this.state.left.X = this.adjustAxis(this.stick.Axis(0))
 		this.state.left.Y = -this.adjustAxis(this.stick.Axis(1))
@@ -123,7 +123,7 @@ func (this *TwinStick) adjustAxis(v int16) float64 {
 	return float64(a) // TODO its possible float cast shoudl be deeper in this funcdtion,to avoid precision loss.
 }
 
-func (this *TwinStick) getNullState() TwinStickState {
+func (this *TwinStick) GetNullState() TwinStickState {
 	this.state.clear()
 	return this.state
 }
@@ -194,8 +194,8 @@ func NewRecordableTwinStick() *RecordableTwinStick {
 	return this
 }
 
-func (this RecordableTwinStick) getState(doRecord bool /*= true */) TwinStickState {
-	s := this.TwinStick.getState()
+func (this RecordableTwinStick) GetState(doRecord bool /*= true */) TwinStickState {
+	s := this.TwinStick.GetState()
 	if doRecord {
 		this.Record(&s)
 	}

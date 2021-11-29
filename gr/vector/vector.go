@@ -189,7 +189,7 @@ func (this Vector) VctSize() float64 {
 	return math.Sqrt(this.X*this.X + this.Y*this.Y)
 }
 
-func (this *Vector) DistVector(v Vector) float64 {
+func (this Vector) DistVector(v Vector) float64 {
 	return this.Dist(v.X, v.Y)
 }
 

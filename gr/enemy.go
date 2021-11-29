@@ -1450,7 +1450,7 @@ func (this *EnemyPool) checkShotHit(pos vector.Vector, shape Collidable, shot *S
 	}
 }
 
-func (this *EnemyPool) checkHitShip(x, y float64, deselection Enemy /* = null */, largeOnly bool /* = false */) *Enemy {
+func (this *EnemyPool) checkHitShip(x, y float64, deselection *Enemy /* = null */, largeOnly bool /* = false */) *Enemy {
 	for _, a := range this.actor {
 		e := a.(*Enemy)
 		if e.Exists() && e != deselection {

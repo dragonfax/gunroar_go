@@ -226,7 +226,7 @@ func (this *BaseShape) createPillar(p vector.Vector, s, z float64) {
 	}
 }
 
-func (this *BaseShape) addWake(wakes WakePool, pos vector.Vector, deg float64, spd float64, sr float64 /* = 1 */) {
+func (this *BaseShape) addWake(wakes *WakePool, pos vector.Vector, deg float64, spd float64, sr float64 /* = 1 */) {
 	sp := spd
 	if sp > 0.1 {
 		sp = 0.1

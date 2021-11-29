@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	r "math/rand"
 	"time"
 
 	"github.com/dragonfax/gunroar/gr/sdl"
@@ -18,9 +19,9 @@ const SCROLL_SPEED_MAX = 0.1
 const SCROLL_START_Y = 2.5
 
 type Ship struct {
-	field                                                Field
+	field                                                *Field
 	boat                                                 [2]Boat
-	gameMode                                             int
+	gameMode                                             GameMode
 	boatNum                                              int
 	InGameState                                          GameState
 	scrollSpeed, _scrollSpeedBase                        float64
@@ -28,11 +29,10 @@ type Ship struct {
 	bridgeShape                                          BaseShape
 }
 
-func NewShip(twinStick sdl.TwinStick, field Field, screen Screen,
-	sparks SparkPool, smokes SmokePool, fragments FragmentPool, wakes WakePool) {
+func NewShip(twinStick *sdl.TwinStick, field *Field, screen *Screen,
+	sparks *SparkPool, smokes *SmokePool, fragments *FragmentPool, wakes *WakePool) {
 	this := &Ship{}
 	this.field = field
-	Boat.init()
 	for i := range this.boat {
 		this.boat[i] = NewBoat(i, this, twinStick,
 			field, screen, sparks, smokes, fragments, wakes)
@@ -276,24 +276,24 @@ const SLOW_TURN_RATIO = 0.0
 const TURN_CHANGE_RATIO = 0.5
 
 var boatRand = r.New(r.NewSource(time.Now().Unix()))
-var stickInput TwinStickState
+var stickInput sdl.TwinStickState
 
 type Boat struct {
-	twinStick                RecordableTwinStick
-	field                    Field
-	screen                   Screen
-	shots                    ShotPool
-	sparks                   SparkPool
-	smokes                   SmokePool
-	fragments                FragmentPool
-	wakes                    WakePool
-	enemies                  EnemyPool
-	stageManager             StageManager
-	gameState                InGameState
+	twinStick                *sdl.RecordableTwinStick
+	field                    *Field
+	screen                   *Screen
+	shots                    *ShotPool
+	sparks                   *SparkPool
+	smokes                   *SmokePool
+	fragments                *FragmentPool
+	wakes                    *WakePool
+	enemies                  *EnemyPool
+	stageManager             *StageManager
+	gameState                *InGameState
 	_pos, firePos            vector.Vector
 	deg, speed, turnRatio    float64
-	_shape                   BaseShape
-	bridgeShape              BaseShape
+	_shape                   *BaseShape
+	bridgeShape              *BaseShape
 	fireCnt, fireSprCnt      int
 	fireInterval, fireSprDeg float64
 	fireLanceCnt             int
@@ -303,11 +303,11 @@ type Boat struct {
 	onBlock                  bool
 	_vel, refVel             vector.Vector
 	shieldCnt                int
-	shieldShape              ShieldShape
+	shieldShape              *ShieldShape
 	_replayMode              bool
 	turnSpeed                float64
 	reverseFire              bool
-	gameMode                 int
+	gameMode                 GameMode
 	vx, vy                   float64
 	idx                      int
 	ship                     *Ship
@@ -318,10 +318,10 @@ func setBoatRandSeed(seed int64) {
 }
 
 func NewBoat(idx int, ship *Ship,
-	twinStick TwinStick,
-	field Field, screen Screen,
-	sparks SparkPool, smokes SmokePool, fragments FragmentPool, wakes WakePool) *Boat {
-	this := &Boat{}
+	twinStick *sdl.RecordableTwinStick,
+	field *Field, screen *Screen,
+	sparks *SparkPool, smokes *SmokePool, fragments *FragmentPool, wakes *WakePool) Boat {
+	this := Boat{}
 	this.idx = idx
 	this.ship = ship
 	this.twinStick = twinStick
@@ -333,11 +333,11 @@ func NewBoat(idx int, ship *Ship,
 	this.wakes = wakes
 	switch idx {
 	case 0:
-		this._shape = NewBaseShape(0.7, 0.6, 0.6, BaseShape.ShapeType.SHIP_ROUNDTAIL, 0.5, 0.7, 0.5)
-		this.bridgeShape = NewBaseShape(0.3, 0.6, 0.6, BaseShape.ShapeType.BRIDGE, 0.3, 0.7, 0.3)
+		this._shape = NewBaseShape(0.7, 0.6, 0.6, SHIP_ROUNDTAIL, 0.5, 0.7, 0.5)
+		this.bridgeShape = NewBaseShape(0.3, 0.6, 0.6, BRIDGE, 0.3, 0.7, 0.3)
 	case 1:
-		this._shape = NewBaseShape(0.7, 0.6, 0.6, BaseShape.ShapeType.SHIP_ROUNDTAIL, 0.4, 0.3, 0.8)
-		this.bridgeShape = NewBaseShape(0.3, 0.6, 0.6, BaseShape.ShapeType.BRIDGE, 0.2, 0.3, 0.6)
+		this._shape = NewBaseShape(0.7, 0.6, 0.6, SHIP_ROUNDTAIL, 0.4, 0.3, 0.8)
+		this.bridgeShape = NewBaseShape(0.3, 0.6, 0.6, BRIDGE, 0.2, 0.3, 0.6)
 	}
 	this.turnSpeed = 1
 	this.fireInterval = FIRE_INTERVAL
@@ -345,26 +345,26 @@ func NewBoat(idx int, ship *Ship,
 	return this
 }
 
-func (this *Boat) setShots(shots ShotPool) {
+func (this *Boat) setShots(shots *ShotPool) {
 	this.shots = shots
 }
 
-func (this *Boat) setEnemies(enemies EnemyPool) {
+func (this *Boat) setEnemies(enemies *EnemyPool) {
 	this.enemies = enemies
 }
 
-func (this *Boat) setStageManager(stageManager StageManager) {
+func (this *Boat) setStageManager(stageManager *StageManager) {
 	this.stageManager = stageManager
 }
 
-func (this *Boat) setGameState(gameState InGameState) {
+func (this *Boat) setGameState(gameState *InGameState) {
 	this.gameState = gameState
 }
 
-func (this *Boat) start(gameMode int) {
+func (this *Boat) start(gameMode GameMode) {
 	this.gameMode = gameMode
-	if gameMode == InGameState.GameMode.DOUBLE_PLAY {
-		switch idx {
+	if gameMode == DOUBLE_PLAY {
+		switch this.idx {
 		case 0:
 			this._pos.X = -this.field.size.X * 0.5
 		case 1:
@@ -384,7 +384,7 @@ func (this *Boat) start(gameMode int) {
 	this.cnt = -INVINCIBLE_CNT
 	this.aPressed = true
 	this.bPressed = true
-	this.stickInput = this.twinStick.getNullState()
+	this.stickInput = this.twinStick.GetNullState()
 }
 
 func (this *Boat) restart() {
@@ -396,7 +396,7 @@ func (this *Boat) restart() {
 	this.fireSprCnt = 0
 	this.fireSprDeg = 0.5
 	this.fireLanceCnt = 0
-	if this.field.getBlock(this._pos) >= 0 {
+	if this.field.getBlockVector(this._pos) >= 0 {
 		this.onBlock = true
 	} else {
 		this.onBlock = false
@@ -421,21 +421,21 @@ func (this *Boat) move() {
 	if this.gameState.isGameOver {
 		this.clearBullets()
 		if this.cnt < -INVINCIBLE_CNT {
-			cnt = -RESTART_CNT
+			this.cnt = -RESTART_CNT
 		}
 	} else if this.cnt < -INVINCIBLE_CNT {
 		this.clearBullets()
 	}
-	vx *= speed
-	vy *= speed
-	vx += refVel.x
-	vy += refVel.y
-	refVel *= 0.9
-	if this.field.checkInField(this._pos.X, this._pos.Y-this.field.lastScrollY) {
-		_pos.y -= field.lastScrollY
+	vx *= this.speed
+	vy *= this.speed
+	vx += this.refVel.X
+	vy += this.refVel.Y
+	this.refVel *= 0.9
+	if this.field.checkInField(this._pos.X, this._pos.Y-this.field.lastScrollY()) {
+		this._pos.Y -= this.field.lastScrollY()
 	}
 	if (this.onBlock || this.field.getBlock(this._pos.X+vx, this._pos.Y) < 0) &&
-		this.field.checkInField(this._pos.X+vx, _pos.y) {
+		this.field.checkInField(this._pos.X+vx, this._pos.Y) {
 		this._pos.X += vx
 		this._vel.X = vx
 	} else {
@@ -453,10 +453,10 @@ func (this *Boat) move() {
 	}
 	if this.field.getBlock(this._pos.X, this._pos.Y) >= 0 {
 		if !this.onBlock {
-			if cnt <= 0 {
-				onBlock = true
+			if this.cnt <= 0 {
+				this.onBlock = true
 			} else {
-				if this.field.checkInField(this._pos.X, this._pos.Y-this.field.lastScrollY) {
+				if this.field.checkInField(this._pos.X, this._pos.Y-this.field.lastScrollY()) {
 					this._pos.X = px
 					this._pos.Y = py
 				} else {
@@ -480,35 +480,35 @@ func (this *Boat) move() {
 		} else {
 			sp = 0.2
 		}
-		sp *= 1 + rand.nextSignedFloat(0.33)
+		sp *= 1 + nextSignedFloat(rand, 0.33)
 		sp *= SPEED_BASE
-		this._shape.addWake(this.wakes, this._pos, this.deg, sp)
+		this._shape.addWake(this.wakes, this._pos, this.deg, sp, 1)
 	}
-	he := enemies.checkHitShip(this.pos.X, this.pos.Y)
+	he := this.enemies.checkHitShip(this.pos().X, this.pos().Y, nil, false)
 	if he != nil {
-		var rd float
-		if this.pos.dist(he.pos) < 0.1 {
+		var rd float64
+		if this.pos().DistVector(he.pos()) < 0.1 {
 			rd = 0
 		} else {
-			rd = math.Atan2(this._pos.X-he.pos.X, _pos.Y-he.pos.Y)
+			rd = math.Atan2(this._pos.X-he.pos.X, this._pos.Y-he.pos.Y)
 		}
-		sz := he.size
+		sz := he.size()
 		this.refVel.X = math.Sin(rd) * sz * 0.1
 		this.refVel.Y = math.Cos(rd) * sz * 0.1
-		rs := this.refVel.vctSize
+		rs := this.refVel.VctSize()
 		if rs > 1 {
 			this.refVel.X /= rs
 			this.refVel.Y /= rs
 		}
 	}
 	if this.shieldCnt > 0 {
-		shieldCnt--
+		this.shieldCnt--
 	}
 }
 
 func (this *Boat) moveTwinStick() {
 	if !this._replayMode {
-		this.stickInput = this.twinStick.getState()
+		this.stickInput = this.twinStick.GetState()
 	} else {
 		i, err := twinStick.replay()
 		this.stickInput = i
