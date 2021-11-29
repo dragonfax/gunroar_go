@@ -78,7 +78,7 @@ func NewEnemyShape(t int) *EnemyShape {
 	return this
 }
 
-func (this *EnemyShape) addWake(wakes WakePool, pos vector.Vector, deg, sp float64) {
+func (this *EnemyShape) addWake(wakes *WakePool, pos vector.Vector, deg, sp float64) {
 	this.Shape().(*BaseShape).addWake(wakes, pos, deg, sp, this.Size())
 }
 

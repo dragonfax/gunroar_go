@@ -8,6 +8,7 @@ import (
 
 	"github.com/dragonfax/gunroar/gr/sdl"
 	"github.com/dragonfax/gunroar/gr/vector"
+	"github.com/go-gl/gl/v4.1-compatibility/gl"
 )
 
 /**
@@ -23,14 +24,14 @@ type Ship struct {
 	boat                                                 [2]Boat
 	gameMode                                             GameMode
 	boatNum                                              int
-	InGameState                                          GameState
+	gameState                                            *InGameState
 	scrollSpeed, _scrollSpeedBase                        float64
 	_midstPos, _higherPos, _lowerPos, _nearPos, _nearVel vector.Vector
 	bridgeShape                                          BaseShape
 }
 
 func NewShip(twinStick *sdl.TwinStick, field *Field, screen *Screen,
-	sparks *SparkPool, smokes *SmokePool, fragments *FragmentPool, wakes *WakePool) {
+	sparks *SparkPool, smokes *SmokePool, fragments *FragmentPool, wakes *WakePool) *Ship {
 	this := &Ship{}
 	this.field = field
 	for i := range this.boat {
@@ -39,14 +40,14 @@ func NewShip(twinStick *sdl.TwinStick, field *Field, screen *Screen,
 		i++
 	}
 	this.boatNum = 1
-	this.scrollSpeed = SCROLL_SPEED_BASE
-	this._scrollSpeedBase = SCROLL_SPEED_BASE
+	this.scrollSpeed = SHIP_SCROLL_SPEED_BASE
+	this._scrollSpeedBase = SHIP_SCROLL_SPEED_BASE
 	this.bridgeShape = NewBaseShape(0.3, 0.2, 0.1, BRIDGE, 0.3, 0.7, 0.7)
-	return ship
+	return this
 }
 
 func (this *Ship) setRandSeed(seed int64) {
-	Boat.setRandSeed(seed)
+	setBoatRandSeed(seed)
 }
 
 func (this *Ship) setShots(shots *ShotPool) {
@@ -55,34 +56,34 @@ func (this *Ship) setShots(shots *ShotPool) {
 	}
 }
 
-func (this *Ship) setEnemies(enemies EnemyPool) {
+func (this *Ship) setEnemies(enemies *EnemyPool) {
 	for _, b := range this.boat {
 		b.setEnemies(enemies)
 	}
 }
 
-func (this *Ship) setStageManager(stageManager StageManager) {
+func (this *Ship) setStageManager(stageManager *StageManager) {
 	for _, b := range this.boat {
 		b.setStageManager(stageManager)
 	}
 }
 
-func (this *Ship) setGameState(gameState InGameState) {
+func (this *Ship) setGameState(gameState *InGameState) {
 	this.gameState = gameState
 	for _, b := range this.boat {
 		b.setGameState(gameState)
 	}
 }
 
-func (this *Ship) start(gameMode int) {
+func (this *Ship) start(gameMode GameMode) {
 	this.gameMode = gameMode
-	if gameMode == InGameState.GameMode.DOUBLE_PLAY {
+	if gameMode == DOUBLE_PLAY {
 		this.boatNum = 2
 	} else {
 		this.boatNum = 1
 	}
-	this._scrollSpeedBase = SCROLL_SPEED_BASE
-	for i := 0; i < boatNum; i++ {
+	this._scrollSpeedBase = SHIP_SCROLL_SPEED_BASE
+	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].start(gameMode)
 	}
 	this._midstPos.x = 0
@@ -106,11 +107,11 @@ func (this *Ship) restart() {
 }
 
 func (this *Ship) move() {
-	this.field.scroll(scrollSpeed)
+	this.field.scroll(this.scrollSpeed, false)
 	sf := false
-	for i := 0; i < boatNum; i++ {
+	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].move()
-		if this.boat[i].hasCollision && this.boat[i].pos.X > this.field.size.X/3 && this.boat[i].pos.Y < -this.field.size.Y/4*3 {
+		if this.boat[i].hasCollision() && this.boat[i].pos().X > this.field.size().X/3 && this.boat[i].pos().Y < -this.field.size().Y/4*3 {
 			sf = true
 		}
 	}
@@ -126,8 +127,8 @@ func (this *Ship) move() {
 }
 
 func (this *Ship) checkBulletHit(p, pp vector.Vector) bool {
-	for i := 0; i < boatNum; i++ {
-		if boat[i].checkBulletHit(p, pp) {
+	for i := 0; i < this.boatNum; i++ {
+		if this.boat[i].checkBulletHit(p, pp) {
 			return true
 		}
 	}
@@ -148,19 +149,19 @@ func (this *Ship) draw() {
 	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].draw()
 	}
-	if this.gameMode == InGameState.GameMode.DOUBLE_PLAY && this.boat[0].hasCollision {
-		sdl.setColor(0.5, 0.5, 0.9, 0.8)
-		gl.Begin(gl.LINE_STRIP)
-		gl.Vertex2f(this.boat[0].pos.X, this.boat[0].pos.Y)
-		sdl.SetColor(0.5, 0.5, 0.9, 0.3)
-		gl.Vertex2f(this.midstPos.X, this.midstPos.Y)
+	if this.gameMode == DOUBLE_PLAY && this.boat[0].hasCollision() {
 		sdl.SetColor(0.5, 0.5, 0.9, 0.8)
-		gl.Vertex2f(this.boat[1].pos.X, this.boat[1].pos.Y)
+		gl.Begin(gl.LINE_STRIP)
+		gl.Vertex2d(this.boat[0].pos().X, this.boat[0].pos().Y)
+		sdl.SetColor(0.5, 0.5, 0.9, 0.3)
+		gl.Vertex2d(this.midstPos().X, this.midstPos().Y)
+		sdl.SetColor(0.5, 0.5, 0.9, 0.8)
+		gl.Vertex2d(this.boat[1].pos().X, this.boat[1].pos().Y)
 		gl.End()
 		gl.PushMatrix()
-		sdl.glTranslate(this.midstPos)
-		gl.Rotatef(-this.degAmongBoats*180/math.Pi, 0, 0, 1)
-		this.bridgeShape.draw()
+		sdl.GlTranslate(this.midstPos())
+		gl.Rotated(-this.degAmongBoats()*180/math.Pi, 0, 0, 1)
+		this.bridgeShape.Draw()
 		gl.PopMatrix()
 	}
 }
@@ -208,7 +209,7 @@ func (this *Ship) midstPos() vector.Vector {
 
 func (this *Ship) higherPos() vector.Vector {
 	this._higherPos.Y = -99999
-	for i := 0; i < boatNum; i++ {
+	for i := 0; i < this.boatNum; i++ {
 		if this.boat[i].pos.Y > this._higherPos.Y {
 			this._higherPos.X = this.boat[i].pos.X
 			this._higherPos.Y = this.boat[i].pos.Y
@@ -220,9 +221,9 @@ func (this *Ship) higherPos() vector.Vector {
 func (this *Ship) lowerPos() vector.Vector {
 	this._lowerPos.Y = 99999
 	for i := 0; i < this.boatNum; i++ {
-		if this.boat[i].pos.Y < this._lowerPos.Y {
-			this._lowerPos.X = this.boat[i].pos.X
-			this._lowerPos.Y = this.boat[i].pos.Y
+		if this.boat[i].pos().Y < this._lowerPos.Y {
+			this._lowerPos.X = this.boat[i].pos().X
+			this._lowerPos.Y = this.boat[i].pos().Y
 		}
 	}
 	return this._lowerPos
@@ -230,23 +231,23 @@ func (this *Ship) lowerPos() vector.Vector {
 
 func (this *Ship) nearPos(p vector.Vector) vector.Vector {
 	dist := 99999.0
-	for i := 0; i < boatNum; i++ {
-		if this.boat[i].pos.dist(p) < dist {
-			dist = this.boat[i].pos.dist(p)
-			this._nearPos.X = this.boat[i].pos.X
-			this._nearPos.Y = this.boat[i].pos.Y
+	for i := 0; i < this.boatNum; i++ {
+		if this.boat[i].pos().DistVector(p) < dist {
+			dist = this.boat[i].pos().DistVector(p)
+			this._nearPos.X = this.boat[i].pos().X
+			this._nearPos.Y = this.boat[i].pos().Y
 		}
 	}
-	return _nearPos
+	return this._nearPos
 }
 
-func (this *Ship) nearVel(p Vector) vector.Vector {
+func (this *Ship) nearVel(p vector.Vector) vector.Vector {
 	dist := 99999.0
-	for i := 0; i < boatNum; i++ {
-		if this.boat[i].pos.dist(p) < dist {
-			dist = this.boat[i].pos.dist(p)
-			this._nearVel.x = this.boat[i].vel.X
-			this._nearVel.y = this.boat[i].vel.Y
+	for i := 0; i < this.boatNum; i++ {
+		if this.boat[i].pos().DistVector(p) < dist {
+			dist = this.boat[i].pos().DistVector(p)
+			this._nearVel.X = this.boat[i].vel().X
+			this._nearVel.Y = this.boat[i].vel().Y
 		}
 	}
 	return this._nearVel
