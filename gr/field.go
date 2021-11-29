@@ -243,10 +243,10 @@ func (this *Field) addGround(typ int) {
 			cx = this.rand.Intn(int(BLOCK_SIZE_X*0.4)) + int(BLOCK_SIZE_X*0.8)
 		}
 	}
-	cy := this.rand.Intn(int(NEXT_BLOCK_AREA_SIZE*0.6)) + int(NEXT_BLOCK_AREA_SIZE*0.2)
+	cy := this.rand.Intn(12 /* int(NEXT_BLOCK_AREA_SIZE*0.6)) + int(NEXT_BLOCK_AREA_SIZE*0.2 */)
 	cy += this.nextBlockY
-	w := rand.Intn(int(BLOCK_SIZE_X*0.33)) + int(BLOCK_SIZE_X*0.33)
-	h := rand.Intn(int(NEXT_BLOCK_AREA_SIZE*0.24)) + int(NEXT_BLOCK_AREA_SIZE*0.33)
+	w := this.rand.Intn(12 /* int(BLOCK_SIZE_X*0.33)) + int(BLOCK_SIZE_X*0.33 */)
+	h := this.rand.Intn(8 /* int(NEXT_BLOCK_AREA_SIZE*0.24)) + int(NEXT_BLOCK_AREA_SIZE*0.33 */)
 	cx -= w / 2
 	cy -= h / 2
 	var wr, hr float64
@@ -257,22 +257,22 @@ func (this *Field) addGround(typ int) {
 				var o, to float64
 				wr = nextFloat(this.rand, 0.2) + 0.2
 				hr = nextFloat(this.rand, 0.3) + 0.4
-				o = (bx-cx)*wr + (y-cy)*hr
+				o = float64(bx-cx)*wr + float64(y-cy)*hr
 				wr = nextFloat(this.rand, 0.2) + 0.2
 				hr = nextFloat(this.rand, 0.3) + 0.4
-				to = (cx+w-1-bx)*wr + (y-cy)*hr
+				to = float64(cx+w-1-bx)*wr + float64(y-cy)*hr
 				if to < o {
 					o = to
 				}
 				wr = nextFloat(this.rand, 0.2) + 0.2
 				hr = nextFloat(this.rand, 0.3) + 0.4
-				to = (bx-cx)*wr + (cy+h-1-y)*hr
+				to = float64(bx-cx)*wr + float64(cy+h-1-y)*hr
 				if to < o {
 					o = to
 				}
 				wr = nextFloat(this.rand, 0.2) + 0.2
 				hr = nextFloat(this.rand, 0.3) + 0.4
-				to = (cx+w-1-bx)*wr + (cy+h-1-y)*hr
+				to = float64(cx+w-1-bx)*wr + float64(cy+h-1-y)*hr
 				if to < o {
 					o = to
 				}
@@ -297,7 +297,7 @@ func (this *Field) getBlockVector(p vector.Vector) int {
 }
 
 func (this *Field) getBlock(x, y float64) int {
-	y -= this.screenY - int(this.screenY)
+	y -= this.screenY - math.Floor(this.screenY)
 	var bx, by int
 	bx = int((x + BLOCK_WIDTH*SCREEN_BLOCK_SIZE_X/2) / BLOCK_WIDTH)
 	by = int(this.screenY) + int((-y+BLOCK_WIDTH*SCREEN_BLOCK_SIZE_Y/2)/BLOCK_WIDTH)
@@ -313,16 +313,16 @@ func (this *Field) getBlock(x, y float64) int {
 }
 
 func (this *Field) convertToScreenPos(bx, y int) vector.Vector {
-	oy := screenY - float64(int(screenY))
-	by := y - int(screenY)
+	oy := this.screenY - math.Floor(this.screenY)
+	by := y - int(this.screenY)
 	if by <= -BLOCK_SIZE_Y {
 		by += BLOCK_SIZE_Y
 	}
 	if by > 0 {
 		by -= BLOCK_SIZE_Y
 	}
-	this.screenPos.X = bx*BLOCK_WIDTH - BLOCK_WIDTH*SCREEN_BLOCK_SIZE_X/2 + BLOCK_WIDTH/2
-	this.screenPos.Y = by*-BLOCK_WIDTH + BLOCK_WIDTH*SCREEN_BLOCK_SIZE_Y/2 + oy - BLOCK_WIDTH/2
+	this.screenPos.X = float64(bx)*BLOCK_WIDTH - BLOCK_WIDTH*SCREEN_BLOCK_SIZE_X/2 + BLOCK_WIDTH/2
+	this.screenPos.Y = float64(by)*-BLOCK_WIDTH + BLOCK_WIDTH*SCREEN_BLOCK_SIZE_Y/2 + oy - BLOCK_WIDTH/2
 	return this.screenPos
 }
 
@@ -361,14 +361,14 @@ func (this *Field) drawPanel() {
 	if nci >= TIME_COLOR_INDEX {
 		nci = 0
 	}
-	co := this.time - ci
+	co := int(this.time) - ci
 	for i := 0; i < 6; i++ {
 		for j := 0; j < 3; j++ {
-			this.baseColor[i][j] = baseColorTime[ci][i][j]*(1-co) + baseColorTime[nci][i][j]*co
+			this.baseColor[i][j] = baseColorTime[ci][i][j]*(1-float64(co)) + baseColorTime[nci][i][j]*float64(co)
 		}
 	}
 	by := int(this.screenY)
-	oy := this.screenY - by
+	oy := this.screenY - float64(by)
 	var sx float64
 	sy := BLOCK_WIDTH*SCREEN_BLOCK_SIZE_Y/2 + oy
 	by--
@@ -403,7 +403,7 @@ func (this *Field) drawPanel() {
 		sy -= BLOCK_WIDTH
 		by++
 	}
-	glEnd()
+	gl.End()
 }
 
 var degBlockOfs = [4][2]int{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
@@ -412,7 +412,7 @@ func (this *Field) calcPlatformDeg(x, y int) float64 {
 	d := this.rand.Intn(4)
 	for i := 0; i < 4; i++ {
 		if !this.checkBlock(x+degBlockOfs[d][0], y+degBlockOfs[d][1], -1, true) {
-			pd := d * math.Pi / 2
+			pd := float64(d) * math.Pi / 2
 			ox := x + degBlockOfs[d][0]
 			oy := y + degBlockOfs[d][1]
 			td := d
@@ -500,7 +500,7 @@ func (this *Field) checkInFieldExceptTop(p vector.Vector) bool {
 }
 
 func (this *Field) checkInOuterFieldExceptTop(p vector.Vector) bool {
-	return p.x >= -this._outerSize.X && p.X <= this._outerSize.X && p.Y >= -this._outerSize.Y && p.Y <= this._outerSize.Y*2
+	return p.X >= -this._outerSize.X && p.X <= this._outerSize.X && p.Y >= -this._outerSize.Y && p.Y <= this._outerSize.Y*2
 }
 
 func (this *Field) size() vector.Vector {
