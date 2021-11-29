@@ -96,16 +96,16 @@ func (this *Shot) Move() {
 		sp = SPEED
 	} else {
 		if this.cnt < 10 {
-			sp = LANCE_SPEED * this.cnt / 10
+			sp = LANCE_SPEED * float64(this.cnt) / 10
 		} else {
 			sp = LANCE_SPEED
 		}
 	}
-	this.pos.x += math.Sin(this._deg) * sp
-	this.pos.y += math.Cos(this._deg) * sp
-	this.pos.y -= this.field.lastScrollY
+	this.pos.X += math.Sin(this._deg) * sp
+	this.pos.Y += math.Cos(this._deg) * sp
+	this.pos.Y -= this.field.lastScrollY()
 	if this.field.getBlockVector(this.pos) >= ON_BLOCK_THRESHOLD ||
-		!this.field.checkInOuterFieldVector(this.pos) || this.pos.Y > this.field.size.Y {
+		!this.field.checkInOuterFieldVector(this.pos) || this.pos.Y > this.field.size().Y {
 		this.remove()
 	}
 	if this.lance {
@@ -138,7 +138,7 @@ func (this *Shot) removeHitToEnemy(isSmallEnemy bool /* = false */) {
 
 func (this *Shot) removeHit() {
 	this.remove()
-	var sn int
+	// var sn int
 	if this.lance {
 		for i := 0; i < 10; i++ {
 			s := this.smokes.GetInstanceForced()
@@ -208,7 +208,7 @@ func (this *Shot) Draw() {
 		gl.PushMatrix()
 		sdl.GlTranslate(this.pos)
 		gl.Rotated(-this._deg*180/math.Pi, 0, 0, 1)
-		gl.Rotated(this.cnt*31, 0, 1, 0)
+		gl.Rotated(float64(this.cnt)*31, 0, 1, 0)
 		shotShape.Draw()
 		gl.PopMatrix()
 	}
@@ -289,11 +289,13 @@ type LanceShape struct {
 }
 
 func NewLanceShape() *LanceShape {
-	this := &LanceShape{NewCollidableImpl()}
-	this._collision = Vector{0.66, 0.66}
+	this := &LanceShape{}
+	this.CollidableImpl = sdl.NewCollidableInternal(this)
+	this._collision = vector.Vector{0.66, 0.66}
 	return this
 }
 
-func (this *LanceShape) Collision() vector.Vector {
-	return this._collision
+func (this *LanceShape) Collision() *vector.Vector {
+	v := this._collision
+	return &v
 }
