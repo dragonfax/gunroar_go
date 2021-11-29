@@ -130,6 +130,8 @@ func (this *TwinStick) GetNullState() TwinStickState {
 
 type TwinStickState struct {
 	left, right vector.Vector
+	PressA      bool
+	PressB      bool
 }
 
 func NewTwinStickState(i record.InputState) record.InputState {

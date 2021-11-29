@@ -140,7 +140,7 @@ func (this *Texture) Close() {
 	}
 }
 
-func (this *Texture) bind(idx int /* = 0 */) {
+func (this *Texture) Bind(idx int /* = 0 */) {
 	gl.BindTexture(gl.TEXTURE_2D, this.num+uint32(idx))
 }
 

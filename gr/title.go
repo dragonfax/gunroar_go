@@ -42,7 +42,7 @@ func (this *TitleManager) init() {
 	this.displayList = sdl.NewDisplayList(1)
 	this.displayList.BeginNewList()
 	gl.Enable(gl.TEXTURE_2D)
-	this.logo.bind()
+	this.logo.Bind(0)
 	sdl.SetColor(1, 1, 1, 1)
 	gl.Begin(gl.TRIANGLE_FAN)
 	gl.TexCoord2f(0, 0)
@@ -98,11 +98,9 @@ func (this *TitleManager) move() {
 	}
 	// PadState input = pad.getState(false);
 	// MouseState mouseInput = mouse.getState(false);
+	input := twinStick.GetState(false)
 	if this.btnPressedCnt <= 0 {
-		if ((this.input.button & PadState.Button.A) ||
-			(this.gameMode == InGameState.GameMode.MOUSE &&
-				(this.mouseInput.button & MouseState.Button.LEFT))) &&
-			this.gameMode >= 0 {
+		if input.PressA && this.gameMode >= 0 {
 			this.gameManager.startInGame(this.gameMode)
 		}
 		gmc := 0

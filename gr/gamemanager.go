@@ -122,7 +122,7 @@ func (this *GameManager) startTitle(fromGameover bool /* = false */) {
 	this.startState()
 }
 
-func (this *GameManager) startInGame(gameMode int) {
+func (this *GameManager) startInGame(gameMode GameMode) {
 	this.state = this.inGameState
 	this.inGameState.gameMode = gameMode
 	this.startState()
@@ -318,11 +318,11 @@ type InGameState struct {
 	pauseCnt      int
 	pausePressed  bool
 	scoreReelSize float64
-	_gameMode     int
+	_gameMode     GameMode
 }
 
 func NewInGameState(gameManager GameManager, screen Screen,
-	twinStick TwinStick,
+	twinStick sdl.TwinStick,
 	field Field, ship *Ship, shots ShotPool, bullets BulletPool, enemies EnemyPool,
 	sparks SparkPool, smokes SmokePool,
 	fragments FragmentPool, sparkFragments SparkFragmentPool, wakes WakePool,
@@ -557,10 +557,10 @@ func (this *InGameState) loadReplay(fileName string) {
 }
 
 func (this *InGameState) resetReplay() {
-	this._replayData = null
+	this._replayData = nil
 }
 
-func (this *InGameState) gameMode() int {
+func (this *InGameState) gameMode() GameMode {
 	return this._gameMode
 }
 
