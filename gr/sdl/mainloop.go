@@ -43,9 +43,9 @@ func NewMainLoop(screen screen.Screen, input Input, gameManager GameManager, pre
 		gameManager:         gameManager,
 		prefManager:         prefManager,
 	}
-	gameManager.setMainLoop(this)
-	gameManager.setUIs(screen, input)
-	gameManager.setPrefManager(prefManager)
+	gameManager.SetMainLoop(this)
+	gameManager.SetUIs(screen, input)
+	gameManager.SetPrefManager(prefManager)
 	return this
 }
 
@@ -53,7 +53,7 @@ func NewMainLoop(screen screen.Screen, input Input, gameManager GameManager, pre
 func (this *MainLoop) initFirst() {
 	this.prefManager.Load()
 	SoundManagerInit()
-	this.gameManager.init()
+	this.gameManager.Init()
 	this.initInterval()
 }
 
@@ -72,7 +72,7 @@ func (this *MainLoop) Loop() {
 	var frame uint32
 	this.screen.InitSDL()
 	this.initFirst()
-	this.gameManager.start()
+	this.gameManager.Start()
 	for !this.done {
 		this.event = sdl.PollEvent()
 		if this.event != nil {
@@ -101,11 +101,11 @@ func (this *MainLoop) Loop() {
 		}
 		this.slowdownRatio = 0
 		for i := uint32(0); i < frame; i++ {
-			this.gameManager.move()
+			this.gameManager.Move()
 		}
 		this.slowdownRatio /= float64(frame)
 		this.screen.Clear()
-		this.gameManager.draw()
+		this.gameManager.Draw()
 		this.screen.Flip()
 		if !this.NoWait {
 			this.calcInterval()

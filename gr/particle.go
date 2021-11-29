@@ -17,7 +17,7 @@ import (
 
 var sparkRand = r.New(r.NewSource(time.Now().Unix()))
 
-var _ LuminousActor = &Spark{}
+var _ sdl.LuminousActor = &Spark{}
 
 type Spark struct {
 	actor.ExistsImpl
@@ -38,7 +38,7 @@ func NewSpark() *Spark {
 func (*Spark) Init(args []interface{}) {
 }
 
-func (this *Spark) set(p Vector, vx, vy, r, g, b float64, c int) {
+func (this *Spark) set(p vector.Vector, vx, vy, r, g, b float64, c int) {
 	this.ppos.X = p.X
 	this.pos.X = p.X
 	this.ppos.Y = p.Y
@@ -52,19 +52,19 @@ func (this *Spark) set(p Vector, vx, vy, r, g, b float64, c int) {
 	this.SetExists(true)
 }
 
-func (this *Spark) move() {
+func (this *Spark) Move() {
 	this.cnt--
-	if this.cnt <= 0 || this.vel.dist(0, 0) < 0.005 {
+	if this.cnt <= 0 || this.vel.Dist(0, 0) < 0.005 {
 		this.SetExists(false)
 		return
 	}
 	this.ppos.X = this.pos.X
 	this.ppos.Y = this.pos.Y
-	this.pos += this.vel
-	this.vel *= 0.96
+	this.pos.OpAddAssign(this.vel)
+	this.vel.OpMulAssign(0.96)
 }
 
-func (this *Spark) draw() {
+func (this *Spark) Draw() {
 	ox := this.vel.X
 	oy := this.vel.Y
 	sdl.SetColor(this.r, this.g, this.b, 1)
@@ -78,7 +78,7 @@ func (this *Spark) draw() {
 	gl.Vertex3d(this.pos.X+oy, this.pos.Y-ox, 0)
 }
 
-func (this *Spark) drawLuminous() {
+func (this *Spark) DrawLuminous() {
 	ox := this.vel.X
 	oy := this.vel.Y
 	sdl.SetColor(this.r, this.g, this.b, 1)
@@ -122,7 +122,7 @@ var smokeRand = r.New(r.NewSource(time.Now().Unix()))
 var windVel = vector.Vector3{0.04, 0.04, 0.02}
 var smokeWakePos vector.Vector
 
-var _ LuminousActor = &Smoke{}
+var _ sdl.LuminousActor = &Smoke{}
 
 type Smoke struct {
 	actor.ExistsImpl
@@ -135,7 +135,7 @@ type Smoke struct {
 	size, r, g, b, a float64
 }
 
-func setSmokeRandSeed(seed int) {
+func setSmokeRandSeed(seed int64) {
 	smokeRand = r.New(r.NewSource(seed))
 }
 
@@ -152,16 +152,16 @@ func (this *Smoke) Init(args []interface{}) {
 	this.wakes = args[1].(*WakePool)
 }
 
-func (this *Smoke) setVector(p vector.Vector, mx, my, mz float64, t int, c int /* = 60 */, sz float64 /* = 2 */) {
+func (this *Smoke) setVector(p vector.Vector, mx, my, mz float64, t SmokeType, c int /* = 60 */, sz float64 /* = 2 */) {
 	this.set(p.X, p.Y, mx, my, mz, t, c, sz)
 }
 
-func (this *Smoke) setVector3(p vector.Vector3, mx, my, mz float64, t int, c int /* = 60 */, sz float64 /* = 2 */) {
+func (this *Smoke) setVector3(p vector.Vector3, mx, my, mz float64, t SmokeType, c int /* = 60 */, sz float64 /* = 2 */) {
 	this.set(p.X, p.Y, mx, my, mz, t, c, sz)
 	this.pos.Z = p.Z
 }
 
-func (this *Smoke) set(x, y, mx, my, mz float64, t int, c int /* = 60 */, sz float64 /* = 2 */) {
+func (this *Smoke) set(x, y, mx, my, mz float64, t SmokeType, c int /* = 60 */, sz float64 /* = 2 */) {
 	if !this.field.checkInOuterField(x, y) {
 		return
 	}
@@ -215,7 +215,7 @@ func (this *Smoke) set(x, y, mx, my, mz float64, t int, c int /* = 60 */, sz flo
 	this.SetExists(true)
 }
 
-func (this *Smoke) move() {
+func (this *Smoke) Move() {
 	this.cnt--
 	if this.cnt <= 0 || !this.field.checkInOuterField(this.pos.X, this.pos.Y) {
 		this.SetExists(false)
@@ -226,11 +226,11 @@ func (this *Smoke) move() {
 		this.vel.Y += (windVel.Y - this.vel.Y) * 0.01
 		this.vel.Z += (windVel.Z - this.vel.Z) * 0.01
 	}
-	this.pos += this.vel
-	this.pos.Y -= this.field.lastScrollY
+	this.pos.OpAddAssign(this.vel)
+	this.pos.Y -= this.field.lastScrollY()
 	switch this.typ {
 	case FIRE, EXPLOSION, SMOKE:
-		if cnt < startCnt/2 {
+		if this.cnt < this.startCnt/2 {
 			this.r *= 0.95
 			this.g *= 0.95
 			this.b *= 0.95
@@ -247,7 +247,7 @@ func (this *Smoke) move() {
 		this.r *= 0.92
 		this.g *= 0.92
 		this.a *= 0.95
-		this.vel *= 0.9
+		this.vel.OpMulAssign(0.9)
 	case WAKE:
 		this.a *= 0.98
 		this.size *= 1.005
@@ -261,62 +261,69 @@ func (this *Smoke) move() {
 	if this.typ == EXPLOSION && this.pos.Z < 0.01 {
 		bl := this.field.getBlock(this.pos.X, this.pos.Y)
 		if bl >= 1 {
-			this.vel *= 0.8
+			this.vel.OpMulAssign(0.8)
 		}
 		if this.cnt%3 == 0 && bl < -1 {
 			sp := math.Sqrt(this.vel.X*this.vel.X + this.vel.Y*this.vel.Y)
 			if sp > 0.3 {
 				d := math.Atan2(this.vel.X, this.vel.Y)
-				wakePos.X = this.pos.X + math.Sin(d+math.Pi/2)*this.size*0.25
-				wakePos.Y = this.pos.Y + math.Cos(d+math.Pi/2)*this.size*0.25
-				w := wakes.getInstanceForced()
-				w.set(wakePos, d+math.Pi-0.2+nextSignedFloat(rand, 0.1), sp*0.33,
-					20+rand.Intn(12), this.size*(7.0+nextFloat(rand, 3)))
-				wakePos.X = this.pos.X + math.Sin(d-math.Pi/2)*this.size*0.25
-				wakePos.Y = this.pos.Y + math.Cos(d-math.Pi/2)*this.size*0.25
-				w = wakes.getInstanceForced()
-				w.set(wakePos, d+math.Pi+0.2+nextSignedFloat(rand, 0.1), sp*0.33,
-					20+rand.Intn(12), this.size*(7.0+nextFloat(rand, 3)))
+				smokeWakePos.X = this.pos.X + math.Sin(d+math.Pi/2)*this.size*0.25
+				smokeWakePos.Y = this.pos.Y + math.Cos(d+math.Pi/2)*this.size*0.25
+				w := this.wakes.GetInstanceForced()
+				w.set(smokeWakePos, d+math.Pi-0.2+nextSignedFloat(rand, 0.1), sp*0.33,
+					20+rand.Intn(12), this.size*(7.0+nextFloat(rand, 3)), false)
+				smokeWakePos.X = this.pos.X + math.Sin(d-math.Pi/2)*this.size*0.25
+				smokeWakePos.Y = this.pos.Y + math.Cos(d-math.Pi/2)*this.size*0.25
+				w = this.wakes.GetInstanceForced()
+				w.set(smokeWakePos, d+math.Pi+0.2+nextSignedFloat(rand, 0.1), sp*0.33,
+					20+rand.Intn(12), this.size*(7.0+nextFloat(rand, 3)), false)
 			}
 		}
 	}
 }
 
-func (this *Smoke) draw() {
+func (this *Smoke) Draw() {
 	quadSize := this.size / 2
 	sdl.SetColor(this.r, this.g, this.b, this.a)
-	glVertex3d(this.pos.X-quadSize, this.pos.Y-quadSize, this.pos.Z)
-	glVertex3d(this.pos.X+quadSize, this.pos.Y-quadSize, this.pos.Z)
-	glVertex3d(this.pos.X+quadSize, this.pos.Y+quadSize, this.pos.Z)
-	glVertex3d(this.pos.X-quadSize, this.pos.Y+quadSize, this.pos.Z)
+	gl.Vertex3d(this.pos.X-quadSize, this.pos.Y-quadSize, this.pos.Z)
+	gl.Vertex3d(this.pos.X+quadSize, this.pos.Y-quadSize, this.pos.Z)
+	gl.Vertex3d(this.pos.X+quadSize, this.pos.Y+quadSize, this.pos.Z)
+	gl.Vertex3d(this.pos.X-quadSize, this.pos.Y+quadSize, this.pos.Z)
 }
 
-func (this *Smoke) drawLuminous() {
+func (this *Smoke) DrawLuminous() {
 	if this.r+this.g > 0.8 && this.b < 0.5 {
 		quadSize := this.size / 2
 		sdl.SetColor(this.r, this.g, this.b, this.a)
-		glVertex3d(this.pos.X-quadSize, this.pos.Y-quadSize, this.pos.Z)
-		glVertex3d(this.pos.X+quadSize, this.pos.Y-quadSize, this.pos.Z)
-		glVertex3d(this.pos.X+quadSize, this.pos.Y+quadSize, this.pos.Z)
-		glVertex3d(this.pos.X-quadSize, this.pos.Y+quadSize, this.pos.Z)
+		gl.Vertex3d(this.pos.X-quadSize, this.pos.Y-quadSize, this.pos.Z)
+		gl.Vertex3d(this.pos.X+quadSize, this.pos.Y-quadSize, this.pos.Z)
+		gl.Vertex3d(this.pos.X+quadSize, this.pos.Y+quadSize, this.pos.Z)
+		gl.Vertex3d(this.pos.X-quadSize, this.pos.Y+quadSize, this.pos.Z)
 	}
 }
 
-var _ LuminousActorPool = &SmokePool{}
-
 type SmokePool struct {
-	actor.ActorPool
+	sdl.LuminousActorPool
 }
 
 func NewSmokePool(n int, args []interface{}) *SmokePool {
-	this := &SmokePool{ActorPool: NewActorPool(NewSmoke, n, args)}
+	f := func() actor.Actor { return NewSmoke() }
+	this := &SmokePool{LuminousActorPool: sdl.NewLuminousActorPool(f, n, args)}
 	return this
+}
+
+func (this *SmokePool) GetInstanceForced() *Smoke {
+	return this.LuminousActorPool.GetInstanceForced().(*Smoke)
+}
+
+func (this *SmokePool) GetInstance() *Smoke {
+	return this.LuminousActorPool.GetInstance().(*Smoke)
 }
 
 /**
  * Fragments of destroyed enemies.
  */
-var _ Actor = &Fragment{}
+var _ actor.Actor = &Fragment{}
 
 var fragmentDisplayList *sdl.DisplayList
 var fragmentRand = r.New(r.NewSource(time.Now().Unix()))
@@ -331,8 +338,8 @@ type Fragment struct {
 }
 
 func fragmentInit() {
-	fragmentDisplayList = sdl.NewDisplayList()
-	fragmentDisplayList.beginNewList()
+	fragmentDisplayList = sdl.NewDisplayList(1)
+	fragmentDisplayList.BeginNewList()
 	sdl.SetColor(0.7, 0.5, 0.5, 0.5)
 	gl.Begin(gl.TRIANGLE_FAN)
 	gl.Vertex2d(-0.5, -0.25)
@@ -341,13 +348,13 @@ func fragmentInit() {
 	gl.Vertex2d(-0.5, 0.25)
 	gl.End()
 	sdl.SetColor(0.7, 0.5, 0.5, 0.9)
-	gl.Begin(GL_LINE_LOOP)
+	gl.Begin(gl.LINE_LOOP)
 	gl.Vertex2d(-0.5, -0.25)
 	gl.Vertex2d(0.5, -0.25)
 	gl.Vertex2d(0.5, 0.25)
 	gl.Vertex2d(-0.5, 0.25)
 	gl.End()
-	fragmentDisplayList.endNewList()
+	fragmentDisplayList.EndNewList()
 }
 
 func setFragmentRandSeed(seed int64) {
@@ -384,35 +391,35 @@ func (this *Fragment) set(p vector.Vector, mx, my, mz float64, sz float64 /* = 1
 	this.SetExists(true)
 }
 
-func (this *Fragment) move() {
+func (this *Fragment) Move() {
 	if !this.field.checkInOuterField(this.pos.X, this.pos.Y) {
-		tihs.SetExists(false)
+		this.SetExists(false)
 		return
 	}
 	this.vel.X *= 0.96
 	this.vel.Y *= 0.96
 	this.vel.Z += (-0.04 - this.vel.Z) * 0.01
-	this.pos += this.vel
+	this.pos.OpAddAssign(this.vel)
 	if this.pos.Z < 0 {
-		s := smokes.getInstanceForced()
+		s := this.smokes.GetInstanceForced()
 		if this.field.getBlock(this.pos.X, this.pos.Y) < 0 {
 			s.set(this.pos.X, this.pos.Y, 0, 0, 0, WAKE, 60, this.size*0.66)
 		} else {
-			s.set(this.pos.X, pos.Y, 0, 0, 0, SAND, 60, this.size*0.75)
+			s.set(this.pos.X, this.pos.Y, 0, 0, 0, SAND, 60, this.size*0.75)
 		}
 		this.SetExists(false)
 		return
 	}
-	this.pos.Y -= this.field.lastScrollY
-	this.d2 += md2
+	this.pos.Y -= this.field.lastScrollY()
+	this.d2 += this.md2
 }
 
-func (this *Fragment) draw() {
+func (this *Fragment) Draw() {
 	gl.PushMatrix()
-	sdl.glTranslate(this.pos)
-	gl.Rotatef(this.d2, 1, 0, 0)
-	gl.Scalef(this.size, this.size, 1)
-	fragmentDisplayList.call(0)
+	sdl.GlTranslate3(this.pos)
+	gl.Rotated(this.d2, 1, 0, 0)
+	gl.Scaled(this.size, this.size, 1)
+	fragmentDisplayList.Call(0)
 	gl.PopMatrix()
 }
 
@@ -421,7 +428,8 @@ type FragmentPool struct {
 }
 
 func NewFragmentPool(n int, args []interface{}) *FragmentPool {
-	return &FragmentPool{actor.NewActorPool(NewFragment, n, args)}
+	f := func() actor.Actor { return NewFragment() }
+	return &FragmentPool{actor.NewActorPool(f, n, args)}
 }
 
 /**
@@ -431,7 +439,7 @@ func NewFragmentPool(n int, args []interface{}) *FragmentPool {
 var sparkFragmentDisplayList *sdl.DisplayList
 var sparkFragmentRand = r.New(r.NewSource(time.Now().Unix()))
 
-var _ LuminousActor = &SparkFragment()
+var _ sdl.LuminousActor = &SparkFragment{}
 
 type SparkFragment struct {
 	actor.ExistsImpl
@@ -487,7 +495,7 @@ func (this *SparkFragment) set(p vector.Vector, mx, my, mz float64, sz float64 /
 	}
 	this.d2 = nextFloat(rand, 360)
 	this.md2 = nextSignedFloat(rand, 15)
-	this.hasSmoke = rand.nextInt(4) == 0
+	this.hasSmoke = rand.Intn(4) == 0
 	this.cnt = 0
 	this.SetExists(true)
 }
@@ -502,7 +510,7 @@ func (this *SparkFragment) Move() {
 	this.vel.Z += (-0.08 - this.vel.Z) * 0.01
 	this.pos.OpAddAssign(this.vel)
 	if this.pos.Z < 0 {
-		s := this.smokes.getInstanceForced()
+		s := this.smokes.GetInstanceForced()
 		if this.field.getBlock(this.pos.X, this.pos.Y) < 0 {
 			s.set(this.pos.X, this.pos.Y, 0, 0, 0, WAKE, 60, this.size*0.66)
 		} else {
@@ -511,13 +519,13 @@ func (this *SparkFragment) Move() {
 		this.SetExists(false)
 		return
 	}
-	this.pos.Y -= this.field.lastScrollY
+	this.pos.Y -= this.field.lastScrollY()
 	this.d2 += this.md2
 	this.cnt++
 	if this.hasSmoke && this.cnt%5 == 0 {
-		s := this.smokes.getInstance()
+		s := this.smokes.GetInstance()
 		if s != nil {
-			s.setVector(this.pos, 0, 0, 0, SMOKE, 90+rand.Intn(60), this.size*0.5)
+			s.setVector3(this.pos, 0, 0, 0, SMOKE, 90+rand.Intn(60), this.size*0.5)
 		}
 	}
 }
@@ -584,8 +592,8 @@ func (this *Wake) set(p vector.Vector, deg, speed float64, c int /* = 60 */, sz 
 	this.pos.Y = p.Y
 	this.deg = deg
 	this.speed = speed
-	this.vel.x = math.Sin(deg) * speed
-	this.vel.y = math.Cos(deg) * speed
+	this.vel.X = math.Sin(deg) * speed
+	this.vel.Y = math.Cos(deg) * speed
 	this.cnt = c
 	this.size = sz
 	this.revShape = rs

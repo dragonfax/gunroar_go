@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	r "math/rand"
 	"time"
@@ -140,26 +139,15 @@ func (this *GameManager) saveErrorReplay() {
 }
 
 func (this *GameManager) saveLastReplay() {
-	err := this.inGameState.saveReplay("last.rpl")
-	if err != nil {
-		fmt.Printf("warn : %s \n", err.Error())
-	}
+	this.inGameState.saveReplay("last.rpl")
 }
 
 func (this *GameManager) loadLastReplay() {
-	err := this.inGameState.loadReplay("last.rpl")
-	if err != nil {
-		fmt.Printf("warn : %s \n", err.Error())
-		this.inGameState.resetReplay()
-	}
+	this.inGameState.loadReplay("last.rpl")
 }
 
 func (this *GameManager) loadErrorReplay() {
-	err := this.inGameState.loadReplay("error.rpl")
-	if err != nil {
-		fmt.printf("warn : %s\n", err.Error())
-		this.inGameState.resetReplay()
-	}
+	this.inGameState.loadReplay("error.rpl")
 }
 
 func (this *GameManager) initInterval() {

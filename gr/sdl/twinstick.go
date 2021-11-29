@@ -27,7 +27,7 @@ type TwinStick struct {
 }
 
 func NewTwinStick() TwinStick {
-	this := TwinStick{reverse: 1}
+	this := TwinStick{Reverse: 1}
 	return this
 }
 
@@ -56,7 +56,7 @@ func (this *TwinStick) getState() TwinStickState {
 		this.state.left.X = this.adjustAxis(this.stick.Axis(0))
 		this.state.left.Y = -this.adjustAxis(this.stick.Axis(1))
 		var rx int16 = 0
-		if this.enableAxis5 {
+		if this.EnableAxis5 {
 			rx = this.stick.Axis(4)
 		} else {
 			rx = this.stick.Axis(2)
@@ -67,7 +67,7 @@ func (this *TwinStick) getState() TwinStickState {
 			this.state.right.Y = 0
 		} else {
 			ry = -ry
-			rd := math.Atan2(float64(rx), float64(ry))*this.reverse + this.rotate
+			rd := math.Atan2(float64(rx), float64(ry))*this.Reverse + this.Rotate
 			rl := math.Sqrt(float64(rx*rx + ry*ry))
 			this.state.right.X = this.adjustAxis(int16(math.Sin(rd) * rl))
 			this.state.right.Y = this.adjustAxis(int16(math.Cos(rd) * rl))

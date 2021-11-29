@@ -19,8 +19,8 @@ type LuminousActorPool struct {
 	actor.ActorPool
 }
 
-func NewLuminousActorPool(f actor.CreateActorFunc, n int, args []interface{}) *LuminousActorPool {
-	this := &LuminousActorPool{
+func NewLuminousActorPool(f actor.CreateActorFunc, n int, args []interface{}) LuminousActorPool {
+	this := LuminousActorPool{
 		ActorPool: actor.NewActorPoolInternal(f, n, args),
 	}
 	return this

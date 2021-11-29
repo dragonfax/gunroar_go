@@ -9,7 +9,7 @@ const REPLAY_VERSION_NUM = 11
 
 type ReplayData struct {
 	// jInputRecord!(PadState) padInputRecord;
-	twinStickInputRecord InputRecord
+	twinStickInputRecord sdl.InputRecord
 	// InputRecord!(MouseAndPadState) mouseAndPadInputRecord;
 	seed            int64
 	score           int
@@ -19,7 +19,7 @@ type ReplayData struct {
 }
 
 func NewReplayData() *ReplayData {
-	this := ReplayData{}
+	this := &ReplayData{}
 	return this
 }
 

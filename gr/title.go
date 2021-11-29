@@ -12,20 +12,20 @@ import (
 const TITLE_SCROLL_SPEED_BASE = 0.025
 
 type TitleManager struct {
-	prefManager PrefManager
+	prefManager *PrefManager
 	// RecordablePad pad;
 	// RecordableMouse mouse;
-	field         Field
-	gameManager   GameManager
-	displayList   DisplayList
-	logo          Texture
+	field         *Field
+	gameManager   *GameManager
+	displayList   *sdl.DisplayList
+	logo          *sdl.Texture
 	cnt           int
-	_replayData   ReplayData
+	_replayData   *ReplayData
 	btnPressedCnt int
 	gameMode      int
 }
 
-func NewTitleManager(prefManager PrefManager /* Pad pad, Mouse mouse, */, field Field, gameManager GameManager) *TitleManager {
+func NewTitleManager(prefManager *PrefManager /* Pad pad, Mouse mouse, */, field *Field, gameManager *GameManager) *TitleManager {
 	this := &TitleManager{}
 	this.prefManager = prefManager
 	// this.pad = cast(RecordablePad) pad;
@@ -39,7 +39,7 @@ func NewTitleManager(prefManager PrefManager /* Pad pad, Mouse mouse, */, field 
 func (this *TitleManager) init() {
 	this.logo = sdl.NewTexture("title.bmp")
 	this.displayList = sdl.NewDisplayList(1)
-	this.displayList.beginNewList()
+	this.displayList.BeginNewList()
 	gl.Enable(gl.TEXTURE_2D)
 	this.logo.bind()
 	sdl.SetColor(1, 1, 1, 1)
