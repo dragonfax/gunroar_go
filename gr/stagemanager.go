@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"math/rand"
 	r "math/rand"
 	"time"
 )
@@ -138,15 +139,19 @@ func (this *StageManager) shipDestroyed() {
 	}
 }
 
+func nextSignedInt(rand *r.Rand, max int) int {
+	return rand.Intn(max*2) - max // NOTES skips some numbers
+}
+
 func (this *StageManager) gotoNextBlockArea() {
 	if this._bossMode {
 		this.bossAppCnt--
 		if this.bossAppCnt == 0 {
 			ses := NewShipEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
 			ses.setParam(this.rank, BOSS, this.rand)
-			en := this.enemies.getInstance()
+			en := this.enemies.GetInstance()
 			if en != nil {
-				if ses.(HasAppearType).setFirstState(en.state, EnemyState.AppearanceType.CENTER) {
+				if ses.setFirstState(en.state(), CENTER) {
 					en.set(ses)
 				}
 			} else {
@@ -180,7 +185,7 @@ func (this *StageManager) gotoNextBlockArea() {
 	}
 	var appType = AppearanceType(this.rand.Intn(2))
 	if largeShipNum > 0 {
-		lr := tr * (0.25 + nextFloat(rand, 0.15))
+		lr := tr * (0.25 + nextFloat(this.rand, 0.15))
 		if noSmallShip {
 			lr *= 1.5
 		}
@@ -292,7 +297,7 @@ func (this *StageManager) bossMode() bool {
 type EnemyAppearance struct {
 	spec                             *EnemySpec
 	nextAppDist, nextAppDistInterval float64
-	appType                          int
+	appType                          AppearanceType
 }
 
 func NewEnemyAppearance() *EnemyAppearance {
@@ -301,7 +306,7 @@ func NewEnemyAppearance() *EnemyAppearance {
 	return this
 }
 
-func (this *EnemyAppearance) set(s *EnemySpec, num, appType int, rand *r.Rand) {
+func (this *EnemyAppearance) set(s *EnemySpec, num, appType AppearanceType, rand *r.Rand) {
 	this.spec = s
 	this.nextAppDistInterval = NEXT_BLOCK_AREA_SIZE / float64(num)
 	this.nextAppDist = nextFloat(rand, this.nextAppDistInterval)
@@ -312,7 +317,7 @@ func (this *EnemyAppearance) unset() {
 	this.spec = nil
 }
 
-func (this *EnemyAppearance) move(enemies *EnemyPool, field Field) {
+func (this *EnemyAppearance) move(enemies *EnemyPool, field *Field) {
 	if this.spec == nil {
 		return
 	}

@@ -112,13 +112,13 @@ func (this *TitleManager) move() {
 			gmc = -1
 		}
 		if gmc != 0 {
-			this.gameMode += gmc
-			if this.gameMode >= InGameState.GAME_MODE_NUM {
+			this.gameMode = GameMode(int(this.gameMode) + gmc)
+			if this.gameMode >= GAME_MODE_NUM {
 				this.gameMode = -1
 			} else if this.gameMode < -1 {
-				this.gameMode = InGameState.GAME_MODE_NUM - 1
+				this.gameMode = GAME_MODE_NUM - 1
 			}
-			if this.gameMode == -1 && this._replayData {
+			if int(this.gameMode) == -1 && this._replayData != nil {
 				enableBgm()
 				enableSe()
 				playCurrentBgm()

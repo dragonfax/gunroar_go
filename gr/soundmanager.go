@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	r "math/rand"
+	"math/rand"
 	"path/filepath"
-	"time"
 
 	"github.com/dragonfax/gunroar/gr/sdl"
 )
@@ -25,20 +24,14 @@ var se map[string]*sdl.Chunk
 var seMark map[string]bool
 var bgmDisabled = false
 var seDisabled = false
-var soundRand *r.Rand
 var bgmFileName []string
 var currentBgm string
 var prevBgmIdx int
 var nextIdxMv int
 
-func setSoundRandSeed(seed int64) {
-	rand = r.New(r.NewSource(seed))
-}
-
 func loadSounds() {
 	loadMusics()
 	loadChunks()
-	rand = r.New(r.NewSource(time.Now().Unix()))
 }
 
 func loadMusics() {

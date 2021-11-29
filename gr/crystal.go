@@ -91,6 +91,6 @@ func NewCrystalPool(n int, args []interface{}) *CrystalPool {
 	return &CrystalPool{actor.NewActorPool(func() actor.Actor { return NewCrystal() }, n, args)}
 }
 
-func (this *CrystalPool) GetIntance() *Crystal {
+func (this *CrystalPool) GetInstance() *Crystal {
 	return this.ActorPool.GetInstance().(*Crystal)
 }

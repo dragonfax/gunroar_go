@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"math/rand"
 	r "math/rand"
 	"time"
 
@@ -138,7 +139,7 @@ func setEnemyStateRandSeed(seed int64) {
 }
 
 type EnemyState struct {
-	appType                                               int
+	appType                                               AppearanceType
 	pos, ppos                                             vector.Vector
 	shield                                                int
 	deg, velDeg, speed, turnWay, trgDeg                   float64
@@ -152,24 +153,24 @@ type EnemyState struct {
 	spec                                                  EnemySpec
 
 	field          *Field
-	screen         Screen
+	screen         *Screen
 	bullets        *BulletPool
 	ship           *Ship
-	sparks         SparkPool
-	smokes         SmokePool
-	fragments      FragmentPool
-	sparkFragments SparkFragmentPool
-	numIndicators  NumIndicatorPool
+	sparks         *SparkPool
+	smokes         *SmokePool
+	fragments      *FragmentPool
+	sparkFragments *SparkFragmentPool
+	numIndicators  *NumIndicatorPool
 	enemy          *Enemy
 	enemies        *EnemyPool
-	stageManager   stageManager
-	scoreReel      ScoreReel
+	stageManager   *StageManager
+	scoreReel      *ScoreReel
 }
 
-func NewEnemyState(field *Field, screen Screen, bullets *BulletPool, ship *Ship,
-	sparks SparkPool, smokes SmokePool,
-	fragments FragmentPool, sparkFragments SparkFragmentPool,
-	numIndicators NumIndicatorPool, scoreReel ScoreReel) EnemyState {
+func NewEnemyState(field *Field, screen *Screen, bullets *BulletPool, ship *Ship,
+	sparks *SparkPool, smokes *SmokePool,
+	fragments *FragmentPool, sparkFragments *SparkFragmentPool,
+	numIndicators *NumIndicatorPool, scoreReel *ScoreReel) EnemyState {
 	this := EnemyState{}
 	this.idx = idxCount
 	idxCount++
@@ -226,7 +227,7 @@ func nextFloat(rand *r.Rand, n float64) float64 {
 	return rand.Float64() * n
 }
 
-func (this *EnemyState) setAppearancePos(field Field, ship *Ship, rand *r.Rand, appType int /* = AppearanceType.TOP */) bool {
+func (this *EnemyState) setAppearancePos(field Field, ship *Ship, rand *r.Rand, appType AppearanceType /* = TOP */) bool {
 	this.appType = appType
 	for i := 0; i < 8; i++ {
 		switch appType {
@@ -582,7 +583,7 @@ type EnemySpecBase struct {
 	movingTurretGroupSpec                            [MOVING_TURRET_GROUP_MAX]MovingTurretGroupSpec
 	movingTurretGroupNum                             int
 	shape, damagedShape, destroyedShape, bridgeShape *EnemyShape
-	typ                                              int
+	typ                                              EnemyType
 }
 
 func setenemySpecRandSeed(seed int64) {
@@ -609,7 +610,7 @@ func NewEnemySpecBase(field *Field, ship *Ship,
 	return this
 }
 
-func (this *EnemySpecBase) set(typ int) {
+func (this *EnemySpecBase) set(typ EnemyType) {
 	this.typ = typ
 	this._size = 1
 	this.distRatio = 0
@@ -640,7 +641,7 @@ func (this *EnemySpecBase) addMovingTurret(rank float64, bossMode bool /* = fals
 		mtn = 1
 	}
 	br := rank / mtn
-	var typ int
+	var typ MoveType
 	if !bossMode {
 		switch rand.Intn(4) {
 		case 0, 1:
@@ -651,7 +652,7 @@ func (this *EnemySpecBase) addMovingTurret(rank float64, bossMode bool /* = fals
 			typ = SWING_AIM
 		}
 	} else {
-		typ = MovingTurretGroupSpec.MoveType.ROLL
+		typ = ROLL
 	}
 	rad := 0.9 + nextFloat(rand, 0.4) - mtn*0.1
 	radInc := 0.5 + nextFloat(rand, 0.25)
@@ -772,7 +773,7 @@ func (this *EnemySpecBase) size() float64 {
 	return this._size
 }
 
-func (this *EnemySpecBase) size(float v) float64 {
+func (this *EnemySpecBase) setSize(v float64) float64 {
 	this._size = v
 	if this.shape != nil {
 		shape.size = _size
@@ -791,11 +792,11 @@ func (this *EnemySpecBase) size(float v) float64 {
 }
 
 func (this *EnemySpecBase) isSmallEnemy() bool {
-	return typ == EnemyType.SMALL
+	return this.typ == SMALL
 }
 
 type HasAppearType interface {
-	setFirstState(es EnemyState, appType int) bool
+	setFirstState(es EnemyState, appType AppearanceType) bool
 }
 
 /**
@@ -868,9 +869,9 @@ func (this *SmallShipEnemySpec) setParam(rank float64, rand *r.Rand) {
 	tgs.turretSpec.setParam(rank-sr*0.5, SMALL, rand)
 }
 
-func (this *SmallShipEnemySpec) setFirstState(es EnemyState, appType int) bool {
+func (this *SmallShipEnemySpec) setFirstState(es EnemyState, appType AppearanceType) bool {
 	es.setSpec(this)
-	if !es.setAppearancePos(this.field, thi.ship, rand, appType) {
+	if !es.setAppearancePos(this.field, this.ship, rand, appType) {
 		return false
 	}
 	switch this.typ {
@@ -1196,7 +1197,7 @@ func (this *ShipEnemySpec) setParam(rank float64, cls ShipClass, rand *r.Rand) {
 	}
 }
 
-func (this *ShipEnemySpec) setFirstState(es EnemyState, appType int) bool {
+func (this *ShipEnemySpec) setFirstState(es EnemyState, appType AppearanceType) bool {
 	es.setSpec(this)
 	if !es.setAppearancePos(this.field, this.ship, this.rand, appType) {
 		return false
@@ -1432,6 +1433,14 @@ func NewEnemyPool(n int, args []interface{}) *EnemyPool {
 		e := a.(*Enemy)
 		e.setEnemyPool(this)
 	}
+}
+
+func (this *EnemyPool) GetInstance() *Enemy {
+	return this.ActorPool.GetInstance().(*Enemy)
+}
+
+func (this *EnemyPool) GetInstanceForced() *Enemy {
+	return this.ActorPool.GetInstanceForced().(*Enemy)
 }
 
 func (this *EnemyPool) setStageManager(stageManager StageManager) {

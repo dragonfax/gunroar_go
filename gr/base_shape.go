@@ -14,7 +14,7 @@ import (
 const POINT_NUM = 16
 const PILLAR_POINT_NUM = 8
 
-var shapeRand *r.Rand
+var shapeRand = r.New(r.NewSource(time.Now().Unix()))
 var shapeWakePos vector.Vector
 
 type ShapeType int
@@ -52,12 +52,8 @@ type BaseShape struct {
 	_pointDeg                   []float64
 }
 
-func BaseShapeInit() {
-	rand = r.New(r.NewSource(time.Now().Unix()))
-}
-
 func SetRandSeed(seed int64) {
-	rand = r.New(r.NewSource(seed))
+	shapeRand = r.New(r.NewSource(seed))
 }
 
 func NewBaseShape(size, distRatio, spinyRatio float64, typ ShapeType, r, g, b float64) *BaseShape {
@@ -238,11 +234,11 @@ func (this *BaseShape) addWake(wakes *WakePool, pos vector.Vector, deg float64, 
 	shapeWakePos.X = pos.X + math.Sin(deg+math.Pi/2+0.7)*this.size*0.5*sr
 	shapeWakePos.Y = pos.Y + math.Cos(deg+math.Pi/2+0.7)*this.size*0.5*sr
 	w := wakes.GetInstanceForced()
-	w.set(shapeWakePos, deg+math.Pi-0.2+nextSignedFloat(rand, 0.1), sp, 40, sz*32*sr, false)
+	w.set(shapeWakePos, deg+math.Pi-0.2+nextSignedFloat(shapeRand, 0.1), sp, 40, sz*32*sr, false)
 	shapeWakePos.X = pos.X + math.Sin(deg-math.Pi/2-0.7)*this.size*0.5*sr
 	shapeWakePos.Y = pos.Y + math.Cos(deg-math.Pi/2-0.7)*this.size*0.5*sr
 	w = wakes.GetInstanceForced()
-	w.set(shapeWakePos, deg+math.Pi+0.2+nextSignedFloat(rand, 0.1), sp, 40, sz*32*sr, false)
+	w.set(shapeWakePos, deg+math.Pi+0.2+nextSignedFloat(shapeRand, 0.1), sp, 40, sz*32*sr, false)
 }
 
 func (this *BaseShape) pointPos() []vector.Vector {
