@@ -21,27 +21,27 @@ var shipReverseFire = false
 type GameManager struct {
 	sdl.GameManagerBase
 
-	twinStick      TwinStick
-	prefManager    PrefManager
-	screen         Screen
-	field          Field
+	twinStick      *sdl.TwinStick
+	prefManager    *PrefManager
+	screen         *Screen
+	field          *Field
 	ship           *Ship
-	shots          ShotPool
-	bullets        BulletPool
-	enemies        EnemyPool
-	sparks         SparkPool
-	smokes         SmokePool
-	fragments      FragmentPool
-	sparkFragments SparkFragmentPool
-	wakes          WakePool
-	crystals       CrystalPool
-	numIndicators  NumIndicatorPool
-	stageManager   StageManager
-	titleManager   TitleManager
-	scoreReel      ScoreReel
+	shots          *ShotPool
+	bullets        *BulletPool
+	enemies        *EnemyPool
+	sparks         *SparkPool
+	smokes         *SmokePool
+	fragments      *FragmentPool
+	sparkFragments *SparkFragmentPool
+	wakes          *WakePool
+	crystals       *CrystalPool
+	numIndicators  *NumIndicatorPool
+	stageManager   *StageManager
+	titleManager   *TitleManager
+	scoreReel      *ScoreReel
 	state          GameState
-	titleState     TitleState
-	inGameState    InGameState
+	titleState     *TitleState
+	inGameState    *InGameState
 	escPressed     bool
 }
 
@@ -50,7 +50,7 @@ func NewGameManager() *GameManager {
 	return this
 }
 
-func (this *GameManager) init() {
+func (this *GameManager) Init() {
 	letter.Init()
 	Shot.init()
 	BulletShape.init()
@@ -109,7 +109,7 @@ func (this *GameManager) init() {
 	this.ship.setGameState(this.inGameState)
 }
 
-func (this *GameManager) start() {
+func (this *GameManager) Start() {
 	this.loadLastReplay()
 	this.startTitle()
 }
@@ -170,7 +170,7 @@ func (this *GameManager) addSlowdownRatio(sr float64) {
 	mainLoop.addSlowdownRatio(sr)
 }
 
-func (this *GameManager) move() {
+func (this *GameManager) Move() {
 	if pad.keys[SDLK_ESCAPE] == SDL_PRESSED {
 		if !escPressed {
 			escPressed = true
@@ -187,7 +187,7 @@ func (this *GameManager) move() {
 	state.move()
 }
 
-func (this *GameManager) draw() {
+func (this *GameManager) Draw() {
 	e := mainLoop.event
 	if e.GetType() == sdl.VIDEORESIZE {
 		re := e.resize
@@ -586,8 +586,8 @@ var _ GameState = &TitleState{}
 type TitleState struct {
 	GameStateBase
 
-	titleManager TitleManager
-	inGameState  InGameState
+	titleManager *TitleManager
+	inGameState  *InGameState
 	gameOverCnt  int
 }
 

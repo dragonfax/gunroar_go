@@ -17,6 +17,11 @@ type RecordableInput struct {
 	inputRecord *InputRecord
 }
 
+func NewRecordableInput() RecordableInput {
+	this := RecordableInput{}
+	return this
+}
+
 func (this *RecordableInput) startRecord() {
 	this.inputRecord = new(InputRecord)
 	this.inputRecord.clear()

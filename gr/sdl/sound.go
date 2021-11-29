@@ -5,14 +5,14 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-var noSound = false
+var NoSound = false
 
 /**
  * Initialize and close SDL_mixer.
  */
 
 func SoundManagerInit() {
-	if noSound {
+	if NoSound {
 		return
 	}
 	var audio_rate int
@@ -21,7 +21,7 @@ func SoundManagerInit() {
 	var audio_buffers int
 	err := sdl.InitSubSystem(sdl.INIT_AUDIO)
 	if err != nil {
-		noSound = true
+		NoSound = true
 		panic("Unable to initialize SDL_AUDIO: " + err.Error())
 	}
 	audio_rate = 44100
@@ -30,7 +30,7 @@ func SoundManagerInit() {
 	audio_buffers = 4096
 	err = mix.OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers)
 	if err != nil {
-		noSound = true
+		NoSound = true
 		panic("Couldn't open audio: " + err.Error())
 	}
 	// audio_rate, audio_format, audio_channels, audio_opened, err := mix.QuerySpec() # serves no purpose
@@ -59,7 +59,7 @@ type Music struct {
 }
 
 func (this *Music) Load(name string) {
-	if noSound {
+	if NoSound {
 		return
 	}
 	fileName := MusicDir + "/" + name
@@ -69,7 +69,7 @@ func (this *Music) Load(name string) {
 		panic(err)
 	}
 	if this.music == nil {
-		noSound = true
+		NoSound = true
 		panic("music not loaded")
 	}
 }
@@ -86,14 +86,14 @@ func (this *Music) Free() {
 }
 
 func (this *Music) Play() {
-	if noSound {
+	if NoSound {
 		return
 	}
 	this.music.Play(-1)
 }
 
 func (this *Music) PlayOnce() {
-	if noSound {
+	if NoSound {
 		return
 	}
 	this.music.Play(1)
@@ -108,14 +108,14 @@ func (this *Music) Halt() {
 }
 
 func FadeMusic() {
-	if noSound {
+	if NoSound {
 		return
 	}
 	mix.FadeOutMusic(fadeOutSpeed)
 }
 
 func HaltMusic() {
-	if noSound {
+	if NoSound {
 		return
 	}
 	if mix.PlayingMusic() {
@@ -137,7 +137,7 @@ func (this *Chunk) Load(name string) {
 }
 
 func (this *Chunk) LoadWithChannel(name string, ch int) {
-	if noSound {
+	if NoSound {
 		return
 	}
 	fileName := sound_dir + "/" + name
@@ -147,7 +147,7 @@ func (this *Chunk) LoadWithChannel(name string, ch int) {
 		panic(err)
 	}
 	if this.chunk == nil {
-		noSound = true
+		NoSound = true
 		panic("no chunk loaded")
 	}
 	this.chunkChannel = ch
@@ -161,14 +161,14 @@ func (this *Chunk) Free() {
 }
 
 func (this *Chunk) Play() {
-	if noSound {
+	if NoSound {
 		return
 	}
 	this.chunk.Play(this.chunkChannel, 0)
 }
 
 func (this *Chunk) Halt() {
-	if noSound {
+	if NoSound {
 		return
 	}
 	mix.HaltChannel(this.chunkChannel)

@@ -18,7 +18,7 @@ func NewPrefManager() *PrefManager {
 	return this
 }
 
-func (this *PrefManager) load() {
+func (this *PrefManager) Load() {
 	fd := file.New()
 	err := fd.Open(PREF_FILE)
 	if err != nil {
@@ -37,7 +37,7 @@ func (this *PrefManager) load() {
 	}
 }
 
-func (this *PrefManager) save() {
+func (this *PrefManager) Save() {
 	fd := file.New()
 	fd.Create(PREF_FILE)
 	fd.WriteInt(PREFS_VERSION_NUM)

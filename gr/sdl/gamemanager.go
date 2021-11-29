@@ -7,18 +7,18 @@ import "github.com/dragonfax/gunroar/gr/sdl/screen"
  */
 
 type GameManager interface {
-	init()
-	start()
-	move()
-	draw()
+	Init()
+	Start()
+	Move()
+	Draw()
 
-	setMainLoop(*MainLoop)
-	setUIs(screen.Screen, Input)
-	setPrefManager(PrefManager)
+	SetMainLoop(*MainLoop)
+	SetUIs(screen.Screen, Input)
+	SetPrefManager(PrefManager)
 }
 
 type GameManagerBase struct {
-	mainLoop        MainLoop
+	mainLoop        *MainLoop
 	abstScreen      screen.Screen
 	input           Input
 	abstPrefManager PrefManager
@@ -28,15 +28,15 @@ func NewGameManagerBaseInternal() GameManagerBase {
 	return GameManagerBase{}
 }
 
-func (this *GameManagerBase) setMainLoop(mainLoop MainLoop) {
+func (this *GameManagerBase) SetMainLoop(mainLoop *MainLoop) {
 	this.mainLoop = mainLoop
 }
 
-func (this *GameManagerBase) setUIs(screen screen.Screen, input Input) {
+func (this *GameManagerBase) SetUIs(screen screen.Screen, input Input) {
 	this.abstScreen = screen
 	this.input = input
 }
 
-func (this *GameManagerBase) setPrefManager(prefManager PrefManager) {
+func (this *GameManagerBase) SetPrefManager(prefManager PrefManager) {
 	this.abstPrefManager = prefManager
 }

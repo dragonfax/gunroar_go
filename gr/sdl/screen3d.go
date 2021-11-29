@@ -159,7 +159,7 @@ func SetClearColor(r, g, b, a float64 /* = 1 */) {
 	gl.ClearColor(float32(r*_brightness), float32(g*_brightness), float32(b*_brightness), float32(a))
 }
 
-func brightness(v float64) float64 {
+func Brightness(v float64) float64 {
 	_brightness = v
 	return v
 }

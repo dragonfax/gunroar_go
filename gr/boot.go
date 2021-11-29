@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"os"
 	"strconv"
@@ -8,14 +9,14 @@ import (
 	"github.com/dragonfax/gunroar/gr/sdl"
 )
 
-// "Usage: " ~ progName ~ " [-window] [-res x y] [-brightness [0-100]] [-luminosity [0-100]] [-nosound] [-exchange] [-turnspeed [0-500]] [-firerear] [-rotatestick2 deg] [-reversestick2] [-enableaxis5] [-nowait]");
+// "Usage: " ~ progName ~ " [-window] [-res x y] [-brightness [0-100]] [-luminosity [0-100]] [-nosound] [-exchange] [-turnspeed [0-500]] [-firerear] [-rotatestick2 deg] [-reversestick2] [-enableaxis5] [-NoWait]");
 
 /**
  * Boot the game.
  */
 var screen *Screen
-var input sdl.MultipleInputDevice
-var twinStick sdl.RecordableTwinStick
+var input *sdl.MultipleInputDevice
+var twinStick *sdl.RecordableTwinStick
 
 // RecordableMouse mouse;
 var gameManager *GameManager
@@ -28,18 +29,15 @@ func main() {
 
 func boot(args []string) {
 	screen = NewScreen()
-	input = NewMultipleInputDevice()
+	input = sdl.NewMultipleInputDevice()
 	twinStick = sdl.NewRecordableTwinStick()
 	input.Inputs = append(input.Inputs, twinStick)
 	gameManager = NewGameManager()
 	prefManager = NewPrefManager()
-	mainLoop = NewMainLoop(screen, input, gameManager, prefManager)
+	mainLoop = sdl.NewMainLoop(screen, input, gameManager, prefManager)
 	parseArgs(args)
 
-	err := mainLoop.loop()
-	if err != nil {
-		panic(err)
-	}
+	mainLoop.Loop()
 	return
 }
 
@@ -57,70 +55,92 @@ func parseArgs(commandArgs []string) {
 				panic("Invalid options")
 			}
 			i++
-			b := float64(strconv.Atoi(args[i])) / 100
+			is, err := strconv.Atoi(args[i])
+			if err != nil {
+				panic(err)
+			}
+			b := float64(is) / 100
 			if b < 0 || b > 1 {
 				usage(args[0])
 				panic("Invalid options")
 			}
-			Screen.brightness = b
+			sdl.Brightness(b)
 		case "-luminosity", "-luminous":
 			if i >= len(args)-1 {
 				usage(progName)
 				panic("Invalid options")
 			}
 			i++
-			l = float64(strconv.Atoi(args[i])) / 100
+			is, err := strconv.Atoi(args[i])
+			if err != nil {
+				panic(err)
+			}
+			l := float64(is) / 100
 			if l < 0 || l > 1 {
 				usage(progName)
 				panic("Invalid options")
 			}
-			screen.luminosity = l
+			screen.luminosity(l)
 		case "-window":
-			screen.windowMode = true
+			screen.SetWindowMode(true)
 		case "-res":
 			if i >= len(args)-2 {
 				usage(progName)
 				panic("Invalid options")
 			}
 			i++
-			w := strconv.Atoi(args[i])
+			w, err := strconv.Atoi(args[i])
+			if err != nil {
+				panic(err)
+			}
 			i++
-			h := strconv.Atoi(args[i])
-			screen.width = w
-			screen.height = h
+			h, err := strconv.Atoi(args[i])
+			if err != nil {
+				panic(err)
+			}
+			screen.SetWidth(w)
+			screen.SetHeight(h)
 		case "-nosound":
-			SoundManager.noSound = true
+			sdl.NoSound = true
 		//case "-exchange":
 		//  pad.buttonReversed = true;
-		case "-nowait":
-			mainLoop.nowait = true
-		case "-accframe":
-			mainLoop.accframe = 1
+		case "-NoWait":
+			mainLoop.NoWait = true
+		case "-AccFrame":
+			mainLoop.AccFrame = true
 		case "-turnspeed":
 			if i >= len(args)-1 {
 				usage(progName)
 				panic("Invalid options")
 			}
 			i++
-			s := float64(strconv.Atoi(args[i])) / 100
+			is, err := strconv.Atoi(args[i])
+			if err != nil {
+				panic(err)
+			}
+			s := float64(is) / 100
 			if s < 0 || s > 5 {
 				usage(progName)
 				panic("Invalid options")
 			}
-			GameManager.shipTurnSpeed = s
+			shipTurnSpeed = s
 		case "-firerear":
-			GameManager.shipReverseFire = true
+			shipReverseFire = true
 		case "-rotatestick2", "-rotaterightstick":
 			if i >= len(args)-1 {
 				usage(progName)
 				panic("Invalid options")
 			}
 			i++
-			twinStick.rotate = float64(strconv.Atoi(args[i])) * math.Pi / 180.0
+			is, err := strconv.Atoi(args[i])
+			if err != nil {
+				panic(err)
+			}
+			twinStick.Rotate = float64(is) * math.Pi / 180.0
 		case "-reversestick2", "-reverserightstick":
-			twinStick.reverse = -1
+			twinStick.Reverse = -1
 		case "-enableaxis5":
-			twinStick.enableAxis5 = true
+			twinStick.EnableAxis5 = true
 		default:
 			usage(progName)
 			panic("Invalid options")
@@ -129,5 +149,6 @@ func parseArgs(commandArgs []string) {
 }
 
 func usage(progName string) {
-	Logger.error
+	fmt.Println("usage: ")
+	os.Exit(1)
 }

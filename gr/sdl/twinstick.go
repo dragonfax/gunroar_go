@@ -18,16 +18,16 @@ const JOYSTICK_AXIS_MAX = 32768
  * Twinstick input.
  */
 type TwinStick struct {
-	rotate      float64
-	reverse     float64
+	Rotate      float64
+	Reverse     float64
 	keys        []uint8
-	enableAxis5 bool
+	EnableAxis5 bool
 	stick       *sdl.Joystick
 	state       TwinStickState
 }
 
-func NewTwinStick() *TwinStick {
-	this := &TwinStick{reverse: 1}
+func NewTwinStick() TwinStick {
+	this := TwinStick{reverse: 1}
 	return this
 }
 
@@ -184,6 +184,14 @@ func (this *TwinStickState) Equals(i record.InputState) bool {
 type RecordableTwinStick struct {
 	TwinStick
 	record.RecordableInput
+}
+
+func NewRecordableTwinStick() *RecordableTwinStick {
+	this := &RecordableTwinStick{
+		TwinStick:       NewTwinStick(),
+		RecordableInput: record.NewRecordableInput(),
+	}
+	return this
 }
 
 func (this RecordableTwinStick) getState(doRecord bool /*= true */) TwinStickState {

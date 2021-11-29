@@ -17,8 +17,8 @@ type PrefManager interface {
 }
 
 type MainLoop struct {
-	nowait              bool
-	accframe            bool
+	NoWait              bool
+	AccFrame            bool
 	maxSkipFrame        uint32
 	event               sdl.Event
 	screen              screen.Screen
@@ -65,7 +65,7 @@ func (this *MainLoop) breakLoop() {
 	this.done = true
 }
 
-func (this *MainLoop) loop() {
+func (this *MainLoop) Loop() {
 	this.done = false
 	var prvTickCount uint32
 	var nowTick uint32
@@ -88,7 +88,7 @@ func (this *MainLoop) loop() {
 		if frame <= 0 {
 			frame = 1
 			sdl.Delay(prvTickCount + itv - nowTick)
-			if this.accframe {
+			if this.AccFrame {
 				prvTickCount = sdl.GetTicks()
 			} else {
 				prvTickCount += uint32(this.interval)
@@ -107,7 +107,7 @@ func (this *MainLoop) loop() {
 		this.screen.Clear()
 		this.gameManager.draw()
 		this.screen.Flip()
-		if !this.nowait {
+		if !this.NoWait {
 			this.calcInterval()
 		}
 	}
