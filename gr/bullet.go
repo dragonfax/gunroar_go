@@ -157,7 +157,7 @@ func (this *Bullet) Draw() {
 	gl.PopMatrix()
 }
 
-func (this *Bullet) checkShotHit(p vector.Vector, s sdl.Collidable, shot Shot) {
+func (this *Bullet) checkShotHit(p vector.Vector, s sdl.Collidable, shot *Shot) {
 	ox := math.Abs(this.pos.X - p.X)
 	oy := math.Abs(this.pos.Y - p.Y)
 	if ox+oy < 0.5 {
@@ -203,7 +203,7 @@ func (this *BulletPool) removeIndexedBullets(idx int) int {
 	return n
 }
 
-func (this *BulletPool) checkShotHit(pos vector.Vector, shape sdl.Collidable, shot Shot) {
+func (this *BulletPool) checkShotHit(pos vector.Vector, shape sdl.Collidable, shot *Shot) {
 	for _, a := range this.Actor {
 		b := a.(*Bullet)
 		if b.Exists() && b.destructive() {

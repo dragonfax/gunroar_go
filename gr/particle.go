@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"math/rand"
 	r "math/rand"
 	"time"
 
@@ -100,6 +101,14 @@ func NewSparkPool(n int, args []interface{}) *SparkPool {
 	f := func() actor.Actor { return NewSpark() }
 	this := &SparkPool{ActorPool: actor.NewActorPool(f, n, args)}
 	return this
+}
+
+func (this *SparkPool) GetInstance() *Spark {
+	return this.ActorPool.GetInstance().(*Spark)
+}
+
+func (this *SparkPool) GetInstanceForced() *Spark {
+	return this.ActorPool.GetInstanceForced().(*Spark)
 }
 
 /**

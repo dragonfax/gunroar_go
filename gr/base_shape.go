@@ -14,7 +14,7 @@ import (
 const POINT_NUM = 16
 const PILLAR_POINT_NUM = 8
 
-var rand *r.Rand
+var shapeRand *r.Rand
 var shapeWakePos vector.Vector
 
 type ShapeType int
