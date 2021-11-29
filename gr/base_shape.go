@@ -15,7 +15,7 @@ const POINT_NUM = 16
 const PILLAR_POINT_NUM = 8
 
 var rand *r.Rand
-var wakePos vector.Vector
+var shapeWakePos vector.Vector
 
 type ShapeType int
 
@@ -220,7 +220,6 @@ func (this *BaseShape) createSquareLoop(s, z float64, backToFirst bool /* = fals
 }
 
 func (this *BaseShape) createPillar(p vector.Vector, s, z float64) {
-	var d float64
 	for i := 0; i < PILLAR_POINT_NUM; i++ {
 		d := math.Pi * 2 * float64(i) / PILLAR_POINT_NUM
 		gl.Vertex3d(math.Sin(d)*s+p.X, math.Cos(d)*s+p.Y, z)
@@ -236,14 +235,14 @@ func (this *BaseShape) addWake(wakes WakePool, pos vector.Vector, deg float64, s
 	if sz > 10 {
 		sz = 10
 	}
-	wakePos.X = pos.X + math.Sin(deg+math.Pi/2+0.7)*this.size*0.5*sr
-	wakePos.Y = pos.Y + math.Cos(deg+math.Pi/2+0.7)*this.size*0.5*sr
-	w := wakes.getInstanceForced()
-	w.Set(wakePos, deg+math.Pi-0.2+nextSignedFloat(rand, 0.1), sp, 40, sz*32*sr)
-	wakePos.X = pos.X + math.Sin(deg-math.Pi/2-0.7)*this.size*0.5*sr
-	wakePos.Y = pos.Y + math.Cos(deg-math.Pi/2-0.7)*this.size*0.5*sr
-	w = wakes.getInstanceForced()
-	w.Set(wakePos, deg+math.Pi+0.2+nextSignedFloat(rand, 0.1), sp, 40, sz*32*sr)
+	shapeWakePos.X = pos.X + math.Sin(deg+math.Pi/2+0.7)*this.size*0.5*sr
+	shapeWakePos.Y = pos.Y + math.Cos(deg+math.Pi/2+0.7)*this.size*0.5*sr
+	w := wakes.GetInstanceForced()
+	w.set(shapeWakePos, deg+math.Pi-0.2+nextSignedFloat(rand, 0.1), sp, 40, sz*32*sr, false)
+	shapeWakePos.X = pos.X + math.Sin(deg-math.Pi/2-0.7)*this.size*0.5*sr
+	shapeWakePos.Y = pos.Y + math.Cos(deg-math.Pi/2-0.7)*this.size*0.5*sr
+	w = wakes.GetInstanceForced()
+	w.set(shapeWakePos, deg+math.Pi+0.2+nextSignedFloat(rand, 0.1), sp, 40, sz*32*sr, false)
 }
 
 func (this *BaseShape) pointPos() []vector.Vector {

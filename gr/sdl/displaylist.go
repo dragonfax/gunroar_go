@@ -20,12 +20,12 @@ func NewDisplayList(num uint32) *DisplayList {
 	return this
 }
 
-func (this *DisplayList) beginNewList() {
+func (this *DisplayList) BeginNewList() {
 	this.ResetList()
 	this.NewList()
 }
 
-func (this *DisplayList) nextNewList() {
+func (this *DisplayList) NextNewList() {
 	gl.EndList()
 	this.enumIdx++
 	if this.enumIdx >= this.idx+this.num || this.enumIdx < this.idx {
@@ -34,7 +34,7 @@ func (this *DisplayList) nextNewList() {
 	gl.NewList(this.enumIdx, gl.COMPILE)
 }
 
-func (this *DisplayList) endNewList() {
+func (this *DisplayList) EndNewList() {
 	gl.EndList()
 	this.registered = true
 }

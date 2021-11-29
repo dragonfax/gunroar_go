@@ -7,6 +7,7 @@ import (
 
 	"github.com/dragonfax/gunroar/gr/sdl"
 	"github.com/dragonfax/gunroar/gr/vector"
+	"github.com/go-gl/gl/v4.1-compatibility/gl"
 )
 
 /**
@@ -56,7 +57,7 @@ const PANEL_WIDTH = 1.8
 const PANEL_HEIGHT_BASE = 0.66
 
 type Field struct {
-	stageManager                          StageManager
+	stageManager                          *StageManager
 	ship                                  *Ship
 	rand                                  *r.Rand
 	_size, _outerSize                     vector.Vector
@@ -291,7 +292,7 @@ func (this *Field) gotoNextBlockArea() {
 	}
 }
 
-func (this *Field) getBlock(p Vector) int {
+func (this *Field) getBlockVector(p vector.Vector) int {
 	return this.getBlock(p.X, p.Y)
 }
 
@@ -474,7 +475,7 @@ func (this *Field) checkBlock(x, y int, th int /* = 0 */, outScreen bool /* = fa
 	return this.block[x][by] >= th
 }
 
-func (this *Field) checkInField(p vector.Vector) bool {
+func (this *Field) checkInFieldVector(p vector.Vector) bool {
 	return this._size.contains(p, 1)
 }
 
@@ -482,7 +483,7 @@ func (this *Field) checkInField(x, y float64) bool {
 	return this._size.contains(x, y, 1)
 }
 
-func (this *Field) checkInOuterField(p vector.Vector) bool {
+func (this *Field) checkInOuterFieldVector(p vector.Vector) bool {
 	return this._outerSize.contains(p, 1)
 }
 
@@ -494,11 +495,11 @@ func (this *Field) checkInOuterHeightField(p vector.Vector) bool {
 	return p.X >= -this._size.X && p.X <= this._size.X && p.Y >= -this._outerSize.Y && p.Y <= this._outerSize.Y
 }
 
-func (this *Field) checkInFieldExceptTop(p Vector) bool {
+func (this *Field) checkInFieldExceptTop(p vector.Vector) bool {
 	return p.X >= -this._size.X && p.x <= this._size.x && p.Y >= -this._size.Y
 }
 
-func (this *Field) checkInOuterFieldExceptTop(p Vector) bool {
+func (this *Field) checkInOuterFieldExceptTop(p vector.Vector) bool {
 	return p.x >= -this._outerSize.X && p.x <= this._outerSize.X && p.y >= -this._outerSize.Y && p.y <= this._outerSize.Y*2
 }
 

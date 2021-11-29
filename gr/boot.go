@@ -13,7 +13,7 @@ import (
 /**
  * Boot the game.
  */
-var screen Screen
+var screen *Screen
 var input sdl.MultipleInputDevice
 var twinStick sdl.RecordableTwinStick
 

@@ -135,19 +135,19 @@ func (this *Screen3D) Height() int {
 	return this._height
 }
 
-func glVertex(v vector.Vector) {
+func GlVertex(v vector.Vector) {
 	gl.Vertex3d(v.X, v.Y, 0)
 }
 
-func glVertex3(v vector.Vector3) {
+func GlVertex3(v vector.Vector3) {
 	gl.Vertex3d(v.X, v.Y, v.Z)
 }
 
-func glTranslate(v vector.Vector) {
+func GlTranslate(v vector.Vector) {
 	gl.Translated(v.X, v.Y, 0)
 }
 
-func glTranslate3(v vector.Vector3) {
+func GlTranslate3(v vector.Vector3) {
 	gl.Translated(v.X, v.Y, v.Z)
 }
 

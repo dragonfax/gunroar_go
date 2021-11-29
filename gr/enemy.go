@@ -1305,13 +1305,13 @@ type PlatformEnemySpec struct {
 	EnemySpecBase
 }
 
-func NewPlatformEnemySpec(field Field, ship *Ship,
-	sparks SparkPool, smokes SmokePool, fragments FragmentPool, wakes WakePool) {
-	this := &PlatformEnemySpec{NewEnemeySpecBase(field, ship, sparks, smokes, fragments, wakes)}
+func NewPlatformEnemySpec(field *Field, ship *Ship,
+	sparks *SparkPool, smokes *SmokePool, fragments *FragmentPool, wakes *WakePool) PlatformEnemySpec {
+	this := PlatformEnemySpec{NewEnemeySpecBase(field, ship, sparks, smokes, fragments, wakes)}
 	return this
 }
 
-func (this *PlatformEnemySpec) setParam(rank float, rand *r.Rand) {
+func (this *PlatformEnemySpec) setParam(rank float64, rand *r.Rand) {
 	this.set(PLATFORM)
 	this.shape = NewEnemyShape(PLATFORM)
 	this.damagedShape = NewEnemyShape(PLATFORM_DAMAGED)

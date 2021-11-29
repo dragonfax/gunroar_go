@@ -120,15 +120,15 @@ const (
 
 var smokeRand = r.New(r.NewSource(time.Now().Unix()))
 var windVel = vector.Vector3{0.04, 0.04, 0.02}
-var wakePos vector.Vector
+var smokeWakePos vector.Vector
 
 var _ LuminousActor = &Smoke{}
 
 type Smoke struct {
 	actor.ExistsImpl
 
-	field            Field
-	wakes            WakePool
+	field            *Field
+	wakes            *WakePool
 	pos, vel         vector.Vector3
 	typ              SmokeType
 	cnt, startCnt    int
@@ -324,8 +324,8 @@ var fragmentRand = r.New(r.NewSource(time.Now().Unix()))
 type Fragment struct {
 	actor.ExistsImpl
 
-	field         Field
-	smokes        SmokePool
+	field         *Field
+	smokes        *SmokePool
 	pos, vel      vector.Vector3
 	size, d2, md2 float64
 }
@@ -436,8 +436,8 @@ var _ LuminousActor = &SparkFragment()
 type SparkFragment struct {
 	actor.ExistsImpl
 
-	field         Field
-	smokes        SmokePool
+	field         *Field
+	smokes        *SmokePool
 	pos, vel      vector.Vector3
 	size, d2, md2 float64
 	cnt           int
@@ -446,14 +446,14 @@ type SparkFragment struct {
 
 func sparkFragmentInit() {
 	sparkFragmentDisplayList = sdl.NewDisplayList(1)
-	sparkFragmentDisplayList.beginNewList()
+	sparkFragmentDisplayList.BeginNewList()
 	gl.Begin(gl.TRIANGLE_FAN)
 	gl.Vertex2d(-0.25, -0.25)
 	gl.Vertex2d(0.25, -0.25)
 	gl.Vertex2d(0.25, 0.25)
 	gl.Vertex2d(-0.25, 0.25)
 	gl.End()
-	sparkFragmnetDisplayList.endNewList()
+	sparkFragmentDisplayList.EndNewList()
 }
 
 func setSparkFragmentRandSeed(seed int64) {
@@ -492,7 +492,7 @@ func (this *SparkFragment) set(p vector.Vector, mx, my, mz float64, sz float64 /
 	this.SetExists(true)
 }
 
-func (this *SparkFragment) move() {
+func (this *SparkFragment) Move() {
 	if !this.field.checkInOuterField(this.pos.X, this.pos.Y) {
 		this.SetExists(false)
 		return
@@ -500,9 +500,9 @@ func (this *SparkFragment) move() {
 	this.vel.X *= 0.99
 	this.vel.Y *= 0.99
 	this.vel.Z += (-0.08 - this.vel.Z) * 0.01
-	this.pos += this.vel
+	this.pos.OpAddAssign(this.vel)
 	if this.pos.Z < 0 {
-		s := smokes.getInstanceForced()
+		s := this.smokes.getInstanceForced()
 		if this.field.getBlock(this.pos.X, this.pos.Y) < 0 {
 			s.set(this.pos.X, this.pos.Y, 0, 0, 0, WAKE, 60, this.size*0.66)
 		} else {
@@ -522,23 +522,23 @@ func (this *SparkFragment) move() {
 	}
 }
 
-func (this *SparkFragment) draw() {
+func (this *SparkFragment) Draw() {
 	gl.PushMatrix()
 	sdl.SetColor(1, nextFloat(rand, 1), 0, 0.8)
-	sd.glTranslate(this.pos)
+	sdl.GlTranslate3(this.pos)
 	gl.Rotated(this.d2, 1, 0, 0)
 	gl.Scaled(this.size, this.size, 1)
-	sparkFragmentDisplayList.call(0)
+	sparkFragmentDisplayList.Call(0)
 	gl.PopMatrix()
 }
 
 func (this *SparkFragment) DrawLuminous() {
 	gl.PushMatrix()
-	sdl.setColor(1, nextFloat(rand, 1), 0, 0.8)
-	sdl.glTranslate(this.pos)
+	sdl.SetColor(1, nextFloat(rand, 1), 0, 0.8)
+	sdl.GlTranslate3(this.pos)
 	gl.Rotated(this.d2, 1, 0, 0)
 	gl.Scaled(this.size, this.size, 1)
-	sparkFragmentDisplayList.call(0)
+	sparkFragmentDisplayList.Call(0)
 	gl.PopMatrix()
 }
 
@@ -547,18 +547,19 @@ type SparkFragmentPool struct {
 }
 
 func NewSparkFragmentPool(n int, args []interface{}) *SparkFragmentPool {
-	return &SparkFragmentPool{actor.NewActorPool(NewSparkFragment, n, args)}
+	f := func() actor.Actor { return NewSparkFragment() }
+	return &SparkFragmentPool{actor.NewActorPool(f, n, args)}
 }
 
 /**
  * Wakes of ships and smokes.
  */
-var _ Actor = &Wake{}
+var _ actor.Actor = &Wake{}
 
 type Wake struct {
 	actor.ExistsImpl
 
-	field            Field
+	field            *Field
 	pos, vel         vector.Vector
 	deg, speed, size float64
 	cnt              int
@@ -591,22 +592,22 @@ func (this *Wake) set(p vector.Vector, deg, speed float64, c int /* = 60 */, sz 
 	this.SetExists(true)
 }
 
-func (this *Wake) move() {
+func (this *Wake) Move() {
 	this.cnt--
-	if this.cnt <= 0 || this.vel.dist(0, 0) < 0.005 || !this.field.checkInOuterField(this.pos.X, this.pos.Y) {
+	if this.cnt <= 0 || this.vel.Dist(0, 0) < 0.005 || !this.field.checkInOuterField(this.pos.X, this.pos.Y) {
 		this.SetExists(false)
 		return
 	}
-	this.pos += this.vel
-	this.pos.Y -= this.field.lastScrollY
-	this.vel *= 0.96
+	this.pos.OpAddAssign(this.vel)
+	this.pos.Y -= this.field.lastScrollY()
+	this.vel.OpMulAssign(0.96)
 	this.size *= 1.02
 }
 
-func (this *Wake) draw() {
+func (this *Wake) Draw() {
 	ox := this.vel.X
 	oy := this.vel.Y
-	sdl.SetColor(0.33, 0.33, 1)
+	sdl.SetColor(0.33, 0.33, 1, 1)
 	ox *= this.size
 	oy *= this.size
 	if this.revShape {
@@ -626,5 +627,10 @@ type WakePool struct {
 }
 
 func NewWakePool(n int, args []interface{}) *WakePool {
-	return &WakePool{actor.NewActorPool(NewWake, n, args)}
+	f := func() actor.Actor { return NewWake() }
+	return &WakePool{actor.NewActorPool(f, n, args)}
+}
+
+func (this *WakePool) GetInstanceForced() *Wake {
+	return this.ActorPool.GetInstanceForced().(*Wake)
 }

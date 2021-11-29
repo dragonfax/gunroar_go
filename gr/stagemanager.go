@@ -15,24 +15,24 @@ const BLOCK_DENSITY_MIN = 0
 const BLOCK_DENSITY_MAX = 3
 
 type StageManager struct {
-	field                                                                            Field
-	enemies                                                                          EnemyPool
-	ship                                                                             Ship
-	bullets                                                                          BulletPool
-	sparks                                                                           SparkPool
-	smokes                                                                           SmokePool
-	fragments                                                                        FragmentPool
-	wakes                                                                            WakePool
+	field                                                                            *Field
+	enemies                                                                          *EnemyPool
+	ship                                                                             *Ship
+	bullets                                                                          *BulletPool
+	sparks                                                                           *SparkPool
+	smokes                                                                           *SmokePool
+	fragments                                                                        *FragmentPool
+	wakes                                                                            *WakePool
 	rand                                                                             *r.Rand
 	rank, baseRank, addRank, rankVel, rankInc                                        float64
 	enemyApp                                                                         [3]*EnemyAppearance
-	PlatformEnemySpec                                                                platformEnemySpec
+	platformEnemySpec                                                                PlatformEnemySpec
 	_bossMode                                                                        bool
 	bossAppCnt, bossAppTime, bossAppTimeBase, bgmStartCnt, _blockDensity, batteryNum int
 }
 
-func NewStageManager(field Field, enemies EnemyPool, ship Ship, bullets BulletPool, sparks SparkPool,
-	smokes SmokePool, fragments FragmentPool, wakes WakePool) *StageManager {
+func NewStageManager(field *Field, enemies *EnemyPool, ship *Ship, bullets *BulletPool, sparks *SparkPool,
+	smokes *SmokePool, fragments *FragmentPool, wakes *WakePool) *StageManager {
 
 	this := &StageManager{}
 	this.field = field
@@ -47,7 +47,7 @@ func NewStageManager(field Field, enemies EnemyPool, ship Ship, bullets BulletPo
 	for i := range this.enemyApp {
 		this.enemyApp[i] = NewEnemyAppearance()
 	}
-	platformEnemySpec := NewPlatformEnemySpec(field, ship, sparks, smokes, fragments, wakes)
+	this.platformEnemySpec = NewPlatformEnemySpec(field, ship, sparks, smokes, fragments, wakes)
 	this.rank = 1
 	this.baseRank = 1
 	this._blockDensity = 2

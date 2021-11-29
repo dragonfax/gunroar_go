@@ -71,9 +71,9 @@ func NewDrawableShape(child HasCreateDisplayList) *DrawableShape {
 func NewDrawableShapeInternal(child HasCreateDisplayList) DrawableShape {
 	this := DrawableShape{}
 	this.displayList = NewDisplayList(1)
-	this.displayList.beginNewList()
+	this.displayList.BeginNewList()
 	child.CreateDisplayList()
-	this.displayList.endNewList()
+	this.displayList.EndNewList()
 	return this
 }
 
