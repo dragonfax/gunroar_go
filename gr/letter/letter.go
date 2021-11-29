@@ -214,7 +214,7 @@ func DrawNumSign(num int, lx, ly, s float64, cl int, /* = 0 */
 	}
 }
 
-func drawTime(time int, lx, y, s float64, cl int /* = 0 */) {
+func DrawTime(time int, lx, y, s float64, cl int /* = 0 */) {
 	n := time
 	if n < 0 {
 		n = 0

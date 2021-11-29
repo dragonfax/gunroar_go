@@ -32,7 +32,7 @@ func NewEnemy() *Enemy {
 
 func (this *Enemy) Init(args []interface{}) {
 	this._state = NewEnemyState(
-		args[0].(*Field), args[1].(Screen),
+		args[0].(*Field), args[1].(*Screen),
 		args[2].(*BulletPool), args[3].(*Ship),
 		args[4].(*SparkPool), args[5].(*SmokePool),
 		args[6].(*FragmentPool), args[7].(*SparkFragmentPool),
@@ -111,7 +111,7 @@ func (this *Enemy) index() int {
 }
 
 func (this *Enemy) isBoss() bool {
-	return this.spec.isBoss
+	return this.spec.isBoss()
 }
 
 /**
@@ -413,7 +413,7 @@ func (this *EnemyState) destroyed(shot *Shot /* = null */) bool {
 		this.explodeItv = 3
 		sc += bn * 10
 		r = true
-		if this.spec.isBoss {
+		if this.spec.isBoss() {
 			this.screen.setScreenShake(45, 0.04)
 		}
 	}
@@ -541,7 +541,7 @@ func (this *EnemyState) draw() {
 			ox = 1.4
 		}
 		oy = 1.25
-		if this.spec.isBoss {
+		if this.spec.isBoss() {
 			ox += 4
 			oy -= 1.25
 		}
@@ -761,7 +761,7 @@ func (this *EnemySpecBase) checkShipCollision(es EnemyState, x, y float64, large
 	return this.shape.checkShipCollision(x-es.pos.X, y-es.pos.Y, es.deg)
 }
 
-func (this *EnemySpecBase) move(es EnemyState) bool {
+func (this EnemySpecBase) move(es EnemyState) bool {
 	return es.move()
 }
 
@@ -804,7 +804,7 @@ type HasAppearType interface {
  */
 
 var _ EnemySpec = &SmallShipEnemySpec{}
-var _ HasAppearType = &smallShipEnemySpec{}
+var _ HasAppearType = &SmallShipEnemySpec{}
 
 type MoveType int
 
@@ -829,9 +829,9 @@ type SmallShipEnemySpec struct {
 	speed, turnDeg             float64
 }
 
-func NewSmallShipEnemySpec(field Field, ship *Ship,
-	sparks SparkPool, smokes SmokePool, fragments FragmentPool, wakes WakePool) {
-	this := &SmallShipEnemySpec{
+func NewSmallShipEnemySpec(field *Field, ship *Ship,
+	sparks *SparkPool, smokes *SmokePool, fragments *FragmentPool, wakes *WakePool) SmallShipEnemySpec {
+	this := SmallShipEnemySpec{
 		EnemySpecBase: NewEnemySpecBase(field, ship, sparks, smokes, fragments, wakes),
 	}
 	this.moveDuration = 1
@@ -960,11 +960,11 @@ func (this *SmallShipEnemySpec) move(EnemyState es) bool {
 	return true
 }
 
-func (this *SmallShipEnemySpec) score() int {
+func (this SmallShipEnemySpec) score() int {
 	return 50
 }
 
-func (this *SmallShipEnemySpec) isBoss() bool {
+func (this SmallShipEnemySpec) isBoss() bool {
 	return false
 }
 
@@ -1208,7 +1208,7 @@ func (this *ShipEnemySpec) setFirstState(es EnemyState, appType AppearanceType) 
 	} else {
 		es.turnWay = 1
 	}
-	if this.isBoss {
+	if this.isBoss() {
 		es.trgDeg = rand.nextFloat(0.1) + 0.1
 		if this.rand.nextInt(2) == 0 {
 			es.trgDeg *= -1
@@ -1218,7 +1218,7 @@ func (this *ShipEnemySpec) setFirstState(es EnemyState, appType AppearanceType) 
 	return true
 }
 
-func (this *ShipEnemySpec) move(es EnemyState) bool {
+func (this ShipEnemySpec) move(es EnemyState) bool {
 	if es.destroyedCnt >= SINK_INTERVAL {
 		return false
 	}
@@ -1235,7 +1235,7 @@ func (this *ShipEnemySpec) move(es EnemyState) bool {
 	if es.pos.y > this.field.outerSize.y*2.2+this.size {
 		es.pos.y = this.field.outerSize.y*2.2 + this.size
 	}
-	if this.isBoss {
+	if this.isBoss() {
 		es.turnCnt--
 		if es.turnCnt <= 0 {
 			es.turnCnt = 250 + rand.nextInt(150)
@@ -1279,7 +1279,7 @@ func (this *ShipEnemySpec) draw(es EnemyState) {
 	this.EnemySpecBase.draw(es)
 }
 
-func (this *ShipEnemySpec) score() int {
+func (this ShipEnemySpec) score() int {
 	switch this.shipClass {
 	case MIDDLE:
 		return 100
@@ -1290,7 +1290,7 @@ func (this *ShipEnemySpec) score() int {
 	}
 }
 
-func (this *ShipEnemySpec) isBoss() bool {
+func (this ShipEnemySpec) isBoss() bool {
 	if shipClass == BOSS {
 		return true
 	}
@@ -1401,7 +1401,7 @@ func (this *PlatformEnemySpec) setFirstState(es EnemyState, x, y, d float64) boo
 	return true
 }
 
-func (this *PlatformEnemySpec) move(EnemyState es) bool {
+func (this PlatformEnemySpec) move(EnemyState es) bool {
 	if !super.move(es) {
 		return false
 	}
@@ -1412,11 +1412,11 @@ func (this *PlatformEnemySpec) move(EnemyState es) bool {
 	return true
 }
 
-func (this *PlatformEnemySpec) score() int {
+func (this PlatformEnemySpec) score() int {
 	return 100
 }
 
-func (this *PlatformEnemySpec) isBoss() bool {
+func (this PlatformEnemySpec) isBoss() bool {
 	return false
 }
 

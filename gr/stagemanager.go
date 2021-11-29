@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	r "math/rand"
 	"time"
+
+	"github.com/dragonfax/gunroar/gr/letter"
 )
 
 /**
@@ -175,13 +177,13 @@ func (this *StageManager) gotoNextBlockArea() {
 	} else if this._blockDensity > BLOCK_DENSITY_MAX {
 		this._blockDensity = BLOCK_DENSITY_MAX
 	}
-	this.batteryNum = int((this._blockDensity + nextSignedFloat(this.rand, 1)) * 0.75)
+	this.batteryNum = int((float64(this._blockDensity) + nextSignedFloat(this.rand, 1)) * 0.75)
 	tr := this.rank
-	largeShipNum := int((2 - this._blockDensity + nextSignedFloat(this.rand, 1)) * 0.5)
+	largeShipNum := int((2 - float64(this._blockDensity) + nextSignedFloat(this.rand, 1)) * 0.5)
 	if noSmallShip {
-		largeShipNum *= 1.5
+		largeShipNum = int(float64(largeShipNum) * 1.5)
 	} else {
-		largeShipNum *= 0.5
+		largeShipNum = int(float64(largeShipNum) * 0.5)
 	}
 	var appType = AppearanceType(this.rand.Intn(2))
 	if largeShipNum > 0 {
@@ -191,18 +193,18 @@ func (this *StageManager) gotoNextBlockArea() {
 		}
 		tr -= lr
 		ses := NewShipEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
-		ses.setParam(lr/largeShipNum, LARGE, this.rand)
+		ses.setParam(lr/float64(largeShipNum), LARGE, this.rand)
 		this.enemyApp[0].set(ses, largeShipNum, appType, this.rand)
 	} else {
 		this.enemyApp[0].unset()
 	}
 	if this.batteryNum > 0 {
 		this.platformEnemySpec = NewPlatformEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
-		pr := tr * (0.3 + nextFloat(rand, 0.1))
-		this.platformEnemySpec.setParam(pr/this.batteryNum, this.rand)
+		pr := tr * (0.3 + nextFloat(this.rand, 0.1))
+		this.platformEnemySpec.setParam(pr/float64(this.batteryNum), this.rand)
 	}
 	appType = (appType + 1) % 2
-	middleShipNum := int((4 - this._blockDensity + nextSignedFloat(rand, 1)) * 0.66)
+	middleShipNum := int((4 - float64(this._blockDensity) + nextSignedFloat(this.rand, 1)) * 0.66)
 	if noSmallShip {
 		middleShipNum *= 2
 	}
@@ -214,9 +216,9 @@ func (this *StageManager) gotoNextBlockArea() {
 			mr = tr * (0.33 + nextFloat(this.rand, 0.33))
 		}
 		tr -= mr
-		ses = NewShipEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
-		ses.setParam(mr/middleShipNum, MIDDLE, this.rand)
-		this.enemyApp[1].set(ses, middleShipNum, appType, rand)
+		ses := NewShipEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
+		ses.setParam(mr/float64(middleShipNum), MIDDLE, this.rand)
+		this.enemyApp[1].set(ses, middleShipNum, appType, this.rand)
 	} else {
 		this.enemyApp[1].unset()
 	}
@@ -227,7 +229,7 @@ func (this *StageManager) gotoNextBlockArea() {
 			smallShipNum = 256
 		}
 		sses := NewSmallShipEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
-		sses.setParam(tr/smallShipNum, this.rand)
+		sses.setParam(tr/float64(smallShipNum), this.rand)
 		this.enemyApp[2].set(sses, smallShipNum, appType, this.rand)
 	} else {
 		this.enemyApp[2].unset()
@@ -254,25 +256,25 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 		if platformPos[ppi].used {
 			break
 		}
-		en := this.enemies.getInstance()
+		en := this.enemies.GetInstance()
 		if en == nil {
 			break
 		}
 		platformPos[ppi].used = true
 		ppn--
-		p := field.convertToScreenPos(int(platformPos[ppi].pos.X), int(platformPos[ppi].pos.Y))
-		if !platformEnemySpec.setFirstState(en.state, p.x, p.y, platformPos[ppi].deg) {
+		p := this.field.convertToScreenPos(int(platformPos[ppi].pos.X), int(platformPos[ppi].pos.Y))
+		if !this.platformEnemySpec.setFirstState(en.state(), p.X, p.Y, platformPos[ppi].deg) {
 			continue
 		}
 		for i := 0; i < platformPosNum; i++ {
-			if math.Abs(platformPos[ppi].pos.x-platformPos[i].pos.x) <= 1 &&
-				math.Abs(platformPos[ppi].pos.y-platformPos[i].pos.y) <= 1 &&
+			if math.Abs(platformPos[ppi].pos.X-platformPos[i].pos.X) <= 1 &&
+				math.Abs(platformPos[ppi].pos.Y-platformPos[i].pos.Y) <= 1 &&
 				!platformPos[i].used {
 				platformPos[i].used = true
 				ppn--
 			}
 		}
-		en.set(platformEnemySpec)
+		en.set(this.platformEnemySpec)
 		bn--
 	}
 }
@@ -282,8 +284,8 @@ func (this *StageManager) blockDensity() int {
 }
 
 func (this *StageManager) draw() {
-	letter.drawNum(int(this.rank)*1000, 620, 10, 10, 0, 0, 33, 3)
-	letter.drawTime(this.bossAppTime, 120, 20, 7)
+	letter.DrawNum(int(this.rank)*1000, 620, 10, 10, 0, 0, 33, 3)
+	letter.DrawTime(this.bossAppTime, 120, 20, 7, 0)
 }
 
 func (this *StageManager) rankMultiplier() float64 {
@@ -295,7 +297,7 @@ func (this *StageManager) bossMode() bool {
 }
 
 type EnemyAppearance struct {
-	spec                             *EnemySpec
+	spec                             EnemySpec
 	nextAppDist, nextAppDistInterval float64
 	appType                          AppearanceType
 }
@@ -306,7 +308,7 @@ func NewEnemyAppearance() *EnemyAppearance {
 	return this
 }
 
-func (this *EnemyAppearance) set(s *EnemySpec, num, appType AppearanceType, rand *r.Rand) {
+func (this *EnemyAppearance) set(s EnemySpec, num int, appType AppearanceType, rand *r.Rand) {
 	this.spec = s
 	this.nextAppDistInterval = NEXT_BLOCK_AREA_SIZE / float64(num)
 	this.nextAppDist = nextFloat(rand, this.nextAppDistInterval)
@@ -331,7 +333,7 @@ func (this *EnemyAppearance) move(enemies *EnemyPool, field *Field) {
 func (this *EnemyAppearance) appear(enemies *EnemyPool) {
 	en := enemies.GetInstance()
 	if en != nil {
-		if this.spec.(HasAppearType).setFirstState(en.state, this.appType) {
+		if this.spec.(HasAppearType).setFirstState(en.state(), this.appType) {
 			en.set(this.spec)
 		}
 	}
