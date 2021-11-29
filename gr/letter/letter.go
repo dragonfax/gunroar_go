@@ -99,7 +99,7 @@ func convertCharToInt(c rune) int {
 	return idx
 }
 
-func drawString(str string, lx, y, s float64,
+func DrawString(str string, lx, y, s float64,
 	d Direction /* = TO_RIGHT */, cl int, /* = 0 */
 	rev bool /* = false */, od float64 /* = 0 */) {
 	lx += LETTER_WIDTH * s / 2
@@ -149,7 +149,7 @@ func drawString(str string, lx, y, s float64,
 	}
 }
 
-func drawNum(num int, lx, y, s float64,
+func DrawNum(num int, lx, y, s float64,
 	cl /* = 0 */, dg int, /* = 0 */
 	headChar /* = -1 */, floatDigit int /* = -1 */) {
 	lx += LETTER_WIDTH * s / 2

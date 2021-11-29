@@ -2,7 +2,6 @@ package main
 
 import (
 	"math"
-	"math/rand"
 	r "math/rand"
 	"time"
 
@@ -186,13 +185,13 @@ func (this *Smoke) set(x, y, mx, my, mz float64, t SmokeType, c int /* = 60 */, 
 	this.size = sz
 	switch this.typ {
 	case FIRE:
-		this.r = nextFloat(rand, 0.1) + 0.9
-		this.g = nextFloat(rand, 0.2) + 0.2
+		this.r = nextFloat(smokeRand, 0.1) + 0.9
+		this.g = nextFloat(smokeRand, 0.2) + 0.2
 		this.b = 0
 		this.a = 1
 	case EXPLOSION:
-		this.r = nextFloat(rand, 0.3) + 0.7
-		this.g = nextFloat(rand, 0.3) + 0.3
+		this.r = nextFloat(smokeRand, 0.3) + 0.7
+		this.g = nextFloat(smokeRand, 0.3) + 0.3
 		this.b = 0
 		this.a = 1
 	case SAND:
@@ -201,8 +200,8 @@ func (this *Smoke) set(x, y, mx, my, mz float64, t SmokeType, c int /* = 60 */, 
 		this.b = 0.6
 		this.a = 0.6
 	case SPARK:
-		this.r = nextFloat(rand, 0.3) + 0.7
-		this.g = nextFloat(rand, 0.5) + 0.5
+		this.r = nextFloat(smokeRand, 0.3) + 0.7
+		this.g = nextFloat(smokeRand, 0.5) + 0.5
 		this.b = 0
 		this.a = 1
 	case WAKE:
@@ -211,14 +210,14 @@ func (this *Smoke) set(x, y, mx, my, mz float64, t SmokeType, c int /* = 60 */, 
 		this.b = 0.8
 		this.a = 0.6
 	case SMOKE:
-		this.r = nextFloat(rand, 0.1) + 0.1
-		this.g = nextFloat(rand, 0.1) + 0.1
+		this.r = nextFloat(smokeRand, 0.1) + 0.1
+		this.g = nextFloat(smokeRand, 0.1) + 0.1
 		this.b = 0.1
 		this.a = 0.5
 	case LANCE_SPARK:
 		this.r = 0.4
-		this.g = nextFloat(rand, 0.2) + 0.7
-		this.b = nextFloat(rand, 0.2) + 0.7
+		this.g = nextFloat(smokeRand, 0.2) + 0.7
+		this.b = nextFloat(smokeRand, 0.2) + 0.7
 		this.a = 1
 	}
 	this.SetExists(true)
@@ -279,13 +278,13 @@ func (this *Smoke) Move() {
 				smokeWakePos.X = this.pos.X + math.Sin(d+math.Pi/2)*this.size*0.25
 				smokeWakePos.Y = this.pos.Y + math.Cos(d+math.Pi/2)*this.size*0.25
 				w := this.wakes.GetInstanceForced()
-				w.set(smokeWakePos, d+math.Pi-0.2+nextSignedFloat(rand, 0.1), sp*0.33,
-					20+rand.Intn(12), this.size*(7.0+nextFloat(rand, 3)), false)
+				w.set(smokeWakePos, d+math.Pi-0.2+nextSignedFloat(smokeRand, 0.1), sp*0.33,
+					20+smokeRand.Intn(12), this.size*(7.0+nextFloat(smokeRand, 3)), false)
 				smokeWakePos.X = this.pos.X + math.Sin(d-math.Pi/2)*this.size*0.25
 				smokeWakePos.Y = this.pos.Y + math.Cos(d-math.Pi/2)*this.size*0.25
 				w = this.wakes.GetInstanceForced()
-				w.set(smokeWakePos, d+math.Pi+0.2+nextSignedFloat(rand, 0.1), sp*0.33,
-					20+rand.Intn(12), this.size*(7.0+nextFloat(rand, 3)), false)
+				w.set(smokeWakePos, d+math.Pi+0.2+nextSignedFloat(smokeRand, 0.1), sp*0.33,
+					20+smokeRand.Intn(12), this.size*(7.0+nextFloat(smokeRand, 3)), false)
 			}
 		}
 	}
@@ -395,8 +394,8 @@ func (this *Fragment) set(p vector.Vector, mx, my, mz float64, sz float64 /* = 1
 	if this.size > 5 {
 		this.size = 5
 	}
-	this.d2 = nextFloat(rand, 360)
-	this.md2 = nextSignedFloat(rand, 20)
+	this.d2 = nextFloat(smokeRand, 360)
+	this.md2 = nextSignedFloat(smokeRand, 20)
 	this.SetExists(true)
 }
 
@@ -474,7 +473,7 @@ func sparkFragmentInit() {
 }
 
 func setSparkFragmentRandSeed(seed int64) {
-	rand = r.New(r.NewSource(seed))
+	sparkFragmentRand = r.New(r.NewSource(seed))
 }
 
 func NewSparkFragment() *SparkFragment {
@@ -502,9 +501,9 @@ func (this *SparkFragment) set(p vector.Vector, mx, my, mz float64, sz float64 /
 	if this.size > 5 {
 		this.size = 5
 	}
-	this.d2 = nextFloat(rand, 360)
-	this.md2 = nextSignedFloat(rand, 15)
-	this.hasSmoke = rand.Intn(4) == 0
+	this.d2 = nextFloat(sparkFragmentRand, 360)
+	this.md2 = nextSignedFloat(sparkFragmentRand, 15)
+	this.hasSmoke = sparkFragmentRand.Intn(4) == 0
 	this.cnt = 0
 	this.SetExists(true)
 }
@@ -534,14 +533,14 @@ func (this *SparkFragment) Move() {
 	if this.hasSmoke && this.cnt%5 == 0 {
 		s := this.smokes.GetInstance()
 		if s != nil {
-			s.setVector3(this.pos, 0, 0, 0, SMOKE, 90+rand.Intn(60), this.size*0.5)
+			s.setVector3(this.pos, 0, 0, 0, SMOKE, 90+sparkFragmentRand.Intn(60), this.size*0.5)
 		}
 	}
 }
 
 func (this *SparkFragment) Draw() {
 	gl.PushMatrix()
-	sdl.SetColor(1, nextFloat(rand, 1), 0, 0.8)
+	sdl.SetColor(1, nextFloat(sparkFragmentRand, 1), 0, 0.8)
 	sdl.GlTranslate3(this.pos)
 	gl.Rotated(this.d2, 1, 0, 0)
 	gl.Scaled(this.size, this.size, 1)
@@ -551,7 +550,7 @@ func (this *SparkFragment) Draw() {
 
 func (this *SparkFragment) DrawLuminous() {
 	gl.PushMatrix()
-	sdl.SetColor(1, nextFloat(rand, 1), 0, 0.8)
+	sdl.SetColor(1, nextFloat(sparkFragmentRand, 1), 0, 0.8)
 	sdl.GlTranslate3(this.pos)
 	gl.Rotated(this.d2, 1, 0, 0)
 	gl.Scaled(this.size, this.size, 1)

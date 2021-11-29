@@ -51,7 +51,7 @@ func (this *PrefManager) prefData() PrefData {
 
 type PrefData struct {
 	_highScore [4]int
-	_gameMode  int
+	_gameMode  GameMode
 }
 
 func (this *PrefData) init() {
@@ -65,31 +65,31 @@ func (this *PrefData) load(fd file.File) {
 	for i := range this._highScore {
 		this._highScore[i] = fd.ReadInt()
 	}
-	this._gameMode = fd.ReadInt()
+	this._gameMode = GameMode(fd.ReadInt())
 }
 
 func (this *PrefData) save(fd file.File) {
 	for i := range this._highScore {
 		fd.WriteInt(this._highScore[i])
 	}
-	fd.WriteInt(this._gameMode)
+	fd.WriteInt(int(this._gameMode))
 }
 
-func (this *PrefData) recordGameMode(gm int) {
+func (this *PrefData) recordGameMode(gm GameMode) {
 	this._gameMode = gm
 }
 
-func (this *PrefData) recordResult(score, gm int) {
+func (this *PrefData) recordResult(score int, gm GameMode) {
 	if score > this._highScore[gm] {
 		this._highScore[gm] = score
 	}
 	this._gameMode = gm
 }
 
-func (this *PrefData) highScore(gm int) int {
-	return this._highScore[gm]
+func (this PrefData) highScore(gm GameMode) int {
+	return this._highScore[int(gm)]
 }
 
-func (this *PrefData) gameMode() int {
+func (this PrefData) gameMode() GameMode {
 	return this._gameMode
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dragonfax/gunroar/gr/letter"
 	"github.com/dragonfax/gunroar/gr/sdl"
 	"github.com/go-gl/gl/v4.1-compatibility/gl"
 )
@@ -22,7 +23,7 @@ type TitleManager struct {
 	cnt           int
 	_replayData   *ReplayData
 	btnPressedCnt int
-	gameMode      int
+	gameMode      GameMode
 }
 
 func NewTitleManager(prefManager *PrefManager /* Pad pad, Mouse mouse, */, field *Field, gameManager *GameManager) *TitleManager {
@@ -53,7 +54,7 @@ func (this *TitleManager) init() {
 	gl.TexCoord2f(0, 1)
 	gl.Vertex2f(0, 0)
 	gl.End()
-	sdl.lineWidth(3)
+	LineWidth(3)
 	gl.Disable(gl.TEXTURE_2D)
 	gl.Begin(gl.LINE_STRIP)
 	gl.Vertex2f(-80, -7)
@@ -66,22 +67,22 @@ func (this *TitleManager) init() {
 	gl.Vertex2f(-45, 61)
 	gl.End()
 	gl.Begin(gl.TRIANGLE_FAN)
-	sdl.SetColor(1, 1, 1)
+	sdl.SetColor(1, 1, 1, 1)
 	gl.Vertex2f(-19, -6)
-	sdl.SetColor(0, 0, 0)
+	sdl.SetColor(0, 0, 0, 1)
 	gl.Vertex2f(-79, -6)
 	gl.Vertex2f(11, -69)
 	gl.End()
 	gl.Begin(gl.TRIANGLE_FAN)
-	sdl.SetColor(1, 1, 1)
+	sdl.SetColor(1, 1, 1, 1)
 	gl.Vertex2f(-16, -3)
-	sdl.SetColor(0, 0, 0)
+	sdl.SetColor(0, 0, 0, 1)
 	gl.Vertex2f(44, -3)
 	gl.Vertex2f(-46, 60)
 	gl.End()
-	sdl.lineWidth(1)
-	this.displayList.endNewList()
-	this.gameMode = prefManager.prefData.gameMode
+	LineWidth(1)
+	this.displayList.EndNewList()
+	this.gameMode = prefManager.prefData().gameMode()
 }
 
 func (this *TitleManager) start() {
@@ -91,9 +92,9 @@ func (this *TitleManager) start() {
 }
 
 func (this *TitleManager) move() {
-	if !this._replayData {
+	if this._replayData != nil {
 		this.field.move()
-		this.field.scroll(SCROLL_SPEED_BASE, true)
+		this.field.scroll(TITLE_SCROLL_SPEED_BASE, true)
 	}
 	// PadState input = pad.getState(false);
 	// MouseState mouseInput = mouse.getState(false);
@@ -140,7 +141,7 @@ func (this *TitleManager) move() {
 
 func (this *TitleManager) draw() {
 	if this.gameMode < 0 {
-		letter.drawString("REPLAY", 3, 400, 5)
+		letter.DrawString("REPLAY", 3, 400, 5, letter.TO_RIGHT, 0, false, 0)
 		return
 	}
 	ts := 1.0
@@ -151,26 +152,26 @@ func (this *TitleManager) draw() {
 		}
 	}
 	gl.PushMatrix()
-	gl.Translatef(80*ts, 240, 0)
-	gl.Scalef(ts, ts, 0)
-	this.displayList.call()
+	gl.Translated(80*ts, 240, 0)
+	gl.Scaled(ts, ts, 0)
+	this.displayList.Call(0)
 	gl.PopMatrix()
 	if this.cnt > 150 {
-		letter.drawString("HIGH", 3, 305, 4, TO_RIGHT, 1)
-		letter.drawNum(prefManager.prefData.highScore(gameMode), 80, 320, 4, 0, 9)
+		letter.DrawString("HIGH", 3, 305, 4, letter.TO_RIGHT, 1, false, 0)
+		letter.DrawNum(prefManager.prefData().highScore(this.gameMode), 80, 320, 4, 0, 9, -1, -1)
 	}
 	if this.cnt > 200 {
-		letter.drawString("LAST", 3, 345, 4, TO_RIGHT, 1)
+		letter.DrawString("LAST", 3, 345, 4, letter.TO_RIGHT, 1, false, 0)
 		ls := 0
-		if this._replayData {
+		if this._replayData != nil {
 			ls = this._replayData.score
 		}
-		letter.drawNum(ls, 80, 360, 4, 0, 9)
+		letter.DrawNum(ls, 80, 360, 4, 0, 9, -1, -1)
 	}
-	letter.drawString(InGameState.gameModeText[this.gameMode], 3, 400, 5)
+	letter.DrawString(gameModeText[this.gameMode], 3, 400, 5, letter.TO_RIGHT, 0, false, 0)
 }
 
-func (this *TitleManager) replayData(v ReplayData) ReplayData {
+func (this *TitleManager) replayData(v *ReplayData) *ReplayData {
 	this._replayData = v
 	return v
 }

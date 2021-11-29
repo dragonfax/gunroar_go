@@ -138,7 +138,7 @@ func (this *NumReel) draw(x, y, s float64) {
 	for i := 0; i < 3; i++ {
 		gl.PushMatrix()
 		if this.ofs > 0.005 {
-			gl.Translated(x+nextSignedFloat(rand, 1)*this.ofs, y+nextSignedFloat(rand, 1)*this.ofs, 0)
+			gl.Translated(x+nextSignedFloat(numReelRand, 1)*this.ofs, y+nextSignedFloat(numReelRand, 1)*this.ofs, 0)
 		} else {
 			gl.Translated(x, y, 0)
 		}
@@ -309,11 +309,11 @@ func (this *NumIndicator) gotoNextTarget() {
 	}
 	switch this.target[this.targetIdx].flyingTo {
 	case RIGHT:
-		this.vel.X = -0.3 + nextSignedFloat(rand, 0.05)
-		this.vel.Y = nextSignedFloat(rand, 0.1)
+		this.vel.X = -0.3 + nextSignedFloat(numIndicatorRand, 0.05)
+		this.vel.Y = nextSignedFloat(numIndicatorRand, 0.1)
 	case BOTTOM:
-		this.vel.X = nextSignedFloat(rand, 0.1)
-		this.vel.Y = 0.3 + nextSignedFloat(rand, 0.05)
+		this.vel.X = nextSignedFloat(numIndicatorRand, 0.1)
+		this.vel.Y = 0.3 + nextSignedFloat(numIndicatorRand, 0.05)
 		decTargetY()
 	}
 	this.vel.OpMulAssign(this.target[this.targetIdx].initialVelRatio)

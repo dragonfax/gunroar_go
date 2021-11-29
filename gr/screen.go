@@ -30,7 +30,7 @@ func NewScreen() *Screen {
 }
 
 func setScreenRandSeed(seed int64) {
-	rand = r.New(r.NewSource(seed))
+	screenRand = r.New(r.NewSource(seed))
 }
 
 func (this *Screen) init() {
