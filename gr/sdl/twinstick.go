@@ -132,11 +132,18 @@ type TwinStickState struct {
 	left, right vector.Vector
 }
 
-func NewTwinStickState(s *TwinStickState) TwinStickState {
-	if s == nil {
-		return TwinStickState{}
+func NewTwinStickState(i record.InputState) record.InputState {
+
+	if i == nil {
+		return &TwinStickState{}
 	} else {
-		return *s
+		s, ok := i.(*TwinStickState)
+		if !ok {
+			panic("wrong state given to NewTwinStickStat")
+		}
+		// copy it.
+		s2 := *s
+		return &s2
 	}
 }
 

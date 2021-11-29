@@ -57,8 +57,8 @@ type InputRecord struct {
 	stateConstructor InputStateConstructor
 }
 
-func New(constructor InputStateConstructor) *InputRecord {
-	this := &InputRecord{
+func New(constructor InputStateConstructor) InputRecord {
+	this := InputRecord{
 		stateConstructor: constructor,
 		record:           make([]Record, 0),
 		replayData:       constructor(nil),
@@ -105,7 +105,7 @@ func (this *InputRecord) next() InputState {
 	return this.replayData
 }
 
-func (this *InputRecord) save(fd file.File) {
+func (this *InputRecord) Save(fd file.File) {
 	fd.WriteInt(len(this.record))
 	for _, r := range this.record {
 		fd.WriteInt(r.series)
@@ -113,7 +113,7 @@ func (this *InputRecord) save(fd file.File) {
 	}
 }
 
-func (this *InputRecord) load(fd file.File) {
+func (this *InputRecord) Load(fd file.File) {
 	this.clear()
 	l := fd.ReadInt()
 	for i := 0; i < l; i++ {
