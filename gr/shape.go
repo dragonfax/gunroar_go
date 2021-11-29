@@ -106,6 +106,11 @@ type BulletShape struct {
 	sdl.ResizableDrawable
 }
 
+func NewBulletShape() *BulletShape {
+	this := &BulletShape{sdl.NewResizableDrawableInternal()}
+	return this
+}
+
 func (this *BulletShape) Set(t int) {
 	this.SetShape(bulletShapes[t])
 }

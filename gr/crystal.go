@@ -57,8 +57,8 @@ func (this *Crystal) Move() {
 		dist = 0.1
 	}
 	if this.cnt < PULLIN_COUNT {
-		this.vel.X += (this.ship.midstPos.X - this.pos.X) / dist * 0.07
-		this.vel.Y += (this.ship.midstPos.Y - this.pos.Y) / dist * 0.07
+		this.vel.X += (this.ship.midstPos().X - this.pos.X) / dist * 0.07
+		this.vel.Y += (this.ship.midstPos().Y - this.pos.Y) / dist * 0.07
 		if this.cnt < 0 || dist < 2 {
 			this.SetExists(false)
 			return
@@ -89,4 +89,8 @@ type CrystalPool struct {
 
 func NewCrystalPool(n int, args []interface{}) *CrystalPool {
 	return &CrystalPool{actor.NewActorPool(func() actor.Actor { return NewCrystal() }, n, args)}
+}
+
+func (this *CrystalPool) GetIntance() *Crystal {
+	return this.ActorPool.GetInstance().(*Crystal)
 }
