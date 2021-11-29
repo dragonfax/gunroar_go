@@ -987,20 +987,20 @@ type ShipEnemySpec struct {
 	EnemySpecBase
 
 	speed, degVel float64
-	shipClass     int
+	shipClass     ShipClass
 }
 
-func NewShipEnemySpec(field Field, ship *Ship,
-	sparks SparkPool, smokes SmokePool, fragments FragmentPool, wakes WakePool) {
-	this := &ShipEnemySpec{
+func NewShipEnemySpec(field *Field, ship *Ship,
+	sparks *SparkPool, smokes *SmokePool, fragments *FragmentPool, wakes *WakePool) ShipEnemySpec {
+	this := ShipEnemySpec{
 		EnemySpecBase: NewEnemySpecBase(field, ship, sparks, smokes, fragments, wakes),
 	}
 	return this
 }
 
-var constad = [6]float{PI / 4, -PI / 4, PI / 2, -PI / 2, PI / 4 * 3, -PI / 4 * 3}
+var constad = [6]float64{math.Pi / 4, -math.Pi / 4, math.Pi / 2, -math.Pi / 2, math.Pi / 4 * 3, -math.Pi / 4 * 3}
 
-func (this *ShipEnemySpec) setParam(rank float64, cls int, rand *r.Rand) {
+func (this *ShipEnemySpec) setParam(rank float64, cls ShipClass, rand *r.Rand) {
 	this.shipClass = cls
 	this.set(LARGE)
 	this.shape = NewEnemyShape(MIDDLE)
@@ -1014,56 +1014,56 @@ func (this *ShipEnemySpec) setParam(rank float64, cls int, rand *r.Rand) {
 	rk := rank
 	switch cls {
 	case MIDDLE:
-		sz := 1.5 + rank/15 + rand.nextFloat(rank/15)
-		ms := 2 + rand.nextFloat(0.5)
+		sz := 1.5 + rank/15 + nextFloat(rand, rank/15)
+		ms := 2 + nextFloat(rand, 0.5)
 		if sz > ms {
 			sz = ms
 		}
 		this.size = sz
-		this.speed = 0.015 + rand.nextSignedFloat(0.005)
-		this.degVel = 0.005 + rand.nextSignedFloat(0.003)
-		switch rand.nextInt(3) {
+		this.speed = 0.015 + nextSignedFloat(rand, 0.005)
+		this.degVel = 0.005 + nextSignedFloat(rand, 0.003)
+		switch rand.Intn(3) {
 		case 0:
-			mainTurretNum = int(size*(1+rand.nextSignedFloat(0.25)) + 1)
+			mainTurretNum = int(this.size()*(1+nextSignedFloat(rand, 0.25)) + 1)
 		case 1:
-			subTurretNum = int(size*1.6*(1+rand.nextSignedFloat(0.5)) + 2)
+			subTurretNum = int(this.size()*1.6*(1+nextSignedFloat(rand, 0.5)) + 2)
 		case 2:
-			mainTurretNum = int(size*(0.5+rand.nextSignedFloat(0.12)) + 1)
-			movingTurretRatio = 0.5 + rand.nextFloat(0.25)
+			mainTurretNum = int(this.size()*(0.5+nextSignedFloat(rand, 0.12)) + 1)
+			movingTurretRatio = 0.5 + nextFloat(rand, 0.25)
 			rk = rank * (1 - movingTurretRatio)
 			movingTurretRatio *= 2
 		}
 	case LARGE:
-		sz := 2.5 + rank/24 + rand.nextFloat(rank/24)
-		ms := 3 + rand.nextFloat(1)
+		sz := 2.5 + rank/24 + nextFloat(rand, rank/24)
+		ms := 3 + nextFloat(rand, 1)
 		if sz > ms {
 			sz = ms
 		}
 		this.size = sz
-		this.speed = 0.01 + rand.nextSignedFloat(0.005)
-		this.degVel = 0.003 + rand.nextSignedFloat(0.002)
-		mainTurretNum = int(this.size*(0.7+rand.nextSignedFloat(0.2)) + 1)
-		subTurretNum = int(this.size*1.6*(0.7+rand.nextSignedFloat(0.33)) + 2)
-		movingTurretRatio = 0.25 + rand.nextFloat(0.5)
+		this.speed = 0.01 + nextSignedFloat(rand, 0.005)
+		this.degVel = 0.003 + nextSignedFloat(rand, 0.002)
+		mainTurretNum = int(this.size()*(0.7+nextSignedFloat(rand, 0.2)) + 1)
+		subTurretNum = int(this.size()*1.6*(0.7+nextSignedFloat(rand, 0.33)) + 2)
+		movingTurretRatio = 0.25 + nextFloat(rand, 0.5)
 		rk = rank * (1 - movingTurretRatio)
 		movingTurretRatio *= 3
 	case BOSS:
-		sz := 5 + rank/30 + rand.nextFloat(rank/30)
-		ms := 9 + rand.nextFloat(3)
+		sz := 5 + rank/30 + nextFloat(rand, rank/30)
+		ms := 9 + nextFloat(rand, 3)
 		if sz > ms {
 			sz = ms
 		}
 		this.size = sz
-		speed = this.ship.scrollSpeedBase + 0.0025 + rand.nextSignedFloat(0.001)
-		this.degVel = 0.003 + rand.nextSignedFloat(0.002)
-		mainTurretNum = cast(int)(size*0.8*(1.5+rand.nextSignedFloat(0.4)) + 2)
-		subTurretNum = cast(int)(size*0.8*(2.4+rand.nextSignedFloat(0.6)) + 2)
-		movingTurretRatio = 0.2 + rand.nextFloat(0.3)
+		this.speed = this.ship.scrollSpeedBase() + 0.0025 + nextSignedFloat(rand, 0.001)
+		this.degVel = 0.003 + nextSignedFloat(rand, 0.002)
+		mainTurretNum = int(this.size()*0.8*(1.5+nextSignedFloat(rand, 0.4)) + 2)
+		subTurretNum = int(this.size()*0.8*(2.4+nextSignedFloat(rand, 0.6)) + 2)
+		movingTurretRatio = 0.2 + nextFloat(rand, 0.3)
 		rk = rank * (1 - movingTurretRatio)
 		movingTurretRatio *= 2.5
 	}
-	this.shield = int(size * 10)
-	if cls == ShipClass.BOSS {
+	this.shield = int(this.size() * 10)
+	if cls == BOSS {
 		shield *= 2.4
 	}
 	if mainTurretNum+subTurretNum <= 0 {
@@ -1420,29 +1420,29 @@ func (this *PlatformEnemySpec) isBoss() bool {
 }
 
 type EnemyPool struct {
-	ActorPool
+	actor.ActorPool
 }
 
 func NewEnemyPool(n int, args []interface{}) *EnemyPool {
-	f := func() Actor { return NewEnemy() }
+	f := func() actor.Actor { return NewEnemy() }
 	this := &EnemyPool{
-		ActorPool: NewActorPool(f, n, args),
+		ActorPool: actor.NewActorPool(f, n, args),
 	}
-	for _, a := range this.actor {
+	for _, a := range this.Actor {
 		e := a.(*Enemy)
 		e.setEnemyPool(this)
 	}
 }
 
 func (this *EnemyPool) setStageManager(stageManager StageManager) {
-	for _, a := range this.actor {
+	for _, a := range this.Actor {
 		e := a.(*Enemy)
 		e.setStageManager(stageManager)
 	}
 }
 
-func (this *EnemyPool) checkShotHit(pos vector.Vector, shape Collidable, shot *Shot /* = null */) {
-	for _, a := range this.actor {
+func (this *EnemyPool) checkShotHit(pos vector.Vector, shape sdl.Collidable, shot *Shot /* = null */) {
+	for _, a := range this.Actor {
 		e := a.(Enemy)
 		if e.Exists() {
 			e.checkShotHit(pos, shape, shot)
@@ -1451,7 +1451,7 @@ func (this *EnemyPool) checkShotHit(pos vector.Vector, shape Collidable, shot *S
 }
 
 func (this *EnemyPool) checkHitShip(x, y float64, deselection *Enemy /* = null */, largeOnly bool /* = false */) *Enemy {
-	for _, a := range this.actor {
+	for _, a := range this.Actor {
 		e := a.(*Enemy)
 		if e.Exists() && e != deselection {
 			if e.checkHitShip(x, y, largeOnly) {
@@ -1463,7 +1463,7 @@ func (this *EnemyPool) checkHitShip(x, y float64, deselection *Enemy /* = null *
 }
 
 func (this *EnemyPool) hasBoss() bool {
-	for _, a := range this.actor {
+	for _, a := range this.Actor {
 		e := a.(*Enemy)
 		if e.Exists() && e.isBoss() {
 			return true

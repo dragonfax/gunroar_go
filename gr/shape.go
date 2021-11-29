@@ -259,7 +259,7 @@ type CrystalShape struct {
 	sdl.DrawableShape
 }
 
-func NewDrawableShape() *CrystalShape {
+func NewCrystalShape() *CrystalShape {
 	this := &CrystalShape{}
 	this.DrawableShape = sdl.NewDrawableShapeInternal(this)
 	return this

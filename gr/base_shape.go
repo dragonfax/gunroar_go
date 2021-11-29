@@ -60,9 +60,9 @@ func SetRandSeed(seed int64) {
 	rand = r.New(r.NewSource(seed))
 }
 
-func NewBaseShape(size, distRatio, spinyRatio float64, typ ShapeType, r, g, b float64) BaseShape {
+func NewBaseShape(size, distRatio, spinyRatio float64, typ ShapeType, r, g, b float64) *BaseShape {
 	this := NewBaseShapeInternal(size, distRatio, spinyRatio, typ, r, g, b)
-	return this
+	return &this
 }
 func NewBaseShapeInternal(size, distRatio, spinyRatio float64, typ ShapeType, r, g, b float64) BaseShape {
 	this := BaseShape{

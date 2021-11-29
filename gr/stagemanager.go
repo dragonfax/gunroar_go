@@ -63,8 +63,8 @@ func (this *StageManager) start(rankIncRatio float64) {
 	this.baseRank = 1
 	this.addRank = 0
 	this.rankVel = 0
-	this.rankInc = RANK_INC_BASE * this.rankIncRatio
-	this._blockDensity = this.rand.nextInt(BLOCK_DENSITY_MAX-BLOCK_DENSITY_MIN+1) + BLOCK_DENSITY_MIN
+	this.rankInc = RANK_INC_BASE * rankIncRatio
+	this._blockDensity = this.rand.Intn(BLOCK_DENSITY_MAX-BLOCK_DENSITY_MIN+1) + BLOCK_DENSITY_MIN
 	this._bossMode = false
 	this.bossAppTimeBase = 60 * 1000
 	this.resetBossMode()
@@ -94,18 +94,18 @@ func (this *StageManager) move() {
 	this.bgmStartCnt--
 	if this.bgmStartCnt == 0 {
 		if this._bossMode {
-			playBgm("gr0.ogg")
+			playBgmWithName("gr0.ogg")
 		} else {
 			nextBgm()
 		}
 	}
 	if this._bossMode {
 		this.addRank *= 0.999
-		if !this.enemies.hasBoss && this.bossAppCnt <= 0 {
+		if !this.enemies.hasBoss() && this.bossAppCnt <= 0 {
 			this.resetBossMode()
 		}
 	} else {
-		rv := this.field.lastScrollY/this.ship.scrollSpeedBase - 2
+		rv := this.field.lastScrollY()/this.ship.scrollSpeedBase() - 2
 		this.bossAppTime -= 17
 		if this.bossAppTime <= 0 {
 			this.bossAppTime = 0
@@ -143,7 +143,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		this.bossAppCnt--
 		if this.bossAppCnt == 0 {
 			ses := NewShipEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
-			ses.setParam(this.rank, ShipEnemySpec.ShipClass.BOSS, this.rand)
+			ses.setParam(this.rank, BOSS, this.rand)
 			en := this.enemies.getInstance()
 			if en != nil {
 				if ses.(HasAppearType).setFirstState(en.state, EnemyState.AppearanceType.CENTER) {
@@ -159,45 +159,45 @@ func (this *StageManager) gotoNextBlockArea() {
 		return
 	}
 	var noSmallShip bool
-	if this._blockDensity < BLOCK_DENSITY_MAX && this.rand.nextInt(2) == 0 {
+	if this._blockDensity < BLOCK_DENSITY_MAX && this.rand.Intn(2) == 0 {
 		noSmallShip = true
 	} else {
 		noSmallShip = false
 	}
-	this._blockDensity += this.rand.nextSignedInt(1)
+	this._blockDensity += nextSignedInt(this.rand, 1)
 	if this._blockDensity < BLOCK_DENSITY_MIN {
 		this._blockDensity = BLOCK_DENSITY_MIN
 	} else if this._blockDensity > BLOCK_DENSITY_MAX {
 		this._blockDensity = BLOCK_DENSITY_MAX
 	}
-	this.batteryNum = int((this._blockDensity + this.rand.nextSignedFloat(1)) * 0.75)
+	this.batteryNum = int((this._blockDensity + nextSignedFloat(this.rand, 1)) * 0.75)
 	tr := this.rank
-	largeShipNum := int((2 - this._blockDensity + this.rand.nextSignedFloat(1)) * 0.5)
+	largeShipNum := int((2 - this._blockDensity + nextSignedFloat(this.rand, 1)) * 0.5)
 	if noSmallShip {
 		largeShipNum *= 1.5
 	} else {
 		largeShipNum *= 0.5
 	}
-	appType := this.rand.nextInt(2)
+	var appType = AppearanceType(this.rand.Intn(2))
 	if largeShipNum > 0 {
-		lr := tr * (0.25 + rand.nextFloat(0.15))
+		lr := tr * (0.25 + nextFloat(rand, 0.15))
 		if noSmallShip {
 			lr *= 1.5
 		}
 		tr -= lr
 		ses := NewShipEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
-		ses.setParam(lr/largeShipNum, ShipEnemySpec.ShipClass.LARGE, this.rand)
+		ses.setParam(lr/largeShipNum, LARGE, this.rand)
 		this.enemyApp[0].set(ses, largeShipNum, appType, this.rand)
 	} else {
 		this.enemyApp[0].unset()
 	}
 	if this.batteryNum > 0 {
 		this.platformEnemySpec = NewPlatformEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
-		pr := tr * (0.3 + rand.nextFloat(0.1))
+		pr := tr * (0.3 + nextFloat(rand, 0.1))
 		this.platformEnemySpec.setParam(pr/this.batteryNum, this.rand)
 	}
 	appType = (appType + 1) % 2
-	middleShipNum := int((4 - _blockDensity + rand.nextSignedFloat(1)) * 0.66)
+	middleShipNum := int((4 - this._blockDensity + nextSignedFloat(rand, 1)) * 0.66)
 	if noSmallShip {
 		middleShipNum *= 2
 	}
@@ -206,18 +206,18 @@ func (this *StageManager) gotoNextBlockArea() {
 		if noSmallShip {
 			mr = tr
 		} else {
-			mr = tr * (0.33 + this.rand.nextFloat(0.33))
+			mr = tr * (0.33 + nextFloat(this.rand, 0.33))
 		}
 		tr -= mr
 		ses = NewShipEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
-		ses.setParam(mr/middleShipNum, ShipEnemySpec.ShipClass.MIDDLE, this.rand)
+		ses.setParam(mr/middleShipNum, MIDDLE, this.rand)
 		this.enemyApp[1].set(ses, middleShipNum, appType, rand)
 	} else {
 		this.enemyApp[1].unset()
 	}
 	if !noSmallShip {
-		appType = EnemyState.AppearanceType.TOP
-		smallShipNum := int(math.Sqrt(3+tr)*(1+this.rand.nextSignedFloat(0.5))*2) + 1
+		appType = TOP
+		smallShipNum := int(math.Sqrt(3+tr)*(1+nextSignedFloat(this.rand, 0.5))*2) + 1
 		if smallShipNum > 256 {
 			smallShipNum = 256
 		}
@@ -236,7 +236,7 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 		if ppn <= 0 || bn <= 0 {
 			break
 		}
-		ppi := rand.nextInt(platformPosNum)
+		ppi := rand.Intn(platformPosNum)
 		for j := 0; j < platformPosNum; j++ {
 			if !platformPos[ppi].used {
 				break
@@ -301,10 +301,10 @@ func NewEnemyAppearance() *EnemyAppearance {
 	return this
 }
 
-func (this *EnemyAppearance) set(s *EnemySpec, num, appType int, rand *Rand) {
+func (this *EnemyAppearance) set(s *EnemySpec, num, appType int, rand *r.Rand) {
 	this.spec = s
-	this.nextAppDistInterval = Field.NEXT_BLOCK_AREA_SIZE / float64(num)
-	this.nextAppDist = rand.nextFloat(this.nextAppDistInterval)
+	this.nextAppDistInterval = NEXT_BLOCK_AREA_SIZE / float64(num)
+	this.nextAppDist = nextFloat(rand, this.nextAppDistInterval)
 	this.appType = appType
 }
 
@@ -312,21 +312,21 @@ func (this *EnemyAppearance) unset() {
 	this.spec = nil
 }
 
-func (this *EnemyApperance) move(enemies *EnemyPool, field Field) {
+func (this *EnemyAppearance) move(enemies *EnemyPool, field Field) {
 	if this.spec == nil {
 		return
 	}
-	this.nextAppDist -= field.lastScrollY
+	this.nextAppDist -= field.lastScrollY()
 	if this.nextAppDist <= 0 {
 		this.nextAppDist += this.nextAppDistInterval
 		this.appear(enemies)
 	}
 }
 
-func (this *EnemyAppearance) appear(enemies EnemyPool) {
-	en := enemies.getInstance()
+func (this *EnemyAppearance) appear(enemies *EnemyPool) {
+	en := enemies.GetInstance()
 	if en != nil {
-		if spec.(HasAppearType).setFirstState(en.state, this.appType) {
+		if this.spec.(HasAppearType).setFirstState(en.state, this.appType) {
 			en.set(this.spec)
 		}
 	}
