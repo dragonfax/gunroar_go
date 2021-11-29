@@ -102,8 +102,8 @@ type HasSetCollision interface {
 	SetCollision() vector.Vector
 }
 
-func NewCollidableDrawable(collidable HasCollision, shape HasCreateDisplayList, setCollision HasSetCollision) *CollidableDrawable {
-	this := &CollidableDrawable{
+func NewCollidableDrawable(collidable HasCollision, shape HasCreateDisplayList, setCollision HasSetCollision) CollidableDrawable {
+	this := CollidableDrawable{
 		CollidableImpl: NewCollidable(collidable),
 		DrawableShape:  NewDrawableShape(shape),
 	}

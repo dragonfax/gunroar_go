@@ -5,29 +5,31 @@ import (
 	r "math/rand"
 	"time"
 
+	"github.com/dragonfax/gunroar/gr/actor"
 	"github.com/dragonfax/gunroar/gr/sdl"
 	"github.com/dragonfax/gunroar/gr/vector"
+	"github.com/go-gl/gl/v4.1-compatibility/gl"
 )
 
 /**
  * Player's shot.
  */
 
-var _ Actor = &Shot{}
+var _ actor.Actor = &Shot{}
 
 const SPEED = 0.6
 const LANCE_SPEED = 0.5
 
 var shotShape ShotShape
 var lanceShape LanceShape
-var shotRand *Rand
+var shotRand *r.Rand
 
 type Shot struct {
-	field   Field
-	enemeis EnemyPool
-	sparks  SparkPool
-	smokes  SmokePool
-	bullets BulletPool
+	field   *Field
+	enemeis *EnemyPool
+	sparks  *SparkPool
+	smokes  *SmokePool
+	bullets *BulletPool
 	pos     vector.Vector
 	cnt     int
 	hitCnt  int
@@ -245,14 +247,16 @@ func (this *ShotPool) existsLance() bool {
 }
 
 type ShotShape struct {
-	CollidableDrawable
+	sdl.CollidableDrawable
 }
 
-func NewShotShape() {
-	return &ShotShape{NewCollidableDrawable()}
+func NewShotShape() *ShotShape {
+	this := &ShotShape{}
+	this.CollidableDrawable = sdl.NewCollidableDrawable(this, this, this)
+	return this
 }
 
-func (this *ShotShape) createDisplayList() {
+func (this *ShotShape) CreateDisplayList() {
 	sdl.SetColor(0.1, 0.33, 0.1, 1)
 	gl.Begin(gl.QUADS)
 	gl.Vertex3f(0, 0.3, 0.1)
@@ -270,8 +274,9 @@ func (this *ShotShape) createDisplayList() {
 	gl.End()
 }
 
-func (this *ShotShape) setCollision() {
+func (this *ShotShape) SetCollision() vector.Vector {
 	this._collision = vector.Vector{0.33, 0.33}
+	return this._collision
 }
 
 var _ Collidable = &LanceShape{}
