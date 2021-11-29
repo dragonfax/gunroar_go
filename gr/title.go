@@ -96,11 +96,13 @@ func (this *TitleManager) move() {
 		this.field.move()
 		this.field.scroll(TITLE_SCROLL_SPEED_BASE, true)
 	}
-	// PadState input = pad.getState(false);
+	PadState input = pad.getState(false);
 	// MouseState mouseInput = mouse.getState(false);
-	input := twinStick.GetState(false)
 	if this.btnPressedCnt <= 0 {
-		if input.PressA && this.gameMode >= 0 {
+		if ((this.input.button & PadState.Button.A) ||
+			(this.gameMode == InGameState.GameMode.MOUSE &&
+				(this.mouseInput.button & MouseState.Button.LEFT))) &&
+			this.gameMode >= 0 {
 			this.gameManager.startInGame(this.gameMode)
 		}
 		gmc := 0
@@ -144,7 +146,7 @@ func (this *TitleManager) draw() {
 	}
 	ts := 1.0
 	if this.cnt > 120 {
-		ts -= (this.cnt - 120) * 0.015
+		ts -= float64(this.cnt-120) * 0.015
 		if ts < 0.5 {
 			ts = 0.5
 		}
