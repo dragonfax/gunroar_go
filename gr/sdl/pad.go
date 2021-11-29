@@ -130,13 +130,17 @@ type PadState struct {
 	button Button
 }
 
-func NewPadState(s PadState) PadState {
+func NewPadState(s *PadState) PadState {
 	this := PadState{}
-	this.set(s)
+	this.Set(s)
 	return this
 }
 
-func (this *PadState) set(s PadState) {
+func (this *PadState) Set(i record.InputState) {
+	s, ok := i.(*PadState)
+	if !ok {
+		panic("wrong type given to padstate set")
+	}
 	this.dir = s.dir
 	this.button = s.button
 }
@@ -157,7 +161,11 @@ func (this *PadState) Write(fd file.File) {
 	fd.WriteInt(s)
 }
 
-func (this *PadState) Equals(s PadState) bool {
+func (this *PadState) Equals(i record.InputState) bool {
+	s, ok := i.(*PadState)
+	if !ok {
+		panic("wrong state type given to padstate.equals")
+	}
 	return this.dir == s.dir && this.button == s.button
 }
 
@@ -177,7 +185,7 @@ func NewRecordablePad() *RecordablePad {
 func (this RecordablePad) GetState(doRecord bool /*= true */) PadState {
 	s := this.Pad.getState()
 	if doRecord {
-		this.Record(s)
+		this.Record(&s)
 	}
 	return s
 }
