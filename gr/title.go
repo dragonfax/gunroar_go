@@ -14,7 +14,7 @@ const TITLE_SCROLL_SPEED_BASE = 0.025
 
 type TitleManager struct {
 	prefManager *PrefManager
-	// RecordablePad pad;
+	pad         *sdl.RecordablePad
 	// RecordableMouse mouse;
 	field         *Field
 	gameManager   *GameManager
@@ -26,12 +26,13 @@ type TitleManager struct {
 	gameMode      GameMode
 }
 
-func NewTitleManager(prefManager *PrefManager /* Pad pad, Mouse mouse, */, field *Field, gameManager *GameManager) *TitleManager {
+func NewTitleManager(prefManager *PrefManager, pad *sdl.RecordablePad /* Mouse mouse, */, field *Field, gameManager *GameManager) *TitleManager {
 	this := &TitleManager{}
 	this.prefManager = prefManager
 	// this.pad = cast(RecordablePad) pad;
 	// this.mouse = cast(RecordableMouse) mouse;
 	this.field = field
+	this.pad = pad
 	this.gameManager = gameManager
 	this.init()
 	return this
@@ -96,19 +97,18 @@ func (this *TitleManager) move() {
 		this.field.move()
 		this.field.scroll(TITLE_SCROLL_SPEED_BASE, true)
 	}
-	PadState input = pad.getState(false);
+	input := this.pad.GetState(false)
 	// MouseState mouseInput = mouse.getState(false);
 	if this.btnPressedCnt <= 0 {
-		if ((this.input.button & PadState.Button.A) ||
-			(this.gameMode == InGameState.GameMode.MOUSE &&
-				(this.mouseInput.button & MouseState.Button.LEFT))) &&
-			this.gameMode >= 0 {
+		if int(input.Button&sdl.ButtonA) > 0 && int(this.gameMode) >= 0 {
+			/* (this.gameMode == MOUSE &&
+			(this.mouseInput.button & MouseState.Button.LEFT)) ) && */
 			this.gameManager.startInGame(this.gameMode)
 		}
 		gmc := 0
-		if (this.input.button & PadState.Button.B) || (this.input.dir & PadState.Dir.DOWN) {
+		if int(input.Button&sdl.ButtonB) > 0 || int(input.Dir&sdl.DOWN) > 0 {
 			gmc = 1
-		} else if this.input.dir & PadState.Dir.UP {
+		} else if int(input.Dir&sdl.UP) > 0 {
 			gmc = -1
 		}
 		if gmc != 0 {
@@ -129,9 +129,9 @@ func (this *TitleManager) move() {
 			}
 		}
 	}
-	if (this.input.button & (PadState.Button.A | PadState.Button.B)) ||
-		(this.input.dir & (PadState.Dir.UP | PadState.Dir.DOWN)) ||
-		(mouseInput.button & MouseState.Button.LEFT) {
+	if int(input.Button&(sdl.ButtonA|sdl.ButtonB)) > 0 ||
+		int(input.Dir&(sdl.UP|sdl.DOWN)) > 0 { /* ||
+		(mouseInput.button & MouseState.Button.LEFT) */
 		this.btnPressedCnt = 6
 	} else {
 		this.btnPressedCnt--

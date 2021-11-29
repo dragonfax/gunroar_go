@@ -44,7 +44,7 @@ func (this *Pad) HandleEvent(event sdl2.Event) {
 
 func (this *Pad) getState() PadState {
 	var x, y int16
-	this.state.dir = NONE
+	this.state.Dir = NONE
 	if this.stick != nil {
 		x = this.stick.Axis(0)
 		y = this.stick.Axis(1)
@@ -52,24 +52,24 @@ func (this *Pad) getState() PadState {
 	if this.keys[sdl2.K_RIGHT] == sdl2.PRESSED || this.keys[sdl2.K_KP_6] == sdl2.PRESSED ||
 		this.keys[sdl2.K_d] == sdl2.PRESSED || this.keys[sdl2.K_l] == sdl2.PRESSED ||
 		x > JOYSTICK_AXIS {
-		this.state.dir |= RIGHT
+		this.state.Dir |= RIGHT
 	}
 	if this.keys[sdl2.K_LEFT] == sdl2.PRESSED || this.keys[sdl2.K_KP_4] == sdl2.PRESSED ||
 		this.keys[sdl2.K_a] == sdl2.PRESSED || this.keys[sdl2.K_j] == sdl2.PRESSED ||
 		x < -JOYSTICK_AXIS {
-		this.state.dir |= LEFT
+		this.state.Dir |= LEFT
 	}
 	if this.keys[sdl2.K_DOWN] == sdl2.PRESSED || this.keys[sdl2.K_KP_2] == sdl2.PRESSED ||
 		this.keys[sdl2.K_s] == sdl2.PRESSED || this.keys[sdl2.K_k] == sdl2.PRESSED ||
 		y > JOYSTICK_AXIS {
-		this.state.dir |= DOWN
+		this.state.Dir |= DOWN
 	}
 	if this.keys[sdl2.K_UP] == sdl2.PRESSED || this.keys[sdl2.K_KP_8] == sdl2.PRESSED ||
 		this.keys[sdl2.K_w] == sdl2.PRESSED || this.keys[sdl2.K_i] == sdl2.PRESSED ||
 		y < -JOYSTICK_AXIS {
-		this.state.dir |= UP
+		this.state.Dir |= UP
 	}
-	this.state.button = 0
+	this.state.Button = 0
 	var btn1, btn2 byte
 	if this.stick != nil {
 		btn1 = this.stick.Button(0) + this.stick.Button(3) +
@@ -83,9 +83,9 @@ func (this *Pad) getState() PadState {
 		this.keys[sdl2.K_LCTRL] == sdl2.PRESSED || this.keys[sdl2.K_RCTRL] == sdl2.PRESSED ||
 		btn1 > 0 {
 		if !this.buttonReversed {
-			this.state.button |= ButtonA
+			this.state.Button |= ButtonA
 		} else {
-			this.state.button |= ButtonB
+			this.state.Button |= ButtonB
 		}
 	}
 	if this.keys[sdl2.K_x] == sdl2.PRESSED || this.keys[sdl2.K_SLASH] == sdl2.PRESSED ||
@@ -94,9 +94,9 @@ func (this *Pad) getState() PadState {
 		this.keys[sdl2.K_RETURN] == sdl2.PRESSED ||
 		btn2 > 0 {
 		if !this.buttonReversed {
-			this.state.button |= ButtonB
+			this.state.Button |= ButtonB
 		} else {
-			this.state.button |= ButtonA
+			this.state.Button |= ButtonA
 		}
 	}
 	return this.state
@@ -126,8 +126,8 @@ const (
 )
 
 type PadState struct {
-	dir    Dir
-	button Button
+	Dir    Dir
+	Button Button
 }
 
 func NewPadState(s *PadState) PadState {
@@ -141,23 +141,23 @@ func (this *PadState) Set(i record.InputState) {
 	if !ok {
 		panic("wrong type given to padstate set")
 	}
-	this.dir = s.dir
-	this.button = s.button
+	this.Dir = s.Dir
+	this.Button = s.Button
 }
 
 func (this *PadState) clear() {
-	this.dir = 0
-	this.button = 0
+	this.Dir = 0
+	this.Button = 0
 }
 
 func (this *PadState) Read(fd file.File) {
 	s := fd.ReadInt()
-	this.dir = Dir(s & (int(UP) | int(DOWN) | int(LEFT) | int(RIGHT)))
-	this.button = Button(s & int(ButtonANY))
+	this.Dir = Dir(s & (int(UP) | int(DOWN) | int(LEFT) | int(RIGHT)))
+	this.Button = Button(s & int(ButtonANY))
 }
 
 func (this *PadState) Write(fd file.File) {
-	s := int(this.dir) | int(this.button)
+	s := int(this.Dir) | int(this.Button)
 	fd.WriteInt(s)
 }
 
@@ -166,7 +166,7 @@ func (this *PadState) Equals(i record.InputState) bool {
 	if !ok {
 		panic("wrong state type given to padstate.equals")
 	}
-	return this.dir == s.dir && this.button == s.button
+	return this.Dir == s.Dir && this.Button == s.Button
 }
 
 type RecordablePad struct {
