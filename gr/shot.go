@@ -274,15 +274,15 @@ func (this *ShotShape) CreateDisplayList() {
 	gl.End()
 }
 
-func (this *ShotShape) SetCollision() vector.Vector {
-	this._collision = vector.Vector{0.33, 0.33}
-	return this._collision
+func (this *ShotShape) CreateCollision() vector.Vector {
+	this.SetCollision(vector.Vector{0.33, 0.33})
+	return *this.Collision()
 }
 
-var _ Collidable = &LanceShape{}
+var _ sdl.Collidable = &LanceShape{}
 
 type LanceShape struct {
-	CollidableImpl
+	sdl.CollidableImpl
 	_collision vector.Vector
 }
 
@@ -292,6 +292,6 @@ func NewLanceShape() *LanceShape {
 	return this
 }
 
-func (this *LanceShape) collision() vector.Vector {
+func (this *LanceShape) Collision() vector.Vector {
 	return this._collision
 }

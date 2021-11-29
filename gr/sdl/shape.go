@@ -99,7 +99,7 @@ type CollidableDrawable struct {
 }
 
 type HasSetCollision interface {
-	SetCollision() vector.Vector
+	CreateCollision() vector.Vector
 }
 
 func NewCollidableDrawable(collidable HasCollision, shape HasCreateDisplayList, setCollision HasSetCollision) CollidableDrawable {
@@ -107,13 +107,17 @@ func NewCollidableDrawable(collidable HasCollision, shape HasCreateDisplayList, 
 		CollidableImpl: NewCollidable(collidable),
 		DrawableShape:  NewDrawableShape(shape),
 	}
-	this._collision = setCollision.SetCollision()
+	this._collision = setCollision.CreateCollision()
 	return this
 }
 
 func (this *CollidableDrawable) Collision() *vector.Vector {
 	v := this._collision
 	return &v
+}
+
+func (this *CollidableDrawable) SetCollision(c vector.Vector) {
+	this._collision = c
 }
 
 /**
