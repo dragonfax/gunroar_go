@@ -10,7 +10,7 @@ const PREFS_VERSION_NUM = 14
 const PREF_FILE = "gr.prf"
 
 type PrefManager struct {
-	_prefData PrefData
+	_prefData *PrefData
 }
 
 func NewPrefManager() *PrefManager {
@@ -45,7 +45,7 @@ func (this *PrefManager) Save() {
 	fd.Close()
 }
 
-func (this *PrefManager) prefData() PrefData {
+func (this *PrefManager) prefData() *PrefData {
 	return this._prefData
 }
 

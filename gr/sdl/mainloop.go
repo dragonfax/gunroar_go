@@ -20,7 +20,7 @@ type MainLoop struct {
 	NoWait              bool
 	AccFrame            bool
 	maxSkipFrame        uint32
-	event               sdl.Event
+	Event               sdl.Event
 	screen              screen.Screen
 	input               Input
 	gameManager         GameManager
@@ -54,14 +54,14 @@ func (this *MainLoop) initFirst() {
 	this.prefManager.Load()
 	SoundManagerInit()
 	this.gameManager.Init()
-	this.initInterval()
+	this.InitInterval()
 }
 
 func (this *MainLoop) quitLast() {
 	sdl.Quit()
 }
 
-func (this *MainLoop) breakLoop() {
+func (this *MainLoop) BreakLoop() {
 	this.done = true
 }
 
@@ -74,12 +74,12 @@ func (this *MainLoop) Loop() {
 	this.initFirst()
 	this.gameManager.Start()
 	for !this.done {
-		this.event = sdl.PollEvent()
-		if this.event != nil {
+		this.Event = sdl.PollEvent()
+		if this.Event != nil {
 			// TODO this.event.type = sdl.USEREVENT;
-			this.input.HandleEvent(this.event)
-			if this.event.GetType() == sdl.QUIT {
-				this.breakLoop()
+			this.input.HandleEvent(this.Event)
+			if this.Event.GetType() == sdl.QUIT {
+				this.BreakLoop()
 			}
 		}
 		nowTick = sdl.GetTicks()
@@ -116,11 +116,11 @@ func (this *MainLoop) Loop() {
 
 // Intentional slowdown.
 
-func (this *MainLoop) initInterval() {
+func (this *MainLoop) InitInterval() {
 	this.interval = INTERVAL_BASE
 }
 
-func (this *MainLoop) addSlowdownRatio(sr float64) {
+func (this *MainLoop) AddSlowdownRatio(sr float64) {
 	this.slowdownRatio += sr
 }
 

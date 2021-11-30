@@ -150,7 +150,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		this.bossAppCnt--
 		if this.bossAppCnt == 0 {
 			ses := NewShipEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
-			ses.setParam(this.rank, BOSS, this.rand)
+			ses.setParam(this.rank, ShipBOSS, this.rand)
 			en := this.enemies.GetInstance()
 			if en != nil {
 				if ses.setFirstState(en.state(), CENTER) {
@@ -193,7 +193,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		}
 		tr -= lr
 		ses := NewShipEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
-		ses.setParam(lr/float64(largeShipNum), LARGE, this.rand)
+		ses.setParam(lr/float64(largeShipNum), ShipLARGE, this.rand)
 		this.enemyApp[0].set(ses, largeShipNum, appType, this.rand)
 	} else {
 		this.enemyApp[0].unset()
@@ -217,7 +217,7 @@ func (this *StageManager) gotoNextBlockArea() {
 		}
 		tr -= mr
 		ses := NewShipEnemySpec(this.field, this.ship, this.sparks, this.smokes, this.fragments, this.wakes)
-		ses.setParam(mr/float64(middleShipNum), MIDDLE, this.rand)
+		ses.setParam(mr/float64(middleShipNum), ShipMIDDLE, this.rand)
 		this.enemyApp[1].set(ses, middleShipNum, appType, this.rand)
 	} else {
 		this.enemyApp[1].unset()

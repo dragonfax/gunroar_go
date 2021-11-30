@@ -52,7 +52,7 @@ type BaseShape struct {
 	_pointDeg                   []float64
 }
 
-func SetRandSeed(seed int64) {
+func SetBaseShapeRandSeed(seed int64) {
 	shapeRand = r.New(r.NewSource(seed))
 }
 

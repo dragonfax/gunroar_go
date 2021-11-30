@@ -23,7 +23,7 @@ type GameManager struct {
 
 	pad            *sdl.RecordablePad
 	twinStick      *sdl.RecordableTwinStick
-	prefManager    sdl.PrefManager
+	prefManager    *PrefManager
 	screen         *Screen
 	field          *Field
 	ship           *Ship
@@ -57,7 +57,7 @@ func (this *GameManager) Init() {
 	fragmentInit()
 	sparkFragmentInit()
 	crystalInit()
-	this.prefManager = this.GetPrefManager()
+	this.prefManager = this.GetPrefManager().(*PrefManager)
 	this.screen = this.GetScreen().(*Screen)
 	this.pad = input.Inputs[0].(*sdl.RecordablePad)
 	this.twinStick = input.Inputs[1].(*sdl.RecordableTwinStick)
@@ -150,21 +150,21 @@ func (this *GameManager) loadErrorReplay() {
 }
 
 func (this *GameManager) initInterval() {
-	mainLoop.initInterval()
+	mainLoop.InitInterval()
 }
 
 func (this *GameManager) addSlowdownRatio(sr float64) {
-	mainLoop.addSlowdownRatio(sr)
+	mainLoop.AddSlowdownRatio(sr)
 }
 
 func (this *GameManager) Move() {
-	if pad.keys[sdl2.K_ESCAPE] == sdl2.PRESSED {
+	if pad.Keys[sdl2.K_ESCAPE] == sdl2.PRESSED {
 		if !this.escPressed {
 			this.escPressed = true
 			if this.state == this.inGameState {
-				this.startTitle()
+				this.startTitle(false)
 			} else {
-				mainLoop.breakLoop()
+				mainLoop.BreakLoop()
 			}
 			return
 		}
@@ -175,11 +175,13 @@ func (this *GameManager) Move() {
 }
 
 func (this *GameManager) Draw() {
-	e := mainLoop.event
+	e := mainLoop.Event
 	if e.GetType() == sdl2.WINDOWEVENT_RESIZED {
-		re := e.resize
-		if re.w > 150 && re.h > 100 {
-			this.screen.resized(re.w, re.h)
+		we := e.(*sdl2.WindowEvent)
+		rew := we.Data1
+		reh := we.Data2
+		if rew > 150 && reh > 100 {
+			this.screen.resized(int(rew), int(reh))
 		}
 	}
 	if this.screen.startRenderToLuminousScreen() {
@@ -280,7 +282,7 @@ func (this *GameStateBase) clearAll() {
 	this.numIndicators.Clear()
 }
 
-func (this *GameStateBase) setReplayData(ReplayData v) ReplayData {
+func (this *GameStateBase) setReplayData(v ReplayData) ReplayData {
 	this._replayData = v
 	return v
 }
@@ -309,7 +311,7 @@ type InGameState struct {
 
 	isGameOver    bool
 	rand          *r.Rand
-	prefManager   PrefManager
+	prefManager   *PrefManager
 	left          int
 	time          int
 	gameOverCnt   int
@@ -343,14 +345,14 @@ func NewInGameState(gameManager *GameManager, screen *Screen,
 func (this *InGameState) start() {
 	this.ship.unsetReplayMode()
 	this._replayData = NewReplayData()
-	this.prefManager.prefData.recordGameMode(this._gameMode)
+	this.prefManager.prefData().recordGameMode(this._gameMode)
 	switch this._gameMode {
-	case GameMode.TWIN_STICK, GameMode.DOUBLE_PLAY:
+	case TWIN_STICK, DOUBLE_PLAY:
 		rts := twinStick
-		rts.startRecord()
+		rts.StartRecord()
 		this._replayData.twinStickInputRecord = rts.inputRecord
 	}
-	this._replayData.seed = this.rand.nextInt32()
+	this._replayData.seed = this.rand.Int63()
 	this._replayData.shipTurnSpeed = shipTurnSpeed
 	this._replayData.shipReverseFire = shipReverseFire
 	this._replayData.gameMode = this._gameMode
@@ -371,13 +373,12 @@ func (this *InGameState) startInGame() {
 	setFragmentRandSeed(seed)
 	setSparkFragmentRandSeed(seed)
 	setScreenRandSeed(seed)
-	setBaseShapeRandSeed(seed)
+	SetBaseShapeRandSeed(seed)
 	this.ship.setRandSeed(seed)
 	setShotRandSeed(seed)
 	this.stageManager.setRandSeed(seed)
 	setNumReelRandSeed(seed)
 	setNumIndicatorRandSeed(seed)
-	setSoundManagerRandSeed(seed)
 	this.stageManager.start(1)
 	this.field.start()
 	this.ship.start(this._gameMode)
@@ -398,7 +399,7 @@ func (this *InGameState) initGameState() {
 }
 
 func (this *InGameState) move() {
-	if pad.keys[sdl2.K_p] == sdl2.PRESSED {
+	if pad.Keys[sdl2.K_p] == sdl2.PRESSED {
 		if !this.pausePressed {
 			if this.pauseCnt <= 0 && !this.isGameOver {
 				this.pauseCnt = 1
@@ -486,13 +487,13 @@ func (this *InGameState) drawFront() {
 	x := -12.0
 	for i := 0; i < this.left; i++ {
 		gl.PushMatrix()
-		gl.Translatef(x, -9, 0)
+		gl.Translated(x, -9, 0)
 		gl.Scalef(0.7, 0.7, 0.7)
 		this.ship.drawShape()
 		gl.PopMatrix()
 		x += 0.7
 	}
-	this.numIndicators.draw()
+	this.numIndicators.Draw()
 }
 
 func (this *InGameState) drawGameParams() {
@@ -511,11 +512,11 @@ func (this *InGameState) drawOrtho() {
 
 func (this *InGameState) drawLuminous() {
 	gl.Begin(gl.TRIANGLES)
-	this.sparks.drawLuminous()
+	this.sparks.DrawLuminous()
 	gl.End()
-	this.sparkFragments.drawLuminous()
+	this.sparkFragments.DrawLuminous()
 	gl.Begin(gl.QUADS)
-	this.smokes.drawLuminous()
+	this.smokes.DrawLuminous()
 	gl.End()
 }
 
@@ -532,7 +533,7 @@ func (this *InGameState) shipDestroyed() {
 		if !this.ship.replayMode {
 			disableSe()
 			this.prefManager.prefData.recordResult(this.scoreReel.actualScore, this._gameMode)
-			this._replayData.score = this.scoreReel.actualScore
+			this._replayData.score = this.scoreReel.actualScore()
 		}
 	}
 }
@@ -604,7 +605,7 @@ func (this *TitleState) start() {
 	if this.replayData != nil {
 		this.startReplay()
 	} else {
-		this.titleManager.replayData = nil
+		this.titleManager.replayData(nil)
 	}
 }
 
@@ -615,7 +616,7 @@ func (this *TitleState) startReplay() {
 		rts := twinStick
 		rts.startReplay(this._replayData.twinStickInputRecord)
 	}
-	this.titleManager.replayData = this._replayData
+	this.titleManager.replayData(this._replayData)
 	this.inGameState.setGameMode(this._replayData.gameMode)
 	this.inGameState.startInGame()
 }

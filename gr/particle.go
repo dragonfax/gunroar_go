@@ -93,12 +93,12 @@ func (this *Spark) DrawLuminous() {
 }
 
 type SparkPool struct {
-	actor.ActorPool
+	sdl.LuminousActorPool
 }
 
 func NewSparkPool(n int, args []interface{}) *SparkPool {
 	f := func() actor.Actor { return NewSpark() }
-	this := &SparkPool{ActorPool: actor.NewActorPool(f, n, args)}
+	this := &SparkPool{LuminousActorPool: sdl.NewLuminousActorPool(f, n, args)}
 	return this
 }
 
@@ -567,12 +567,12 @@ func (this *SparkFragment) DrawLuminous() {
 }
 
 type SparkFragmentPool struct {
-	actor.ActorPool
+	sdl.LuminousActorPool
 }
 
 func NewSparkFragmentPool(n int, args []interface{}) *SparkFragmentPool {
 	f := func() actor.Actor { return NewSparkFragment() }
-	return &SparkFragmentPool{actor.NewActorPool(f, n, args)}
+	return &SparkFragmentPool{sdl.NewLuminousActorPool(f, n, args)}
 }
 
 func (this *SparkFragmentPool) GetInstance() *SparkFragment {

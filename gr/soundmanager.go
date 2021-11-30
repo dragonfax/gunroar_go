@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
+	r "math/rand"
 	"path/filepath"
+	"time"
 
 	"github.com/dragonfax/gunroar/gr/sdl"
 )
@@ -73,9 +74,11 @@ func playBgmWithName(name string) {
 	bgm[name].Play()
 }
 
+var soundRand = r.New(r.NewSource(time.Now().Unix()))
+
 func playBgm() {
-	bgmIdx := rand.Intn(len(bgm)-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
-	nextIdxMv = rand.Intn(2)*2 - 1
+	bgmIdx := soundRand.Intn(len(bgm)-RANDOM_BGM_START_INDEX) + RANDOM_BGM_START_INDEX
+	nextIdxMv = soundRand.Intn(2)*2 - 1
 	prevBgmIdx = bgmIdx
 	playBgmWithName(bgmFileName[bgmIdx])
 }

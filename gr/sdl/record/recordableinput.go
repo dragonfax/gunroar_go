@@ -26,7 +26,7 @@ func NewRecordableInput() RecordableInput {
 	return this
 }
 
-func (this *RecordableInput) startRecord() {
+func (this *RecordableInput) StartRecord() {
 	this.inputRecord = new(InputRecord)
 	this.inputRecord.clear()
 }
@@ -40,13 +40,11 @@ func (this *RecordableInput) startReplay(pr *InputRecord) {
 	this.inputRecord.reset()
 }
 
-var EndRecordingErr = fmt.Errorf("end of recording")
-
 func (this *RecordableInput) Replay() (InputState, error) {
 	if !this.inputRecord.hasNext() {
-		return nil, EndRecordingErr
+		return nil, NoRecordDataException
 	}
-	return this.inputRecord.next(), nil
+	return this.inputRecord.next()
 }
 
 type InputStateConstructor func(InputState) InputState
@@ -72,7 +70,7 @@ func New(constructor InputStateConstructor) InputRecord {
 	return this
 }
 
-func (this *InputRecord) clear() { //lint:ignore ST1006
+func (this *InputRecord) clear() {
 	this.record = make([]Record, 0)
 }
 
@@ -96,9 +94,11 @@ func (this *InputRecord) hasNext() bool {
 	return this.idx < len(this.record)
 }
 
-func (this *InputRecord) next() InputState {
+var NoRecordDataException = fmt.Errorf("ran out of data")
+
+func (this *InputRecord) next() (InputState, error) {
 	if this.idx >= len(this.record) {
-		panic("No more items")
+		return nil, NoRecordDataException
 	}
 	if this.series <= 0 {
 		this.series = this.record[this.idx].series
@@ -108,7 +108,7 @@ func (this *InputRecord) next() InputState {
 	if this.series <= 0 {
 		this.idx++
 	}
-	return this.replayData
+	return this.replayData, nil
 }
 
 func (this *InputRecord) Save(fd file.File) {

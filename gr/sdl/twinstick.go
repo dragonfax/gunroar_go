@@ -20,7 +20,7 @@ const JOYSTICK_AXIS_MAX = 32768
 type TwinStick struct {
 	Rotate      float64
 	Reverse     float64
-	keys        []uint8
+	Keys        []uint8
 	EnableAxis5 bool
 	stick       *sdl.Joystick
 	state       TwinStickState
@@ -48,7 +48,7 @@ func (this *TwinStick) OpenJoystick(st *sdl.Joystick) *sdl.Joystick {
 }
 
 func (this *TwinStick) HandleEvent(event sdl.Event) {
-	this.keys = sdl.GetKeyboardState()
+	this.Keys = sdl.GetKeyboardState()
 }
 
 func (this *TwinStick) GetState() TwinStickState {
@@ -78,28 +78,28 @@ func (this *TwinStick) GetState() TwinStickState {
 		this.state.Right.X = 0
 		this.state.Right.Y = 0
 	}
-	if this.keys[sdl.K_d] == sdl.PRESSED {
+	if this.Keys[sdl.K_d] == sdl.PRESSED {
 		this.state.Left.X = 1
 	}
-	if this.keys[sdl.K_l] == sdl.PRESSED {
+	if this.Keys[sdl.K_l] == sdl.PRESSED {
 		this.state.Right.X = 1
 	}
-	if this.keys[sdl.K_a] == sdl.PRESSED {
+	if this.Keys[sdl.K_a] == sdl.PRESSED {
 		this.state.Left.X = -1
 	}
-	if this.keys[sdl.K_j] == sdl.PRESSED {
+	if this.Keys[sdl.K_j] == sdl.PRESSED {
 		this.state.Right.X = -1
 	}
-	if this.keys[sdl.K_s] == sdl.PRESSED {
+	if this.Keys[sdl.K_s] == sdl.PRESSED {
 		this.state.Left.Y = -1
 	}
-	if this.keys[sdl.K_k] == sdl.PRESSED {
+	if this.Keys[sdl.K_k] == sdl.PRESSED {
 		this.state.Right.Y = -1
 	}
-	if this.keys[sdl.K_w] == sdl.PRESSED {
+	if this.Keys[sdl.K_w] == sdl.PRESSED {
 		this.state.Left.Y = 1
 	}
-	if this.keys[sdl.K_i] == sdl.PRESSED {
+	if this.Keys[sdl.K_i] == sdl.PRESSED {
 		this.state.Right.Y = 1
 	}
 	return this.state

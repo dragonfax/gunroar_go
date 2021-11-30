@@ -677,13 +677,13 @@ func (this *EnemySpecBase) set(typ EnemyType) {
 	this.movingTurretGroupNum = 0
 }
 
-func (this *EnemySpecBase) getTurretGroupSpec() TurretGroupSpec {
+func (this EnemySpecBase) getTurretGroupSpec() TurretGroupSpec {
 	this.turretGroupNum++
 	this.turretGroupSpec[this.turretGroupNum-1].init()
 	return this.turretGroupSpec[this.turretGroupNum-1]
 }
 
-func (this *EnemySpecBase) getMovingTurretGroupSpec() MovingTurretGroupSpec {
+func (this EnemySpecBase) getMovingTurretGroupSpec() MovingTurretGroupSpec {
 	this.movingTurretGroupNum++
 	this.movingTurretGroupSpec[this.movingTurretGroupNum-1].init()
 	return this.movingTurretGroupSpec[this.movingTurretGroupNum-1]
@@ -809,11 +809,11 @@ func (this *EnemySpecBase) addMovingTurret(rank float64, bossMode bool /* = fals
 	}
 }
 
-func (this *EnemySpecBase) checkCollision(es EnemyState, x, y float64, c sdl.Collidable, shot *Shot) bool {
+func (this EnemySpecBase) checkCollision(es EnemyState, x, y float64, c sdl.Collidable, shot *Shot) bool {
 	return es.checkCollision(x, y, c, shot)
 }
 
-func (this *EnemySpecBase) checkShipCollision(es EnemyState, x, y float64, largeOnly bool /* = false */) bool {
+func (this EnemySpecBase) checkShipCollision(es EnemyState, x, y float64, largeOnly bool /* = false */) bool {
 	if es.destroyedCnt >= 0 || (largeOnly && this.typ != EnemyLARGE) {
 		return false
 	}
@@ -824,11 +824,11 @@ func (this EnemySpecBase) move(es EnemyState) bool {
 	return es.move()
 }
 
-func (this *EnemySpecBase) draw(es EnemyState) {
+func (this EnemySpecBase) draw(es EnemyState) {
 	es.draw()
 }
 
-func (this *EnemySpecBase) size() float64 {
+func (this EnemySpecBase) size() float64 {
 	return this._size
 }
 
@@ -850,7 +850,7 @@ func (this *EnemySpecBase) setSize(v float64) float64 {
 	return this._size
 }
 
-func (this *EnemySpecBase) isSmallEnemy() bool {
+func (this EnemySpecBase) isSmallEnemy() bool {
 	return this.typ == EnemySMALL
 }
 
@@ -944,7 +944,7 @@ func (this *SmallShipEnemySpec) setFirstState(es EnemyState, appType AppearanceT
 	return true
 }
 
-func (this *SmallShipEnemySpec) move(es EnemyState) bool {
+func (this SmallShipEnemySpec) move(es EnemyState) bool {
 	if !this.EnemySpecBase.move(es) {
 		return false
 	}
@@ -1328,7 +1328,7 @@ func (this ShipEnemySpec) move(es EnemyState) bool {
 	return true
 }
 
-func (this *ShipEnemySpec) draw(es EnemyState) {
+func (this ShipEnemySpec) draw(es EnemyState) {
 	if es.destroyedCnt >= 0 {
 		sdl.SetColor(
 			MIDDLE_COLOR_R*(1-float64(es.destroyedCnt)/SINK_INTERVAL)*0.5,
