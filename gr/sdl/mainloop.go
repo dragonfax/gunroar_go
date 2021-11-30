@@ -74,6 +74,7 @@ func (this *MainLoop) Loop() {
 	this.initFirst()
 	this.gameManager.Start()
 	for !this.done {
+		this.screen.HandleError()
 		this.Event = sdl.PollEvent()
 		if this.Event != nil {
 			// TODO this.event.type = sdl.USEREVENT;
@@ -82,6 +83,7 @@ func (this *MainLoop) Loop() {
 				this.BreakLoop()
 			}
 		}
+		this.screen.HandleError()
 		nowTick = sdl.GetTicks()
 		itv := uint32(this.interval)
 		frame = (nowTick - prvTickCount) / itv
@@ -99,13 +101,17 @@ func (this *MainLoop) Loop() {
 		} else {
 			prvTickCount = nowTick
 		}
+		this.screen.HandleError()
 		this.slowdownRatio = 0
 		for i := uint32(0); i < frame; i++ {
 			this.gameManager.Move()
 		}
+		this.screen.HandleError()
 		this.slowdownRatio /= float64(frame)
 		this.screen.Clear()
+		this.screen.HandleError()
 		this.gameManager.Draw()
+		this.screen.HandleError()
 		this.screen.Flip()
 		if !this.NoWait {
 			this.calcInterval()

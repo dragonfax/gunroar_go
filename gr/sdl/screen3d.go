@@ -81,6 +81,20 @@ func (this *Screen3D) InitSDL() {
 
 	gl.Init()
 
+	/*
+		gl.Enable(gl.DEBUG_OUTPUT)
+		gl.DebugMessageCallback(func(
+			source uint32,
+			gltype uint32,
+			id uint32,
+			severity uint32,
+			length int32,
+			message string,
+			userParam unsafe.Pointer) {
+			fmt.Printf("gl debug: %s", message)
+		}, nil)
+	*/
+
 	gl.Viewport(0, 0, int32(this.Width()), int32(this.Height()))
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
 	this.Resized(this._width, this._height)
@@ -111,7 +125,7 @@ func (this *Screen3D) CloseSDL() {
 }
 
 func (this *Screen3D) Flip() {
-	this.handleError()
+	this.HandleError()
 	window.GLSwap() // NOTE watch out for macos special issues.
 }
 
@@ -119,13 +133,13 @@ func (this *Screen3D) Clear() {
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 }
 
-func (this *Screen3D) handleError() {
+func (this *Screen3D) HandleError() {
 	err := gl.GetError()
 	if err == gl.NO_ERROR {
 		return
 	}
 	this.CloseSDL()
-	panic("error from open gl")
+	panic(fmt.Errorf("error from open gl: %d", err))
 }
 
 func (this *Screen3D) SetCaption(name string) {

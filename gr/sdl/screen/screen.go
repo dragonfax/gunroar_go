@@ -8,6 +8,7 @@ type Screen interface {
 	CloseSDL()
 	Flip()
 	Clear()
+	HandleError()
 }
 
 type SizableScreen interface {

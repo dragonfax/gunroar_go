@@ -402,7 +402,7 @@ func (this *InGameState) initGameState() {
 }
 
 func (this *InGameState) move() {
-	if pad.sdl2.GetScancodeFromKey(sdl2.K_p)] == sdl2.PRESSED {
+	if pad.Keys[sdl2.GetScancodeFromKey(sdl2.K_p)] == sdl2.PRESSED {
 		if !this.pausePressed {
 			if this.pauseCnt <= 0 && !this.isGameOver {
 				this.pauseCnt = 1
@@ -464,23 +464,43 @@ func (this *InGameState) moveInGame() {
 }
 
 func (this *InGameState) draw() {
+	this.screen.HandleError()
 	this.field.draw()
-	gl.Begin(gl.TRIANGLES)
-	this.wakes.Draw()
-	this.sparks.Draw()
-	gl.End()
+	this.screen.HandleError()
+	/*
+		gl.Begin(gl.TRIANGLES)
+		this.screen.HandleError()
+		this.wakes.Draw()
+		this.screen.HandleError()
+		this.sparks.Draw()
+		this.screen.HandleError()
+		gl.End()
+	*/
+	this.screen.HandleError()
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	this.screen.HandleError()
 	gl.Begin(gl.QUADS)
+	this.screen.HandleError()
 	this.smokes.Draw()
+	this.screen.HandleError()
 	gl.End()
+	this.screen.HandleError()
 	this.fragments.Draw()
+	this.screen.HandleError()
 	this.sparkFragments.Draw()
+	this.screen.HandleError()
 	this.crystals.Draw()
+	this.screen.HandleError()
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE)
+	this.screen.HandleError()
 	this.enemies.Draw()
+	this.screen.HandleError()
 	this.shots.Draw()
+	this.screen.HandleError()
 	this.ship.draw()
+	this.screen.HandleError()
 	this.bullets.Draw()
+	this.screen.HandleError()
 }
 
 func (this *InGameState) drawFront() {
