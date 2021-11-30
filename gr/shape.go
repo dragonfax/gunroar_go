@@ -16,10 +16,14 @@ const (
 	TurretDESTROYED
 )
 
-var turretShapes = []ShapeI{
-	NewCollidableBaseShape(1, 0, 0, TURRET, 1, 0.8, 0.8),
-	NewBaseShape(1, 0, 0, TURRET_DAMAGED, 0.9, 0.9, 1),
-	NewBaseShape(1, 0, 0, TURRET_DESTROYED, 0.8, 0.33, 0.66),
+var turretShapes []ShapeI
+
+func turretShapeInit() {
+	turretShapes = []ShapeI{
+		NewCollidableBaseShape(1, 0, 0, TURRET, 1, 0.8, 0.8),
+		NewBaseShape(1, 0, 0, TURRET_DAMAGED, 0.9, 0.9, 1),
+		NewBaseShape(1, 0, 0, TURRET_DESTROYED, 0.8, 0.33, 0.66),
+	}
 }
 
 type TurretShape struct {
@@ -54,18 +58,22 @@ const (
 	EnemyShapePLATFORM_BRIDGE
 )
 
-var enemyShapes = []ShapeI{
-	NewBaseShape(1, 0.5, 0.1, SHIP, 0.9, 0.7, 0.5),
-	NewBaseShape(1, 0.5, 0.1, SHIP_DAMAGED, 0.5, 0.5, 0.9),
-	NewCollidableBaseShape(0.66, 0, 0, BRIDGE, 1, 0.2, 0.3),
-	NewBaseShape(1, 0.7, 0.33, SHIP, MIDDLE_COLOR_R, MIDDLE_COLOR_G, MIDDLE_COLOR_B),
-	NewBaseShape(1, 0.7, 0.33, SHIP_DAMAGED, 0.5, 0.5, 0.9),
-	NewBaseShape(1, 0.7, 0.33, SHIP_DESTROYED, 0, 0, 0),
-	NewCollidableBaseShape(0.66, 0, 0, BRIDGE, 1, 0.2, 0.3),
-	NewBaseShape(1, 0, 0, PLATFORM, 1, 0.6, 0.7),
-	NewBaseShape(1, 0, 0, PLATFORM_DAMAGED, 0.5, 0.5, 0.9),
-	NewBaseShape(1, 0, 0, PLATFORM_DESTROYED, 1, 0.6, 0.7),
-	NewCollidableBaseShape(0.5, 0, 0, BRIDGE, 1, 0.2, 0.3),
+var enemyShapes []ShapeI
+
+func enemyShapesInit() {
+	enemyShapes = []ShapeI{
+		NewBaseShape(1, 0.5, 0.1, SHIP, 0.9, 0.7, 0.5),
+		NewBaseShape(1, 0.5, 0.1, SHIP_DAMAGED, 0.5, 0.5, 0.9),
+		NewCollidableBaseShape(0.66, 0, 0, BRIDGE, 1, 0.2, 0.3),
+		NewBaseShape(1, 0.7, 0.33, SHIP, MIDDLE_COLOR_R, MIDDLE_COLOR_G, MIDDLE_COLOR_B),
+		NewBaseShape(1, 0.7, 0.33, SHIP_DAMAGED, 0.5, 0.5, 0.9),
+		NewBaseShape(1, 0.7, 0.33, SHIP_DESTROYED, 0, 0, 0),
+		NewCollidableBaseShape(0.66, 0, 0, BRIDGE, 1, 0.2, 0.3),
+		NewBaseShape(1, 0, 0, PLATFORM, 1, 0.6, 0.7),
+		NewBaseShape(1, 0, 0, PLATFORM_DAMAGED, 0.5, 0.5, 0.9),
+		NewBaseShape(1, 0, 0, PLATFORM_DESTROYED, 1, 0.6, 0.7),
+		NewCollidableBaseShape(0.5, 0, 0, BRIDGE, 1, 0.2, 0.3),
+	}
 }
 
 type EnemyShape struct {
@@ -95,11 +103,15 @@ const (
 	BulletDESTRUCTIVE
 )
 
-var bulletShapes = []ShapeI{
-	NewNormalBulletShape(),
-	NewSmallBulletShape(),
-	NewMovingTurretBulletShape(),
-	NewDestructiveBulletShape(),
+var bulletShapes []ShapeI
+
+func bulletShapesInit() {
+	bulletShapes = []ShapeI{
+		NewNormalBulletShape(),
+		NewSmallBulletShape(),
+		NewMovingTurretBulletShape(),
+		NewDestructiveBulletShape(),
+	}
 }
 
 type BulletShape struct {
