@@ -54,7 +54,7 @@ func (this *Bullet) Init(args []interface{}) {
 }
 
 func (this *Bullet) set(enemyIdx int,
-	p vector.Vector, deg, speed, size float64, shapeType int,
+	p vector.Vector, deg, speed, size float64, shapeType BulletShapeType,
 	rang, startSpeed /* = 0 */, startDeg float64, /* = -99999 */
 	destructive bool /* = false */) {
 	if !this.field.checkInOuterFieldExceptTop(p) {

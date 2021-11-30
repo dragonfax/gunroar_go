@@ -111,7 +111,7 @@ func NewBulletShape() *BulletShape {
 	return this
 }
 
-func (this *BulletShape) Set(t int) {
+func (this *BulletShape) Set(t BulletShapeType) {
 	this.SetShape(bulletShapes[t])
 }
 

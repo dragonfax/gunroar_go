@@ -15,11 +15,11 @@ import (
  */
 
 var turretRand = r.New(r.NewSource(time.Now().Unix()))
-var damagedPos vector.Vector
+var turretDamagedPos vector.Vector
 
 type Turret struct {
 	field                         *Field
-	bullets                       BulletPool
+	bullets                       *BulletPool
 	ship                          *Ship
 	sparks                        *SparkPool
 	smokes                        *SmokePool
@@ -36,7 +36,7 @@ type Turret struct {
 }
 
 func setTurretRandSeed(seed int64) {
-	rand = r.New(r.NewSource(seed))
+	turretRand = r.New(r.NewSource(seed))
 }
 
 func NewTurret(field *Field, bullets *BulletPool, ship *Ship,
@@ -77,9 +77,9 @@ func (this *Turret) move(x, y, d float64, bulletFireSpeed float64 /* = 0 */, bul
 		this.destroyedCnt++
 		itv := 5 + this.destroyedCnt/12
 		if itv < 60 && this.destroyedCnt%itv == 0 {
-			s := smokes.getInstance()
+			s := this.smokes.GetInstance()
 			if s != nil {
-				s.set(this.pos, 0, 0, 0.01+nextFloat(rand, 0.01), FIRE, 90+nextInt(rand, 30), this.spec.size)
+				s.setVector(this.pos, 0, 0, 0.01+nextFloat(turretRand, 0.01), FIRE, 90+turretRand.Intn(30), this.spec.size())
 			}
 		}
 		return false
@@ -90,11 +90,11 @@ func (this *Turret) move(x, y, d float64, bulletFireSpeed float64 /* = 0 */, bul
 	ax := shipPos.X - this.pos.X
 	ay := shipPos.Y - this.pos.Y
 	if this.spec.lookAheadRatio != 0 {
-		rd := this.pos.dist(shipPos) / this.spec.speed * 1.2
-		ax += shipVel.x * this.spec.lookAheadRatio * rd
-		ay += shipVel.y * this.spec.lookAheadRatio * rd
+		rd := this.pos.DistVector(shipPos) / this.spec.speed * 1.2
+		ax += shipVel.X * this.spec.lookAheadRatio * rd
+		ay += shipVel.Y * this.spec.lookAheadRatio * rd
 	}
-	var ad float
+	var ad float64
 	if math.Abs(ax)+math.Abs(ay) < 0.1 {
 		ad = 0
 	} else {
@@ -102,7 +102,7 @@ func (this *Turret) move(x, y, d float64, bulletFireSpeed float64 /* = 0 */, bul
 	}
 	od := td - ad
 	od = normalizeDeg(od)
-	var ts float
+	var ts float64
 	if this.cnt >= 0 {
 		ts = this.spec.turnSpeed
 	} else {
@@ -122,42 +122,42 @@ func (this *Turret) move(x, y, d float64, bulletFireSpeed float64 /* = 0 */, bul
 		this.deg = -this.spec.turnRange
 	}
 	this.cnt++
-	if this.field.checkInField(this.pos) || (this.parent.isBoss && this.cnt%4 == 0) {
-		appCnt++
+	if this.field.checkInFieldVector(this.pos) || (this.parent.isBoss() && this.cnt%4 == 0) {
+		this.appCnt++
 	}
 	if this.cnt >= this.spec.interval {
 		if this.spec.blind || (math.Abs(od) <= this.spec.turnSpeed &&
-			this.pos.dist(shipPos) < this.spec.maxRange*1.1 &&
-			this.pos.dist(shipPos) > this.spec.minRange) {
+			this.pos.DistVector(shipPos) < this.spec.maxRange*1.1 &&
+			this.pos.DistVector(shipPos) > this.spec.minRange) {
 			this.cnt = -(this.spec.burstNum - 1) * this.spec.burstInterval
 			this.bulletSpeed = this.spec.speed
 			this.burstCnt = 0
 		}
 	}
 	if this.cnt <= 0 && -this.cnt%this.spec.burstInterval == 0 &&
-		((this.spec.invisible && this.field.checkInField(this.pos)) ||
-			(this.spec.invisible && this.parent.isBoss && this.field.checkInOuterField(this.pos)) ||
+		((this.spec.invisible && this.field.checkInFieldVector(this.pos)) ||
+			(this.spec.invisible && this.parent.isBoss() && this.field.checkInOuterFieldVector(this.pos)) ||
 			(!this.spec.invisible && this.field.checkInFieldExceptTop(this.pos))) &&
-		this.pos.dist(shipPos) > this.spec.minRange {
+		this.pos.DistVector(shipPos) > this.spec.minRange {
 		bd := this.baseDeg + this.deg
-		s := smokes.getInstance()
+		s := this.smokes.GetInstance()
 		if s != nil {
-			s.set(this.pos, math.Sin(bd)*this.bulletSpeed, math.Cos(bd)*this.bulletSpeed, 0,
-				SPARK, 20, this.spec.size*2)
+			s.setVector(this.pos, math.Sin(bd)*this.bulletSpeed, math.Cos(bd)*this.bulletSpeed, 0,
+				SPARK, 20, this.spec.size()*2)
 		}
 		nw := this.spec.nway
 		if this.spec.nwayChange && this.burstCnt%2 == 1 {
 			nw--
 		}
-		bd -= this.spec.nwayAngle * (nw - 1) / 2
+		bd -= this.spec.nwayAngle * float64(nw-1) / 2
 		for i := 0; i < nw; i++ {
-			b := this.bullets.getInstance()
+			b := this.bullets.GetInstance()
 			if b == nil {
 				break
 			}
-			b.set(this.parent.index,
-				this.pos, bd, this.bulletSpeed, this.spec.size*3, this.spec.bulletShape, this.spec.maxRange,
-				this.bulletFireSpeed, this.bulletFireDeg, this.spec.bulletDestructive)
+			b.set(this.parent.index(),
+				this.pos, bd, this.bulletSpeed, this.spec.size()*3, this.spec.bulletShape, this.spec.maxRange,
+				bulletFireSpeed, bulletFireDeg, this.spec.bulletDestructive)
 			bd += this.spec.nwayAngle
 		}
 		this.bulletSpeed += this.spec.speedAccel
@@ -177,19 +177,19 @@ func (this *Turret) draw() {
 	}
 	gl.PushMatrix()
 	if this.destroyedCnt < 0 && this.damagedCnt > 0 {
-		this.damagedPos.X = this.pos.X + nextSignedFloat(rand, damagedCnt*0.015)
-		this.damagedPos.Y = this.pos.Y + nextSignedFloat(rand, damagedCnt*0.015)
-		sdl.glTranslate(this.damagedPos)
+		turretDamagedPos.X = this.pos.X + nextSignedFloat(turretRand, float64(this.damagedCnt)*0.015)
+		turretDamagedPos.Y = this.pos.Y + nextSignedFloat(turretRand, float64(this.damagedCnt)*0.015)
+		sdl.GlTranslate(turretDamagedPos)
 	} else {
-		sdl.glTranslate(this.pos)
+		sdl.GlTranslate(this.pos)
 	}
-	gl.Rotatef(-(this.baseDeg+this.deg)*180/math.Pi, 0, 0, 1)
+	gl.Rotated(-(this.baseDeg+this.deg)*180/math.Pi, 0, 0, 1)
 	if this.destroyedCnt >= 0 {
-		this.spec.destroyedShape.draw()
-	} else if !damaged {
-		this.spec.shape.draw()
+		this.spec.destroyedShape.Draw()
+	} else if !this.damaged {
+		this.spec.shape.Draw()
 	} else {
-		this.spec.damagedShape.draw()
+		this.spec.damagedShape.Draw()
 	}
 	gl.PopMatrix()
 	if this.destroyedCnt >= 0 {
@@ -202,57 +202,57 @@ func (this *Turret) draw() {
 	if this.startCnt < 12 {
 		a = float64(this.startCnt) / 12
 	}
-	td := baseDeg + deg
+	td := this.baseDeg + this.deg
 	if this.spec.nway <= 1 {
 		gl.Begin(gl.LINE_STRIP)
-		sdl.SetColor(0.9, 0.1, 0.1, this.a)
+		sdl.SetColor(0.9, 0.1, 0.1, a)
 		gl.Vertex2d(this.pos.X+math.Sin(td)*this.spec.minRange, this.pos.Y+math.Cos(td)*this.spec.minRange)
 		sdl.SetColor(0.9, 0.1, 0.1, a*0.5)
 		gl.Vertex2d(this.pos.X+math.Sin(td)*this.spec.maxRange, this.pos.Y+math.Cos(td)*this.spec.maxRange)
 		gl.End()
 	} else {
-		td -= this.spec.nwayAngle * (this.spec.nway - 1) / 2
+		td -= this.spec.nwayAngle * float64(this.spec.nway-1) / 2
 		gl.Begin(gl.LINE_STRIP)
 		sdl.SetColor(0.9, 0.1, 0.1, a*0.75)
-		gl.Vertex2f(this.pos.X+math.Sin(td)*this.spec.minRange, this.pos.Y+math.Cos(td)*this.spec.minRange)
+		gl.Vertex2d(this.pos.X+math.Sin(td)*this.spec.minRange, this.pos.Y+math.Cos(td)*this.spec.minRange)
 		sdl.SetColor(0.9, 0.1, 0.1, a*0.25)
-		gl.Vertex2f(this.pos.X+math.Sin(td)*this.spec.maxRange, this.pos.Y+math.Cos(td)*this.spec.maxRange)
+		gl.Vertex2d(this.pos.X+math.Sin(td)*this.spec.maxRange, this.pos.Y+math.Cos(td)*this.spec.maxRange)
 		gl.End()
 		gl.Begin(gl.QUADS)
-		for i := 0; i < spec.nway-1; i++ {
-			sdl.SetColor(0.9, 0.1, 0.1, this.a*0.3)
+		for i := 0; i < this.spec.nway-1; i++ {
+			sdl.SetColor(0.9, 0.1, 0.1, a*0.3)
 			gl.Vertex2d(this.pos.X+math.Sin(td)*this.spec.minRange, this.pos.Y+math.Cos(td)*this.spec.minRange)
-			sdl.SetColor(0.9, 0.1, 0.1, this.a*0.05)
+			sdl.SetColor(0.9, 0.1, 0.1, a*0.05)
 			gl.Vertex2d(this.pos.X+math.Sin(td)*this.spec.maxRange, this.pos.Y+math.Cos(td)*this.spec.maxRange)
 			td += this.spec.nwayAngle
 			gl.Vertex2d(this.pos.X+math.Sin(td)*this.spec.maxRange, this.pos.Y+math.Cos(td)*this.spec.maxRange)
-			sdl.SetColor(0.9, 0.1, 0.1, this.a*0.3)
-			gl.Vertex2d(this.pos.x+math.Sin(td)*this.spec.minRange, this.pos.Y+math.Cos(td)*this.spec.minRange)
+			sdl.SetColor(0.9, 0.1, 0.1, a*0.3)
+			gl.Vertex2d(this.pos.X+math.Sin(td)*this.spec.minRange, this.pos.Y+math.Cos(td)*this.spec.minRange)
 		}
 		gl.End()
 		gl.Begin(gl.LINE_STRIP)
-		sdl.SetColor(0.9, 0.1, 0.1, this.a*0.75)
+		sdl.SetColor(0.9, 0.1, 0.1, a*0.75)
 		gl.Vertex2d(this.pos.X+math.Sin(td)*this.spec.minRange, this.pos.Y+math.Cos(td)*this.spec.minRange)
-		sdl.SetColor(0.9, 0.1, 0.1, this.a*0.25)
-		gl.Vertex2d(this.pos.x+math.Sin(td)*this.spec.maxRange, this.pos.Y+math.Cos(td)*this.spec.maxRange)
+		sdl.SetColor(0.9, 0.1, 0.1, a*0.25)
+		gl.Vertex2d(this.pos.X+math.Sin(td)*this.spec.maxRange, this.pos.Y+math.Cos(td)*this.spec.maxRange)
 		gl.End()
 	}
 }
 
-func (this *Turret) checkCollision(x, y float64, c Collidable, shot *Shot) bool {
+func (this *Turret) checkCollision(x, y float64, c sdl.Collidable, shot *Shot) bool {
 	if this.destroyedCnt >= 0 || this.spec.invisible {
 		return false
 	}
-	ox := math.Abs(this.pos.X - X)
-	oy := math.Abs(this.pos.Y - Y)
-	if this.spec.shape.checkCollision(ox, oy, c) {
-		this.addDamage(this.shot.damage)
+	ox := math.Abs(this.pos.X - x)
+	oy := math.Abs(this.pos.Y - y)
+	if this.spec.shape.CheckCollision(ox, oy, c) {
+		this.addDamage(shot.damage())
 		return true
 	}
 	return false
 }
 
-func (this *Turret) addDamage(n in) {
+func (this *Turret) addDamage(n int) {
 	this.shield -= n
 	if this.shield <= 0 {
 		this.destroyed()
@@ -265,25 +265,25 @@ func (this *Turret) destroyed() {
 	playSe("turret_destroyed.wav")
 	this.destroyedCnt = 0
 	for i := 0; i < 6; i++ {
-		s := smokes.getInstanceForced()
-		s.set(this.pos, nextSignedFloat(rand, 0.1), nextSignedFloat(rand, 0.1), nextFloat(rand, 0.04),
-			EXPLOSION, 30+nextInt(rand, 20), this.spec.size*1.5)
+		s := this.smokes.GetInstanceForced()
+		s.setVector(this.pos, nextSignedFloat(turretRand, 0.1), nextSignedFloat(turretRand, 0.1), nextFloat(turretRand, 0.04),
+			EXPLOSION, 30+turretRand.Intn(20), this.spec.size()*1.5)
 	}
 	for i := 0; i < 32; i++ {
-		sp := this.sparks.getInstanceForced()
-		sp.set(this.pos, nextSignedFloat(rand, 0.5), nextSignedFloat(rand, 0.5),
-			0.5+nextFloat(rand, 0.5), 0.5+nextFloat(rand, 0.5), 0, 30+rand.Intn(30))
+		sp := this.sparks.GetInstanceForced()
+		sp.set(this.pos, nextSignedFloat(turretRand, 0.5), nextSignedFloat(turretRand, 0.5),
+			0.5+nextFloat(turretRand, 0.5), 0.5+nextFloat(turretRand, 0.5), 0, 30+turretRand.Intn(30))
 	}
 	for i := 0; i < 7; i++ {
-		f := this.fragments.getInstanceForced()
-		f.set(pos, nextSignedFloat(rand, 0.25), nextSignedFloat(rand, 0.25), 0.05+nextFloat(rand, 0.05),
-			this.spec.size*(0.5+nextFloat(rand, 0.5)))
+		f := this.fragments.GetInstanceForced()
+		f.set(this.pos, nextSignedFloat(turretRand, 0.25), nextSignedFloat(turretRand, 0.25), 0.05+nextFloat(turretRand, 0.05),
+			this.spec.size()*(0.5+nextFloat(turretRand, 0.5)))
 	}
 	switch this.spec.typ {
-	case MAIN:
+	case TurretMAIN:
 		this.parent.increaseMultiplier(2)
 		this.parent.addScore(40)
-	case SUB, SUB_DESTRUCTIVE:
+	case TurretSUB, TurretSUB_DESTRUCTIVE:
 		this.parent.increaseMultiplier(1)
 		this.parent.addScore(20)
 	}
@@ -291,7 +291,7 @@ func (this *Turret) destroyed() {
 
 func (this *Turret) remove() {
 	if this.destroyedCnt < 0 {
-		destroyedCnt = 999
+		this.destroyedCnt = 999
 	}
 }
 
@@ -302,12 +302,12 @@ func (this *Turret) remove() {
 type TurretType int
 
 const (
-	MAIN TurretType = iota
-	SUB
-	SUB_DESTRUCTIVE
-	SMALL
-	MOVING
-	DUMMY
+	TurretMAIN TurretType = iota
+	TurretSUB
+	TurretSUB_DESTRUCTIVE
+	TurretSMALL
+	TurretMOVING
+	TurretDUMMY
 )
 
 type TurretSpec struct {
@@ -325,15 +325,15 @@ type TurretSpec struct {
 	bulletDestructive                                           bool
 	shield                                                      int
 	invisible                                                   bool
-	shape, damagedShape, destroyedShape                         TurretShape
+	shape, damagedShape, destroyedShape                         *TurretShape
 	_size                                                       float64
 }
 
-func NewTurretSpec() TurretSpect {
+func NewTurretSpec() TurretSpec {
 	this := TurretSpec{}
-	this.shape = NewTurretShape(NORMAL)
-	this.damagedShape = NewTurretShape(DAMAGED)
-	this.destroyedShape = NewTurretShape(DESTROYED)
+	this.shape = NewTurretShape(TurretNORMAL)
+	this.damagedShape = NewTurretShape(TurretDAMAGED)
+	this.destroyedShape = NewTurretShape(TurretDESTROYED)
 	this.init()
 	return this
 }
@@ -386,21 +386,21 @@ func (this *TurretSpec) setParamTurretSpec(ts TurretSpec) {
 	this.size = ts.size
 }
 
-func (this *TurretSpec) setParam(rank float64, typ int, rand *r.Rand) {
+func (this *TurretSpec) setParam(rank float64, typ TurretType, rand *r.Rand) {
 	this.init()
 	this.typ = typ
-	if this.typ == DUMMY {
+	if this.typ == TurretDUMMY {
 		this.invisible = true
 		return
 	}
 	rk := this.rank
 	switch this.typ {
-	case SMALL:
+	case TurretSMALL:
 		this.minRange = 8
 		this.bulletShape = SMALL
 		this.blind = true
 		this.invisible = true
-	case MOVING:
+	case TurretMOVING:
 		this.minRange = 6
 		this.bulletShape = MOVING_TURRET
 		this.blind = true
@@ -411,7 +411,7 @@ func (this *TurretSpec) setParam(rank float64, typ int, rand *r.Rand) {
 	default:
 		this.maxRange = 9 + nextFloat(rand, 16)
 		this.minRange = this.maxRange / (4 + nextFloat(rand, 0.5))
-		if this.typ == SUB || this.typ == SUB_DESTRUCTIVE {
+		if this.typ == TurretSUB || this.typ == TurretSUB_DESTRUCTIVE {
 			this.maxRange *= 0.72
 			this.minRange *= 0.9
 		}
@@ -441,7 +441,7 @@ func (this *TurretSpec) setParam(rank float64, typ int, rand *r.Rand) {
 	}
 	this.burstInterval = 6 + rand.Intn(8)
 	switch this.typ {
-	case MAIN:
+	case TurretMAIN:
 		this.size = 0.42 + nextFloat(rand, 0.05)
 		br := (rk * 0.3) * (1 + nextSignedFloat(rand, 0.2))
 		nr := (rk * 0.33) * nextFloat(rand, 1)
@@ -456,7 +456,7 @@ func (this *TurretSpec) setParam(rank float64, typ int, rand *r.Rand) {
 		this.speed = math.Sqrt(sr * 0.6)
 		this.speed *= 0.12
 		this.shield = 20
-	case SUB:
+	case TurretSUB:
 		this.size = 0.36 + nextFloat(rand, 0.025)
 		br := (rk * 0.4) * (1 + nextSignedFloat(rand, 0.2))
 		nr := (rk * 0.2) * nextFloat(rand, 1)
@@ -471,7 +471,7 @@ func (this *TurretSpec) setParam(rank float64, typ int, rand *r.Rand) {
 		this.speed = math.Sqrt(sr * 0.7)
 		this.speed *= 0.2
 		this.shield = 12
-	case SUB_DESTRUCTIVE:
+	case TurretSUB_DESTRUCTIVE:
 		this.size = 0.36 + nextFloat(rand, 0.025)
 		br := (rk * 0.4) * (1 + nextSignedFloat(rand, 0.2))
 		nr := (rk * 0.2) * nextFloat(rand, 1)
@@ -489,7 +489,7 @@ func (this *TurretSpec) setParam(rank float64, typ int, rand *r.Rand) {
 		this.speed = math.Sqrt(sr * 0.7)
 		this.speed *= 0.33
 		this.shield = 12
-	case SMALL:
+	case TurretSMALL:
 		this.size = 0.33
 		br := (rk * 0.33) * (1 + nextSignedFloat(rand, 0.2))
 		ir := (rk * 0.2) * (1 + nextSignedFloat(rand, 0.2))
@@ -502,7 +502,7 @@ func (this *TurretSpec) setParam(rank float64, typ int, rand *r.Rand) {
 		}
 		this.speed = math.Sqrt(sr)
 		this.speed *= 0.24
-	case MOVING:
+	case TurretMOVING:
 		this.size = 0.36
 		br := (rk * 0.3) * (1 + nextSignedFloat(rand, 0.2))
 		nr := (rk * 0.1) * nextFloat(rand, 1)
@@ -822,10 +822,10 @@ func (this MovingTurretGroup) remove() {
 	}
 }
 
-type MoveType int
+type BulletMoveType int
 
 const (
-	ROLL MoveType = iota
+	ROLL BulletMoveType = iota
 	SWING_FIX
 	SWING_AIM
 )
@@ -846,21 +846,21 @@ func NewMovingTurretGroupSpec() MovingTurretGroupSpec {
 }
 
 func (this *MovingTurretGroupSpec) initParam() {
-	thisnum = 1
-	thisalignDeg = math.Pi * 2
-	thisalignAmp = 0
+	this.num = 1
+	this.alignDeg = math.Pi * 2
+	this.alignAmp = 0
 	this.alignAmpVel = 0
-	thisradiusBase = 1
-	thisradiusAmp = 0
+	this.radiusBase = 1
+	this.radiusAmp = 0
 	this.radiusAmpVel = 0
-	thismoveType = SWING_FIX
-	thisrollDegVel = 0
+	this.moveType = SWING_FIX
+	this.rollDegVel = 0
 	this.rollAmp = 0
 	this.rollAmpVel = 0
-	thisswingDegVel = 0
+	this.swingDegVel = 0
 	this.swingAmpVel = 0
-	thisdistRatio = 0
-	thisxReverse = 1
+	this.distRatio = 0
+	this.xReverse = 1
 }
 
 func (this *MovingTurretGroupSpec) init() {

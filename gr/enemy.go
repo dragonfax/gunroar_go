@@ -131,7 +131,7 @@ const MOVING_TURRET_GROUP_MAX = 4
 const MULTIPLIER_DECREASE_RATIO = 0.005
 
 var enemyStateRand = r.New(r.NewSource(time.Now().Unix()))
-var edgePos, explodeVel, damagedPos vector.Vector
+var edgePos, explodeVel, enemyDamagedPos vector.Vector
 var idxCount = 0
 
 func setEnemyStateRandSeed(seed int64) {
@@ -383,18 +383,18 @@ func (this *EnemyState) destroyed(shot *Shot /* = null */) bool {
 		sn = 3
 	}
 	for i := 0; i < sn*8; i++ {
-		s := this.smokes.getInstanceForced()
+		s := this.smokes.GetInstanceForced()
 		s.set(this.pos, nextSignedFloat(rand, 0.1)+this.explodeVel.X, nextSignedFloat(rand, 0.1)+this.explodeVel.Y,
 			rand.nextFloat(vz),
 			EXPLOSION, 32+rand.nextInt(30), ss)
 	}
 	for i := 0; i < sn*36; i++ {
-		sp := sparks.getInstanceForced()
+		sp := sparks.GetInstanceForced()
 		sp.set(this.pos, nextSignedFloat(rand, 0.8)+this.explodeVel.X, nextSignedFloat(rand, 0.8)+this.explodeVel.Y,
 			0.5+nextFloat(rand, 0.5), 0.5+nextFloat(rand, 0.5), 0, 30+rand.Intn(30))
 	}
 	for i = 0; i < sn*12; i++ {
-		f := fragments.getInstanceForced()
+		f := fragments.GetInstanceForced()
 		f.set(this.pos, nextSignedFloat(rand, 0.33)+this.explodeVel.X, nextSignedFloat(rand, 0.33)+this.explodeVel.Y,
 			0.05+rand.nextFloat(0.1),
 			0.2+rand.nextFloat(0.33))
@@ -424,7 +424,7 @@ func (this *EnemyState) destroyed(shot *Shot /* = null */) bool {
 func (this *EnemyState) setScoreIndicator(sc int, mp float64) {
 	ty := NumIndicator.getTargetY()
 	if mp > 1 {
-		ni := numIndicators.getInstanceForced()
+		ni := numIndicators.GetInstanceForced()
 		ni.set(sc, SCORE, 0.5, this.pos)
 		ni.addTarget(8, ty, RIGHT, 1, 0.5, sc, 40)
 		ni.addTarget(11, ty, RIGHT, 0.5, 0.75,
@@ -434,19 +434,19 @@ func (this *EnemyState) setScoreIndicator(sc int, mp float64) {
 		ni.addTarget(12, -8, BOTTOM, 0.5, 0.1,
 			int(sc*mp*this.stageManager.rankMultiplier), 40)
 		ni.gotoNextTarget()
-		ni = numIndicators.getInstanceForced()
+		ni = numIndicators.GetInstanceForced()
 		mn := int(mp * 1000)
 		ni.set(mn, MULTIPLIER, 0.7, this.pos)
 		ni.addTarget(10.5, ty, RIGHT, 0.5, 0.2, mn, 70)
 		ni.gotoNextTarget()
-		ni = numIndicators.getInstanceForced()
+		ni = numIndicators.GetInstanceForced()
 		rn := int(stageManager.rankMultiplier * 1000)
 		ni.set(rn, MULTIPLIER, 0.4, 11, 8)
 		ni.addTarget(13, ty, RIGHT, 0.5, 0.2, rn, 40)
 		ni.gotoNextTarget()
 		this.scoreReel.addActualScore(int(sc * mp * this.stageManager.rankMultiplier))
 	} else {
-		ni := numIndicators.getInstanceForced()
+		ni := numIndicators.GetInstanceForced()
 		ni.set(sc, SCORE, 0.3, this.pos)
 		ni.addTarget(11, ty, RIGHT, 1.5, 0.2, sc, 40)
 		ni.addTarget(13, ty, RIGHT, 0.25, 0.25,
@@ -454,7 +454,7 @@ func (this *EnemyState) setScoreIndicator(sc int, mp float64) {
 		ni.addTarget(12, -8, BOTTOM, 0.5, 0.1,
 			int(sc*this.stageManager.rankMultiplier), 40)
 		ni.gotoNextTarget()
-		ni = numIndicators.getInstanceForced()
+		ni = numIndicators.GetInstanceForced()
 		rn := int(this.stageManager.rankMultiplier * 1000)
 		ni.set(rn, MULTIPLIER, 0.4, 11, 8)
 		ni.addTarget(13, ty, RIGHT, 0.5, 0.2, rn, 40)
@@ -479,18 +479,18 @@ func (this *EnemyState) destroyedEdge(n int) {
 		ss = 1
 	}
 	for i := 0; i < sn; i++ {
-		s := smokes.getInstanceForced()
+		s := smokes.GetInstanceForced()
 		sr := rand.nextFloat(0.5)
 		sd := spd[si] + rand.nextSignedFloat(0.2)
 		s.set(this.edgePos, math.Sin(sd)*sr, math.Cos(sd)*sr, -0.004,
 			EXPLOSION, 75+rand.nextInt(25), ss)
 		for j := 0; j < 2; j++ {
-			sp := sparks.getInstanceForced()
+			sp := sparks.GetInstanceForced()
 			sp.set(edgePos, math.Sin(sd)*sr*2, math.Cos(sd)*sr*2,
 				0.5+rand.nextFloat(0.5), 0.5+rand.nextFloat(0.5), 0, 30+rand.nextInt(30))
 		}
 		if math.Mod(i, 2) == 0 {
-			sf := sparkFragments.getInstanceForced()
+			sf := sparkFragments.GetInstanceForced()
 			sf.set(this.edgePos, math.Sin(sd)*sr*0.5, this.Cos(sd)*sr*0.5, 0.06+rand.nextFloat(0.07),
 				(0.2 + rand.nextFloat(0.1)))
 		}
@@ -509,11 +509,11 @@ func (this *EnemyState) removeTurrets() {
 func (this *EnemyState) draw() {
 	gl.PushMatrix()
 	if this.destroyedCnt < 0 && this.damagedCnt > 0 {
-		this.damagedPos.X = this.pos.X + rand.nextSignedFloat(this.damagedCnt*0.01)
-		this.damagedPos.Y = this.pos.Y + rand.nextSignedFloat(this.damagedCnt*0.01)
-		this.screen.glTranslate(this.damagedPos)
+		enemyDamagedPos.X = this.pos.X + rand.nextSignedFloat(this.damagedCnt*0.01)
+		enemyDamagedPos.Y = this.pos.Y + rand.nextSignedFloat(this.damagedCnt*0.01)
+		sdl.GlTranslate(enemyDamagedPos)
 	} else {
-		this.screen.glTranslate(this.pos)
+		sdl.GlTranslate(this.pos)
 	}
 	gl.Rotatef(-this.deg*180/math.Pi, 0, 0, 1)
 	if this.destroyedCnt >= 0 {
@@ -641,7 +641,7 @@ func (this *EnemySpecBase) addMovingTurret(rank float64, bossMode bool /* = fals
 		mtn = 1
 	}
 	br := rank / mtn
-	var typ MoveType
+	var typ BulletMoveType
 	if !bossMode {
 		switch rand.Intn(4) {
 		case 0, 1:
@@ -741,7 +741,7 @@ func (this *EnemySpecBase) addMovingTurret(rank float64, bossMode bool /* = fals
 		if rand.nextInt(4) == 0 {
 			tgs.setXReverse(-1)
 		}
-		tgs.turretSpec.setParam(sr, MOVING, rand)
+		tgs.turretSpec.setParam(sr, TurretMOVING, rand)
 		if bossMode {
 			tgs.turretSpec.setBossSpec()
 		}
@@ -806,18 +806,18 @@ type HasAppearType interface {
 var _ EnemySpec = &SmallShipEnemySpec{}
 var _ HasAppearType = &SmallShipEnemySpec{}
 
-type MoveType int
+type EnemyMoveType int
 
 const (
-	STOPANDGO MoveType = iota
+	STOPANDGO EnemyMoveType = iota
 	CHASE
 )
 
 type MoveState int
 
 const (
-	STAYING MoveState = iota
-	MOVING
+	EnemySTAYING MoveState = iota
+	EnemyMOVING
 )
 
 type SmallShipEnemySpec struct {
@@ -877,7 +877,7 @@ func (this *SmallShipEnemySpec) setFirstState(es EnemyState, appType AppearanceT
 	switch this.typ {
 	case STOPANDGO:
 		es.speed = 0
-		es.state = MOVING
+		es.state = EnemyMOVING
 		es.cnt = this.moveDuration
 	case CHASE:
 		es.speed = this.speed
@@ -903,7 +903,7 @@ func (this *SmallShipEnemySpec) move(EnemyState es) bool {
 			es.pos.y += math.Cos(es.velDeg) * es.speed * 2
 		}
 		switch es.state {
-		case MOVING:
+		case EnemyMOVING:
 			es.speed += (this.maxSpeed - es.speed) * this.accel
 			es.cnt--
 			if es.cnt <= 0 {
@@ -911,12 +911,12 @@ func (this *SmallShipEnemySpec) move(EnemyState es) bool {
 				es.cnt = this.stayDuration
 				es.state = STAYING
 			}
-		case STAYING:
+		case EnemySTAYING:
 			es.speed += (staySpeed - es.speed) * accel
 			es.cnt--
 			if es.cnt <= 0 {
 				es.cnt = this.moveDuration
-				es.state = MOVING
+				es.state = EnemyMOVING
 			}
 		}
 	case CHASE:
