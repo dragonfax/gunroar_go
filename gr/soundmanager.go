@@ -20,12 +20,12 @@ var seFileName = []string{
 	"turret_destroyed.wav", "destroyed.wav", "small_destroyed.wav", "explode.wav",
 	"ship_destroyed.wav", "ship_shield_lost.wav", "score_up.wav"}
 var seChannel = []int{0, 1, 2, 3, 4, 5, 6, 7, 7, 6}
-var bgm map[string]*sdl.Music
-var se map[string]*sdl.Chunk
-var seMark map[string]bool
+var bgm = make(map[string]*sdl.Music)
+var se = make(map[string]*sdl.Chunk)
+var seMark = make(map[string]bool)
 var bgmDisabled = false
 var seDisabled = false
-var bgmFileName []string
+var bgmFileName = make([]string, 0)
 var currentBgm string
 var prevBgmIdx int
 var nextIdxMv int
@@ -42,7 +42,8 @@ func loadMusics() {
 	}
 	for _, fileName := range files {
 		ext := filepath.Ext(fileName)
-		if ext != "ogg" && ext != "wav" {
+		if ext != ".ogg" && ext != ".wav" {
+			fmt.Printf("skipping bgm %s, ext %s\n", fileName, ext)
 			continue
 		}
 		music := &sdl.Music{}

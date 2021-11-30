@@ -1,7 +1,7 @@
 package sdl
 
 import (
-	gl "github.com/go-gl/gl/v4.1-compatibility/gl"
+	gl "github.com/go-gl/gl/v2.1/gl"
 	sdl2 "github.com/veandco/go-sdl2/sdl"
 )
 

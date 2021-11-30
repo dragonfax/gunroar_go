@@ -5,7 +5,7 @@ import (
 
 	"github.com/dragonfax/gunroar/gr/sdl/screen"
 	"github.com/dragonfax/gunroar/gr/vector"
-	"github.com/go-gl/gl/v4.1-compatibility/gl"
+	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -45,10 +45,10 @@ func (this *Screen3D) InitSDL() {
 		panic("Unable to initialize SDL: " + err.Error())
 	}
 
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 4)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2)
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG, gl.TRUE)
+	// sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_COMPATIBILITY)
+	// sdl.GLSetAttribute(sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG, gl.TRUE)
 
 	// Create an OpenGL screen.
 	var videoFlags uint32

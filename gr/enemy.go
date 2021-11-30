@@ -9,7 +9,7 @@ import (
 	"github.com/dragonfax/gunroar/gr/letter"
 	"github.com/dragonfax/gunroar/gr/sdl"
 	"github.com/dragonfax/gunroar/gr/vector"
-	"github.com/go-gl/gl/v4.1-compatibility/gl"
+	"github.com/go-gl/gl/v2.1/gl"
 )
 
 /**

@@ -6,7 +6,7 @@ import (
 
 	"github.com/dragonfax/gunroar/gr/letter"
 	"github.com/dragonfax/gunroar/gr/sdl"
-	"github.com/go-gl/gl/v4.1-compatibility/gl"
+	"github.com/go-gl/gl/v2.1/gl"
 	sdl2 "github.com/veandco/go-sdl2/sdl"
 )
 
@@ -78,13 +78,13 @@ func (this *GameManager) Init() {
 	this.ship = NewShip(twinStick,
 		this.field, screen, this.sparks, this.smokes, this.fragments, this.wakes)
 	cargs := []interface{}{this.ship}
-	crystals := NewCrystalPool(80, cargs)
+	this.crystals = NewCrystalPool(80, cargs)
 	this.scoreReel = NewScoreReel()
 	nargs := []interface{}{this.scoreReel}
-	numIndicators := NewNumIndicatorPool(50, nargs)
-	bargs := []interface{}{this, this.field, this.ship, this.smokes, this.wakes, crystals}
+	this.numIndicators = NewNumIndicatorPool(50, nargs)
+	bargs := []interface{}{this, this.field, this.ship, this.smokes, this.wakes, this.crystals}
 	this.bullets = NewBulletPool(240, bargs)
-	eargs := []interface{}{this.field, screen, this.bullets, this.ship, this.sparks, this.smokes, this.fragments, this.sparkFragments, numIndicators, this.scoreReel}
+	eargs := []interface{}{this.field, screen, this.bullets, this.ship, this.sparks, this.smokes, this.fragments, this.sparkFragments, this.numIndicators, this.scoreReel}
 	this.enemies = NewEnemyPool(40, eargs)
 	sargs := []interface{}{this.field, this.enemies, this.sparks, this.smokes, this.bullets}
 	this.shots = NewShotPool(50, sargs)
@@ -161,7 +161,7 @@ func (this *GameManager) addSlowdownRatio(sr float64) {
 }
 
 func (this *GameManager) Move() {
-	if pad.Keys[sdl2.K_ESCAPE] == sdl2.PRESSED {
+	if pad.Keys[sdl2.GetScancodeFromKey(sdl2.K_ESCAPE)] == sdl2.PRESSED {
 		if !this.escPressed {
 			this.escPressed = true
 			if this.state == this.inGameState {
@@ -348,7 +348,7 @@ func NewInGameState(gameManager *GameManager, screen *Screen,
 func (this *InGameState) start() {
 	this.ship.unsetReplayMode()
 	this._replayData = NewReplayData()
-	this.prefManager.prefData().recordGameMode(this._gameMode)
+	this.prefManager.prefData.recordGameMode(this._gameMode)
 	switch this._gameMode {
 	case TWIN_STICK, DOUBLE_PLAY:
 		rts := twinStick
@@ -402,7 +402,7 @@ func (this *InGameState) initGameState() {
 }
 
 func (this *InGameState) move() {
-	if pad.Keys[sdl2.K_p] == sdl2.PRESSED {
+	if pad.sdl2.GetScancodeFromKey(sdl2.K_p)] == sdl2.PRESSED {
 		if !this.pausePressed {
 			if this.pauseCnt <= 0 && !this.isGameOver {
 				this.pauseCnt = 1
@@ -536,7 +536,7 @@ func (this *InGameState) shipDestroyed() {
 		this.scoreReel.accelerate()
 		if !this.ship.replayMode() {
 			disableSe()
-			this.prefManager.prefData().recordResult(this.scoreReel.actualScore(), this._gameMode)
+			this.prefManager.prefData.recordResult(this.scoreReel.actualScore(), this._gameMode)
 			this._replayData.score = this.scoreReel.actualScore()
 		}
 	}

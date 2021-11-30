@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	r "math/rand"
 	"time"
@@ -8,7 +9,7 @@ import (
 	"github.com/dragonfax/gunroar/gr/sdl"
 	"github.com/dragonfax/gunroar/gr/sdl/record"
 	"github.com/dragonfax/gunroar/gr/vector"
-	"github.com/go-gl/gl/v4.1-compatibility/gl"
+	"github.com/go-gl/gl/v2.1/gl"
 )
 
 /**
@@ -37,7 +38,6 @@ func NewShip(twinStick *sdl.RecordableTwinStick, field *Field, screen *Screen,
 	for i := range this.boat {
 		this.boat[i] = NewBoat(i, this, twinStick,
 			field, screen, sparks, smokes, fragments, wakes)
-		i++
 	}
 	this.boatNum = 1
 	this.scrollSpeed = SHIP_SCROLL_SPEED_BASE
@@ -51,27 +51,27 @@ func (this *Ship) setRandSeed(seed int64) {
 }
 
 func (this *Ship) setShots(shots *ShotPool) {
-	for _, b := range this.boat {
-		b.setShots(shots)
+	for i := range this.boat {
+		this.boat[i].setShots(shots)
 	}
 }
 
 func (this *Ship) setEnemies(enemies *EnemyPool) {
-	for _, b := range this.boat {
-		b.setEnemies(enemies)
+	for i := range this.boat {
+		this.boat[i].setEnemies(enemies)
 	}
 }
 
 func (this *Ship) setStageManager(stageManager *StageManager) {
-	for _, b := range this.boat {
-		b.setStageManager(stageManager)
+	for i := range this.boat {
+		this.boat[i].setStageManager(stageManager)
 	}
 }
 
 func (this *Ship) setGameState(gameState *InGameState) {
 	this.gameState = gameState
-	for _, b := range this.boat {
-		b.setGameState(gameState)
+	for i := range this.boat {
+		this.boat[i].setGameState(gameState)
 	}
 }
 
@@ -181,14 +181,14 @@ func (this *Ship) scrollSpeedBase() float64 {
 }
 
 func (this *Ship) setReplayMode(turnSpeed float64, reverseFire bool) {
-	for _, b := range this.boat {
-		b.setReplayMode(turnSpeed, reverseFire)
+	for i := range this.boat {
+		this.boat[i].setReplayMode(turnSpeed, reverseFire)
 	}
 }
 
 func (this *Ship) unsetReplayMode() {
-	for _, b := range this.boat {
-		b.unsetReplayMode()
+	for i := range this.boat {
+		this.boat[i].unsetReplayMode()
 	}
 }
 
@@ -509,18 +509,22 @@ func (this *Boat) move() {
 
 func (this *Boat) moveTwinStick() {
 	if !this._replayMode {
+		fmt.Println("not in replay")
 		stickInput = this.twinStick.GetState(true)
 	} else {
+		fmt.Println("in replay")
 		si, err := twinStick.Replay()
 		if err != nil {
 			if err == record.NoRecordDataException {
 				this.gameState.isGameOver = true
+				fmt.Println("got null state")
 				stickInput = this.twinStick.GetNullState()
 			} else {
 				panic(err)
 			}
+		} else {
+			stickInput = *si.(*sdl.TwinStickState)
 		}
-		stickInput = *si.(*sdl.TwinStickState)
 	}
 	if this.gameState.isGameOver || this.cnt < -INVINCIBLE_CNT {
 		stickInput.Clear()
@@ -551,8 +555,9 @@ func (this *Boat) moveDoublePlay() {
 				} else {
 					panic(err)
 				}
+			} else {
+				stickInput = *si.(*sdl.TwinStickState)
 			}
-			stickInput = *si.(*sdl.TwinStickState)
 		}
 		if this.gameState.isGameOver || this.cnt < -INVINCIBLE_CNT {
 			stickInput.Clear()

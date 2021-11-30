@@ -9,7 +9,7 @@ import (
 	"github.com/dragonfax/gunroar/gr/letter"
 	"github.com/dragonfax/gunroar/gr/sdl"
 	"github.com/dragonfax/gunroar/gr/vector"
-	"github.com/go-gl/gl/v4.1-compatibility/gl"
+	"github.com/go-gl/gl/v2.1/gl"
 )
 
 const MAX_DIGIT = 16
@@ -216,7 +216,7 @@ var _ actor.Actor = &NumIndicator{}
 type NumIndicator struct {
 	actor.ExistsImpl
 
-	scoreReel ScoreReel
+	scoreReel *ScoreReel
 	pos, vel  vector.Vector
 	n         int
 	typ       IndicatorType
@@ -258,7 +258,7 @@ func NewNumIndicator() *NumIndicator {
 }
 
 func (this *NumIndicator) Init(args []interface{}) {
-	this.scoreReel = args[0].(ScoreReel)
+	this.scoreReel = args[0].(*ScoreReel)
 }
 
 func (this *NumIndicator) setWithVector(n int, typ IndicatorType, size float64, p vector.Vector) {

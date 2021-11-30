@@ -78,28 +78,28 @@ func (this *TwinStick) GetState() TwinStickState {
 		this.state.Right.X = 0
 		this.state.Right.Y = 0
 	}
-	if this.Keys[sdl.K_d] == sdl.PRESSED {
+	if this.Keys[sdl.GetScancodeFromKey(sdl.K_d)] == sdl.PRESSED {
 		this.state.Left.X = 1
 	}
-	if this.Keys[sdl.K_l] == sdl.PRESSED {
+	if this.Keys[sdl.GetScancodeFromKey(sdl.K_l)] == sdl.PRESSED {
 		this.state.Right.X = 1
 	}
-	if this.Keys[sdl.K_a] == sdl.PRESSED {
+	if this.Keys[sdl.GetScancodeFromKey(sdl.K_a)] == sdl.PRESSED {
 		this.state.Left.X = -1
 	}
-	if this.Keys[sdl.K_j] == sdl.PRESSED {
+	if this.Keys[sdl.GetScancodeFromKey(sdl.K_j)] == sdl.PRESSED {
 		this.state.Right.X = -1
 	}
-	if this.Keys[sdl.K_s] == sdl.PRESSED {
+	if this.Keys[sdl.GetScancodeFromKey(sdl.K_s)] == sdl.PRESSED {
 		this.state.Left.Y = -1
 	}
-	if this.Keys[sdl.K_k] == sdl.PRESSED {
+	if this.Keys[sdl.GetScancodeFromKey(sdl.K_k)] == sdl.PRESSED {
 		this.state.Right.Y = -1
 	}
-	if this.Keys[sdl.K_w] == sdl.PRESSED {
+	if this.Keys[sdl.GetScancodeFromKey(sdl.K_w)] == sdl.PRESSED {
 		this.state.Left.Y = 1
 	}
-	if this.Keys[sdl.K_i] == sdl.PRESSED {
+	if this.Keys[sdl.GetScancodeFromKey(sdl.K_i)] == sdl.PRESSED {
 		this.state.Right.Y = 1
 	}
 	return this.state

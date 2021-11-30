@@ -49,23 +49,23 @@ func (this *Pad) getState() PadState {
 		x = this.stick.Axis(0)
 		y = this.stick.Axis(1)
 	}
-	if this.Keys[sdl2.K_RIGHT] == sdl2.PRESSED || this.Keys[sdl2.K_KP_6] == sdl2.PRESSED ||
-		this.Keys[sdl2.K_d] == sdl2.PRESSED || this.Keys[sdl2.K_l] == sdl2.PRESSED ||
+	if this.Keys[sdl2.GetScancodeFromKey(sdl2.K_RIGHT)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_KP_6)] == sdl2.PRESSED ||
+		this.Keys[sdl2.GetScancodeFromKey(sdl2.K_d)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_l)] == sdl2.PRESSED ||
 		x > JOYSTICK_AXIS {
 		this.state.Dir |= RIGHT
 	}
-	if this.Keys[sdl2.K_LEFT] == sdl2.PRESSED || this.Keys[sdl2.K_KP_4] == sdl2.PRESSED ||
-		this.Keys[sdl2.K_a] == sdl2.PRESSED || this.Keys[sdl2.K_j] == sdl2.PRESSED ||
+	if this.Keys[sdl2.GetScancodeFromKey(sdl2.K_LEFT)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_KP_4)] == sdl2.PRESSED ||
+		this.Keys[sdl2.GetScancodeFromKey(sdl2.K_a)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_j)] == sdl2.PRESSED ||
 		x < -JOYSTICK_AXIS {
 		this.state.Dir |= LEFT
 	}
-	if this.Keys[sdl2.K_DOWN] == sdl2.PRESSED || this.Keys[sdl2.K_KP_2] == sdl2.PRESSED ||
-		this.Keys[sdl2.K_s] == sdl2.PRESSED || this.Keys[sdl2.K_k] == sdl2.PRESSED ||
+	if this.Keys[sdl2.GetScancodeFromKey(sdl2.K_DOWN)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_KP_2)] == sdl2.PRESSED ||
+		this.Keys[sdl2.GetScancodeFromKey(sdl2.K_s)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_k)] == sdl2.PRESSED ||
 		y > JOYSTICK_AXIS {
 		this.state.Dir |= DOWN
 	}
-	if this.Keys[sdl2.K_UP] == sdl2.PRESSED || this.Keys[sdl2.K_KP_8] == sdl2.PRESSED ||
-		this.Keys[sdl2.K_w] == sdl2.PRESSED || this.Keys[sdl2.K_i] == sdl2.PRESSED ||
+	if this.Keys[sdl2.GetScancodeFromKey(sdl2.K_UP)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_KP_8)] == sdl2.PRESSED ||
+		this.Keys[sdl2.GetScancodeFromKey(sdl2.K_w)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_i)] == sdl2.PRESSED ||
 		y < -JOYSTICK_AXIS {
 		this.state.Dir |= UP
 	}
@@ -79,8 +79,8 @@ func (this *Pad) getState() PadState {
 			this.stick.Button(5) + this.stick.Button(6) +
 			this.stick.Button(9) + this.stick.Button(10)
 	}
-	if this.Keys[sdl2.K_z] == sdl2.PRESSED || this.Keys[sdl2.K_PERIOD] == sdl2.PRESSED ||
-		this.Keys[sdl2.K_LCTRL] == sdl2.PRESSED || this.Keys[sdl2.K_RCTRL] == sdl2.PRESSED ||
+	if this.Keys[sdl2.GetScancodeFromKey(sdl2.K_z)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_PERIOD)] == sdl2.PRESSED ||
+		this.Keys[sdl2.GetScancodeFromKey(sdl2.K_LCTRL)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_RCTRL)] == sdl2.PRESSED ||
 		btn1 > 0 {
 		if !this.buttonReversed {
 			this.state.Button |= ButtonA
@@ -88,10 +88,10 @@ func (this *Pad) getState() PadState {
 			this.state.Button |= ButtonB
 		}
 	}
-	if this.Keys[sdl2.K_x] == sdl2.PRESSED || this.Keys[sdl2.K_SLASH] == sdl2.PRESSED ||
-		this.Keys[sdl2.K_LALT] == sdl2.PRESSED || this.Keys[sdl2.K_RALT] == sdl2.PRESSED ||
-		this.Keys[sdl2.K_LSHIFT] == sdl2.PRESSED || this.Keys[sdl2.K_RSHIFT] == sdl2.PRESSED ||
-		this.Keys[sdl2.K_RETURN] == sdl2.PRESSED ||
+	if this.Keys[sdl2.GetScancodeFromKey(sdl2.K_x)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_SLASH)] == sdl2.PRESSED ||
+		this.Keys[sdl2.GetScancodeFromKey(sdl2.K_LALT)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_RALT)] == sdl2.PRESSED ||
+		this.Keys[sdl2.GetScancodeFromKey(sdl2.K_LSHIFT)] == sdl2.PRESSED || this.Keys[sdl2.GetScancodeFromKey(sdl2.K_RSHIFT)] == sdl2.PRESSED ||
+		this.Keys[sdl2.GetScancodeFromKey(sdl2.K_RETURN)] == sdl2.PRESSED ||
 		btn2 > 0 {
 		if !this.buttonReversed {
 			this.state.Button |= ButtonB

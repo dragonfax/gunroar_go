@@ -43,7 +43,7 @@ func NewActorPool(f CreateActorFunc, n int, args []interface{}) ActorPool {
 
 func NewActorPoolInternal(f CreateActorFunc, n int, args []interface{}) ActorPool {
 	this := ActorPool{
-		Actor:       make([]Actor, n, 0),
+		Actor:       make([]Actor, 0, n),
 		createActor: f,
 	}
 	this.createActors(n, args)
@@ -51,7 +51,7 @@ func NewActorPoolInternal(f CreateActorFunc, n int, args []interface{}) ActorPoo
 }
 
 func (this *ActorPool) createActors(n int, args []interface{} /* = null */) {
-	this.Actor = make([]Actor, n, n)
+	this.Actor = make([]Actor, n)
 	for i := range this.Actor {
 		a := this.createActor()
 		a.SetExists(false)
@@ -83,7 +83,7 @@ func (this *ActorPool) GetInstanceForced() Actor {
 }
 
 func (this *ActorPool) GetMultipleInstances(n int) []Actor {
-	rsl := make([]Actor, n, n)
+	rsl := make([]Actor, n)
 	for i := 0; i < n; i++ {
 		inst := this.GetInstance()
 		if inst == nil {

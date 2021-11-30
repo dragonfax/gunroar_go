@@ -75,6 +75,9 @@ func (this InputRecord) clear() {
 }
 
 func (this InputRecord) add(d InputState) {
+	if this.stateConstructor == nil {
+		return
+	}
 	if len(this.record) > 0 && this.record[len(this.record)-1].data.Equals(d) {
 		this.record[len(this.record)-1].series++
 	} else {
@@ -107,6 +110,9 @@ func (this InputRecord) next() (InputState, error) {
 	this.series--
 	if this.series <= 0 {
 		this.idx++
+	}
+	if this.replayData == nil {
+		return nil, NoRecordDataException
 	}
 	return this.replayData, nil
 }

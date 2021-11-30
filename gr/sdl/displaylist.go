@@ -1,6 +1,6 @@
 package sdl
 
-import "github.com/go-gl/gl/v4.1-compatibility/gl"
+import "github.com/go-gl/gl/v2.1/gl"
 
 /**
  * Manage a display list.

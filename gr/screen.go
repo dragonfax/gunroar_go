@@ -4,7 +4,7 @@ import (
 	r "math/rand"
 
 	"github.com/dragonfax/gunroar/gr/sdl"
-	"github.com/go-gl/gl/v4.1-compatibility/gl"
+	"github.com/go-gl/gl/v2.1/gl"
 )
 
 const CAPTION = "Gunroar"

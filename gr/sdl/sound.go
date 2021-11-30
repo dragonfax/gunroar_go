@@ -1,6 +1,8 @@
 package sdl
 
 import (
+	"fmt"
+
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -34,6 +36,7 @@ func SoundManagerInit() {
 		panic("Couldn't open audio: " + err.Error())
 	}
 	// audio_rate, audio_format, audio_channels, audio_opened, err := mix.QuerySpec() # serves no purpose
+	fmt.Println("audio opened")
 }
 
 /**
@@ -62,7 +65,7 @@ func (this *Music) Load(name string) {
 	if NoSound {
 		return
 	}
-	fileName := MusicDir + "/" + name
+	fileName := name
 	m, err := mix.LoadMUS(fileName)
 	this.music = m
 	if err != nil {
@@ -141,6 +144,7 @@ func (this *Chunk) LoadWithChannel(name string, ch int) {
 		return
 	}
 	fileName := sound_dir + "/" + name
+	fmt.Printf("loading sound %s \n", fileName)
 	c, err := mix.LoadWAV(fileName)
 	this.chunk = c
 	if err != nil {

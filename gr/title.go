@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/dragonfax/gunroar/gr/letter"
 	"github.com/dragonfax/gunroar/gr/sdl"
-	"github.com/go-gl/gl/v4.1-compatibility/gl"
+	"github.com/go-gl/gl/v2.1/gl"
 )
 
 /**
@@ -83,7 +83,7 @@ func (this *TitleManager) init() {
 	gl.End()
 	LineWidth(1)
 	this.displayList.EndNewList()
-	this.gameMode = prefManager.prefData().gameMode()
+	this.gameMode = prefManager.prefData.gameMode()
 }
 
 func (this *TitleManager) start() {
@@ -158,7 +158,7 @@ func (this *TitleManager) draw() {
 	gl.PopMatrix()
 	if this.cnt > 150 {
 		letter.DrawString("HIGH", 3, 305, 4, letter.TO_RIGHT, 1, false, 0)
-		letter.DrawNum(prefManager.prefData().highScore(this.gameMode), 80, 320, 4, 0, 9, -1, -1)
+		letter.DrawNum(prefManager.prefData.highScore(this.gameMode), 80, 320, 4, 0, 9, -1, -1)
 	}
 	if this.cnt > 200 {
 		letter.DrawString("LAST", 3, 345, 4, letter.TO_RIGHT, 1, false, 0)

@@ -57,7 +57,12 @@ func (this *ReplayData) save(fileName string) {
 
 func (this *ReplayData) load(fileName string) {
 	fd := file.New()
-	fd.Open(dir + "/" + fileName)
+	err := fd.Open(dir + "/" + fileName)
+	if err != nil {
+		this.twinStickInputRecord = record.New(sdl.NewTwinStickState)
+		this.gameMode = GameMode(0)
+		return
+	}
 	ver := fd.ReadInt()
 	if ver != REPLAY_VERSION_NUM {
 		panic("Wrong version num")

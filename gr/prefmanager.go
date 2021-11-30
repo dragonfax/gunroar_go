@@ -10,7 +10,7 @@ const PREFS_VERSION_NUM = 14
 const PREF_FILE = "gr.prf"
 
 type PrefManager struct {
-	_prefData *PrefData
+	prefData PrefData
 }
 
 func NewPrefManager() *PrefManager {
@@ -21,15 +21,15 @@ func NewPrefManager() *PrefManager {
 func (this *PrefManager) Load() {
 	fd := file.New()
 	err := fd.Open(PREF_FILE)
-	if err != nil {
+	if err == nil {
 		ver := fd.ReadInt()
 		if ver != PREFS_VERSION_NUM {
 			panic("Wrong version num")
 		} else {
-			this._prefData.load(fd)
+			this.prefData.load(fd)
 		}
 	} else {
-		this._prefData.init()
+		this.prefData.init()
 	}
 
 	if fd.IsOpen() {
@@ -41,12 +41,8 @@ func (this *PrefManager) Save() {
 	fd := file.New()
 	fd.Create(PREF_FILE)
 	fd.WriteInt(PREFS_VERSION_NUM)
-	this._prefData.save(fd)
+	this.prefData.save(fd)
 	fd.Close()
-}
-
-func (this *PrefManager) prefData() *PrefData {
-	return this._prefData
 }
 
 type PrefData struct {
