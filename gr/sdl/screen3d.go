@@ -1,6 +1,8 @@
 package sdl
 
 import (
+	"fmt"
+
 	"github.com/dragonfax/gunroar/gr/sdl/screen"
 	"github.com/dragonfax/gunroar/gr/vector"
 	"github.com/go-gl/gl/v4.1-compatibility/gl"
@@ -43,19 +45,41 @@ func (this *Screen3D) InitSDL() {
 		panic("Unable to initialize SDL: " + err.Error())
 	}
 
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 4)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
+	sdl.GLSetAttribute(sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG, gl.TRUE)
+
 	// Create an OpenGL screen.
 	var videoFlags uint32
-	if this._windowMode {
-		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_RESIZABLE
-	} else {
-		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_FULLSCREEN
-	}
+	//if this._windowMode {
+	videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_RESIZABLE
+	//} else {
+	// videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_FULLSCREEN
+	//}
 
 	window, err = sdl.CreateWindow("gunroar", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
 		int32(this._width), int32(this._height), sdl.WINDOW_SHOWN|videoFlags)
 	if err != nil {
 		panic(err)
 	}
+
+	major, err := sdl.GLGetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION)
+	if err != nil {
+		panic(err)
+	}
+	minor, err := sdl.GLGetAttribute(sdl.GL_CONTEXT_MINOR_VERSION)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("opengl version %d.%d\n", major, minor)
+
+	_, err = window.GLCreateContext()
+	if err != nil {
+		panic(err)
+	}
+
+	gl.Init()
 
 	gl.Viewport(0, 0, int32(this.Width()), int32(this.Height()))
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
