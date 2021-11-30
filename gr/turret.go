@@ -777,8 +777,7 @@ func (this *MovingTurretGroup) move(p vector.Vector, ed float64) {
 			this.deg += od * 0.1
 		}
 	}
-	var d, ad, md float64
-	d, ad, md = this.calcAlignDeg(d, ad, md)
+	d, _, md := this.calcAlignDeg()
 	for i := 0; i < this.spec.num; i++ {
 		d += md
 		bx := math.Sin(d) * this.radius * this.spec.xReverse
@@ -797,9 +796,10 @@ func (this *MovingTurretGroup) move(p vector.Vector, ed float64) {
 	this.cnt++
 }
 
-func (this MovingTurretGroup) calcAlignDeg(d, ad, md float64) (float64, float64, float64) {
+func (this MovingTurretGroup) calcAlignDeg() (float64, float64, float64) {
 	this.alignAmpCnt += this.spec.alignAmpVel
-	ad = this.spec.alignDeg * (1 + math.Sin(this.alignAmpCnt)*this.spec.alignAmp)
+	ad := this.spec.alignDeg * (1 + math.Sin(this.alignAmpCnt)*this.spec.alignAmp)
+	var md float64
 	if this.spec.num > 1 {
 		if this.spec.moveType == ROLL {
 			md = ad / float64(this.spec.num)
@@ -809,7 +809,7 @@ func (this MovingTurretGroup) calcAlignDeg(d, ad, md float64) (float64, float64,
 	} else {
 		md = 0
 	}
-	d = this.deg - md - ad/2
+	d := this.deg - md - ad/2
 	return d, ad, md
 }
 

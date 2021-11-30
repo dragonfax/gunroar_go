@@ -41,11 +41,10 @@ func boot(args []string) {
 	parseArgs(args)
 
 	mainLoop.Loop()
-	return
 }
 
 func parseArgs(commandArgs []string) {
-	args := make([]string, len(commandArgs)-1, len(commandArgs)-1)
+	args := make([]string, len(commandArgs)-1)
 	for i := 1; i < len(commandArgs); i++ {
 		args[i] = commandArgs[i]
 	}

@@ -512,7 +512,6 @@ func (this *Boat) moveTwinStick() {
 		stickInput = this.twinStick.GetState(true)
 	} else {
 		si, err := twinStick.Replay()
-		stickInput = si.(sdl.TwinStickState)
 		if err != nil {
 			if err == record.NoRecordDataException {
 				this.gameState.isGameOver = true
@@ -521,6 +520,7 @@ func (this *Boat) moveTwinStick() {
 				panic(err)
 			}
 		}
+		stickInput = *si.(*sdl.TwinStickState)
 	}
 	if this.gameState.isGameOver || this.cnt < -INVINCIBLE_CNT {
 		stickInput.Clear()
@@ -541,10 +541,9 @@ func (this *Boat) moveDoublePlay() {
 	switch this.idx {
 	case 0:
 		if !this._replayMode {
-			stickInput = this.twinStick.GetState()
+			stickInput = this.twinStick.GetState(true)
 		} else {
-			var err error
-			stickInput, err = twinStick.Replay()
+			si, err := twinStick.Replay()
 			if err != nil {
 				if err != record.NoRecordDataException {
 					this.gameState.isGameOver = true
@@ -553,6 +552,7 @@ func (this *Boat) moveDoublePlay() {
 					panic(err)
 				}
 			}
+			stickInput = *si.(*sdl.TwinStickState)
 		}
 		if this.gameState.isGameOver || this.cnt < -INVINCIBLE_CNT {
 			stickInput.Clear()

@@ -116,7 +116,7 @@ func (this *GameManager) startTitle(fromGameover bool /* = false */) {
 	if fromGameover {
 		this.saveLastReplay()
 	}
-	this.titleState.replayData = this.inGameState.replayData
+	this.titleState._replayData = this.inGameState.replayData()
 	this.state = this.titleState
 	this.startState()
 }
@@ -202,9 +202,9 @@ func (this *GameManager) Draw() {
 	this.field.drawSideWalls()
 	this.state.drawFront()
 	gl.PopMatrix()
-	this.screen.viewOrthoFixed()
+	viewOrthoFixed()
 	this.state.drawOrtho()
-	this.screen.viewPerspective()
+	viewPerspective()
 }
 
 /**
@@ -282,7 +282,7 @@ func (this *GameStateBase) clearAll() {
 	this.numIndicators.Clear()
 }
 
-func (this *GameStateBase) setReplayData(v ReplayData) ReplayData {
+func (this *GameStateBase) setReplayData(v *ReplayData) *ReplayData {
 	this._replayData = v
 	return v
 }
@@ -350,7 +350,7 @@ func (this *InGameState) start() {
 	case TWIN_STICK, DOUBLE_PLAY:
 		rts := twinStick
 		rts.StartRecord()
-		this._replayData.twinStickInputRecord = rts.inputRecord
+		this._replayData.twinStickInputRecord = rts.InputRecord
 	}
 	this._replayData.seed = this.rand.Int63()
 	this._replayData.shipTurnSpeed = shipTurnSpeed
@@ -418,7 +418,8 @@ func (this *InGameState) move() {
 	this.moveInGame()
 	if this.isGameOver {
 		this.gameOverCnt++
-		if this.input.button & sdl.ButtonA /* || (this.gameMode == InGameState.GameMode.MOUSE && (mouseInput.button & MouseState.Button.LEFT)) */ {
+		input := pad.GetState(false)
+		if (input.Button & sdl.ButtonA) > 0 /* || (this.gameMode == InGameState.GameMode.MOUSE && (mouseInput.button & MouseState.Button.LEFT)) */ {
 			if this.gameOverCnt > 60 && !this.btnPressed {
 				this.gameManager.startTitle(true)
 			}
@@ -530,9 +531,9 @@ func (this *InGameState) shipDestroyed() {
 		this.btnPressed = true
 		fadeBgm()
 		this.scoreReel.accelerate()
-		if !this.ship.replayMode {
+		if !this.ship.replayMode() {
 			disableSe()
-			this.prefManager.prefData.recordResult(this.scoreReel.actualScore, this._gameMode)
+			this.prefManager.prefData().recordResult(this.scoreReel.actualScore(), this._gameMode)
 			this._replayData.score = this.scoreReel.actualScore()
 		}
 	}
@@ -614,7 +615,7 @@ func (this *TitleState) startReplay() {
 	switch this._replayData.gameMode {
 	case TWIN_STICK, DOUBLE_PLAY:
 		rts := twinStick
-		rts.startReplay(this._replayData.twinStickInputRecord)
+		rts.StartReplay(this._replayData.twinStickInputRecord)
 	}
 	this.titleManager.replayData(this._replayData)
 	this.inGameState.setGameMode(this._replayData.gameMode)

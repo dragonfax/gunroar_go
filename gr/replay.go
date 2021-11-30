@@ -14,7 +14,7 @@ const dir = "replay"
 const REPLAY_VERSION_NUM = 11
 
 type ReplayData struct {
-	// jInputRecord!(PadState) padInputRecord;
+	padInputRecord       record.InputRecord
 	twinStickInputRecord record.InputRecord
 	// InputRecord!(MouseAndPadState) mouseAndPadInputRecord;
 	seed            int64
@@ -49,7 +49,7 @@ func (this *ReplayData) save(fileName string) {
 	case TWIN_STICK, DOUBLE_PLAY:
 		this.twinStickInputRecord.Save(fd)
 		/* case InGameState.GameMode.MOUSE:
-		   this.mouseAndPadInputRecord.save(fd);
+		this.mouseAndPadInputRecord.save(fd);
 		*/
 	}
 	fd.Close()

@@ -18,7 +18,7 @@ type InputState interface {
  * T represents a data structure of specific device input.
  */
 type RecordableInput struct {
-	inputRecord *InputRecord
+	InputRecord InputRecord
 }
 
 func NewRecordableInput() RecordableInput {
@@ -27,24 +27,24 @@ func NewRecordableInput() RecordableInput {
 }
 
 func (this *RecordableInput) StartRecord() {
-	this.inputRecord = new(InputRecord)
-	this.inputRecord.clear()
+	this.InputRecord = InputRecord{}
+	this.InputRecord.clear()
 }
 
 func (this *RecordableInput) Record(d InputState) {
-	this.inputRecord.add(d)
+	this.InputRecord.add(d)
 }
 
-func (this *RecordableInput) startReplay(pr *InputRecord) {
-	this.inputRecord = pr
-	this.inputRecord.reset()
+func (this *RecordableInput) StartReplay(pr InputRecord) {
+	this.InputRecord = pr
+	this.InputRecord.reset()
 }
 
 func (this *RecordableInput) Replay() (InputState, error) {
-	if !this.inputRecord.hasNext() {
+	if !this.InputRecord.hasNext() {
 		return nil, NoRecordDataException
 	}
-	return this.inputRecord.next()
+	return this.InputRecord.next()
 }
 
 type InputStateConstructor func(InputState) InputState
@@ -70,11 +70,11 @@ func New(constructor InputStateConstructor) InputRecord {
 	return this
 }
 
-func (this *InputRecord) clear() {
+func (this InputRecord) clear() {
 	this.record = make([]Record, 0)
 }
 
-func (this *InputRecord) add(d InputState) {
+func (this InputRecord) add(d InputState) {
 	if len(this.record) > 0 && this.record[len(this.record)-1].data.Equals(d) {
 		this.record[len(this.record)-1].series++
 	} else {
@@ -85,18 +85,18 @@ func (this *InputRecord) add(d InputState) {
 	}
 }
 
-func (this *InputRecord) reset() {
+func (this InputRecord) reset() {
 	this.idx = 0
 	this.series = 0
 }
 
-func (this *InputRecord) hasNext() bool {
+func (this InputRecord) hasNext() bool {
 	return this.idx < len(this.record)
 }
 
 var NoRecordDataException = fmt.Errorf("ran out of data")
 
-func (this *InputRecord) next() (InputState, error) {
+func (this InputRecord) next() (InputState, error) {
 	if this.idx >= len(this.record) {
 		return nil, NoRecordDataException
 	}
@@ -111,7 +111,7 @@ func (this *InputRecord) next() (InputState, error) {
 	return this.replayData, nil
 }
 
-func (this *InputRecord) Save(fd file.File) {
+func (this InputRecord) Save(fd file.File) {
 	fd.WriteInt(len(this.record))
 	for _, r := range this.record {
 		fd.WriteInt(r.series)
@@ -119,7 +119,7 @@ func (this *InputRecord) Save(fd file.File) {
 	}
 }
 
-func (this *InputRecord) Load(fd file.File) {
+func (this InputRecord) Load(fd file.File) {
 	this.clear()
 	l := fd.ReadInt()
 	for i := 0; i < l; i++ {

@@ -2,7 +2,6 @@ package main
 
 import (
 	"math"
-	"math/rand"
 	r "math/rand"
 	"time"
 
@@ -243,7 +242,7 @@ func (this *StageManager) addBatteries(platformPos []PlatformPos, platformPosNum
 		if ppn <= 0 || bn <= 0 {
 			break
 		}
-		ppi := rand.Intn(platformPosNum)
+		ppi := this.rand.Intn(platformPosNum)
 		for j := 0; j < platformPosNum; j++ {
 			if !platformPos[ppi].used {
 				break

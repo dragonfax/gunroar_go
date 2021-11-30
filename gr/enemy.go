@@ -73,9 +73,11 @@ func (this *Enemy) checkHitShip(x float64, y float64, largeOnly bool /* = false 
 	return this.spec.checkShipCollision(this._state, x, y, largeOnly)
 }
 
+/* unused
 func (this *Enemy) addDamage(n int) {
 	this._state.addDamage(n, nil)
 }
+*/
 
 func (this *Enemy) increaseMultiplier(m float64) {
 	this._state.increaseMultiplier(m)
@@ -1351,10 +1353,7 @@ func (this ShipEnemySpec) score() int {
 }
 
 func (this ShipEnemySpec) isBoss() bool {
-	if this.shipClass == ShipBOSS {
-		return true
-	}
-	return false
+	return this.shipClass == ShipBOSS
 }
 
 /**
@@ -1455,10 +1454,7 @@ func (this *PlatformEnemySpec) setFirstState(es EnemyState, x, y, d float64) boo
 	es.pos.Y = y
 	es.deg = d
 	es.speed = 0
-	if !es.checkFrontClear(true) {
-		return false
-	}
-	return true
+	return es.checkFrontClear(true)
 }
 
 func (this PlatformEnemySpec) move(es EnemyState) bool {
@@ -1466,10 +1462,7 @@ func (this PlatformEnemySpec) move(es EnemyState) bool {
 		return false
 	}
 	es.pos.Y -= this.field.lastScrollY()
-	if es.pos.Y <= -this.field.outerSize().Y {
-		return false
-	}
-	return true
+	return es.pos.Y > -this.field.outerSize().Y
 }
 
 func (this PlatformEnemySpec) score() int {
