@@ -578,8 +578,8 @@ type TurretGroup struct {
 
 func NewTurretGroup(field *Field, bullets *BulletPool, ship *Ship,
 	sparks *SparkPool, smokes *SmokePool, fragments *FragmentPool,
-	parent *Enemy) *TurretGroup {
-	this := &TurretGroup{}
+	parent *Enemy) TurretGroup {
+	this := TurretGroup{}
 	this.ship = ship
 	for i := range this.turret {
 		this.turret[i] = NewTurret(field, bullets, ship, sparks, smokes, fragments, parent)
@@ -672,8 +672,8 @@ type TurretGroupSpec struct {
 	offset                                  vector.Vector
 }
 
-func NewTurretGroupSpec() *TurretGroupSpec {
-	this := &TurretGroupSpec{}
+func NewTurretGroupSpec() TurretGroupSpec {
+	this := TurretGroupSpec{}
 	this.turretSpec = NewTurretSpec()
 	this.num = 1
 	return this
