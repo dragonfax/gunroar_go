@@ -16,6 +16,7 @@ import (
  */
 var screen *Screen
 var input *sdl.MultipleInputDevice
+var pad *sdl.RecordablePad
 var twinStick *sdl.RecordableTwinStick
 
 // RecordableMouse mouse;
@@ -30,7 +31,9 @@ func main() {
 func boot(args []string) {
 	screen = NewScreen()
 	input = sdl.NewMultipleInputDevice()
+	pad = sdl.NewRecordablePad()
 	twinStick = sdl.NewRecordableTwinStick()
+	input.Inputs = append(input.Inputs, pad)
 	input.Inputs = append(input.Inputs, twinStick)
 	gameManager = NewGameManager()
 	prefManager = NewPrefManager()

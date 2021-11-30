@@ -25,7 +25,7 @@ func NewPad() Pad {
 	return Pad{}
 }
 
-func (this *Pad) openJoystick(st *sdl2.Joystick /* = null*/) *sdl2.Joystick {
+func (this *Pad) OpenJoystick(st *sdl2.Joystick /* = null*/) *sdl2.Joystick {
 	if st == nil {
 		err := sdl2.InitSubSystem(sdl2.INIT_JOYSTICK)
 		if err != nil {

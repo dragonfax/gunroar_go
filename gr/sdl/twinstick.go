@@ -31,7 +31,7 @@ func NewTwinStick() TwinStick {
 	return this
 }
 
-func (this *TwinStick) openJoystick(st *sdl.Joystick) *sdl.Joystick {
+func (this *TwinStick) OpenJoystick(st *sdl.Joystick) *sdl.Joystick {
 	var stick *sdl.Joystick
 	if st == nil {
 

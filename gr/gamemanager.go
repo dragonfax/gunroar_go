@@ -1,12 +1,13 @@
 package main
 
 import (
-	"math"
 	r "math/rand"
 	"time"
 
+	"github.com/dragonfax/gunroar/gr/letter"
 	"github.com/dragonfax/gunroar/gr/sdl"
 	"github.com/go-gl/gl/v4.1-compatibility/gl"
+	sdl2 "github.com/veandco/go-sdl2/sdl"
 )
 
 /**
@@ -20,7 +21,8 @@ var shipReverseFire = false
 type GameManager struct {
 	sdl.GameManagerBase
 
-	twinStick      *sdl.TwinStick
+	pad            *sdl.RecordablePad
+	twinStick      *sdl.RecordableTwinStick
 	prefManager    *PrefManager
 	screen         *Screen
 	field          *Field
@@ -50,67 +52,64 @@ func NewGameManager() *GameManager {
 }
 
 func (this *GameManager) Init() {
-	letter.Init()
-	Shot.init()
-	BulletShape.init()
-	EnemyShape.init()
-	Turret.init()
-	TurretShape.init()
-	Fragment.init()
-	SparkFragment.init()
-	Crystal.init()
+	letter.LetterInit()
+	shotInit()
+	fragmentInit()
+	sparkFragmentInit()
+	crystalInit()
 	this.prefManager = abstPrefManager
 	this.screen = abstScreen
+	this.pad = input.inputs[0]
 	this.twinStick = input.inputs[1]
-	this.twinStick.openJoystick(pad.openJoystick())
+	this.twinStick.OpenJoystick(pad.OpenJoystick(nil))
 	this.field = NewField()
 	pargs := make([]interface{}, 0)
 	this.sparks = NewSparkPool(120, pargs)
-	pargs = append(pargs, field)
+	pargs = append(pargs, this.field)
 	this.wakes = NewWakePool(100, pargs)
-	pargs = append(pargs, wakes)
+	pargs = append(pargs, this.wakes)
 	this.smokes = NewSmokePool(200, pargs)
-	fargs := []interface{}{field, smokes}
+	fargs := []interface{}{this.field, this.smokes}
 	this.fragments = NewFragmentPool(60, fargs)
 	this.sparkFragments = NewSparkFragmentPool(40, fargs)
 	this.ship = NewShip(twinStick,
-		field, screen, sparks, smokes, fragments, wakes)
-	cargs := []interface{}{ship}
+		this.field, screen, this.sparks, this.smokes, this.fragments, this.wakes)
+	cargs := []interface{}{this.ship}
 	crystals := NewCrystalPool(80, cargs)
 	this.scoreReel = NewScoreReel()
-	nargs := []interface{}{scoreReel}
+	nargs := []interface{}{this.scoreReel}
 	numIndicators := NewNumIndicatorPool(50, nargs)
-	bargs := []interface{}{this, field, ship, smokes, wakes, crystals}
+	bargs := []interface{}{this, this.field, this.ship, this.smokes, this.wakes, crystals}
 	this.bullets = NewBulletPool(240, bargs)
-	eargs := []interface{}{field, screen, bullets, ship, sparks, smokes, fragments, sparkFragments, numIndicators, scoreReel}
+	eargs := []interface{}{this.field, screen, this.bullets, this.ship, this.sparks, this.smokes, this.fragments, this.sparkFragments, numIndicators, this.scoreReel}
 	this.enemies = NewEnemyPool(40, eargs)
-	sargs := []interface{}{field, enemies, sparks, smokes, bullets}
+	sargs := []interface{}{this.field, this.enemies, this.sparks, this.smokes, this.bullets}
 	this.shots = NewShotPool(50, sargs)
-	this.ship.setShots(shots)
-	this.ship.setEnemies(enemies)
-	this.stageManager = NewStageManager(field, enemies, ship, bullets, sparks, smokes, fragments, wakes)
-	this.ship.setStageManager(stageManager)
-	this.field.setStageManager(stageManager)
-	this.field.setShip(ship)
-	this.enemies.setStageManager(stageManager)
+	this.ship.setShots(this.shots)
+	this.ship.setEnemies(this.enemies)
+	this.stageManager = NewStageManager(this.field, this.enemies, this.ship, this.bullets, this.sparks, this.smokes, this.fragments, this.wakes)
+	this.ship.setStageManager(this.stageManager)
+	this.field.setStageManager(this.stageManager)
+	this.field.setShip(this.ship)
+	this.enemies.setStageManager(this.stageManager)
 	loadSounds()
-	this.titleManager = NewTitleManager(prefManager, field, this)
-	this.inGameState = NewInGameState(this, screen, twinStick,
-		field, ship, shots, bullets, enemies,
-		sparks, smokes, fragments, sparkFragments, wakes,
-		crystals, numIndicators, stageManager, scoreReel,
-		prefManager)
+	this.titleManager = NewTitleManager(prefManager, pad, this.field, this)
+	this.inGameState = NewInGameState(this, this.screen, this.twinStick,
+		this.field, this.ship, this.shots, this.bullets, this.enemies,
+		this.sparks, this.smokes, this.fragments, this.sparkFragments, this.wakes,
+		this.crystals, this.numIndicators, this.stageManager, this.scoreReel,
+		this.prefManager)
 	this.titleState = NewTitleState(this, screen, twinStick,
-		field, ship, shots, bullets, enemies,
-		sparks, smokes, fragments, sparkFragments, wakes,
-		crystals, numIndicators, stageManager, scoreReel,
-		titleManager, inGameState)
+		this.field, this.ship, this.shots, this.bullets, this.enemies,
+		this.sparks, this.smokes, this.fragments, this.sparkFragments, this.wakes,
+		this.crystals, this.numIndicators, this.stageManager, this.scoreReel,
+		this.titleManager, this.inGameState)
 	this.ship.setGameState(this.inGameState)
 }
 
 func (this *GameManager) Start() {
 	this.loadLastReplay()
-	this.startTitle()
+	this.startTitle(false)
 }
 
 func (this *GameManager) startTitle(fromGameover bool /* = false */) {
@@ -124,7 +123,7 @@ func (this *GameManager) startTitle(fromGameover bool /* = false */) {
 
 func (this *GameManager) startInGame(gameMode GameMode) {
 	this.state = this.inGameState
-	this.inGameState.gameMode = gameMode
+	this.inGameState.setGameMode(gameMode)
 	this.startState()
 }
 
@@ -159,48 +158,48 @@ func (this *GameManager) addSlowdownRatio(sr float64) {
 }
 
 func (this *GameManager) Move() {
-	if pad.keys[SDLK_ESCAPE] == SDL_PRESSED {
-		if !escPressed {
-			escPressed = true
-			if state == inGameState {
-				startTitle()
+	if pad.keys[sdl2.K_ESCAPE] == sdl2.PRESSED {
+		if !this.escPressed {
+			this.escPressed = true
+			if this.state == this.inGameState {
+				this.startTitle()
 			} else {
 				mainLoop.breakLoop()
 			}
 			return
 		}
 	} else {
-		escPressed = false
+		this.escPressed = false
 	}
-	state.move()
+	this.state.move()
 }
 
 func (this *GameManager) Draw() {
 	e := mainLoop.event
-	if e.GetType() == sdl.VIDEORESIZE {
+	if e.GetType() == sdl2.WINDOWEVENT_RESIZED {
 		re := e.resize
 		if re.w > 150 && re.h > 100 {
 			this.screen.resized(re.w, re.h)
 		}
 	}
 	if this.screen.startRenderToLuminousScreen() {
-		glPushMatrix()
+		gl.PushMatrix()
 		this.screen.setEyepos()
 		this.state.drawLuminous()
-		glPopMatrix()
+		gl.PopMatrix()
 		this.screen.endRenderToLuminousScreen()
 	}
 	this.screen.clear()
-	glPushMatrix()
+	gl.PushMatrix()
 	this.screen.setEyepos()
 	this.state.draw()
-	glPopMatrix()
+	gl.PopMatrix()
 	this.screen.drawLuminous()
-	glPushMatrix()
+	gl.PushMatrix()
 	this.screen.setEyepos()
 	this.field.drawSideWalls()
 	this.state.drawFront()
-	glPopMatrix()
+	gl.PopMatrix()
 	this.screen.viewOrthoFixed()
 	this.state.drawOrtho()
 	this.screen.viewPerspective()
@@ -220,33 +219,33 @@ type GameState interface {
 }
 
 type GameStateBase struct {
-	gameManager    GameManager
-	screen         Screen
-	twinStick      TwinStick
-	field          Field
+	gameManager    *GameManager
+	screen         *Screen
+	twinStick      *sdl.RecordableTwinStick
+	field          *Field
 	ship           *Ship
-	shots          ShotPool
-	bullets        BulletPool
-	enemies        EnemyPool
-	sparks         SparkPool
-	smokes         SmokePool
-	fragments      FragmentPool
-	sparkFragments SparkFragmentPool
-	wakes          WakePool
-	crystals       CrystalPool
-	numIndicators  NumIndicatorPool
-	stageManager   StageManager
-	scoreReel      ScoreReel
+	shots          *ShotPool
+	bullets        *BulletPool
+	enemies        *EnemyPool
+	sparks         *SparkPool
+	smokes         *SmokePool
+	fragments      *FragmentPool
+	sparkFragments *SparkFragmentPool
+	wakes          *WakePool
+	crystals       *CrystalPool
+	numIndicators  *NumIndicatorPool
+	stageManager   *StageManager
+	scoreReel      *ScoreReel
 	_replayData    *ReplayData
 }
 
-func NewGameStateBase(gameManager GameManager, screen Screen,
-	twinStick TwinStick,
-	field Field, ship *Ship, shots ShotPool, bullets BulletPool, enemies EnemyPool,
-	sparks SparkPool, smokes SmokePool,
-	fragments FragmentPool, sparkFragments SparkFragmentPool, wakes WakePool,
-	crystals CrystalPool, numIndicators NumIndicatorPool,
-	stageManager StageManager, scoreReel ScoreReel) GameStateBase {
+func NewGameStateBase(gameManager *GameManager, screen *Screen,
+	twinStick *sdl.RecordableTwinStick,
+	field *Field, ship *Ship, shots *ShotPool, bullets *BulletPool, enemies *EnemyPool,
+	sparks *SparkPool, smokes *SmokePool,
+	fragments *FragmentPool, sparkFragments *SparkFragmentPool, wakes *WakePool,
+	crystals *CrystalPool, numIndicators *NumIndicatorPool,
+	stageManager *StageManager, scoreReel *ScoreReel) GameStateBase {
 	this := GameStateBase{}
 	this.gameManager = gameManager
 	this.screen = screen
@@ -269,16 +268,16 @@ func NewGameStateBase(gameManager GameManager, screen Screen,
 }
 
 func (this *GameStateBase) clearAll() {
-	this.shots.clear()
-	this.bullets.clear()
-	this.enemies.clear()
-	this.sparks.clear()
-	this.smokes.clear()
-	this.fragments.clear()
-	this.sparkFragments.clear()
-	this.wakes.clear()
-	this.crystals.clear()
-	this.numIndicators.clear()
+	this.shots.Clear()
+	this.bullets.Clear()
+	this.enemies.Clear()
+	this.sparks.Clear()
+	this.smokes.Clear()
+	this.fragments.Clear()
+	this.sparkFragments.Clear()
+	this.wakes.Clear()
+	this.crystals.Clear()
+	this.numIndicators.Clear()
 }
 
 func (this *GameStateBase) setReplayData(ReplayData v) ReplayData {
@@ -286,7 +285,7 @@ func (this *GameStateBase) setReplayData(ReplayData v) ReplayData {
 	return v
 }
 
-func (this *GameStateBase) replayData() ReplayData {
+func (this *GameStateBase) replayData() *ReplayData {
 	return this._replayData
 }
 
@@ -321,14 +320,14 @@ type InGameState struct {
 	_gameMode     GameMode
 }
 
-func NewInGameState(gameManager GameManager, screen Screen,
-	twinStick sdl.TwinStick,
-	field Field, ship *Ship, shots ShotPool, bullets BulletPool, enemies EnemyPool,
-	sparks SparkPool, smokes SmokePool,
-	fragments FragmentPool, sparkFragments SparkFragmentPool, wakes WakePool,
-	crystals CrystalPool, numIndicators NumIndicatorPool,
-	stageManager StageManager, scoreReel ScoreReel,
-	prefManager PrefManager) *InGameState {
+func NewInGameState(gameManager *GameManager, screen *Screen,
+	twinStick *sdl.RecordableTwinStick,
+	field *Field, ship *Ship, shots *ShotPool, bullets *BulletPool, enemies *EnemyPool,
+	sparks *SparkPool, smokes *SmokePool,
+	fragments *FragmentPool, sparkFragments *SparkFragmentPool, wakes *WakePool,
+	crystals *CrystalPool, numIndicators *NumIndicatorPool,
+	stageManager *StageManager, scoreReel *ScoreReel,
+	prefManager *PrefManager) *InGameState {
 	this := &InGameState{GameStateBase: NewGameStateBase(
 		gameManager, screen, twinStick,
 		field, ship, shots, bullets, enemies,
@@ -361,7 +360,7 @@ func (this *InGameState) start() {
 }
 
 func (this *InGameState) startInGame() {
-	thuis.clearAll()
+	this.clearAll()
 	seed := this._replayData.seed
 	this.field.setRandSeed(seed)
 	setEnemyStateRandSeed(seed)
@@ -399,17 +398,17 @@ func (this *InGameState) initGameState() {
 }
 
 func (this *InGameState) move() {
-	if pad.keys[SDLK_p] == SDL_PRESSED {
-		if !pausePressed {
-			if pauseCnt <= 0 && !isGameOver {
+	if pad.keys[sdl2.K_p] == sdl2.PRESSED {
+		if !this.pausePressed {
+			if this.pauseCnt <= 0 && !this.isGameOver {
 				this.pauseCnt = 1
 			} else {
 				this.pauseCnt = 0
 			}
 		}
-		pausePressed = true
+		this.pausePressed = true
 	} else {
-		pausePressed = false
+		this.pausePressed = false
 	}
 	if this.pauseCnt > 0 {
 		this.pauseCnt++
@@ -418,9 +417,8 @@ func (this *InGameState) move() {
 	this.moveInGame()
 	if this.isGameOver {
 		this.gameOverCnt++
-		if (this.input.button & PadState.Button.A) || (this.gameMode == InGameState.GameMode.MOUSE &&
-			(mouseInput.button & MouseState.Button.LEFT)) {
-			if this.gameOverCnt > 60 && !btnPressed {
+		if this.input.button & sdl.ButtonA /* || (this.gameMode == InGameState.GameMode.MOUSE && (mouseInput.button & MouseState.Button.LEFT)) */ {
+			if this.gameOverCnt > 60 && !this.btnPressed {
 				this.gameManager.startTitle(true)
 			}
 			this.btnPressed = true
@@ -441,16 +439,16 @@ func (this *InGameState) moveInGame() {
 	this.field.move()
 	this.ship.move()
 	this.stageManager.move()
-	this.enemies.move()
-	this.shots.move()
-	this.bullets.move()
-	this.crystals.move()
-	this.numIndicators.move()
-	this.sparks.move()
-	this.smokes.move()
-	this.fragments.move()
-	this.sparkFragments.move()
-	this.wakes.move()
+	this.enemies.Move()
+	this.shots.Move()
+	this.bullets.Move()
+	this.crystals.Move()
+	this.numIndicators.Move()
+	this.sparks.Move()
+	this.smokes.Move()
+	this.fragments.Move()
+	this.sparkFragments.Move()
+	this.wakes.Move()
 	this.screen.move()
 	this.scoreReelSize += (SCORE_REEL_SIZE_DEFAULT - this.scoreReelSize) * 0.05
 	this.scoreReel.move()
@@ -463,21 +461,21 @@ func (this *InGameState) moveInGame() {
 func (this *InGameState) draw() {
 	this.field.draw()
 	gl.Begin(gl.TRIANGLES)
-	this.wakes.draw()
-	this.sparks.draw()
+	this.wakes.Draw()
+	this.sparks.Draw()
 	gl.End()
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	gl.Begin(gl.QUADS)
-	this.smokes.draw()
+	this.smokes.Draw()
 	gl.End()
-	this.fragments.draw()
-	this.sparkFragments.draw()
-	this.crystals.draw()
+	this.fragments.Draw()
+	this.sparkFragments.Draw()
+	this.crystals.Draw()
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE)
-	this.enemies.draw()
-	this.shots.draw()
+	this.enemies.Draw()
+	this.shots.Draw()
 	this.ship.draw()
-	this.bullets.draw()
+	this.bullets.Draw()
 }
 
 func (this *InGameState) drawFront() {
@@ -504,10 +502,10 @@ func (this *InGameState) drawGameParams() {
 func (this *InGameState) drawOrtho() {
 	this.drawGameParams()
 	if this.isGameOver {
-		letter.drawString("GAME OVER", 190, 180, 15)
+		letter.DrawString("GAME OVER", 190, 180, 15, letter.TO_RIGHT, 0, false, 0)
 	}
-	if this.pauseCnt > 0 && math.Mod(this.pauseCnt, 64) < 32 {
-		letter.drawString("PAUSE", 265, 210, 12)
+	if this.pauseCnt > 0 && this.pauseCnt%64 < 32 {
+		letter.DrawString("PAUSE", 265, 210, 12, letter.TO_RIGHT, 0, false, 0)
 	}
 }
 
@@ -540,7 +538,7 @@ func (this *InGameState) shipDestroyed() {
 }
 
 func (this *InGameState) clearBullets() {
-	this.bullets.clear()
+	this.bullets.Clear()
 }
 
 func (this *InGameState) shrinkScoreReel() {
@@ -564,7 +562,7 @@ func (this *InGameState) gameMode() GameMode {
 	return this._gameMode
 }
 
-func (this *InGameState) setGameMode(v int) int {
+func (this *InGameState) setGameMode(v GameMode) GameMode {
 	this._gameMode = v
 	return v
 }
@@ -579,16 +577,16 @@ type TitleState struct {
 	gameOverCnt  int
 }
 
-func NewTitleState(GameManager gameManager, Screen screen,
-	TwinStick twinStick,
-	Field field, Ship ship, ShotPool shots, BulletPool bullets, EnemyPool enemies,
-	SparkPool sparks, SmokePool smokes,
-	FragmentPool fragments, SparkFragmentPool sparkFragments, WakePool wakes,
-	CrystalPool crystals, NumIndicatorPool numIndicators,
-	StageManager stageManager, ScoreReel scoreReel,
-	TitleManager titleManager, InGameState inGameState) *TitleState {
+func NewTitleState(gameManager *GameManager, screen *Screen,
+	twinStick *sdl.RecordableTwinStick,
+	field *Field, ship *Ship, shots *ShotPool, bullets *BulletPool, enemies *EnemyPool,
+	sparks *SparkPool, smokes *SmokePool,
+	fragments *FragmentPool, sparkFragments *SparkFragmentPool, wakes *WakePool,
+	crystals *CrystalPool, numIndicators *NumIndicatorPool,
+	stageManager *StageManager, scoreReel *ScoreReel,
+	titleManager *TitleManager, inGameState *InGameState) *TitleState {
 
-	this := &TitleState{NewGameStateBase(gameManager, screen, twinStick,
+	this := &TitleState{GameStateBase: NewGameStateBase(gameManager, screen, twinStick,
 		field, ship, shots, bullets, enemies,
 		sparks, smokes, fragments, sparkFragments, wakes, crystals, numIndicators,
 		stageManager, scoreReel)}
@@ -618,7 +616,7 @@ func (this *TitleState) startReplay() {
 		rts.startReplay(this._replayData.twinStickInputRecord)
 	}
 	this.titleManager.replayData = this._replayData
-	this.inGameState.gameMode = this._replayData.gameMode
+	this.inGameState.setGameMode(this._replayData.gameMode)
 	this.inGameState.startInGame()
 }
 

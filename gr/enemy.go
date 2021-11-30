@@ -645,7 +645,7 @@ func (this EnemySpecBase) Typ() EnemyType {
 	return this.typ
 }
 
-func setenemySpecRandSeed(seed int64) {
+func setEnemySpecRandSeed(seed int64) {
 	enemySpecRand = r.New(r.NewSource(seed))
 }
 
