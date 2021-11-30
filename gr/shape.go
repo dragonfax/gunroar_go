@@ -72,7 +72,7 @@ type EnemyShape struct {
 	sdl.ResizableDrawable
 }
 
-func NewEnemyShape(t int) *EnemyShape {
+func NewEnemyShape(t EnemyShapeType) *EnemyShape {
 	this := &EnemyShape{sdl.NewResizableDrawableInternal()}
 	this.SetShape(enemyShapes[t])
 	return this
