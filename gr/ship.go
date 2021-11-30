@@ -601,7 +601,7 @@ func (this *Boat) fireTwinStick() {
 			}
 			sm := this.smokes.GetInstanceForced()
 			sd := this.fireDeg + td/2
-			sm.set(this.firePos, math.Sin(sd)*SPEED*0.33, math.Cos(sd)*SPEED*0.33, 0, SPARK, 10, 0.33)
+			sm.setVector(this.firePos, math.Sin(sd)*SPEED*0.33, math.Cos(sd)*SPEED*0.33, 0, SPARK, 10, 0.33)
 		}
 	} else {
 		this.fireDeg = 99999
@@ -622,15 +622,15 @@ func (this *Boat) fireDoublePlay() {
 	} else if dist < 6 {
 		this.fireInterval *= 1.6
 	}
-	if this.fireCnt > this.fireInterval {
+	if float64(this.fireCnt) > this.fireInterval {
 		this.fireCnt = int(this.fireInterval)
 	}
 	if this.fireCnt <= 0 {
 		playSe("shot.wav")
 		foc := (this.fireSprCnt%2)*2 - 1
 		this.fireDeg = 0
-		this.firePos.X = this._pos.X + math.Cos(this.fireDeg+math.Pi)*0.2*foc
-		this.firePos.Y = this._pos.Y - math.Sin(this.fireDeg+math.Pi)*0.2*foc
+		this.firePos.X = this._pos.X + math.Cos(this.fireDeg+math.Pi)*0.2*float64(foc)
+		this.firePos.Y = this._pos.Y - math.Sin(this.fireDeg+math.Pi)*0.2*float64(foc)
 		s := this.shots.GetInstance()
 		if s != nil {
 			s.set(this.firePos, this.fireDeg, false, 2)
@@ -638,15 +638,15 @@ func (this *Boat) fireDoublePlay() {
 		this.fireCnt = int(this.fireInterval)
 		sm := this.smokes.GetInstanceForced()
 		sd := this.fireDeg
-		sm.set(this.firePos, math.Sin(sd)*SPEED*0.33, math.Cos(sd)*SPEED*0.33, 0, SPARK, 10, 0.33)
+		sm.setVector(this.firePos, math.Sin(sd)*SPEED*0.33, math.Cos(sd)*SPEED*0.33, 0, SPARK, 10, 0.33)
 		if this.idx == 0 {
 			fd := this.ship.degAmongBoats() + math.Pi/2
 			var td float64
 			switch foc {
 			case -1:
-				td = this.fireSprDeg * (this.fireSprCnt/math.Mod(2, 4) + 1) * 0.15
+				td = this.fireSprDeg * float64(this.fireSprCnt/2%4+1) * 0.15
 			case 1:
-				td = -this.fireSprDeg * (this.fireSprCnt/math.Mod(2, 4) + 1) * 0.15
+				td = -this.fireSprDeg * float64(this.fireSprCnt/2%4+1) * 0.15
 			}
 			this.firePos.x = this.ship.midstPos().X + math.Cos(fd+math.Pi)*0.2*float64(foc)
 			this.firePos.y = this.ship.midstPos().Y - math.Sin(fd+math.Pi)*0.2*float64(foc)
@@ -659,7 +659,7 @@ func (this *Boat) fireDoublePlay() {
 				s.set(this.firePos, fd+td, false, 2)
 			}
 			sm = this.smokes.GetInstanceForced()
-			sm.set(this.firePos, math.Sin(fd+td/2)*SPEED*0.33, math.Cos(fd+td/2)*SPEED*0.33, 0,
+			sm.setVector(this.firePos, math.Sin(fd+td/2)*SPEED*0.33, math.Cos(fd+td/2)*SPEED*0.33, 0,
 				SPARK, 10, 0.33)
 		}
 		this.fireSprCnt++
@@ -715,7 +715,7 @@ func (this *Boat) destroyedBoatShield() {
 			40+boatRand.Intn(40))
 	}
 	playSe("ship_shield_lost.wav")
-	sdl.setScreenShake(30, 0.02)
+	screen.setScreenShake(30, 0.02)
 	this.shieldCnt = 0
 	this.cnt = -INVINCIBLE_CNT / 2
 }
@@ -730,11 +730,11 @@ func (this *Boat) destroyedBoat() {
 	playSe("ship_destroyed.wav")
 	for i := 0; i < 64; i++ {
 		s := this.smokes.GetInstanceForced()
-		s.set(this.pos(), nextSignedFloat(boatRand, 0.2), nextSignedFloat(boatRand, 0.2),
+		s.setVector(this.pos(), nextSignedFloat(boatRand, 0.2), nextSignedFloat(boatRand, 0.2),
 			nextFloat(boatRand, 0.1),
 			EXPLOSION, 50+boatRand.Intn(30), 1)
 	}
-	sdl.setScreenShake(60, 0.05)
+	screen.setScreenShake(60, 0.05)
 	this.restart()
 	this.cnt = -RESTART_CNT
 }
@@ -769,7 +769,7 @@ func (this *Boat) draw() {
 			ss *= float64(this.shieldCnt) / 120
 		}
 		gl.Scaled(ss, ss, ss)
-		gl.Rotatef(this.shieldCnt*5, 0, 0, 1)
+		gl.Rotated(float64(this.shieldCnt)*5, 0, 0, 1)
 		this.shieldShape.Draw()
 	}
 	gl.PopMatrix()
@@ -782,8 +782,8 @@ func (this *Boat) drawFront() {
 }
 
 func (this *Boat) drawShape() {
-	this._shape.draw()
-	this.bridgeShape.draw()
+	this._shape.Draw()
+	this.bridgeShape.Draw()
 }
 
 func (this *Boat) clearBullets() {
