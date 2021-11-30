@@ -440,6 +440,14 @@ func NewFragmentPool(n int, args []interface{}) *FragmentPool {
 	return &FragmentPool{actor.NewActorPool(f, n, args)}
 }
 
+func (this *FragmentPool) GetInstance() *Fragment {
+	return this.ActorPool.GetInstance().(*Fragment)
+}
+
+func (this *FragmentPool) GetInstanceForced() *Fragment {
+	return this.ActorPool.GetInstance().(*Fragment)
+}
+
 /**
  * Luminous fragments.
  */
@@ -567,6 +575,14 @@ func NewSparkFragmentPool(n int, args []interface{}) *SparkFragmentPool {
 	return &SparkFragmentPool{actor.NewActorPool(f, n, args)}
 }
 
+func (this *SparkFragmentPool) GetInstance() *SparkFragment {
+	return this.ActorPool.GetInstance().(*SparkFragment)
+}
+
+func (this *SparkFragmentPool) GetInstanceForced() *SparkFragment {
+	return this.ActorPool.GetInstance().(*SparkFragment)
+}
+
 /**
  * Wakes of ships and smokes.
  */
@@ -647,6 +663,10 @@ func NewWakePool(n int, args []interface{}) *WakePool {
 	return &WakePool{actor.NewActorPool(f, n, args)}
 }
 
+func (this *WakePool) GetInstance() *Wake {
+	return this.ActorPool.GetInstance().(*Wake)
+}
+
 func (this *WakePool) GetInstanceForced() *Wake {
-	return this.ActorPool.GetInstanceForced().(*Wake)
+	return this.ActorPool.GetInstance().(*Wake)
 }

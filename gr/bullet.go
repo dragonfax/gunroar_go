@@ -183,6 +183,14 @@ type BulletPool struct {
 	actor.ActorPool
 }
 
+func (this *BulletPool) GetInstance() *Bullet {
+	return this.ActorPool.GetInstance().(*Bullet)
+}
+
+func (this *BulletPool) GetInstanceForced() *Bullet {
+	return this.ActorPool.GetInstance().(*Bullet)
+}
+
 func NewBulletPool(n int, args []interface{}) *BulletPool {
 	f := func() actor.Actor { return NewBullet() }
 	this := &BulletPool{

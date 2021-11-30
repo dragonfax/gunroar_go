@@ -53,8 +53,8 @@ func (this *TwinStick) HandleEvent(event sdl.Event) {
 
 func (this *TwinStick) GetState() TwinStickState {
 	if this.stick != nil {
-		this.state.left.X = this.adjustAxis(this.stick.Axis(0))
-		this.state.left.Y = -this.adjustAxis(this.stick.Axis(1))
+		this.state.Left.X = this.adjustAxis(this.stick.Axis(0))
+		this.state.Left.Y = -this.adjustAxis(this.stick.Axis(1))
 		var rx int16 = 0
 		if this.EnableAxis5 {
 			rx = this.stick.Axis(4)
@@ -63,44 +63,44 @@ func (this *TwinStick) GetState() TwinStickState {
 		}
 		ry := this.stick.Axis(3)
 		if rx == 0 && ry == 0 {
-			this.state.right.X = 0
-			this.state.right.Y = 0
+			this.state.Right.X = 0
+			this.state.Right.Y = 0
 		} else {
 			ry = -ry
 			rd := math.Atan2(float64(rx), float64(ry))*this.Reverse + this.Rotate
 			rl := math.Sqrt(float64(rx*rx + ry*ry))
-			this.state.right.X = this.adjustAxis(int16(math.Sin(rd) * rl))
-			this.state.right.Y = this.adjustAxis(int16(math.Cos(rd) * rl))
+			this.state.Right.X = this.adjustAxis(int16(math.Sin(rd) * rl))
+			this.state.Right.Y = this.adjustAxis(int16(math.Cos(rd) * rl))
 		}
 	} else {
-		this.state.left.X = 0
-		this.state.left.Y = 0
-		this.state.right.X = 0
-		this.state.right.Y = 0
+		this.state.Left.X = 0
+		this.state.Left.Y = 0
+		this.state.Right.X = 0
+		this.state.Right.Y = 0
 	}
 	if this.keys[sdl.K_d] == sdl.PRESSED {
-		this.state.left.X = 1
+		this.state.Left.X = 1
 	}
 	if this.keys[sdl.K_l] == sdl.PRESSED {
-		this.state.right.X = 1
+		this.state.Right.X = 1
 	}
 	if this.keys[sdl.K_a] == sdl.PRESSED {
-		this.state.left.X = -1
+		this.state.Left.X = -1
 	}
 	if this.keys[sdl.K_j] == sdl.PRESSED {
-		this.state.right.X = -1
+		this.state.Right.X = -1
 	}
 	if this.keys[sdl.K_s] == sdl.PRESSED {
-		this.state.left.Y = -1
+		this.state.Left.Y = -1
 	}
 	if this.keys[sdl.K_k] == sdl.PRESSED {
-		this.state.right.Y = -1
+		this.state.Right.Y = -1
 	}
 	if this.keys[sdl.K_w] == sdl.PRESSED {
-		this.state.left.Y = 1
+		this.state.Left.Y = 1
 	}
 	if this.keys[sdl.K_i] == sdl.PRESSED {
-		this.state.right.Y = 1
+		this.state.Right.Y = 1
 	}
 	return this.state
 }
@@ -124,12 +124,12 @@ func (this *TwinStick) adjustAxis(v int16) float64 {
 }
 
 func (this *TwinStick) GetNullState() TwinStickState {
-	this.state.clear()
+	this.state.Clear()
 	return this.state
 }
 
 type TwinStickState struct {
-	left, right vector.Vector
+	Left, Right vector.Vector
 	PressA      bool
 	PressB      bool
 }
@@ -154,31 +154,31 @@ func (this *TwinStickState) Set(i record.InputState) {
 	if !ok {
 		panic("wrong state type given to TwinStickState.Set")
 	}
-	this.left.X = s.left.X
-	this.left.Y = s.left.Y
-	this.right.X = s.right.X
-	this.right.Y = s.right.Y
+	this.Left.X = s.Left.X
+	this.Left.Y = s.Left.Y
+	this.Right.X = s.Right.X
+	this.Right.Y = s.Right.Y
 }
 
-func (this *TwinStickState) clear() {
-	this.left.X = 0
-	this.left.Y = 0
-	this.right.X = 0
-	this.right.Y = 0
+func (this *TwinStickState) Clear() {
+	this.Left.X = 0
+	this.Left.Y = 0
+	this.Right.X = 0
+	this.Right.Y = 0
 }
 
 func (this *TwinStickState) Read(fd file.File) {
-	this.left.X = fd.ReadFloat64()
-	this.left.Y = fd.ReadFloat64()
-	this.right.X = fd.ReadFloat64()
-	this.right.Y = fd.ReadFloat64()
+	this.Left.X = fd.ReadFloat64()
+	this.Left.Y = fd.ReadFloat64()
+	this.Right.X = fd.ReadFloat64()
+	this.Right.Y = fd.ReadFloat64()
 }
 
 func (this *TwinStickState) Write(fd file.File) {
-	fd.WriteFloat64(this.left.X)
-	fd.WriteFloat64(this.left.Y)
-	fd.WriteFloat64(this.right.X)
-	fd.WriteFloat64(this.right.Y)
+	fd.WriteFloat64(this.Left.X)
+	fd.WriteFloat64(this.Left.Y)
+	fd.WriteFloat64(this.Right.X)
+	fd.WriteFloat64(this.Right.Y)
 }
 
 func (this *TwinStickState) Equals(i record.InputState) bool {
@@ -186,8 +186,8 @@ func (this *TwinStickState) Equals(i record.InputState) bool {
 	if !ok {
 		panic("wrong state given to TwinStickState")
 	}
-	return this.left.X == s.left.X && this.left.Y == s.left.Y &&
-		this.right.X == s.right.X && this.right.Y == s.right.Y
+	return this.Left.X == s.Left.X && this.Left.Y == s.Left.Y &&
+		this.Right.X == s.Right.X && this.Right.Y == s.Right.Y
 }
 
 type RecordableTwinStick struct {

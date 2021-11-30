@@ -248,6 +248,14 @@ func (this *ShotPool) existsLance() bool {
 	return false
 }
 
+func (this *ShotPool) GetInstance() *Shot {
+	return this.ActorPool.GetInstance().(*Shot)
+}
+
+func (this *ShotPool) GetInstanceForced() *Shot {
+	return this.ActorPool.GetInstance().(*Shot)
+}
+
 type ShotShape struct {
 	sdl.CollidableDrawable
 }

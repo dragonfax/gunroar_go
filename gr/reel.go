@@ -388,3 +388,11 @@ func NewNumIndicatorPool(n int, args []interface{}) *NumIndicatorPool {
 
 	return this
 }
+
+func (this *NumIndicatorPool) GetInstance() *NumIndicator {
+	return this.ActorPool.GetInstance().(*NumIndicator)
+}
+
+func (this *NumIndicatorPool) GetInstanceForced() *NumIndicator {
+	return this.ActorPool.GetInstance().(*NumIndicator)
+}

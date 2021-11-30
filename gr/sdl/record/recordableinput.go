@@ -1,6 +1,10 @@
 package record
 
-import "github.com/dragonfax/gunroar/gr/sdl/file"
+import (
+	"fmt"
+
+	"github.com/dragonfax/gunroar/gr/sdl/file"
+)
 
 type InputState interface {
 	Read(file.File)
@@ -36,11 +40,13 @@ func (this *RecordableInput) startReplay(pr *InputRecord) {
 	this.inputRecord.reset()
 }
 
-func (this *RecordableInput) replay() InputState {
+var EndRecordingErr = fmt.Errorf("end of recording")
+
+func (this *RecordableInput) Replay() (InputState, error) {
 	if !this.inputRecord.hasNext() {
-		panic("No record data.")
+		return nil, EndRecordingErr
 	}
-	return this.inputRecord.next()
+	return this.inputRecord.next(), nil
 }
 
 type InputStateConstructor func(InputState) InputState

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	r "math/rand"
 	"time"
 
 	"github.com/dragonfax/gunroar/gr/sdl"
+	"github.com/dragonfax/gunroar/gr/sdl/record"
 	"github.com/dragonfax/gunroar/gr/vector"
 	"github.com/go-gl/gl/v4.1-compatibility/gl"
 )
@@ -30,7 +30,7 @@ type Ship struct {
 	bridgeShape                                          BaseShape
 }
 
-func NewShip(twinStick *sdl.TwinStick, field *Field, screen *Screen,
+func NewShip(twinStick *sdl.RecordableTwinStick, field *Field, screen *Screen,
 	sparks *SparkPool, smokes *SmokePool, fragments *FragmentPool, wakes *WakePool) *Ship {
 	this := &Ship{}
 	this.field = field
@@ -42,7 +42,7 @@ func NewShip(twinStick *sdl.TwinStick, field *Field, screen *Screen,
 	this.boatNum = 1
 	this.scrollSpeed = SHIP_SCROLL_SPEED_BASE
 	this._scrollSpeedBase = SHIP_SCROLL_SPEED_BASE
-	this.bridgeShape = NewBaseShape(0.3, 0.2, 0.1, BRIDGE, 0.3, 0.7, 0.7)
+	this.bridgeShape = NewBaseShapeInternal(0.3, 0.2, 0.1, BRIDGE, 0.3, 0.7, 0.7)
 	return this
 }
 
@@ -86,16 +86,16 @@ func (this *Ship) start(gameMode GameMode) {
 	for i := 0; i < this.boatNum; i++ {
 		this.boat[i].start(gameMode)
 	}
-	this._midstPos.x = 0
-	this._midstPos.y = 0
-	this._higherPos.x = 0
-	this._higherPos.y = 0
-	this._lowerPos.x = 0
-	this._lowerPos.y = 0
-	this._nearPos.x = 0
-	this._nearPos.y = 0
-	this._nearVel.x = 0
-	this._nearVel.y = 0
+	this._midstPos.X = 0
+	this._midstPos.Y = 0
+	this._higherPos.X = 0
+	this._higherPos.Y = 0
+	this._lowerPos.X = 0
+	this._lowerPos.Y = 0
+	this._nearPos.X = 0
+	this._nearPos.Y = 0
+	this._nearVel.X = 0
+	this._nearVel.Y = 0
 	this.restart()
 }
 
@@ -118,7 +118,7 @@ func (this *Ship) move() {
 	if sf {
 		this.gameState.shrinkScoreReel()
 	}
-	if this.higherPos.y >= SCROLL_START_Y {
+	if this.higherPos().Y >= SCROLL_START_Y {
 		this.scrollSpeed += (SCROLL_SPEED_MAX - this.scrollSpeed) * 0.1
 	} else {
 		this.scrollSpeed += (this._scrollSpeedBase - this.scrollSpeed) * 0.1
@@ -197,22 +197,22 @@ func (this *Ship) replayMode() bool {
 }
 
 func (this *Ship) midstPos() vector.Vector {
-	this._midstPos.x = 0
-	this._midstPos.y = 0
+	this._midstPos.X = 0
+	this._midstPos.Y = 0
 	for i := 0; i < this.boatNum; i++ {
-		this._midstPos.X += this.boat[i].pos.X
-		this._midstPos.Y += this.boat[i].pos.Y
+		this._midstPos.X += this.boat[i].pos().X
+		this._midstPos.Y += this.boat[i].pos().Y
 	}
-	this._midstPos /= this.boatNum
+	this._midstPos.OpDivAssign(float64(this.boatNum))
 	return this._midstPos
 }
 
 func (this *Ship) higherPos() vector.Vector {
 	this._higherPos.Y = -99999
 	for i := 0; i < this.boatNum; i++ {
-		if this.boat[i].pos.Y > this._higherPos.Y {
-			this._higherPos.X = this.boat[i].pos.X
-			this._higherPos.Y = this.boat[i].pos.Y
+		if this.boat[i].pos().Y > this._higherPos.Y {
+			this._higherPos.X = this.boat[i].pos().X
+			this._higherPos.Y = this.boat[i].pos().Y
 		}
 	}
 	return this._higherPos
@@ -254,14 +254,14 @@ func (this *Ship) nearVel(p vector.Vector) vector.Vector {
 }
 
 func (this *Ship) distAmongBoats() float64 {
-	return this.boat[0].pos.dist(this.boat[1].pos)
+	return this.boat[0].pos().DistVector(this.boat[1].pos())
 }
 
 func (this *Ship) degAmongBoats() float64 {
-	if this.distAmongBoats < 0.1 {
+	if this.distAmongBoats() < 0.1 {
 		return 0
 	} else {
-		return math.Atan2(this.boat[0].pos.X-this.boat[1].pos.X, this.boat[0].pos.Y-this.boat[1].pos.Y)
+		return math.Atan2(this.boat[0].pos().X-this.boat[1].pos().X, this.boat[0].pos().Y-this.boat[1].pos().Y)
 	}
 }
 
@@ -315,7 +315,7 @@ type Boat struct {
 }
 
 func setBoatRandSeed(seed int64) {
-	boatRand = r.New(r.NewSoure(seed))
+	boatRand = r.New(r.NewSource(seed))
 }
 
 func NewBoat(idx int, ship *Ship,
@@ -367,25 +367,25 @@ func (this *Boat) start(gameMode GameMode) {
 	if gameMode == DOUBLE_PLAY {
 		switch this.idx {
 		case 0:
-			this._pos.X = -this.field.size.X * 0.5
+			this._pos.X = -this.field.size().X * 0.5
 		case 1:
-			this._pos.X = this.field.size.X * 0.5
+			this._pos.X = this.field.size().X * 0.5
 		}
 	} else {
 		this._pos.X = 0
 	}
-	this._pos.Y = -this.field.size.Y * 0.8
+	this._pos.Y = -this.field.size().Y * 0.8
 	this.firePos.X = 0
 	this.firePos.Y = 0
-	this._vel.x = 0
-	this._vel.y = 0
+	this._vel.X = 0
+	this._vel.Y = 0
 	this.deg = 0
 	this.speed = SPEED_BASE
 	this.turnRatio = TURN_RATIO_BASE
 	this.cnt = -INVINCIBLE_CNT
 	this.aPressed = true
 	this.bPressed = true
-	this.stickInput = this.twinStick.GetNullState()
+	stickInput = this.twinStick.GetNullState()
 }
 
 func (this *Boat) restart() {
@@ -411,8 +411,8 @@ func (this *Boat) move() {
 	px := this._pos.X
 	py := this._pos.Y
 	this.cnt++
-	vx := 0
-	vy := 0
+	this.vx = 0
+	this.vy = 0
 	switch this.gameMode {
 	case TWIN_STICK:
 		this.moveTwinStick()
@@ -427,27 +427,27 @@ func (this *Boat) move() {
 	} else if this.cnt < -INVINCIBLE_CNT {
 		this.clearBullets()
 	}
-	vx *= this.speed
-	vy *= this.speed
-	vx += this.refVel.X
-	vy += this.refVel.Y
-	this.refVel *= 0.9
+	this.vx *= this.speed
+	this.vy *= this.speed
+	this.vx += this.refVel.X
+	this.vy += this.refVel.Y
+	this.refVel.OpMulAssign(0.9)
 	if this.field.checkInField(this._pos.X, this._pos.Y-this.field.lastScrollY()) {
 		this._pos.Y -= this.field.lastScrollY()
 	}
-	if (this.onBlock || this.field.getBlock(this._pos.X+vx, this._pos.Y) < 0) &&
-		this.field.checkInField(this._pos.X+vx, this._pos.Y) {
-		this._pos.X += vx
-		this._vel.X = vx
+	if (this.onBlock || this.field.getBlock(this._pos.X+this.vx, this._pos.Y) < 0) &&
+		this.field.checkInField(this._pos.X+this.vx, this._pos.Y) {
+		this._pos.X += this.vx
+		this._vel.X = this.vx
 	} else {
 		this._vel.X = 0
 		this.refVel.X = 0
 	}
-	srf := false
-	if (this.onBlock || this.field.getBlock(px, this._pos.Y+vy) < 0) &&
-		this.field.checkInField(this._pos.X, this._pos.Y+vy) {
-		this._pos.Y += vy
-		this._vel.Y = vy
+	// srf := false
+	if (this.onBlock || this.field.getBlock(px, this._pos.Y+this.vy) < 0) &&
+		this.field.checkInField(this._pos.X, this._pos.Y+this.vy) {
+		this._pos.Y += this.vy
+		this._vel.Y = this.vy
 	} else {
 		this._vel.Y = 0
 		this.refVel.Y = 0
@@ -476,12 +476,12 @@ func (this *Boat) move() {
 	}
 	if this.cnt%3 == 0 && this.cnt >= -INVINCIBLE_CNT {
 		var sp float64
-		if vx != 0 || vy != 0 {
+		if this.vx != 0 || this.vy != 0 {
 			sp = 0.4
 		} else {
 			sp = 0.2
 		}
-		sp *= 1 + nextSignedFloat(rand, 0.33)
+		sp *= 1 + nextSignedFloat(boatRand, 0.33)
 		sp *= SPEED_BASE
 		this._shape.addWake(this.wakes, this._pos, this.deg, sp, 1)
 	}
@@ -491,7 +491,7 @@ func (this *Boat) move() {
 		if this.pos().DistVector(he.pos()) < 0.1 {
 			rd = 0
 		} else {
-			rd = math.Atan2(this._pos.X-he.pos.X, this._pos.Y-he.pos.Y)
+			rd = math.Atan2(this._pos.X-he.pos().X, this._pos.Y-he.pos().Y)
 		}
 		sz := he.size()
 		this.refVel.X = math.Sin(rd) * sz * 0.1
@@ -509,23 +509,26 @@ func (this *Boat) move() {
 
 func (this *Boat) moveTwinStick() {
 	if !this._replayMode {
-		this.stickInput = this.twinStick.GetState()
+		stickInput = this.twinStick.GetState()
 	} else {
-		i, err := twinStick.replay()
-		this.stickInput = i
+		var err error
+		stickInput, err = twinStick.Replay()
 		if err != nil {
-			fmt.Printf("warn : %s", err.Error())
-			this.gameState.isGameOver = true
-			this.stickInput = this.twinStick.getNullState()
+			if err == record.EndRecordingErr {
+				this.gameState.isGameOver = true
+				stickInput = this.twinStick.GetNullState()
+			} else {
+				panic(err)
+			}
 		}
 	}
 	if this.gameState.isGameOver || this.cnt < -INVINCIBLE_CNT {
-		stickInput.clear()
+		stickInput.Clear()
 	}
-	vx = this.stickInput.left.X
-	vy = this.stickInput.left.Y
-	if vx != 0 || vy != 0 {
-		ad := math.Atan2(vx, vy)
+	this.vx = stickInput.Left.X
+	this.vy = stickInput.Left.Y
+	if this.vx != 0 || this.vy != 0 {
+		ad := math.Atan2(this.vx, this.vy)
 		ad = normalizeDeg(ad)
 		ad -= this.deg
 		ad = normalizeDeg(ad)
@@ -538,26 +541,26 @@ func (this *Boat) moveDoublePlay() {
 	switch this.idx {
 	case 0:
 		if !this._replayMode {
-			this.stickInput = this.twinStick.getState()
+			stickInput = this.twinStick.GetState()
 		} else {
-			i, err := twinStick.replay()
-			this.stickInput = i
+			var err error
+			stickInput, err = twinStick.Replay()
 			if err != nil {
 				this.gameState.isGameOver = true
-				this.stickInput = twinStick.getNullState()
+				stickInput = twinStick.GetNullState()
 			}
 		}
 		if this.gameState.isGameOver || this.cnt < -INVINCIBLE_CNT {
-			stickInput.clear()
+			stickInput.Clear()
 		}
-		vx = this.stickInput.left.X
-		vy = this.stickInput.left.Y
+		this.vx = stickInput.Left.X
+		this.vy = stickInput.Left.Y
 	case 1:
-		vx = this.stickInput.right.X
-		vy = this.stickInput.right.Y
+		this.vx = stickInput.Right.X
+		this.vy = stickInput.Right.Y
 	}
-	if vx != 0 || vy != 0 {
-		ad := math.Atan2(vx, vy)
+	if this.vx != 0 || this.vy != 0 {
+		ad := math.Atan2(this.vx, this.vy)
 		ad = normalizeDeg(ad)
 		ad -= this.deg
 		ad = normalizeDeg(ad)
@@ -567,36 +570,36 @@ func (this *Boat) moveDoublePlay() {
 }
 
 func (this *Boat) fireTwinStick() {
-	if math.Abs(this.stickInput.right.X)+math.Abs(this.stickInput.right.Y) > 0.01 {
-		this.fireDeg = math.Atan2(this.stickInput.right.X, this.stickInput.right.Y)
+	if math.Abs(stickInput.Right.X)+math.Abs(stickInput.Right.Y) > 0.01 {
+		this.fireDeg = math.Atan2(stickInput.Right.X, stickInput.Right.Y)
 		if this.fireCnt <= 0 {
 			playSe("shot.wav")
-			foc := (fireSprCnt%2)*2 - 1
-			rsd := this.stickInput.right.vctSize
+			foc := (this.fireSprCnt%2)*2 - 1
+			rsd := stickInput.Right.VctSize()
 			if rsd > 1 {
 				rsd = 1
 			}
 			this.fireSprDeg = 1 - rsd + 0.05
-			this.firePos.X = this._pos.X + math.Cos(this.fireDeg+math.Pi)*0.2*foc
-			this.firePos.Y = this._pos.Y - math.Sin(this.fireDeg+math.Pi)*0.2*foc
-			this.fireCnt = int(fireInterval)
-			var td float
+			this.firePos.X = this._pos.X + math.Cos(this.fireDeg+math.Pi)*0.2*float64(foc)
+			this.firePos.Y = this._pos.Y - math.Sin(this.fireDeg+math.Pi)*0.2*float64(foc)
+			this.fireCnt = int(this.fireInterval)
+			var td float64
 			switch foc {
 			case -1:
-				td = this.fireSprDeg * (this.fireSprCnt/2%4 + 1) * 0.2
+				td = this.fireSprDeg * float64(this.fireSprCnt/2%4+1) * 0.2
 			case 1:
-				td = -this.fireSprDeg * (this.fireSprCnt/2%4 + 1) * 0.2
+				td = -this.fireSprDeg * float64(this.fireSprCnt/2%4+1) * 0.2
 			}
 			this.fireSprCnt++
-			s := shots.getInstance()
+			s := this.shots.GetInstance()
 			if s != nil {
 				s.set(this.firePos, this.fireDeg+td/2, false, 2)
 			}
-			s = shots.getInstance()
+			s = this.shots.GetInstance()
 			if s != nil {
 				s.set(this.firePos, this.fireDeg+td, false, 2)
 			}
-			sm := smokes.getInstanceForced()
+			sm := this.smokes.GetInstanceForced()
 			sd := this.fireDeg + td/2
 			sm.set(this.firePos, math.Sin(sd)*SPEED*0.33, math.Cos(sd)*SPEED*0.33, 0, SPARK, 10, 0.33)
 		}
@@ -610,7 +613,7 @@ func (this *Boat) fireDoublePlay() {
 	if this.gameState.isGameOver || this.cnt < -INVINCIBLE_CNT {
 		return
 	}
-	dist := ship.distAmongBoats()
+	dist := this.ship.distAmongBoats()
 	this.fireInterval = FIRE_INTERVAL + 10.0/(dist+0.005)
 	if dist < 2 {
 		this.fireInterval = 99999
@@ -620,42 +623,42 @@ func (this *Boat) fireDoublePlay() {
 		this.fireInterval *= 1.6
 	}
 	if this.fireCnt > this.fireInterval {
-		this.fireCnt = int(fireInterval)
+		this.fireCnt = int(this.fireInterval)
 	}
 	if this.fireCnt <= 0 {
 		playSe("shot.wav")
-		foc := int(math.Mod(fireSprCnt, 2))*2 - 1
+		foc := (this.fireSprCnt%2)*2 - 1
 		this.fireDeg = 0
 		this.firePos.X = this._pos.X + math.Cos(this.fireDeg+math.Pi)*0.2*foc
 		this.firePos.Y = this._pos.Y - math.Sin(this.fireDeg+math.Pi)*0.2*foc
-		s := shots.getInstance()
+		s := this.shots.GetInstance()
 		if s != nil {
 			s.set(this.firePos, this.fireDeg, false, 2)
 		}
-		this.fireCnt = int(fireInterval)
-		sm := this.smokes.getInstanceForced()
+		this.fireCnt = int(this.fireInterval)
+		sm := this.smokes.GetInstanceForced()
 		sd := this.fireDeg
 		sm.set(this.firePos, math.Sin(sd)*SPEED*0.33, math.Cos(sd)*SPEED*0.33, 0, SPARK, 10, 0.33)
 		if this.idx == 0 {
-			fd := ship.degAmongBoats() + math.Pi/2
-			var td float
+			fd := this.ship.degAmongBoats() + math.Pi/2
+			var td float64
 			switch foc {
 			case -1:
 				td = this.fireSprDeg * (this.fireSprCnt/math.Mod(2, 4) + 1) * 0.15
 			case 1:
 				td = -this.fireSprDeg * (this.fireSprCnt/math.Mod(2, 4) + 1) * 0.15
 			}
-			this.firePos.x = this.ship.midstPos.X + math.Cos(fd+math.Pi)*0.2*foc
-			this.firePos.y = this.ship.midstPos.Y - math.Sin(fd+math.Pi)*0.2*foc
-			s = shots.getInstance()
+			this.firePos.x = this.ship.midstPos().X + math.Cos(fd+math.Pi)*0.2*float64(foc)
+			this.firePos.y = this.ship.midstPos().Y - math.Sin(fd+math.Pi)*0.2*float64(foc)
+			s = this.shots.GetInstance()
 			if s != nil {
 				s.set(this.firePos, fd, false, 2)
 			}
-			s = shots.getInstance()
+			s = this.shots.GetInstance()
 			if s != nil {
 				s.set(this.firePos, fd+td, false, 2)
 			}
-			sm = smokes.getInstanceForced()
+			sm = this.smokes.GetInstanceForced()
 			sm.set(this.firePos, math.Sin(fd+td/2)*SPEED*0.33, math.Cos(fd+td/2)*SPEED*0.33, 0,
 				SPARK, 10, 0.33)
 		}
@@ -669,17 +672,17 @@ func (this *Boat) checkBulletHit(p, pp vector.Vector) bool {
 		return false
 	}
 	var bmvx, bmvy, inaa float64
-	bmvx = pp.x
-	bmvy = pp.y
-	bmvx -= p.x
-	bmvy -= p.y
+	bmvx = pp.X
+	bmvy = pp.Y
+	bmvx -= p.X
+	bmvy -= p.Y
 	inaa = bmvx*bmvx + bmvy*bmvy
 	if inaa > 0.00001 {
 		var sofsx, sofsy, inab, hd float64
-		sofsx = _pos.x
-		sofsy = _pos.y
-		sofsx -= p.x
-		sofsy -= p.y
+		sofsx = this._pos.X
+		sofsy = this._pos.Y
+		sofsx -= p.X
+		sofsy -= p.Y
 		inab = bmvx*sofsx + bmvy*sofsy
 		if inab >= 0 && inab <= inaa {
 			hd = sofsx*sofsx + sofsy*sofsy - inab*inab/inaa
@@ -706,10 +709,10 @@ func (this *Boat) destroyed() {
 
 func (this *Boat) destroyedBoatShield() {
 	for i := 0; i < 100; i++ {
-		sp := this.sparks.getInstanceForced()
-		sp.set(this.pos, rand.nextSignedFloat(1), rand.nextSignedFloat(1),
-			0.5+rand.nextFloat(0.5), 0.5+rand.nextFloat(0.5), 0,
-			40+rand.nextInt(40))
+		sp := this.sparks.GetInstanceForced()
+		sp.set(this.pos(), nextSignedFloat(boatRand, 1), nextSignedFloat(boatRand, 1),
+			0.5+nextFloat(boatRand, 0.5), 0.5+nextFloat(boatRand, 0.5), 0,
+			40+boatRand.Intn(40))
 	}
 	playSe("ship_shield_lost.wav")
 	sdl.setScreenShake(30, 0.02)
@@ -719,17 +722,17 @@ func (this *Boat) destroyedBoatShield() {
 
 func (this *Boat) destroyedBoat() {
 	for i := 0; i < 128; i++ {
-		sp := sparks.getInstanceForced()
-		sp.set(this.pos, rand.nextSignedFloat(1), rand.nextSignedFloat(1),
-			0.5+rand.nextFloat(0.5), 0.5+rand.nextFloat(0.5), 0,
-			40+rand.nextInt(40))
+		sp := this.sparks.GetInstanceForced()
+		sp.set(this.pos(), nextSignedFloat(boatRand, 1), nextSignedFloat(boatRand, 1),
+			0.5+nextFloat(boatRand, 0.5), 0.5+nextFloat(boatRand, 0.5), 0,
+			40+boatRand.Intn(40))
 	}
 	playSe("ship_destroyed.wav")
 	for i := 0; i < 64; i++ {
-		s := smokes.getInstanceForced()
-		s.set(this.pos, rand.nextSignedFloat(0.2), rand.nextSignedFloat(0.2),
-			rand.nextFloat(0.1),
-			EXPLOSION, 50+rand.nextInt(30), 1)
+		s := this.smokes.GetInstanceForced()
+		s.set(this.pos(), nextSignedFloat(boatRand, 0.2), nextSignedFloat(boatRand, 0.2),
+			nextFloat(boatRand, 0.1),
+			EXPLOSION, 50+boatRand.Intn(30), 1)
 	}
 	sdl.setScreenShake(60, 0.05)
 	this.restart()
@@ -745,29 +748,29 @@ func (this *Boat) draw() {
 		return
 	}
 	if this.fireDeg < 99999 {
-		sdl.setColor(0.5, 0.9, 0.7, 0.4)
+		sdl.SetColor(0.5, 0.9, 0.7, 0.4)
 		gl.Begin(gl.LINE_STRIP)
-		gl.Vertex2(this._pos.X, this._pos.Y)
+		gl.Vertex2d(this._pos.X, this._pos.Y)
 		sdl.SetColor(0.5, 0.9, 0.7, 0.8)
-		gl.Vertex2(this._pos.X+math.Sin(this.fireDeg)*20, this._pos.Y+math.Cos(this.fireDeg)*20)
+		gl.Vertex2d(this._pos.X+math.Sin(this.fireDeg)*20, this._pos.Y+math.Cos(this.fireDeg)*20)
 		gl.End()
 	}
 	if this.cnt < 0 && (-this.cnt%32) < 16 {
 		return
 	}
 	gl.PushMatrix()
-	sdl.glTranslate(pos)
-	gl.Rotatef(-deg*180/PI, 0, 0, 1)
-	this._shape.draw()
-	this.bridgeShape.draw()
+	sdl.GlTranslate(this.pos())
+	gl.Rotated(-this.deg*180/math.Pi, 0, 0, 1)
+	this._shape.Draw()
+	this.bridgeShape.Draw()
 	if this.shieldCnt > 0 {
 		ss := 0.66
 		if this.shieldCnt < 120 {
-			ss *= float64(shieldCnt) / 120
+			ss *= float64(this.shieldCnt) / 120
 		}
-		gl.Scalef(ss, ss, ss)
-		gl.Rotatef(shieldCnt*5, 0, 0, 1)
-		this.shieldShape.draw()
+		gl.Scaled(ss, ss, ss)
+		gl.Rotatef(this.shieldCnt*5, 0, 0, 1)
+		this.shieldShape.Draw()
 	}
 	gl.PopMatrix()
 }
@@ -803,8 +806,8 @@ func (this *Boat) setReplayMode(turnSpeed float64, reverseFire bool) {
 
 func (this *Boat) unsetReplayMode() {
 	this._replayMode = false
-	this.turnSpeed = GameManager.shipTurnSpeed
-	this.reverseFire = GameManager.shipReverseFire
+	this.turnSpeed = shipTurnSpeed
+	this.reverseFire = shipReverseFire
 }
 
 func (this *Boat) replayMode() bool {
