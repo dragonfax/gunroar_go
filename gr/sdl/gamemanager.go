@@ -15,6 +15,8 @@ type GameManager interface {
 	SetMainLoop(*MainLoop)
 	SetUIs(screen.Screen, Input)
 	SetPrefManager(PrefManager)
+	GetPrefManager() PrefManager
+	GetScreen() screen.Screen
 }
 
 type GameManagerBase struct {
@@ -39,4 +41,12 @@ func (this *GameManagerBase) SetUIs(screen screen.Screen, input Input) {
 
 func (this *GameManagerBase) SetPrefManager(prefManager PrefManager) {
 	this.abstPrefManager = prefManager
+}
+
+func (this *GameManagerBase) GetPrefManager() PrefManager {
+	return this.abstPrefManager
+}
+
+func (this *GameManagerBase) GetScreen() screen.Screen {
+	return this.abstScreen
 }

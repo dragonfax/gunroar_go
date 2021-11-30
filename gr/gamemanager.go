@@ -23,7 +23,7 @@ type GameManager struct {
 
 	pad            *sdl.RecordablePad
 	twinStick      *sdl.RecordableTwinStick
-	prefManager    *PrefManager
+	prefManager    sdl.PrefManager
 	screen         *Screen
 	field          *Field
 	ship           *Ship
@@ -57,10 +57,10 @@ func (this *GameManager) Init() {
 	fragmentInit()
 	sparkFragmentInit()
 	crystalInit()
-	this.prefManager = abstPrefManager
-	this.screen = abstScreen
-	this.pad = input.inputs[0]
-	this.twinStick = input.inputs[1]
+	this.prefManager = this.GetPrefManager()
+	this.screen = this.GetScreen().(*Screen)
+	this.pad = input.Inputs[0].(*sdl.RecordablePad)
+	this.twinStick = input.Inputs[1].(*sdl.RecordableTwinStick)
 	this.twinStick.OpenJoystick(pad.OpenJoystick(nil))
 	this.field = NewField()
 	pargs := make([]interface{}, 0)
