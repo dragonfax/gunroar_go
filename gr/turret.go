@@ -41,8 +41,8 @@ func setTurretRandSeed(seed int64) {
 
 func NewTurret(field *Field, bullets *BulletPool, ship *Ship,
 	sparks *SparkPool, smokes *SmokePool, fragments *FragmentPool,
-	parent *Enemy) *Turret {
-	this := &Turret{}
+	parent *Enemy) Turret {
+	this := Turret{}
 	this.field = field
 	this.bullets = bullets
 	this.ship = ship
@@ -355,7 +355,7 @@ func (this *TurretSpec) init() {
 	this.nway = 1
 	this.nwayAngle = 0
 	this.nwayChange = false
-	this.bulletShape = NORMAL
+	this.bulletShape = BulletNORMAL
 	this.bulletDestructive = false
 	this.shield = 99999
 	this.invisible = false
@@ -383,7 +383,7 @@ func (this *TurretSpec) setParamTurretSpec(ts TurretSpec) {
 	this.bulletDestructive = ts.bulletDestructive
 	this.shield = ts.shield
 	this.invisible = ts.invisible
-	this.size = ts.size
+	this.setSize(ts.size())
 }
 
 func (this *TurretSpec) setParam(rank float64, typ TurretType, rand *r.Rand) {
@@ -393,16 +393,16 @@ func (this *TurretSpec) setParam(rank float64, typ TurretType, rand *r.Rand) {
 		this.invisible = true
 		return
 	}
-	rk := this.rank
+	rk := rank
 	switch this.typ {
 	case TurretSMALL:
 		this.minRange = 8
-		this.bulletShape = SMALL
+		this.bulletShape = BulletSMALL
 		this.blind = true
 		this.invisible = true
 	case TurretMOVING:
 		this.minRange = 6
-		this.bulletShape = MOVING_TURRET
+		this.bulletShape = BulletMOVING_TURRET
 		this.blind = true
 		this.invisible = true
 		this.turnSpeed = 0
@@ -417,7 +417,7 @@ func (this *TurretSpec) setParam(rank float64, typ TurretType, rand *r.Rand) {
 		}
 		rk *= (10.0 / math.Sqrt(this.maxRange))
 		if rand.Intn(4) == 0 {
-			lar := this.rank * 0.1
+			lar := rank * 0.1
 			if lar > 1 {
 				lar = 1
 			}
@@ -432,7 +432,7 @@ func (this *TurretSpec) setParam(rank float64, typ TurretType, rand *r.Rand) {
 		}
 		this.turnRange = math.Pi/4 + nextFloat(rand, math.Pi/4)
 		this.turnSpeed = 0.005 + nextFloat(rand, 0.015)
-		if this.typ == MAIN {
+		if this.typ == TurretMAIN {
 			this.turnRange *= 1.2
 		}
 		if rand.Intn(4) == 0 {
@@ -442,14 +442,14 @@ func (this *TurretSpec) setParam(rank float64, typ TurretType, rand *r.Rand) {
 	this.burstInterval = 6 + rand.Intn(8)
 	switch this.typ {
 	case TurretMAIN:
-		this.size = 0.42 + nextFloat(rand, 0.05)
+		this.setSize(0.42 + nextFloat(rand, 0.05))
 		br := (rk * 0.3) * (1 + nextSignedFloat(rand, 0.2))
 		nr := (rk * 0.33) * nextFloat(rand, 1)
 		ir := (rk * 0.1) * (1 + nextSignedFloat(rand, 0.2))
 		this.burstNum = int(br) + 1
 		this.nway = int(nr*0.66 + 1)
 		this.interval = int(120.0/(ir*2+1)) + 1
-		sr := rk - this.burstNum + 1 - (this.nway-1)/0.66 - ir
+		sr := rk - float64(this.burstNum) + 1 - float64(this.nway-1)/0.66 - ir
 		if sr < 0 {
 			sr = 0
 		}
@@ -457,14 +457,14 @@ func (this *TurretSpec) setParam(rank float64, typ TurretType, rand *r.Rand) {
 		this.speed *= 0.12
 		this.shield = 20
 	case TurretSUB:
-		this.size = 0.36 + nextFloat(rand, 0.025)
+		this.setSize(0.36 + nextFloat(rand, 0.025))
 		br := (rk * 0.4) * (1 + nextSignedFloat(rand, 0.2))
 		nr := (rk * 0.2) * nextFloat(rand, 1)
 		ir := (rk * 0.2) * (1 + nextSignedFloat(rand, 0.2))
 		this.burstNum = int(br) + 1
 		this.nway = int(nr*0.66 + 1)
 		this.interval = int(120.0/(ir*2+1)) + 1
-		sr := rk - this.burstNum + 1 - (this.nway-1)/0.66 - ir
+		sr := rk - float64(this.burstNum) + 1 - float64(this.nway-1)/0.66 - ir
 		if sr < 0 {
 			sr = 0
 		}
@@ -472,17 +472,17 @@ func (this *TurretSpec) setParam(rank float64, typ TurretType, rand *r.Rand) {
 		this.speed *= 0.2
 		this.shield = 12
 	case TurretSUB_DESTRUCTIVE:
-		this.size = 0.36 + nextFloat(rand, 0.025)
+		this.setSize(0.36 + nextFloat(rand, 0.025))
 		br := (rk * 0.4) * (1 + nextSignedFloat(rand, 0.2))
 		nr := (rk * 0.2) * nextFloat(rand, 1)
 		ir := (rk * 0.2) * (1 + nextSignedFloat(rand, 0.2))
 		this.burstNum = int(br)*2 + 1
 		this.nway = int(nr*0.66 + 1)
 		this.interval = int(60.0/(ir*2+1)) + 1
-		this.burstInterval *= 0.88
-		this.bulletShape = DESTRUCTIVE
+		this.burstInterval = int(float64(this.burstInterval) * 0.88)
+		this.bulletShape = BulletDESTRUCTIVE
 		this.bulletDestructive = true
-		sr := rk - (this.burstNum-1)/2 - (this.nway-1)/0.66 - ir
+		sr := rk - float64(this.burstNum-1)/2 - float64(this.nway-1)/0.66 - ir
 		if sr < 0 {
 			sr = 0
 		}
@@ -490,27 +490,27 @@ func (this *TurretSpec) setParam(rank float64, typ TurretType, rand *r.Rand) {
 		this.speed *= 0.33
 		this.shield = 12
 	case TurretSMALL:
-		this.size = 0.33
+		this.setSize(0.33)
 		br := (rk * 0.33) * (1 + nextSignedFloat(rand, 0.2))
 		ir := (rk * 0.2) * (1 + nextSignedFloat(rand, 0.2))
 		this.burstNum = int(br) + 1
 		this.nway = 1
 		this.interval = int(120.0/(ir*2+1)) + 1
-		sr := rk - this.burstNum + 1 - ir
+		sr := rk - float64(this.burstNum) + 1 - ir
 		if sr < 0 {
 			sr = 0
 		}
 		this.speed = math.Sqrt(sr)
 		this.speed *= 0.24
 	case TurretMOVING:
-		this.size = 0.36
+		this.setSize(0.36)
 		br := (rk * 0.3) * (1 + nextSignedFloat(rand, 0.2))
 		nr := (rk * 0.1) * nextFloat(rand, 1)
 		ir := (rk * 0.33) * (1 + nextSignedFloat(rand, 0.2))
 		this.burstNum = int(br) + 1
 		this.nway = int(nr*0.66 + 1)
 		this.interval = int(120.0/(ir*2+1)) + 1
-		sr := rk - this.burstNum + 1 - (this.nway-1)/0.66 - ir
+		sr := rk - float64(this.burstNum) + 1 - float64(this.nway-1)/0.66 - ir
 		if sr < 0 {
 			sr = 0
 		}
@@ -525,12 +525,12 @@ func (this *TurretSpec) setParam(rank float64, typ TurretType, rand *r.Rand) {
 	if this.burstNum > 2 {
 		if rand.Intn(4) == 0 {
 			this.speed *= 0.8
-			this.burstInterval *= 0.7
-			this.speedAccel = (this.speed * (0.4 + nextFloat(rand, 0.3))) / this.burstNum
+			this.burstInterval = int(float64(this.burstInterval) * 0.7)
+			this.speedAccel = (this.speed * (0.4 + nextFloat(rand, 0.3))) / float64(this.burstNum)
 			if rand.Intn(2) == 0 {
 				this.speedAccel *= -1
 			}
-			this.speed -= this.speedAccel * this.burstNum / 2
+			this.speed -= this.speedAccel * float64(this.burstNum) / 2
 		}
 		if rand.Intn(5) == 0 {
 			if this.nway > 1 {
@@ -538,24 +538,24 @@ func (this *TurretSpec) setParam(rank float64, typ TurretType, rand *r.Rand) {
 			}
 		}
 	}
-	this.nwayAngle = (0.1 + nextFloat(rand, 0.33)) / (1 + this.nway*0.1)
+	this.nwayAngle = (0.1 + nextFloat(rand, 0.33)) / (1 + float64(this.nway)*0.1)
 }
 
 func (this *TurretSpec) setBossSpec() {
 	this.minRange = 0
 	this.maxRange *= 1.5
-	this.shield *= 2.1
+	this.shield = int(float64(this.shield) * 2.1)
 }
 
 func (this *TurretSpec) size() float64 {
 	return this._size
 }
 
-func (this *TurretSpec) size(v float64) float64 {
+func (this *TurretSpec) setSize(v float64) float64 {
 	this._size = v
-	this.shape.size = v
-	this.damagedShape.size = v
-	this.destroyedShape.size = v
+	this.shape.SetSize(v)
+	this.damagedShape.SetSize(v)
+	this.destroyedShape.SetSize(v)
 	return this._size
 }
 
@@ -563,7 +563,7 @@ func (this *TurretSpec) size(v float64) float64 {
  * Grouped turrets.
  */
 
-const MAX_NUM = 16
+const TURRET_GROUP_MAX_NUM = 16
 
 type TurretGroup struct {
 	ship      *Ship
@@ -572,13 +572,13 @@ type TurretGroup struct {
 	fragments *FragmentPool
 	spec      TurretGroupSpec
 	centerPos vector.Vector
-	turret    [MAX_NUM]*Turret
+	turret    [TURRET_GROUP_MAX_NUM]Turret
 	cnt       int
 }
 
 func NewTurretGroup(field *Field, bullets *BulletPool, ship *Ship,
 	sparks *SparkPool, smokes *SmokePool, fragments *FragmentPool,
-	parent *Enemy) {
+	parent *Enemy) *TurretGroup {
 	this := &TurretGroup{}
 	this.ship = ship
 	for i := range this.turret {
@@ -604,16 +604,16 @@ func (this *TurretGroup) move(p vector.Vector, deg float64) bool {
 	case ROUND:
 		d = this.spec.alignDeg
 		if this.spec.num > 1 {
-			md = this.spec.alignWidth / (this.spec.num - 1)
+			md = this.spec.alignWidth / float64(this.spec.num-1)
 			d -= this.spec.alignWidth / 2
 		} else {
 			md = 0
 		}
 	case STRAIGHT:
 		y = 0
-		my = this.spec.offset.Y / (this.spec.num + 1)
+		my = this.spec.offset.Y / float64(this.spec.num+1)
 	}
-	for i := 0; i < spec.num; i++ {
+	for i := 0; i < this.spec.num; i++ {
 		var tbx, tby float64
 		switch this.spec.alignType {
 		case ROUND:
@@ -621,14 +621,14 @@ func (this *TurretGroup) move(p vector.Vector, deg float64) bool {
 			tby = math.Cos(d) * this.spec.radius
 		case STRAIGHT:
 			y += my
-			tbx = this.spec.offset.x
+			tbx = this.spec.offset.X
 			tby = y
 			d = math.Atan2(tbx, tby)
 		}
 		tbx *= (1 - this.spec.distRatio)
-		bx := tbx*math.Cos(-this.deg) - tby*math.Sin(-this.deg)
-		by := tbx*math.Sin(-this.deg) + tby*math.Cos(-this.deg)
-		alive |= this.turret[i].move(this.centerPos.X+bx, this.centerPos.Y+by, d+this.deg)
+		bx := tbx*math.Cos(-deg) - tby*math.Sin(-deg)
+		by := tbx*math.Sin(-deg) + tby*math.Cos(-deg)
+		alive = alive || this.turret[i].move(this.centerPos.X+bx, this.centerPos.Y+by, d+deg, 0, -99999)
 		if this.spec.alignType == ROUND {
 			d += md
 		}
@@ -649,10 +649,10 @@ func (this *TurretGroup) remove() {
 	}
 }
 
-func (this *TurretGroup) checkCollision(x, y float64, c Collidable, shot *Shot) bool {
+func (this *TurretGroup) checkCollision(x, y float64, c sdl.Collidable, shot *Shot) bool {
 	col := false
 	for i := 0; i < this.spec.num; i++ {
-		col |= this.turret[i].checkCollision(x, y, c, shot)
+		col = col || this.turret[i].checkCollision(x, y, c, shot)
 	}
 	return col
 }
@@ -666,7 +666,8 @@ const (
 
 type TurretGroupSpec struct {
 	turretSpec                              TurretSpec
-	num, alignType                          int
+	num                                     int
+	alignType                               AlignType
 	alignDeg, alignWidth, radius, distRatio float64
 	offset                                  vector.Vector
 }
@@ -685,15 +686,15 @@ func (this *TurretGroupSpec) init() {
 	this.alignWidth = 0
 	this.radius = 0
 	this.distRatio = 0
-	this.offset.x = 0
-	this.offset.y = 0
+	this.offset.X = 0
+	this.offset.Y = 0
 }
 
 /**
  * Turrets moving around a bridge.
  */
 
-const MAX_NUM = 16
+const MOVING_TURRET_MAX_NUM = 16
 
 type MovingTurretGroup struct {
 	ship                                                                                                           *Ship
@@ -701,7 +702,7 @@ type MovingTurretGroup struct {
 	radius, radiusAmpCnt, deg, rollAmpCnt, swingAmpCnt, swingAmpDeg, swingFixDeg, alignAmpCnt, distDeg, distAmpCnt float64
 	cnt                                                                                                            int
 	centerPos                                                                                                      vector.Vector
-	turret                                                                                                         [MAX_NUM]Turret
+	turret                                                                                                         [MOVING_TURRET_MAX_NUM]Turret
 }
 
 func NewMovingTurretGroup(field *Field, bullets *BulletPool, ship *Ship,
@@ -712,6 +713,7 @@ func NewMovingTurretGroup(field *Field, bullets *BulletPool, ship *Ship,
 	for i := range this.turret {
 		this.turret[i] = NewTurret(field, bullets, ship, sparks, smokes, fragments, parent)
 	}
+	return this
 }
 
 func (this *MovingTurretGroup) set(spec MovingTurretGroupSpec) {
@@ -761,7 +763,7 @@ func (this *MovingTurretGroup) move(p vector.Vector, ed float64) {
 		if this.spec.moveType == SWING_AIM {
 			var od float64
 			shipPos := this.ship.nearPos(this.centerPos)
-			if shipPos.dist(this.centerPos < 0.1) {
+			if shipPos.DistVector(this.centerPos) < 0.1 {
 				od = 0
 			} else {
 				od = math.Atan2(shipPos.X-this.centerPos.X, shipPos.Y-this.centerPos.Y)
@@ -776,7 +778,7 @@ func (this *MovingTurretGroup) move(p vector.Vector, ed float64) {
 		}
 	}
 	var d, ad, md float64
-	this.calcAlignDeg(d, ad, md)
+	d, ad, md = this.calcAlignDeg(d, ad, md)
 	for i := 0; i < this.spec.num; i++ {
 		d += md
 		bx := math.Sin(d) * this.radius * this.spec.xReverse
@@ -790,24 +792,25 @@ func (this *MovingTurretGroup) move(p vector.Vector, ed float64) {
 			fd = math.Atan2(bx, by)
 		}
 		fs *= 0.06
-		this.turret[i].move(this.centerPos.x, this.centerPos.y, d, fs, fd)
+		this.turret[i].move(this.centerPos.X, this.centerPos.Y, d, fs, fd)
 	}
 	this.cnt++
 }
 
-func (this MovingTurretGroup) calcAlignDeg(d, ad, md *float64) {
+func (this MovingTurretGroup) calcAlignDeg(d, ad, md float64) (float64, float64, float64) {
 	this.alignAmpCnt += this.spec.alignAmpVel
 	ad = this.spec.alignDeg * (1 + math.Sin(this.alignAmpCnt)*this.spec.alignAmp)
 	if this.spec.num > 1 {
 		if this.spec.moveType == ROLL {
-			md = ad / this.spec.num
+			md = ad / float64(this.spec.num)
 		} else {
-			md = ad / (this.spec.num - 1)
+			md = ad / float64(this.spec.num-1)
 		}
 	} else {
 		md = 0
 	}
 	d = this.deg - md - ad/2
+	return d, ad, md
 }
 
 func (this MovingTurretGroup) draw() {
@@ -817,7 +820,7 @@ func (this MovingTurretGroup) draw() {
 }
 
 func (this MovingTurretGroup) remove() {
-	for i := 0; i < spec.num; i++ {
+	for i := 0; i < this.spec.num; i++ {
 		this.turret[i].remove()
 	}
 }
@@ -831,15 +834,17 @@ const (
 )
 
 type MovingTurretGroupSpec struct {
-	turretSpec                                                                                                                                           TurretSpec
-	num                                                                                                                                                  int
-	moveType                                                                                                                                             int
-	alignDeg, alignAmp, alignAmpVel, radiusBase, radiusAmp, radiusAmpVel, rollDegVel, rollAmp, rollAmpVel, swingDegVel, swingAmpVel, distRatio, xReverse float64
+	turretSpec TurretSpec
+	num        int
+	moveType   BulletMoveType
+	alignDeg, alignAmp, alignAmpVel, radiusBase,
+	radiusAmp, radiusAmpVel, rollDegVel, rollAmp,
+	rollAmpVel, swingDegVel, swingAmpVel, distRatio, xReverse float64
 }
 
 func NewMovingTurretGroupSpec() MovingTurretGroupSpec {
 	this := MovingTurretGroupSpec{}
-	turretSpec = NewTurretSpec()
+	this.turretSpec = NewTurretSpec()
 	this.num = 1
 	this.initParam()
 	return this

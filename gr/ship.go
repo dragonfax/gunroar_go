@@ -648,8 +648,8 @@ func (this *Boat) fireDoublePlay() {
 			case 1:
 				td = -this.fireSprDeg * float64(this.fireSprCnt/2%4+1) * 0.15
 			}
-			this.firePos.x = this.ship.midstPos().X + math.Cos(fd+math.Pi)*0.2*float64(foc)
-			this.firePos.y = this.ship.midstPos().Y - math.Sin(fd+math.Pi)*0.2*float64(foc)
+			this.firePos.X = this.ship.midstPos().X + math.Cos(fd+math.Pi)*0.2*float64(foc)
+			this.firePos.Y = this.ship.midstPos().Y - math.Sin(fd+math.Pi)*0.2*float64(foc)
 			s = this.shots.GetInstance()
 			if s != nil {
 				s.set(this.firePos, fd, false, 2)
