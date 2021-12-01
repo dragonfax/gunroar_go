@@ -54,14 +54,7 @@ func (this *DisplayList) EndList() {
 }
 
 func (this *DisplayList) Call(i int /* = 0 */) {
-	listId := this.idx + uint32(i)
-	if !gl.IsList(listId) {
-		panic("missing list")
-	}
-	gl.CallList(listId)
-	if gl.GetError() != gl.NO_ERROR {
-		panic("gl error")
-	}
+	gl.CallList(this.idx + uint32(i))
 }
 
 func (this *DisplayList) Close() {

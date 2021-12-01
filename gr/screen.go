@@ -37,26 +37,24 @@ func setScreenRandSeed(seed int64) {
 func (this *Screen) init() {
 	this.Screen3D.InitSDL()
 
-	/*
-			this.SetCaption(CAPTION)
-			gl.LineWidth(1)
-			gl.BlendFunc(gl.SRC_ALPHA, gl.ONE)
-			gl.Enable(gl.BLEND)
-			gl.Enable(gl.LINE_SMOOTH)
-			gl.Disable(gl.TEXTURE_2D)
-			gl.Disable(gl.COLOR_MATERIAL)
-			gl.Disable(gl.CULL_FACE)
-			gl.Disable(gl.DEPTH_TEST)
-			gl.Disable(gl.LIGHTING)
-			sdl.SetClearColor(0, 0, 0, 1)
-		if this._luminosity > 0 {
-			this.luminousScreen = sdl.NewLuminousScreen()
-			this.luminousScreen.Init(this._luminosity, this.Width(), this.Height())
-		} else {
-			this.luminousScreen = nil
-		}
-		this.screenResized()
-	*/
+	this.SetCaption(CAPTION)
+	gl.LineWidth(1)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE)
+	gl.Enable(gl.BLEND)
+	gl.Enable(gl.LINE_SMOOTH)
+	gl.Disable(gl.TEXTURE_2D)
+	gl.Disable(gl.COLOR_MATERIAL)
+	gl.Disable(gl.CULL_FACE)
+	gl.Disable(gl.DEPTH_TEST)
+	gl.Disable(gl.LIGHTING)
+	sdl.SetClearColor(0, 0, 0, 1)
+	if this._luminosity > 0 {
+		this.luminousScreen = sdl.NewLuminousScreen()
+		this.luminousScreen.Init(this._luminosity, this.Width(), this.Height())
+	} else {
+		this.luminousScreen = nil
+	}
+	this.screenResized()
 }
 
 func (this *Screen) startRenderToLuminousScreen() bool {
