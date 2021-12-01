@@ -45,10 +45,24 @@ func (this *Screen3D) InitSDL() {
 		panic("Unable to initialize SDL: " + err.Error())
 	}
 
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2)
-	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
-	// sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_COMPATIBILITY)
-	// sdl.GLSetAttribute(sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG, gl.TRUE)
+	/*
+		{
+			sdl.GLSetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2)
+			sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 1)
+			// sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_COMPATIBILITY)
+			// sdl.GLSetAttribute(sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG, gl.TRUE)
+
+			major, err := sdl.GLGetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION)
+			if err != nil {
+				panic(err)
+			}
+			minor, err := sdl.GLGetAttribute(sdl.GL_CONTEXT_MINOR_VERSION)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf("opengl version %d.%d\n", major, minor)
+		}
+	*/
 
 	// Create an OpenGL screen.
 	var videoFlags uint32
@@ -59,27 +73,29 @@ func (this *Screen3D) InitSDL() {
 	//}
 
 	window, err = sdl.CreateWindow("gunroar", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		int32(this._width), int32(this._height), sdl.WINDOW_SHOWN|videoFlags)
+		int32(this._width), int32(this._height), videoFlags)
 	if err != nil {
 		panic(err)
 	}
 
-	major, err := sdl.GLGetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION)
+	context, err := window.GLCreateContext()
 	if err != nil {
 		panic(err)
 	}
-	minor, err := sdl.GLGetAttribute(sdl.GL_CONTEXT_MINOR_VERSION)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("opengl version %d.%d\n", major, minor)
-
-	_, err = window.GLCreateContext()
+	err = window.GLMakeCurrent(context)
 	if err != nil {
 		panic(err)
 	}
 
-	gl.Init()
+	{
+
+		err := gl.Init()
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	//gl.UseProgram(0)
 
 	/*
 		gl.Enable(gl.DEBUG_OUTPUT)
@@ -95,10 +111,30 @@ func (this *Screen3D) InitSDL() {
 		}, nil)
 	*/
 
-	gl.Viewport(0, 0, int32(this.Width()), int32(this.Height()))
+	// gl.Viewport(0, 0, int32(this.Width()), int32(this.Height()))
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
-	this.Resized(this._width, this._height)
-	sdl.ShowCursor(sdl.DISABLE)
+	// this.Resized(this._width, this._height)
+	// sdl.ShowCursor(sdl.DISABLE)
+
+	SetColor(1, 1, 1, 1)
+	list := gl.GenLists(1)
+	gl.NewList(list, gl.COMPILE)
+	gl.Begin(gl.TRIANGLE_FAN)
+	gl.TexCoord2f(0, 0)
+	gl.Vertex2f(0, -63)
+	gl.TexCoord2f(1, 0)
+	gl.Vertex2f(255, -63)
+	gl.TexCoord2f(1, 1)
+	gl.Vertex2f(255, 0)
+	gl.TexCoord2f(0, 1)
+	gl.Vertex2f(0, 0)
+	gl.End()
+	gl.EndList()
+	this.HandleError()
+	gl.CallList(list)
+	this.HandleError()
+	window.GLSwap()
+	fmt.Println("passed initial gl test")
 }
 
 // Reset a viewport when the screen is resized.

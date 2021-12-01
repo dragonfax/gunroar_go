@@ -50,7 +50,6 @@ func loadMusics() {
 		music.Load(fileName)
 		bgm[fileName] = music
 		bgmFileName = append(bgmFileName, fileName)
-		fmt.Println("Load bgm: " + fileName)
 	}
 }
 
@@ -61,7 +60,6 @@ func loadChunks() {
 		chunk.LoadWithChannel(fileName, seChannel[i])
 		se[fileName] = chunk
 		seMark[fileName] = false
-		fmt.Println("Load SE: " + fileName)
 		i++
 	}
 }

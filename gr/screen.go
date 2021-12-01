@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	r "math/rand"
 
 	"github.com/dragonfax/gunroar/gr/sdl"
@@ -10,7 +11,7 @@ import (
 const CAPTION = "Gunroar"
 
 var screenRand *r.Rand = r.New(r.NewSource(0)) // TODO should the seed be random?
-var lineWidthBase float64
+var lineWidthBase = 1.0
 
 /**
  * Initialize an OpenGL and set the caption.
@@ -36,24 +37,26 @@ func setScreenRandSeed(seed int64) {
 func (this *Screen) init() {
 	this.Screen3D.InitSDL()
 
-	this.SetCaption(CAPTION)
-	gl.LineWidth(1)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE)
-	gl.Enable(gl.BLEND)
-	gl.Enable(gl.LINE_SMOOTH)
-	gl.Disable(gl.TEXTURE_2D)
-	gl.Disable(gl.COLOR_MATERIAL)
-	gl.Disable(gl.CULL_FACE)
-	gl.Disable(gl.DEPTH_TEST)
-	gl.Disable(gl.LIGHTING)
-	sdl.SetClearColor(0, 0, 0, 1)
-	if this._luminosity > 0 {
-		this.luminousScreen = sdl.NewLuminousScreen()
-		this.luminousScreen.Init(this._luminosity, this.Width(), this.Height())
-	} else {
-		this.luminousScreen = nil
-	}
-	this.screenResized()
+	/*
+			this.SetCaption(CAPTION)
+			gl.LineWidth(1)
+			gl.BlendFunc(gl.SRC_ALPHA, gl.ONE)
+			gl.Enable(gl.BLEND)
+			gl.Enable(gl.LINE_SMOOTH)
+			gl.Disable(gl.TEXTURE_2D)
+			gl.Disable(gl.COLOR_MATERIAL)
+			gl.Disable(gl.CULL_FACE)
+			gl.Disable(gl.DEPTH_TEST)
+			gl.Disable(gl.LIGHTING)
+			sdl.SetClearColor(0, 0, 0, 1)
+		if this._luminosity > 0 {
+			this.luminousScreen = sdl.NewLuminousScreen()
+			this.luminousScreen.Init(this._luminosity, this.Width(), this.Height())
+		} else {
+			this.luminousScreen = nil
+		}
+		this.screenResized()
+	*/
 }
 
 func (this *Screen) startRenderToLuminousScreen() bool {
@@ -96,7 +99,12 @@ func (this *Screen) screenResized() {
 }
 
 func LineWidth(w int) {
-	gl.LineWidth(float32(lineWidthBase) * float32(w))
+	lineWidth := float32(lineWidthBase) * float32(w)
+	if lineWidth == 0.0 {
+		panic("can't set to no line width")
+	}
+	fmt.Printf("setting line width to %f\n", lineWidth)
+	gl.LineWidth(lineWidth)
 }
 
 func (this *Screen) clear() {

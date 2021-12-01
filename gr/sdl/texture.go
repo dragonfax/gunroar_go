@@ -65,17 +65,13 @@ func NewTexture(name string) *Texture {
 		mode = gl.RGBA
 	}
 
-	// code copied from the internet
-	// data := s.Pixels()
-	//sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&data))
-
 	gl.TexImage2D(gl.TEXTURE_2D, 0, mode, s.W, s.H, 0, uint32(mode), gl.UNSIGNED_BYTE, s.Data())
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
 	//gluBuild2DMipmaps(gl.TEXTURE_2D, 4, s.W, s.H, gl.RGBA, gl.UNSIGNED_BYTE, s.Pixels) # not found
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	// gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
+	// gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	return this
 }
 

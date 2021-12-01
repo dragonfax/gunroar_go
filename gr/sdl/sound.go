@@ -144,7 +144,6 @@ func (this *Chunk) LoadWithChannel(name string, ch int) {
 		return
 	}
 	fileName := sound_dir + "/" + name
-	fmt.Printf("loading sound %s \n", fileName)
 	c, err := mix.LoadWAV(fileName)
 	this.chunk = c
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"runtime"
 	"strconv"
 
 	"github.com/dragonfax/gunroar/gr/sdl"
@@ -25,6 +26,7 @@ var prefManager *PrefManager
 var mainLoop *sdl.MainLoop
 
 func main() {
+	runtime.LockOSThread()
 	boot(os.Args)
 }
 
