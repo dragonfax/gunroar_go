@@ -109,7 +109,9 @@ func (this *GameManager) move() {
 
 func (this *GameManager) draw() {
 	if screen.startRenderToLuminousScreen() {
+		checkGLError()
 		gl.PushMatrix()
+		checkGLError()
 		screen.setEyepos()
 		state.drawLuminous()
 		gl.PopMatrix()

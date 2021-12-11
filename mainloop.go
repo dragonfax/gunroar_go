@@ -80,7 +80,9 @@ func (m *MainLoop) handleInput() {
 }
 
 func (m *MainLoop) draw() {
+	checkGLError()
 	screen.clear()
+	checkGLError()
 	gameManager.draw()
 	screen.flip()
 }

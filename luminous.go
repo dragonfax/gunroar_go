@@ -58,7 +58,9 @@ func (ls *LuminousScreen) close() {
 }
 
 func (ls *LuminousScreen) startRender() {
+	checkGLError()
 	gl.Viewport(0, 0, int32(ls.luminousTextureWidth), int32(ls.luminousTextureHeight))
+	checkGLError()
 }
 
 func (ls *LuminousScreen) endRender() {

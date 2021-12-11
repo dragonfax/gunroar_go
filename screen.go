@@ -8,7 +8,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/dragonfax/glu"
+	"github.com/dragonfax/gunroar_go/glu"
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -22,7 +22,7 @@ const CAPTION = "Gunroar"
 
 var screen *Screen
 
-var lineWidthBase float32
+var lineWidthBase float32 = 1
 var brightness float32 = 1
 
 type Screen struct {
@@ -67,6 +67,7 @@ func (s *Screen) Init() {
 		s.luminousScreen = nil
 	}
 	s.screenResized()
+	checkGLError()
 }
 
 func (s *Screen) Close() {
@@ -127,11 +128,11 @@ func (s *Screen) screenResized() {
 }
 
 func lineWidth(w int) {
-	gl.LineWidth(floor32(lineWidthBase * float32(w)))
-}
-
-func (s *Screen) Clear() {
-	gl.Clear(gl.COLOR_BUFFER_BIT)
+	newWidth := lineWidthBase * float32(w)
+	if newWidth < 1 {
+		panic("line too small")
+	}
+	gl.LineWidth(newWidth)
 }
 
 func viewOrthoFixed() {
@@ -163,7 +164,9 @@ func (s *Screen) setEyepos() {
 		lx += mx
 		ly += my
 	}
+	checkGLError()
 	glu.LookAt(float64(ex), float64(ey), float64(ez), float64(lx), float64(ly), float64(lz), 0, 1, 0)
+	checkGLError()
 }
 
 func (s *Screen) setScreenShake(cnt int, its float32) {
@@ -193,13 +196,13 @@ func (s *Screen) initSDL() {
 	var videoFlags uint32
 	var window *sdl.Window
 	var err error
-	if s.windowMode {
-		videoFlags = sdl.WINDOW_OPENGL
-		window, err = sdl.CreateWindow("Title", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, int32(s.width), int32(s.height), videoFlags)
-	} else {
+	//if s.windowMode {
+	videoFlags = sdl.WINDOW_OPENGL
+	window, err = sdl.CreateWindow("Title", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, int32(s.width), int32(s.height), videoFlags)
+	/* } else {
 		videoFlags = sdl.WINDOW_OPENGL | sdl.WINDOW_FULLSCREEN_DESKTOP
 		window, err = sdl.CreateWindow("Title", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, videoFlags)
-	}
+	} */
 	if err != nil {
 		panic(fmt.Sprintf("SDLInitFailedException (Unable to create SDL screen: %v", sdl.GetError()))
 	}
@@ -211,10 +214,30 @@ func (s *Screen) initSDL() {
 	if err != nil {
 		panic(err)
 	}
+	err = s.window.GLMakeCurrent(s.context)
+	if err != nil {
+		panic(err)
+	}
+
 	err = gl.Init()
 	if err != nil {
 		panic(err)
 	}
+
+	{
+		major, err := sdl.GLGetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION)
+		if err != nil {
+			panic(err)
+		}
+		checkGLError()
+		minor, err := sdl.GLGetAttribute(sdl.GL_CONTEXT_MINOR_VERSION)
+		if err != nil {
+			panic(err)
+		}
+		checkGLError()
+		fmt.Printf("opengl version %d.%d\n", major, minor)
+	}
+
 	gl.Viewport(0, 0, int32(s.width), int32(s.height))
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
 	surface, err := s.window.GetSurface()
@@ -224,8 +247,12 @@ func (s *Screen) initSDL() {
 	s.width = uint32(surface.W)
 	s.height = uint32(surface.H)
 	s.resized(s.width, s.height)
-	sdl.ShowCursor(sdl.DISABLE)
+	_, err = sdl.ShowCursor(sdl.DISABLE)
+	if err != nil {
+		panic(err)
+	}
 	s.Init()
+	checkGLError()
 }
 
 func (s *Screen) closeSDL() {
@@ -234,12 +261,17 @@ func (s *Screen) closeSDL() {
 }
 
 func (s *Screen) flip() {
-	// s.handleError()
+	checkGLError()
+	s.handleError()
+	checkGLError()
 	s.window.GLSwap()
+	checkGLError()
 }
 
 func (s *Screen) clear() {
+	checkGLError()
 	gl.Clear(gl.COLOR_BUFFER_BIT)
+	checkGLError()
 }
 
 func (s *Screen) handleError() {
