@@ -13,7 +13,7 @@ func Build2DMipmaps(target int, internalFormat int, width int32, height int32, f
 	// gl.TexStorage2D(gl.TEXTURE_2D, num_mipmaps, typ, width, height)
 	// checkGLError()
 	checkGLError()
-	gl.TexImage2D(gl.TEXTURE_2D, 0, int32(format), 0, width, height, format, typ, data)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, int32(format), width, height, 0, format, typ, data)
 	checkGLError()
 	gl.GenerateMipmap(gl.TEXTURE_2D) //Generate num_mipmaps number of mipmaps here.
 	checkGLError()

@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"unsafe"
 
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/veandco/go-sdl2/sdl"
@@ -63,20 +64,18 @@ func LoadBmp(name string) *sdl.Surface {
 
 func NewTextureFromBMP(name string) *Texture {
 	this := new(Texture)
-	// s := LoadBmp(name)
+	s := LoadBmp(name)
 	this.textures = make([]uint32, 1)
 
-	/*
-		gl.GenTextures(1, &this.textures[0])
+	gl.GenTextures(1, &this.textures[0])
 
-			checkGLError()
-			gl.BindTexture(gl.TEXTURE_2D, this.textures[0])
-			Build2DMipmaps(gl.TEXTURE_2D, 4, int32(s.W), int32(s.H), gl.RGBA, gl.UNSIGNED_BYTE, s.Data())
-			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
-			checkGLError()
-			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-			checkGLError()
-	*/
+	checkGLError()
+	gl.BindTexture(gl.TEXTURE_2D, this.textures[0])
+	Build2DMipmaps(gl.TEXTURE_2D, 4, int32(s.W), int32(s.H), gl.RGBA, gl.UNSIGNED_BYTE, s.Data())
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
+	checkGLError()
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	checkGLError()
 	return this
 }
 
@@ -133,27 +132,25 @@ func NewTexture(surfacePixels []uint32, surfaceWidth int,
 					pi++
 				}
 			}
-			/*
+			checkGLError()
+			gl.BindTexture(gl.TEXTURE_2D, this.textures[ti])
+			checkGLError()
+			Build2DMipmaps(gl.TEXTURE_2D, 4, int32(panelWidth), int32(panelHeight), gl.RGBA, gl.UNSIGNED_BYTE, unsafe.Pointer(&(this.pixels)))
+			checkGLError()
+			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
+			checkGLError()
+			gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+			checkGLError()
+			if maskColor != 0xffffffff {
+				gl.BindTexture(gl.TEXTURE_2D, this.maskTextures[ti])
 				checkGLError()
-				gl.BindTexture(gl.TEXTURE_2D, this.textures[ti])
-				checkGLError()
-				Build2DMipmaps(gl.TEXTURE_2D, 4, int32(panelWidth), int32(panelHeight), gl.RGBA, gl.UNSIGNED_BYTE, unsafe.Pointer(&(this.pixels)))
+				Build2DMipmaps(gl.TEXTURE_2D, 4, int32(panelWidth), int32(panelHeight), gl.RGBA, gl.UNSIGNED_BYTE, unsafe.Pointer(&(this.maskPixels)))
 				checkGLError()
 				gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
 				checkGLError()
 				gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 				checkGLError()
-				if maskColor != 0xffffffff {
-					gl.BindTexture(gl.TEXTURE_2D, this.maskTextures[ti])
-					checkGLError()
-					Build2DMipmaps(gl.TEXTURE_2D, 4, int32(panelWidth), int32(panelHeight), gl.RGBA, gl.UNSIGNED_BYTE, unsafe.Pointer(&(this.maskPixels)))
-					checkGLError()
-					gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
-					checkGLError()
-					gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-					checkGLError()
-				}
-			*/
+			}
 			ti++
 		}
 	}
