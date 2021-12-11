@@ -308,6 +308,12 @@ func NewEnemyAppearance() *EnemyAppearance {
 }
 
 func (this *EnemyAppearance) set(s EnemySpec, num int, appType AppearanceType, rand *r.Rand) {
+	if s == nil {
+		panic("no spec")
+	}
+	if this == nil {
+		panic("no this")
+	}
 	this.spec = s
 	this.nextAppDistInterval = NEXT_BLOCK_AREA_SIZE / float64(num)
 	this.nextAppDist = nextFloat(rand, this.nextAppDistInterval)
@@ -330,6 +336,9 @@ func (this *EnemyAppearance) move(enemies *EnemyPool, field *Field) {
 }
 
 func (this *EnemyAppearance) appear(enemies *EnemyPool) {
+	if this.spec == nil {
+		panic("no spec")
+	}
 	en := enemies.GetInstance()
 	if en != nil {
 		if this.spec.(HasAppearType).setFirstState(en.state(), this.appType) {

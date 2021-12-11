@@ -179,7 +179,7 @@ func (this *GameManager) Move() {
 
 func (this *GameManager) Draw() {
 	e := mainLoop.Event
-	if e.GetType() == sdl2.WINDOWEVENT_RESIZED {
+	if e != nil && e.GetType() == sdl2.WINDOWEVENT_RESIZED {
 		we := e.(*sdl2.WindowEvent)
 		rew := we.Data1
 		reh := we.Data2

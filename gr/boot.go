@@ -48,7 +48,7 @@ func boot(args []string) {
 func parseArgs(commandArgs []string) {
 	args := make([]string, len(commandArgs)-1)
 	for i := 1; i < len(commandArgs); i++ {
-		args[i] = commandArgs[i]
+		args[i-1] = commandArgs[i]
 	}
 	progName := commandArgs[0]
 	for i := 0; i < len(args); i++ {

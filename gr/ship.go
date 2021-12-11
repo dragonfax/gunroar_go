@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	r "math/rand"
 	"time"
@@ -509,15 +508,12 @@ func (this *Boat) move() {
 
 func (this *Boat) moveTwinStick() {
 	if !this._replayMode {
-		fmt.Println("not in replay")
 		stickInput = this.twinStick.GetState(true)
 	} else {
-		fmt.Println("in replay")
 		si, err := twinStick.Replay()
 		if err != nil {
 			if err == record.NoRecordDataException {
 				this.gameState.isGameOver = true
-				fmt.Println("got null state")
 				stickInput = this.twinStick.GetNullState()
 			} else {
 				panic(err)

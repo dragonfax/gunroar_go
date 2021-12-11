@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	r "math/rand"
 
 	"github.com/dragonfax/gunroar/gr/sdl"
@@ -101,7 +100,6 @@ func LineWidth(w int) {
 	if lineWidth == 0.0 {
 		panic("can't set to no line width")
 	}
-	fmt.Printf("setting line width to %f\n", lineWidth)
 	gl.LineWidth(lineWidth)
 }
 

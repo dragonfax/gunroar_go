@@ -48,6 +48,9 @@ func (this *Enemy) setStageManager(stageManager *StageManager) {
 }
 
 func (this *Enemy) set(spec EnemySpec) {
+	if spec == nil {
+		panic("no spec")
+	}
 	this.spec = spec
 	this.SetExists(true)
 }
@@ -209,6 +212,9 @@ func (this *EnemyState) setStageManager(stageManager *StageManager) {
 }
 
 func (this *EnemyState) setSpec(spec EnemySpec) {
+	if spec == nil {
+		panic("nil spec")
+	}
 	this.spec = spec
 	this.shield = spec.Shield()
 	for i := 0; i < spec.TurretGroupNum(); i++ {
@@ -292,6 +298,9 @@ func (this *EnemyState) checkFrontClear(checkCurrentPos bool /* = false */) bool
 }
 
 func (this *EnemyState) move() bool {
+	if this.spec == nil {
+		panic("no spec")
+	}
 	this.ppos.X = this.pos.X
 	this.ppos.Y = this.pos.Y
 	this.multiplier -= MULTIPLIER_DECREASE_RATIO
@@ -865,7 +874,7 @@ type HasAppearType interface {
  */
 
 var _ EnemySpec = &SmallShipEnemySpec{}
-var _ HasAppearType = &SmallShipEnemySpec{}
+var _ HasAppearType = SmallShipEnemySpec{}
 
 type EnemyMoveType int
 
@@ -930,7 +939,7 @@ func (this *SmallShipEnemySpec) setParam(rank float64, rand *r.Rand) {
 	tgs.turretSpec.setParam(rank-sr*0.5, TurretSMALL, rand)
 }
 
-func (this *SmallShipEnemySpec) setFirstState(es EnemyState, appType AppearanceType) bool {
+func (this SmallShipEnemySpec) setFirstState(es EnemyState, appType AppearanceType) bool {
 	es.setSpec(this)
 	if !es.setAppearancePos(this.field, this.ship, enemySpecRand, appType) {
 		return false
@@ -1033,7 +1042,7 @@ func (this SmallShipEnemySpec) isBoss() bool {
  * Specification for a large/middle class ship.
  */
 var _ EnemySpec = &ShipEnemySpec{}
-var _ HasAppearType = &ShipEnemySpec{}
+var _ HasAppearType = ShipEnemySpec{}
 
 type ShipClass int
 
@@ -1258,7 +1267,7 @@ func (this *ShipEnemySpec) setParam(rank float64, cls ShipClass, rand *r.Rand) {
 	}
 }
 
-func (this *ShipEnemySpec) setFirstState(es EnemyState, appType AppearanceType) bool {
+func (this ShipEnemySpec) setFirstState(es EnemyState, appType AppearanceType) bool {
 	es.setSpec(this)
 	if !es.setAppearancePos(this.field, this.ship, enemySpecRand, appType) {
 		return false
@@ -1448,7 +1457,7 @@ func (this *PlatformEnemySpec) setParam(rank float64, rand *r.Rand) {
 	}
 }
 
-func (this *PlatformEnemySpec) setFirstState(es EnemyState, x, y, d float64) bool {
+func (this PlatformEnemySpec) setFirstState(es EnemyState, x, y, d float64) bool {
 	es.setSpec(this)
 	es.pos.X = x
 	es.pos.Y = y
