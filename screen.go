@@ -238,20 +238,35 @@ func (s *Screen) initSDL() {
 		fmt.Printf("opengl version %d.%d\n", major, minor)
 	}
 
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+	checkGLError()
+
 	gl.Viewport(0, 0, int32(s.width), int32(s.height))
 	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
-	surface, err := s.window.GetSurface()
-	if err != nil {
-		panic(err)
-	}
-	s.width = uint32(surface.W)
-	s.height = uint32(surface.H)
+
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+	checkGLError()
+
+	w, h := s.window.GLGetDrawableSize()
+	s.width = uint32(w)
+	s.height = uint32(h)
+
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+	checkGLError()
+
 	s.resized(s.width, s.height)
 	_, err = sdl.ShowCursor(sdl.DISABLE)
 	if err != nil {
 		panic(err)
 	}
+
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+	checkGLError()
+
 	s.Init()
+	checkGLError()
+
+	gl.Clear(gl.COLOR_BUFFER_BIT)
 	checkGLError()
 }
 
@@ -270,6 +285,23 @@ func (s *Screen) flip() {
 
 func (s *Screen) clear() {
 	checkGLError()
+
+	/*
+		r := gl.CheckFramebufferStatus(gl.DRAW_FRAMEBUFFER)
+		if r == gl.FRAMEBUFFER_UNDEFINED {
+			fmt.Printf("frame buffer %d not defined\n", gl.DRAW_FRAMEBUFFER)
+		} else if r != gl.FRAMEBUFFER_COMPLETE {
+			panic(fmt.Sprintf("frame buffer %d not ready: %d", gl.DRAW_FRAMEBUFFER, r))
+		}
+
+		r = gl.CheckFramebufferStatus(gl.READ_FRAMEBUFFER)
+		if r == gl.FRAMEBUFFER_UNDEFINED {
+			fmt.Printf("frame buffer %d not defined\n", gl.READ_FRAMEBUFFER)
+		} else if r != gl.FRAMEBUFFER_COMPLETE {
+			panic(fmt.Sprintf("frame buffer %d not ready: %d", gl.READ_FRAMEBUFFER, r))
+		}
+	*/
+
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 	checkGLError()
 }
